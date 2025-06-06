@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid, GridCellEditStopReasons } from '@mui/x-data-grid';
 import { getPatients, updatePatient, deletePatient } from './adtService';
-import styles from './PatientList.module.css';
+import styles from './PatientList.module.css'; // Ensure this path is correct
 
 export default function PatientList() {
   const [patients, setPatients] = useState([]);
@@ -13,16 +13,20 @@ export default function PatientList() {
     async function fetchPatients() {
       try {
         const data = await getPatients();
-        setPatients(data.map(patient => ({
-          id: patient.id,
-          patientId: patient.patientId || '',
-          name: patient.user?.name || '',
-          email: patient.user?.email || '',
-          phone: patient.phone || '',
-          gender: patient.gender || '',
-          dateOfBirth: patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : '',
-          bloodType: patient.bloodType || '',
-        })));
+        setPatients(
+          data.map((patient) => ({
+            id: patient.id,
+            patientId: patient.patientId || '',
+            name: patient.user?.name || '',
+            email: patient.user?.email || '',
+            phone: patient.phone || '',
+            gender: patient.gender || '',
+            dateOfBirth: patient.dateOfBirth
+              ? new Date(patient.dateOfBirth).toLocaleDateString()
+              : '',
+            bloodType: patient.bloodType || '',
+          }))
+        );
         setError(null);
       } catch (error) {
         console.error('Error fetching patients:', error);
@@ -41,14 +45,18 @@ export default function PatientList() {
           email: params.row.email || '',
           phone: params.row.phone || null,
           gender: params.row.gender || null,
-          dateOfBirth: params.row.dateOfBirth ? new Date(params.row.dateOfBirth) : null,
+          dateOfBirth: params.row.dateOfBirth
+            ? new Date(params.row.dateOfBirth)
+            : null,
           bloodType: params.row.bloodType || null,
           [params.field]: params.value,
         };
         await updatePatient(params.id, updatedData);
-        setPatients(patients.map(row => 
-          row.id === params.id ? { ...row, [params.field]: params.value } : row
-        ));
+        setPatients(
+          patients.map((row) =>
+            row.id === params.id ? { ...row, [params.field]: params.value } : row
+          )
+        );
       } catch (error) {
         console.error('Error updating patient:', error);
         setError(error.response?.data?.details || error.message);
@@ -59,7 +67,7 @@ export default function PatientList() {
   const handleDelete = async (id) => {
     try {
       await deletePatient(id);
-      setPatients(patients.filter(row => row.id !== id));
+      setPatients(patients.filter((row) => row.id !== id));
     } catch (error) {
       console.error('Error deleting patient:', error);
       setError(error.response?.data?.details || error.message);
@@ -70,7 +78,7 @@ export default function PatientList() {
     { field: 'id', headerName: 'ID', width: 90 },
     { field: 'patientId', headerName: 'Patient ID', width: 120 },
     { field: 'name', headerName: 'Name', width: 150, editable: true },
-    { field: 'email', headerName: 'Email', width: 180, editable: true }, // Fixed: Changed 'email' to string
+    { field: 'email', headerName: 'Email', width: 180, editable: true },
     { field: 'phone', headerName: 'Phone', width: 150, editable: true },
     { field: 'gender', headerName: 'Gender', width: 100, editable: true },
     { field: 'dateOfBirth', headerName: 'Date of Birth', width: 150 },
@@ -84,7 +92,7 @@ export default function PatientList() {
           variant="outlined"
           color="error"
           onClick={() => handleDelete(params.row.id)}
-          className={styles.button}
+          className={styles.button} // Correct usage of styles
         >
           Delete
         </Button>
