@@ -5,7 +5,7 @@ import PatientForm from './PatientForm';
 import PatientList from './PatientList';
 import MedicalRecordsList from './MedicalRecordsList';
 import { getPatients } from './patientService';
-import { getMedicalRecords } from '../medical-records/medicalRecordsService';
+import { getMedicalRecords } from './medicalRecordsService';
 import styles from './PatientPage.module.css';
 
 export default function PatientPage() {
@@ -31,19 +31,19 @@ export default function PatientPage() {
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
     if (newValue !== 1) {
-      setSelectedPatient(null); // Clear selected patient when switching tabs
+      setSelectedPatient(null);
     }
   };
 
   const handleSuccess = () => {
-    setSelectedPatient(null); // Clear selected patient after success
-    setTabValue(0); // Switch to "All Patients" tab
-    setRefreshKey((prev) => prev + 1); // Refresh data
+    setSelectedPatient(null);
+    setTabValue(0);
+    setRefreshKey((prev) => prev + 1);
   };
 
   const handleEdit = (patient) => {
     setSelectedPatient(patient);
-    setTabValue(1); // Switch to "Add/Edit Patient" tab
+    setTabValue(1);
   };
 
   return (
@@ -83,6 +83,7 @@ export default function PatientPage() {
           {tabValue === 2 && (
             <MedicalRecordsList
               medicalRecords={medicalRecords}
+              patients={patients}
               onSuccess={handleSuccess}
             />
           )}
