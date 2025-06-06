@@ -1,83 +1,72 @@
-'use client';
-
+"use client";
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, TextField, MenuItem, Skeleton } from '@mui/material';
-import { DataGrid, GridToolbarContainer, GridToolbarFilterButton } from '@mui/x-data-grid';
-import { getPatients, updatePatient, deletePatient } from '../adt/adtService';
-import styles from './PatientList.module.css';
+import { Box, Typography, Alert, Button } from '@mui/material';
+import { DataGrid, GridCellEditStopReasons } from '@mui/x-data-grid';
+import { getPatients, updatePatient, deletePatient } from './adtService';
 
 export default function PatientList() {
   const [patients, setPatients] = useState([]);
-  const [filteredPatients, setFilteredPatients] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [genderFilter, setGenderFilter] = useState('');
 
   useEffect(() => {
     async function fetchPatients() {
       try {
-        setLoading(true);
         const data = await getPatients();
-        const mappedPatients = data.map(patient => ({
-          id: patient.id,
-          patientId: patient.patientId || '',
-          name: patient.user?.name || '',
-          email: patient.user?.email || '',
-          phone: patient.phone || '',
-          gender: patient.gender || '',
-          dateOfBirth: patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : '',
-          bloodType: patient.bloodType || '',
-        }));
-        setPatients(mappedPatients);
-        setFilteredPatients(mappedPatients);
+        setPatients(
+          data.map((patient) => ({
+            id: patient.id,
+            patientId: patient.patientId || '',
+            name: patient.user?.name || '',
+            email: patient.user?.email || '',
+            phone: patient.phone || '',
+            gender: patient.gender || '',
+            dateOfBirth: patient.dateOfBirth
+              ? new Date(patient.dateOfBirth).toLocaleDateString()
+              : '',
+            bloodType: patient.bloodType || '',
+          }))
+        );
         setError(null);
       } catch (error) {
         console.error('Error fetching patients:', error);
         setError(error.response?.data?.details || error.message);
-      } finally {
-        setLoading(false);
       }
     }
     fetchPatients();
   }, []);
 
-  useEffect(() => {
-    const filtered = patients.filter(patient =>
-      (patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       patient.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       patient.patientId.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      (genderFilter ? patient.gender === genderFilter : true)
-    );
-    setFilteredPatients(filtered);
-  }, [searchQuery, genderFilter, patients]);
-
-  const handleCellEditCommit = async (params) => {
-    try {
-      const updatedData = {
-        patientId: params.row.patientId || '',
-        name: params.row.name || '',
-        email: params.row.email || '',
-        phone: params.row.phone || null,
-        gender: params.row.gender || null,
-        dateOfBirth: params.row.dateOfBirth ? new Date(params.row.dateOfBirth) : null,
-        bloodType: params.row.bloodType || null,
-        [params.field]: params.value,
-      };
-      await updatePatient(params.id, updatedData);
-      setPatients(patients.map(row =>
-        row.id === params.id ? { ...row, [params.field]: params.value } : row
-      ));
-    } catch (error) {
-      console.error('Error updating patient:', error);
-      setError(error.response?.data?.details || error.message);
+  const handleCellEditCommit = async (params, event, details) => {
+    if (details.reason === GridCellEditStopReasons.cellEditEnd) {
+      try {
+        const updatedData = {
+          patientId: params.row.patientId || '',
+          name: params.row.name || '',
+          email: params.row.email || '',
+          phone: params.row.phone || null,
+          gender: params.row.gender || null,
+          dateOfBirth: params.row.dateOfBirth
+            ? new Date(params.row.dateOfBirth)
+            : null,
+          bloodType: params.row.bloodType || null,
+          [params.field]: params.value,
+        };
+        await updatePatient(params.id, updatedData);
+        setPatients(
+          patients.map((row) =>
+            row.id === params.id ? { ...row, [params.field]: params.value } : row
+          )
+        );
+      } catch (error) {
+        console.error('Error updating patient:', error);
+        setError(error.response?.data?.details || error.message);
+      }
     }
   };
 
   const handleDelete = async (id) => {
     try {
       await deletePatient(id);
-      setPatients(patients.filter(row => row.id !== id));
+      setPatients(patients.filter((row) => row.id !== id));
     } catch (error) {
       console.error('Error deleting patient:', error);
       setError(error.response?.data?.details || error.message);
@@ -102,7 +91,12 @@ export default function PatientList() {
           variant="outlined"
           color="error"
           onClick={() => handleDelete(params.row.id)}
-          className={styles.actionButton}
+          sx={{
+            fontSize: { xs: '0.675rem', sm: '0.75rem' },
+            padding: { xs: '3px 6px', sm: '4px 8px' },
+            textTransform: 'none',
+            borderRadius: '4px',
+          }}
         >
           Delete
         </Button>
@@ -110,73 +104,104 @@ export default function PatientList() {
     },
   ];
 
-  const genders = [...new Set(patients.map(patient => patient.gender))].filter(g => g !== '');
-
-  const CustomToolbar = () => (
-    <GridToolbarContainer className={styles.toolbar}>
-      <TextField
-        label="Search by Name, ID, or Email"
-        variant="outlined"
-        size="small"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        sx={{ mr: 2, width: 250 }}
-      />
-      <TextField
-        label="Filter by Gender"
-        select
-        variant="outlined"
-        size="small"
-        value={genderFilter}
-        onChange={(e) => setGenderFilter(e.target.value)}
-        sx={{ mr: 2, width: 200 }}
-      >
-        <MenuItem value="">All Genders</MenuItem>
-        {genders.map(gender => (
-          <MenuItem key={gender} value={gender}>{gender}</MenuItem>
-        ))}
-      </TextField>
-      <GridToolbarFilterButton />
-    </GridToolbarContainer>
-  );
-
   return (
-    <Box className={styles.container}>
-      <Typography variant="h6" className={styles.title}>
+    <Box
+      sx={{
+        width: '100%',
+        maxWidth: '100vw',
+        minHeight: '100vh',
+        margin: 0,
+        padding: { xs: '4px', sm: '8px' },
+        boxSizing: 'border-box',
+        backgroundColor: '#f5f5f5',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          fontSize: { xs: '1.25rem', sm: '1.5rem' },
+          fontWeight: 600,
+          color: '#333',
+          margin: 0,
+          padding: '8px 0',
+          textAlign: 'left',
+        }}
+      >
         Patients List
       </Typography>
       {error && (
-        <Alert severity="error" className={styles.alert}>
+        <Alert
+          severity="error"
+          sx={{
+            width: '100%',
+            maxWidth: '100%',
+            margin: 0,
+            padding: '8px',
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            borderRadius: '4px',
+          }}
+        >
           Failed to load patients: {error}
         </Alert>
       )}
-      {loading ? (
-        <Box className={styles.skeletonWrapper}>
-          <Skeleton variant="rectangular" height={60} className={styles.skeleton} />
-          <Skeleton variant="rectangular" height={400} className={styles.skeleton} />
-        </Box>
-      ) : patients.length === 0 && !error ? (
-        <Alert severity="info" className={styles.alert}>
+      {patients.length === 0 && !error && (
+        <Alert
+          severity="info"
+          sx={{
+            width: '100%',
+            maxWidth: '100%',
+            margin: 0,
+            padding: '8px',
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            borderRadius: '4px',
+          }}
+        >
           No patients found.
         </Alert>
-      ) : (
-        <Box className={styles.tableWrapper}>
-          <Box className={styles.dataGridWrapper}>
-            <DataGrid
-              rows={filteredPatients}
-              columns={columns}
-              pageSizeOptions={[5, 10, 25]}
-              disableRowSelectionOnClick
-              initialState={{
-                pagination: { paginationModel: { pageSize: 10 } },
-              }}
-              className={styles.dataGrid}
-              onCellEditStop={handleCellEditCommit}
-              slots={{ toolbar: CustomToolbar }}
-            />
-          </Box>
-        </Box>
       )}
+      <Box
+        sx={{
+          width: '100%',
+          flexGrow: 1,
+          overflowX: 'auto',
+        }}
+      >
+        <DataGrid
+          rows={patients}
+          columns={columns}
+          pageSizeOptions={[5, 10, 25]}
+          disableRowSelectionOnClick
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
+          onCellEditStop={handleCellEditCommit}
+          sx={{
+            width: '100%',
+            border: 'none',
+            backgroundColor: '#fff',
+            borderRadius: '4px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            '& .MuiDataGrid-cell': {
+              padding: '4px 8px',
+            },
+            '& .MuiDataGrid-columnHeader': {
+              padding: '4px 8px',
+              backgroundColor: '#f9f9f9',
+              color: '#333',
+            },
+            '& .MuiDataGrid-toolbarContainer': {
+              padding: '4px',
+            },
+            '& .MuiDataGrid-footerContainer': {
+              padding: '4px',
+            },
+          }}
+        />
+      </Box>
     </Box>
   );
 }
