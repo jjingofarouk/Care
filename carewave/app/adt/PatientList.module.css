@@ -44,6 +44,25 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Scope MUI DataGrid styles under the local .dataGrid class */
+.dataGrid :global(.MuiDataGrid-root .MuiDataGrid-cell) {
+  padding: 4px 8px; /* Minimal cell padding */
+}
+
+.dataGrid :global(.MuiDataGrid-root .MuiDataGrid-columnHeader) {
+  padding: 4px 8px;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.dataGrid :global(.MuiDataGrid-root .MuiDataGrid-toolbarContainer) {
+  padding: 4px;
+}
+
+.dataGrid :global(.MuiDataGrid-root .MuiDataGrid-footerContainer) {
+  padding: 4px;
+}
+
 .button {
   font-size: 0.75rem;
   padding: 4px 8px;
@@ -68,22 +87,4 @@
     font-size: 0.675rem;
     padding: 3px 6px;
   }
-}
-
-:global(.MuiDataGrid-root .MuiDataGrid-cell) {
-  padding: 4px 8px;
-}
-
-:global(.MuiDataGrid-root .MuiDataGrid-columnHeader) {
-  padding: 4px 8px;
-  background-color: #f9f9f9;
-  color: #333;
-}
-
-:global(.MuiDataGrid-root .MuiDataGrid-toolbarContainer) {
-  padding: 4px;
-}
-
-:global(.MuiDataGrid-root .MuiDataGrid-footerContainer) {
-  padding: 4px;
 }
