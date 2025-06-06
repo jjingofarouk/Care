@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, Chip } from '@mui/material';
+import { Box, Typography, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import PatientForm from './PatientForm';
+import MedicalRecordsList from './MedicalRecordsList';
 import { getPatients, updatePatient, deletePatient } from './patientService';
 
 export default function PatientList({ patients, onSuccess, onEdit }) {
@@ -12,6 +13,8 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState(null);
+  const [openMedicalRecordsModal, setOpenMedicalRecordsModal] = useState(false);
+  const [medicalRecordsPatient, setMedicalRecordsPatient] = useState(null);
 
   useEffect(() => {
     async function fetchPatients() {
@@ -21,8 +24,8 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
           data.map((patient) => ({
             id: patient.id,
             patientId: patient.patientId || 'N/A',
-            name: patient.user?.name || patient.patientId || 'No Name',
-            email: patient.user?.email || 'No Email',
+            name: patient.name || 'No Name',
+            email: patient.email || 'No Email',
             phone: patient.phone || 'N/A',
             gender: patient.gender || 'N/A',
             dateOfBirth: patient.dateOfBirth
@@ -36,7 +39,11 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
             insurancePolicy: patient.insurancePolicy || 'N/A',
             allergies: patient.allergies || 'N/A',
             medicalHistory: patient.medicalHistory || 'N/A',
-            hasUserAccount: !!patient.user,
+            presentingComplaint: patient.presentingComplaint || 'N/A',
+            familyHistory: patient.familyHistory || 'N/A',
+            socialHistory: patient.socialHistory || 'N/A',
+            pastMedicalHistory: patient.pastMedicalHistory || 'N/A',
+            medications: patient.medications || 'N/A',
           }))
         );
         setError(null);
@@ -52,8 +59,8 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
         patients.map((patient) => ({
           id: patient.id,
           patientId: patient.patientId || 'N/A',
-          name: patient.user?.name || patient.patientId || 'No Name',
-          email: patient.user?.email || 'No Email',
+          name: patient.name || 'No Name',
+          email: patient.email || 'No Email',
           phone: patient.phone || 'N/A',
           gender: patient.gender || 'N/A',
           dateOfBirth: patient.dateOfBirth
@@ -67,7 +74,11 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
           insurancePolicy: patient.insurancePolicy || 'N/A',
           allergies: patient.allergies || 'N/A',
           medicalHistory: patient.medicalHistory || 'N/A',
-          hasUserAccount: !!patient.user,
+          presentingComplaint: patient.presentingComplaint || 'N/A',
+          familyHistory: patient.familyHistory || 'N/A',
+          socialHistory: patient.socialHistory || 'N/A',
+          pastMedicalHistory: patient.pastMedicalHistory || 'N/A',
+          medications: patient.medications || 'N/A',
         }))
       );
     }
@@ -95,8 +106,8 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
           data.map((patient) => ({
             id: patient.id,
             patientId: patient.patientId || 'N/A',
-            name: patient.user?.name || patient.patientId || 'No Name',
-            email: patient.user?.email || 'No Email',
+            name: patient.name || 'No Name',
+            email: patient.email || 'No Email',
             phone: patient.phone || 'N/A',
             gender: patient.gender || 'N/A',
             dateOfBirth: patient.dateOfBirth
@@ -110,7 +121,11 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
             insurancePolicy: patient.insurancePolicy || 'N/A',
             allergies: patient.allergies || 'N/A',
             medicalHistory: patient.medicalHistory || 'N/A',
-            hasUserAccount: !!patient.user,
+            presentingComplaint: patient.presentingComplaint || 'N/A',
+            familyHistory: patient.familyHistory || 'N/A',
+            socialHistory: patient.socialHistory || 'N/A',
+            pastMedicalHistory: patient.pastMedicalHistory || 'N/A',
+            medications: patient.medications || 'N/A',
           }))
         );
       } catch (error) {
@@ -139,39 +154,57 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
     }
   };
 
+  const handleViewMedicalRecords = (patient) => {
+    setMedicalRecordsPatient(patient);
+    setOpenMedicalRecordsModal(true);
+  };
+
+  const handleCloseMedicalRecordsModal = () => {
+    setOpenMedicalRecordsModal(false);
+    setMedicalRecordsPatient(null);
+  };
+
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
     { field: 'patientId', headerName: 'Patient ID', width: 120 },
-    {
-      field: 'name',
-      headerName: 'Name',
-      width: 150,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {params.value}
-          {!params.row.hasUserAccount && (
-            <Chip label="No Account" size="small" color="warning" />
-          )}
-        </Box>
-      ),
-    },
-    {
-      field: 'email',
-      headerName: 'Email',
-      width: 180,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {params.value}
-          {!params.row.hasUserAccount && (
-            <Chip label="No Account" size="small" color="warning" />
-          )}
-        </Box>
-      ),
-    },
+    { field: 'name', headerName: 'Name', width: 150 },
+    { field: 'email', headerName: 'Email', width: 180 },
     { field: 'phone', headerName: 'Phone', width: 150 },
     { field: 'gender', headerName: 'Gender', width: 100 },
     { field: 'dateOfBirth', headerName: 'Date of Birth', width: 150 },
     { field: 'bloodType', headerName: 'Blood Type', width: 120 },
+    { field: 'address', headerName: 'Address', width: 200 },
+    { field: 'emergencyContact', headerName: 'Emergency Contact', width: 150 },
+    { field: 'emergencyContactPhone', headerName: 'Emergency Contact Phone', width: 180 },
+    { field: 'insuranceProvider', headerName: 'Insurance Provider', width: 150 },
+    { field: 'insurancePolicy', headerName: 'Insurance Policy', width: 150 },
+    { field: 'allergies', headerName: 'Allergies', width: 200 },
+    { field: 'medicalHistory', headerName: 'Medical History', width: 250 },
+    { field: 'presentingComplaint', headerName: 'Presenting Complaint', width: 200 },
+    { field: 'familyHistory', headerName: 'Family History', width: 200 },
+    { field: 'socialHistory', headerName: 'Social History', width: 200 },
+    { field: 'pastMedicalHistory', headerName: 'Past Medical History', width: 200 },
+    { field: 'medications', headerName: 'Medications', width: 200 },
+    {
+      field: 'medicalRecords',
+      headerName: 'Medical Records',
+      width: 150,
+      renderCell: (params) => (
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => handleViewMedicalRecords(params.row)}
+          sx={{
+            fontSize: { xs: '0.675rem', sm: '0.75rem' },
+            padding: { xs: '3px 6px', sm: '4px 8px' },
+            textTransform: 'none',
+            borderRadius: '4px',
+          }}
+        >
+          Open
+        </Button>
+      ),
+    },
     {
       field: 'actions',
       headerName: 'Actions',
@@ -328,6 +361,21 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
           </Button>
           <Button onClick={handleDelete} color="error">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openMedicalRecordsModal} onClose={handleCloseMedicalRecordsModal} maxWidth="lg" fullWidth>
+        <DialogTitle>Medical Records for {medicalRecordsPatient?.name}</DialogTitle>
+        <DialogContent>
+          <MedicalRecordsList
+            medicalRecords={medicalRecordsPatient?.medicalRecords || []}
+            patients={[medicalRecordsPatient]}
+            onSuccess={handleSuccess}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseMedicalRecordsModal} color="secondary">
+            Close
           </Button>
         </DialogActions>
       </Dialog>
