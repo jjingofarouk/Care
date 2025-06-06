@@ -1,17 +1,17 @@
 model MedicalRecord {
-id                 Int      @id @default(autoincrement())
-patientId          String
-patient            Patient  @relation("PatientMedicalRecords", fields: [patientId], references: [patientId])
-recordId           String   @unique
-diagnosis          String
-presentingComplaint String?
-familyHistory      String?
-socialHistory      String?
-pastMedicalHistory String?
-allergies          String?
-medications        String?
-date               DateTime
-doctorName         String
-createdAt          DateTime @default(now())
-updatedAt          DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  patientId          Int
+  patient            Patient  @relation("PatientMedicalRecords", fields: [patientId], references: [id])
+  recordId           String   @unique
+  diagnosis          String
+  presentingComplaint String?
+  familyHistory      String?
+  socialHistory      String?
+  pastMedicalHistory String?
+  allergies          String?
+  medications        String?
+  date               DateTime
+  doctorName         String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
