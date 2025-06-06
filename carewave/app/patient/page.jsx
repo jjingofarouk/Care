@@ -1,24 +1,25 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
-import PatientForm from './PatientForm';
-import HistoryTakingForm from './HistoryTakingForm';
-import { getPatients } from './patientService';
-import styles from './PatientPage.module.css'; // Import new CSS module
+import PatientList from './PatientList';
+import MedicalRecordsList from './MedicalRecordsList';
+import { getPatients, getMedicalRecords } from './patientService';
+import styles from './PatientPage.module.css';
 
 export default function PatientPage() {
   const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [medicalRecords, setMedicalRecords] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const patientsData = await getPatients();
+        const [patientsData, recordsData] = await Promise.all([getPatients(), getMedicalRecords()]);
         setPatients(patientsData);
+        setMedicalRecords(recordsData);
       } catch (err) {
-        console.error('Failed to fetch patients', err);
+        console.error('Failed to fetch data', err);
       }
     };
     fetchData();
@@ -26,20 +27,10 @@ export default function PatientPage() {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
-    if (newValue !== 1) {
-      setSelectedPatient(null);
-    }
   };
 
   const handleSuccess = () => {
-    setSelectedPatient(null);
-    setTabValue(0);
     setRefreshKey((prev) => prev + 1);
-  };
-
-  const handleEdit = (patient) => {
-    setSelectedPatient(patient);
-    setTabValue(1);
   };
 
   return (
@@ -56,16 +47,23 @@ export default function PatientPage() {
             scrollButtons="auto"
             className={styles.tabs}
           >
-            <Tab label={selectedPatient ? 'Edit Patient' : 'Add Patient'} className={styles.tab} />
-            <Tab label="History Taking" className={styles.tab} />
+            <Tab label="All Patients" className={styles.tab} />
+            <Tab label="Medical Records" className={styles.tab} />
           </Tabs>
         </Box>
         <Box className={styles.content}>
           {tabValue === 0 && (
-            <PatientForm patient={selectedPatient} onSuccess={handleSuccess} />
+            <PatientList
+              key={refreshKey}
+              patients={patients}
+              onSuccess={handleSuccess}
+            />
           )}
           {tabValue === 1 && (
-            <HistoryTakingForm patients={patients} onSuccess={handleSuccess} />
+            <MedicalRecordsList
+              medicalRecords={medicalRecords}
+              onSuccess={handleSuccess}
+            />
           )}
         </Box>
       </Paper>
