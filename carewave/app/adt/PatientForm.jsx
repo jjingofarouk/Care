@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, MenuItem, Button, Grid, Paper, Typography, Alert, Skeleton } from '@mui/material';
 import axios from 'axios';
+import styles from './PatientForm.module.css';
 
 export default function PatientForm({ onSubmit }) {
   const [formData, setFormData] = useState({
