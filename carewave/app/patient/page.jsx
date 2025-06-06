@@ -1,16 +1,13 @@
-'use client';
+"use client";
 import React, { useState, useEffect } from 'react';
 import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
 import PatientForm from './PatientForm';
-import PatientList from './PatientList';
 import HistoryTakingForm from './HistoryTakingForm';
-import MedicalRecordsList from './MedicalRecordsList';
 import { getPatients } from './patientService';
-import { getMedicalRecords } from '../medical-records/medicalRecordsService';
+import styles from './PatientPage.module.css'; // Import new CSS module
 
 export default function PatientPage() {
   const [patients, setPatients] = useState([]);
-  const [medicalRecords, setMedicalRecords] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -18,11 +15,10 @@ export default function PatientPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [patientsData, recordsData] = await Promise.all([getPatients(), getMedicalRecords()]);
+        const patientsData = await getPatients();
         setPatients(patientsData);
-        setMedicalRecords(recordsData);
       } catch (err) {
-        console.error('Failed to fetch data', err);
+        console.error('Failed to fetch patients', err);
       }
     };
     fetchData();
@@ -30,7 +26,7 @@ export default function PatientPage() {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
-    if (newValue !== 1 && newValue !== 2) {
+    if (newValue !== 1) {
       setSelectedPatient(null);
     }
   };
@@ -38,7 +34,7 @@ export default function PatientPage() {
   const handleSuccess = () => {
     setSelectedPatient(null);
     setTabValue(0);
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
   };
 
   const handleEdit = (patient) => {
@@ -47,51 +43,29 @@ export default function PatientPage() {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom>Patient Management</Typography>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Box sx={{ mb: 3 }}>
+    <Container maxWidth="xl" className={styles.container}>
+      <Typography variant="h4" className={styles.title}>
+        Patient Management
+      </Typography>
+      <Paper className={styles.paper}>
+        <Box className={styles.tabsWrapper}>
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
             variant="scrollable"
             scrollButtons="auto"
-            sx={{
-              '& .MuiTabs-flexContainer': { flexWrap: 'nowrap' },
-              '& .MuiTab-root': { minWidth: { xs: 100, sm: 120 }, fontSize: { xs: '0.8rem', sm: '0.875rem' } },
-            }}
+            className={styles.tabs}
           >
-            <Tab label="All Patients" />
-            <Tab label={selectedPatient ? 'Edit Patient' : 'Add Patient'} />
-            <Tab label="History Taking" />
-            <Tab label="Medical Records" />
+            <Tab label={selectedPatient ? 'Edit Patient' : 'Add Patient'} className={styles.tab} />
+            <Tab label="History Taking" className={styles.tab} />
           </Tabs>
         </Box>
-        <Box>
+        <Box className={styles.content}>
           {tabValue === 0 && (
-            <PatientList
-              key={refreshKey}
-              patients={patients}
-              onEdit={handleEdit}
-            />
+            <PatientForm patient={selectedPatient} onSuccess={handleSuccess} />
           )}
           {tabValue === 1 && (
-            <PatientForm
-              patient={selectedPatient}
-              onSuccess={handleSuccess}
-            />
-          )}
-          {tabValue === 2 && (
-            <HistoryTakingForm
-              patients={patients}
-              onSuccess={handleSuccess}
-            />
-          )}
-          {tabValue === 3 && (
-            <MedicalRecordsList
-              medicalRecords={medicalRecords}
-              onSuccess={handleSuccess}
-            />
+            <HistoryTakingForm patients={patients} onSuccess={handleSuccess} />
           )}
         </Box>
       </Paper>
