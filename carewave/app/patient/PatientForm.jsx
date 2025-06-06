@@ -1,12 +1,14 @@
-'use client';
+"use client";
 import React, { useState, useEffect } from 'react';
-import { Grid, TextField, Button, MenuItem } from '@mui/material';
-import { createPatient, updatePatient } from './patientService';
+import { Box, TextField, MenuItem, Button, Grid, Paper, Typography, Alert, Skeleton } from '@mui/material';
+import axios from 'axios';
+import styles from './PatientForm.module.css';
 
-export default function PatientForm({ patient, onSuccess }) {
+export default function PatientForm({ onSubmit }) {
   const [formData, setFormData] = useState({
-    patientId: '',
+    email: '',
     name: '',
+    password: '',
     dateOfBirth: '',
     gender: '',
     phone: '',
@@ -15,200 +17,217 @@ export default function PatientForm({ patient, onSuccess }) {
     emergencyContactPhone: '',
     insuranceProvider: '',
     insurancePolicy: '',
-    bloodType: '',
-    allergies: '',
-    medicalHistory: '',
   });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [genderFilter, setGenderFilter] = useState('');
 
   useEffect(() => {
-    if (patient) {
-      setFormData({
-        patientId: patient.patientId || '',
-        name: patient.name || '',
-        dateOfBirth: patient.dateOfBirth ? patient.dateOfBirth.split('T')[0] : '',
-        gender: patient.gender || '',
-        phone: patient.phone || '',
-        address: patient.address || '',
-        emergencyContact: patient.emergencyContact || '',
-        emergencyContactPhone: patient.emergencyContactPhone || '',
-        insuranceProvider: patient.insuranceProvider || '',
-        insurancePolicy: patient.insurancePolicy || '',
-        bloodType: patient.bloodType || '',
-        allergies: patient.allergies || '',
-        medicalHistory: patient.medicalHistory || '',
-      });
-    }
-  }, [patient]);
+    // Simulate loading delay for skeleton
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (patient) {
-        await updatePatient(patient.id, formData);
-        alert('Patient updated successfully');
-      } else {
-        await createPatient(formData);
-        alert('Patient registered successfully');
-      }
-      onSuccess();
+      setLoading(true);
+      await axios.post('/api/patient', formData);
+      onSubmit();
+      setFormData({
+        email: '',
+        name: '',
+        password: '',
+        dateOfBirth: '',
+        gender: '',
+        phone: '',
+        address: '',
+        emergencyContact: '',
+        emergencyContactPhone: '',
+        insuranceProvider: '',
+        insurancePolicy: '',
+      });
+      setError(null);
     } catch (error) {
-      alert(`Error ${patient ? 'updating' : 'registering'} patient`);
+      console.error('Error creating patient:', error);
+      setError(error.response?.data?.error || 'Failed to create patient');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    // Optional: Add logic to filter form fields or trigger API search
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Patient ID"
-            name="patientId"
-            value={formData.patientId}
-            onChange={handleChange}
-            required
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Full Name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Date of Birth"
-            type="date"
-            name="dateOfBirth"
-            value={formData.dateOfBirth}
-            onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            select
-            fullWidth
-            label="Gender"
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-          >
-            <MenuItem value="Male">Male</MenuItem>
-            <MenuItem value="Female">Female</MenuItem>
-            <MenuItem value="Other">Other</MenuItem>
-          </TextField>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Emergency Contact"
-            name="emergencyContact"
-            value={formData.emergencyContact}
-            onChange={handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Emergency Contact Phone"
-            name="emergencyContactPhone"
-            value={formData.emergencyContactPhone}
-            onChange={handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Insurance Provider"
-            name="insuranceProvider"
-            value={formData.insuranceProvider}
-            onChange={handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Insurance Policy"
-            name="insurancePolicy"
-            value={formData.insurancePolicy}
-            onChange={handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            select
-            fullWidth
-            label="Blood Type"
-            name="bloodType"
-            value={formData.bloodType}
-            onChange={handleChange}
-          >
-            <MenuItem value="A+">A+</MenuItem>
-            <MenuItem value="A-">A-</MenuItem>
-            <MenuItem value="B+">B+</MenuItem>
-            <MenuItem value="B-">B-</MenuItem>
-            <MenuItem value="AB+">AB+</MenuItem>
-            <MenuItem value="AB-">AB-</MenuItem>
-            <MenuItem value="O+">O+</MenuItem>
-            <MenuItem value="O-">O-</MenuItem>
-          </TextField>
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="Allergies"
-            name="allergies"
-            value={formData.allergies}
-            onChange={handleChange}
-            multiline
-            rows={2}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="Medical History"
-            name="medicalHistory"
-            value={formData.medicalHistory}
-            onChange={handleChange}
-            multiline
-            rows={3}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <Button type="submit" variant="contained" color="primary" size="large">
-            {patient ? 'Update Patient' : 'Register Patient'}
-          </Button>
-        </Grid>
-      </Grid>
-    </form>
+    <Paper className={styles.paper}>
+      <Typography variant="h6" className={styles.title}>
+        Add New Patient
+      </Typography>
+      {error && (
+        <Alert severity="error" className={styles.alert}>
+          {error}
+        </Alert>
+      )}
+      {loading ? (
+        <Box className={styles.skeletonWrapper}>
+          <Skeleton variant="rectangular" height={60} className={styles.skeleton} />
+          <Skeleton variant="rectangular" height={400} className={styles.skeleton} />
+        </Box>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <Box className={styles.toolbar}>
+            <TextField
+              label="Search Patient Details"
+              variant="outlined"
+              size="small"
+              value={searchQuery}
+              onChange={handleSearch}
+              className={styles.searchField}
+            />
+            <TextField
+              label="Filter by Gender"
+              select
+              variant="outlined"
+              size="small"
+              value={genderFilter}
+              onChange={(e) => setGenderFilter(e.target.value)}
+              className={styles.filterField}
+            >
+              <MenuItem value="">All Genders</MenuItem>
+              <MenuItem value="Male">Male</MenuItem>
+              <MenuItem value="Female">Female</MenuItem>
+              <MenuItem value="Other">Other</MenuItem>
+            </TextField>
+          </Box>
+          <Grid container spacing={2} className={styles.formGrid}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                type="password"
+                label="Password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                type="date"
+                label="Date of Birth"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                select
+                label="Gender"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                fullWidth
+              >
+                <MenuItem value="Male">Male</MenuItem>
+                <MenuItem value="Female">Female</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Emergency Contact"
+                name="emergencyContact"
+                value={formData.emergencyContact}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Emergency Contact Phone"
+                name="emergencyContactPhone"
+                value={formData.emergencyContactPhone}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Insurance Provider"
+                name="insuranceProvider"
+                value={formData.insuranceProvider}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Insurance Policy"
+                name="insurancePolicy"
+                value={formData.insurancePolicy}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button type="submit" variant="contained" color="primary" className={styles.submitButton}>
+                Add Patient
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+      )}
+    </Paper>
   );
 }
