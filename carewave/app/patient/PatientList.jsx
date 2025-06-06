@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid, GridCellEditStopReasons } from '@mui/x-data-grid';
-import { getPatients, updatePatient, deletePatient } from './adtService';
+import { getPatients, updatePatient, deletePatient } from '../adt/adtService';
 
 export default function PatientList() {
   const [patients, setPatients] = useState([]);
