@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, Chip } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import PatientForm from './PatientForm';
 import { getPatients, updatePatient, deletePatient } from './patientService';
 
-export default function PatientList() {
-  const [patients, setPatients] = useState([]);
+export default function PatientList({ patients, onSuccess, onEdit }) {
+  const [localPatients, setLocalPatients] = useState([]);
   const [error, setError] = useState(null);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -17,12 +17,12 @@ export default function PatientList() {
     async function fetchPatients() {
       try {
         const data = await getPatients();
-        setPatients(
+        setLocalPatients(
           data.map((patient) => ({
             id: patient.id,
-            patientId: patient.patientId || '',
-            name: patient.user?.name || 'N/A',
-            email: patient.user?.email || 'N/A',
+            patientId: patient.patientId || 'N/A',
+            name: patient.user?.name || patient.patientId || 'No Name',
+            email: patient.user?.email || 'No Email',
             phone: patient.phone || 'N/A',
             gender: patient.gender || 'N/A',
             dateOfBirth: patient.dateOfBirth
@@ -36,6 +36,7 @@ export default function PatientList() {
             insurancePolicy: patient.insurancePolicy || 'N/A',
             allergies: patient.allergies || 'N/A',
             medicalHistory: patient.medicalHistory || 'N/A',
+            hasUserAccount: !!patient.user,
           }))
         );
         setError(null);
@@ -44,10 +45,36 @@ export default function PatientList() {
         setError(error.response?.data?.details || error.message);
       }
     }
-    fetchPatients();
-  }, []);
+    if (!patients || patients.length === 0) {
+      fetchPatients();
+    } else {
+      setLocalPatients(
+        patients.map((patient) => ({
+          id: patient.id,
+          patientId: patient.patientId || 'N/A',
+          name: patient.user?.name || patient.patientId || 'No Name',
+          email: patient.user?.email || 'No Email',
+          phone: patient.phone || 'N/A',
+          gender: patient.gender || 'N/A',
+          dateOfBirth: patient.dateOfBirth
+            ? new Date(patient.dateOfBirth).toLocaleDateString()
+            : 'N/A',
+          bloodType: patient.bloodType || 'N/A',
+          address: patient.address || 'N/A',
+          emergencyContact: patient.emergencyContact || 'N/A',
+          emergencyContactPhone: patient.emergencyContactPhone || 'N/A',
+          insuranceProvider: patient.insuranceProvider || 'N/A',
+          insurancePolicy: patient.insurancePolicy || 'N/A',
+          allergies: patient.allergies || 'N/A',
+          medicalHistory: patient.medicalHistory || 'N/A',
+          hasUserAccount: !!patient.user,
+        }))
+      );
+    }
+  }, [patients]);
 
   const handleEdit = (patient) => {
+    if (onEdit) onEdit(patient);
     setSelectedPatient(patient);
     setOpenEditModal(true);
   };
@@ -60,16 +87,16 @@ export default function PatientList() {
   const handleSuccess = () => {
     setOpenEditModal(false);
     setSelectedPatient(null);
-    // Refresh patient list
+    if (onSuccess) onSuccess();
     async function refreshPatients() {
       try {
         const data = await getPatients();
-        setPatients(
+        setLocalPatients(
           data.map((patient) => ({
             id: patient.id,
-            patientId: patient.patientId || '',
-            name: patient.user?.name || 'N/A',
-            email: patient.user?.email || 'N/A',
+            patientId: patient.patientId || 'N/A',
+            name: patient.user?.name || patient.patientId || 'No Name',
+            email: patient.user?.email || 'No Email',
             phone: patient.phone || 'N/A',
             gender: patient.gender || 'N/A',
             dateOfBirth: patient.dateOfBirth
@@ -83,6 +110,7 @@ export default function PatientList() {
             insurancePolicy: patient.insurancePolicy || 'N/A',
             allergies: patient.allergies || 'N/A',
             medicalHistory: patient.medicalHistory || 'N/A',
+            hasUserAccount: !!patient.user,
           }))
         );
       } catch (error) {
@@ -101,9 +129,10 @@ export default function PatientList() {
   const handleDelete = async () => {
     try {
       await deletePatient(patientToDelete);
-      setPatients(patients.filter((row) => row.id !== patientToDelete));
+      setLocalPatients(localPatients.filter((row) => row.id !== patientToDelete));
       setOpenDeleteConfirm(false);
       setPatientToDelete(null);
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Error deleting patient:', error);
       setError(error.response?.data?.details || error.message);
@@ -113,8 +142,32 @@ export default function PatientList() {
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
     { field: 'patientId', headerName: 'Patient ID', width: 120 },
-    { field: 'name', headerName: 'Name', width: 150 },
-    { field: 'email', headerName: 'Email', width: 180 },
+    {
+      field: 'name',
+      headerName: 'Name',
+      width: 150,
+      renderCell: (params) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {params.value}
+          {!params.row.hasUserAccount && (
+            <Chip label="No Account" size="small" color="warning" />
+          )}
+        </Box>
+      ),
+    },
+    {
+      field: 'email',
+      headerName: 'Email',
+      width: 180,
+      renderCell: (params) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {params.value}
+          {!params.row.hasUserAccount && (
+            <Chip label="No Account" size="small" color="warning" />
+          )}
+        </Box>
+      ),
+    },
     { field: 'phone', headerName: 'Phone', width: 150 },
     { field: 'gender', headerName: 'Gender', width: 100 },
     { field: 'dateOfBirth', headerName: 'Date of Birth', width: 150 },
@@ -199,7 +252,7 @@ export default function PatientList() {
           Failed to load patients: {error}
         </Alert>
       )}
-      {patients.length === 0 && !error && (
+      {localPatients.length === 0 && !error && (
         <Alert
           severity="info"
           sx={{
@@ -222,7 +275,7 @@ export default function PatientList() {
         }}
       >
         <DataGrid
-          rows={patients}
+          rows={localPatients}
           columns={columns}
           pageSizeOptions={[5, 10, 25]}
           disableRowSelectionOnClick
