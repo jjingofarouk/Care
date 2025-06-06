@@ -1,14 +1,17 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
+import PatientForm from './PatientForm';
 import PatientList from './PatientList';
 import MedicalRecordsList from './MedicalRecordsList';
-import { getPatients, getMedicalRecords } from './patientService';
+import { getPatients } from './patientService';
+import { getMedicalRecords } from './medicalRecordsService';
 import styles from './PatientPage.module.css';
 
 export default function PatientPage() {
   const [patients, setPatients] = useState([]);
   const [medicalRecords, setMedicalRecords] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -27,10 +30,20 @@ export default function PatientPage() {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
+    if (newValue !== 1) {
+      setSelectedPatient(null); // Clear selected patient when switching tabs
+    }
   };
 
   const handleSuccess = () => {
-    setRefreshKey((prev) => prev + 1);
+    setSelectedPatient(null); // Clear selected patient after success
+    setTabValue(0); // Switch to "All Patients" tab
+    setRefreshKey((prev) => prev + 1); // Refresh data
+  };
+
+  const handleEdit = (patient) => {
+    setSelectedPatient(patient);
+    setTabValue(1); // Switch to "Add/Edit Patient" tab
   };
 
   return (
@@ -48,6 +61,7 @@ export default function PatientPage() {
             className={styles.tabs}
           >
             <Tab label="All Patients" className={styles.tab} />
+            <Tab label={selectedPatient ? 'Edit Patient' : 'Add Patient'} className={styles.tab} />
             <Tab label="Medical Records" className={styles.tab} />
           </Tabs>
         </Box>
@@ -57,9 +71,16 @@ export default function PatientPage() {
               key={refreshKey}
               patients={patients}
               onSuccess={handleSuccess}
+              onEdit={handleEdit}
             />
           )}
           {tabValue === 1 && (
+            <PatientForm
+              patient={selectedPatient}
+              onSubmit={handleSuccess}
+            />
+          )}
+          {tabValue === 2 && (
             <MedicalRecordsList
               medicalRecords={medicalRecords}
               onSuccess={handleSuccess}
