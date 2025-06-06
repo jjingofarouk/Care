@@ -30,12 +30,12 @@ model User {
   email             String             @unique
   name              String
   password          String
-  role              String             @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
+  role              String             @default("PATIENT")
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   doctor            Doctor?            @relation(fields: [doctorId], references: [id])
   doctorId          Int?               @unique
-  patient           Patient?           @relation(fields: [patientId], references: [id])
+  patient           Patient?
   patientId         Int?               @unique
   payrolls          Payroll[]
   cssdLogs          CSSDLog[]          @relation("LoggedBy")
