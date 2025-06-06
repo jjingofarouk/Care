@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid, GridCellEditStopReasons } from '@mui/x-data-grid';
 import { getPatients, updatePatient, deletePatient } from './adtService';
-import styles from './PatientList.module.css'; // Ensure this path is correct
 
 export default function PatientList() {
   const [patients, setPatients] = useState([]);
@@ -92,7 +91,12 @@ export default function PatientList() {
           variant="outlined"
           color="error"
           onClick={() => handleDelete(params.row.id)}
-          className={styles.button} // Correct usage of styles
+          sx={{
+            fontSize: { xs: '0.675rem', sm: '0.75rem' },
+            padding: { xs: '3px 6px', sm: '4px 8px' },
+            textTransform: 'none',
+            borderRadius: '4px',
+          }}
         >
           Delete
         </Button>
@@ -101,21 +105,70 @@ export default function PatientList() {
   ];
 
   return (
-    <Box className={styles.container}>
-      <Typography variant="h6" className={styles.title}>
+    <Box
+      sx={{
+        width: '100%',
+        maxWidth: '100vw',
+        minHeight: '100vh',
+        margin: 0,
+        padding: { xs: '4px', sm: '8px' },
+        boxSizing: 'border-box',
+        backgroundColor: '#f5f5f5',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          fontSize: { xs: '1.25rem', sm: '1.5rem' },
+          fontWeight: 600,
+          color: '#333',
+          margin: 0,
+          padding: '8px 0',
+          textAlign: 'left',
+        }}
+      >
         Patients List
       </Typography>
       {error && (
-        <Alert severity="error" className={styles.alert}>
+        <Alert
+          severity="error"
+          sx={{
+            width: '100%',
+            maxWidth: '100%',
+            margin: 0,
+            padding: '8px',
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            borderRadius: '4px',
+          }}
+        >
           Failed to load patients: {error}
         </Alert>
       )}
       {patients.length === 0 && !error && (
-        <Alert severity="info" className={styles.alert}>
+        <Alert
+          severity="info"
+          sx={{
+            width: '100%',
+            maxWidth: '100%',
+            margin: 0,
+            padding: '8px',
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            borderRadius: '4px',
+          }}
+        >
           No patients found.
         </Alert>
       )}
-      <Box className={styles.tableWrapper}>
+      <Box
+        sx={{
+          width: '100%',
+          flexGrow: 1,
+          overflowX: 'auto',
+        }}
+      >
         <DataGrid
           rows={patients}
           columns={columns}
@@ -124,8 +177,29 @@ export default function PatientList() {
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
           }}
-          className={styles.dataGrid}
           onCellEditStop={handleCellEditCommit}
+          sx={{
+            width: '100%',
+            border: 'none',
+            backgroundColor: '#fff',
+            borderRadius: '4px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            '& .MuiDataGrid-cell': {
+              padding: '4px 8px',
+            },
+            '& .MuiDataGrid-columnHeader': {
+              padding: '4px 8px',
+              backgroundColor: '#f9f9f9',
+              color: '#333',
+            },
+            '& .MuiDataGrid-toolbarContainer': {
+              padding: '4px',
+            },
+            '& .MuiDataGrid-footerContainer': {
+              padding: '4px',
+            },
+          }}
         />
       </Box>
     </Box>
