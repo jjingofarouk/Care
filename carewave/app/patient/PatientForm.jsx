@@ -1,30 +1,33 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Box, TextField, MenuItem, Button, Grid, Paper, Typography, Alert, Skeleton } from '@mui/material';
-import axios from 'axios';
+import { createPatient, updatePatient } from './patientService';
 import styles from './PatientForm.module.css';
 
-export default function PatientForm({ onSubmit }) {
+export default function PatientForm({ onSubmit, patient }) {
   const [formData, setFormData] = useState({
-    email: '',
-    name: '',
+    email: patient?.user?.email || '',
+    name: patient?.user?.name || '',
     password: '',
-    dateOfBirth: '',
-    gender: '',
-    phone: '',
-    address: '',
-    emergencyContact: '',
-    emergencyContactPhone: '',
-    insuranceProvider: '',
-    insurancePolicy: '',
+    patientId: patient?.patientId || '',
+    dateOfBirth: patient?.dateOfBirth ? patient.dateOfBirth.split('T')[0] : '',
+    gender: patient?.gender || '',
+    phone: patient?.phone || '',
+    address: patient?.address || '',
+    emergencyContact: patient?.emergencyContact || '',
+    emergencyContactPhone: patient?.emergencyContactPhone || '',
+    insuranceProvider: patient?.insuranceProvider || '',
+    insurancePolicy: patient?.insurancePolicy || '',
+    bloodType: patient?.bloodType || '',
+    allergies: patient?.allergies || '',
+    medicalHistory: patient?.medicalHistory || '',
   });
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
 
   useEffect(() => {
-    // Simulate loading delay for skeleton
     const timer = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
@@ -39,25 +42,35 @@ export default function PatientForm({ onSubmit }) {
     e.preventDefault();
     try {
       setLoading(true);
-      await axios.post('/api/patient', formData);
+      if (patient) {
+        await updatePatient(patient.id, { ...formData, userId: patient.user?.id });
+      } else {
+        await createPatient(formData);
+      }
       onSubmit();
-      setFormData({
-        email: '',
-        name: '',
-        password: '',
-        dateOfBirth: '',
-        gender: '',
-        phone: '',
-        address: '',
-        emergencyContact: '',
-        emergencyContactPhone: '',
-        insuranceProvider: '',
-        insurancePolicy: '',
-      });
+      if (!patient) {
+        setFormData({
+          email: '',
+          name: '',
+          password: '',
+          patientId: '',
+          dateOfBirth: '',
+          gender: '',
+          phone: '',
+          address: '',
+          emergencyContact: '',
+          emergencyContactPhone: '',
+          insuranceProvider: '',
+          insurancePolicy: '',
+          bloodType: '',
+          allergies: '',
+          medicalHistory: '',
+        });
+      }
       setError(null);
     } catch (error) {
-      console.error('Error creating patient:', error);
-      setError(error.response?.data?.error || 'Failed to create patient');
+      console.error(`Error ${patient ? 'updating' : 'creating'} patient:`, error);
+      setError(error.response?.data?.error || `Failed to ${patient ? 'update' : 'create'} patient`);
     } finally {
       setLoading(false);
     }
@@ -65,13 +78,12 @@ export default function PatientForm({ onSubmit }) {
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
-    // Optional: Add logic to filter form fields or trigger API search
   };
 
   return (
     <Paper className={styles.paper}>
       <Typography variant="h6" className={styles.title}>
-        Add New Patient
+        {patient ? 'Edit Patient' : 'Add New Patient'}
       </Typography>
       {error && (
         <Alert severity="error" className={styles.alert}>
@@ -117,7 +129,6 @@ export default function PatientForm({ onSubmit }) {
                 value={formData.email}
                 onChange={handleChange}
                 fullWidth
-                required
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -138,7 +149,16 @@ export default function PatientForm({ onSubmit }) {
                 value={formData.password}
                 onChange={handleChange}
                 fullWidth
-                required
+                disabled={!!patient}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Patient ID"
+                name="patientId"
+                value={formData.patientId}
+                onChange={handleChange}
+                fullWidth
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -220,9 +240,38 @@ export default function PatientForm({ onSubmit }) {
                 fullWidth
               />
             </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Blood Type"
+                name="bloodType"
+                value={formData.bloodType}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Allergies"
+                name="allergies"
+                value={formData.allergies}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Medical History"
+                name="medicalHistory"
+                value={formData.medicalHistory}
+                onChange={handleChange}
+                fullWidth
+                multiline
+                rows={4}
+              />
+            </Grid>
             <Grid item xs={12}>
               <Button type="submit" variant="contained" color="primary" className={styles.submitButton}>
-                Add Patient
+                {patient ? 'Update Patient' : 'Add Patient'}
               </Button>
             </Grid>
           </Grid>
