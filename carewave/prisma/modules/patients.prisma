@@ -1,7 +1,7 @@
 model Patient {
   id                    Int               @id @default(autoincrement())
   patientId             String            @unique
-  name                  String
+  name                  String?
   email                 String?           @unique
   dateOfBirth           DateTime?
   gender                String?
