@@ -1204,10 +1204,22 @@ async function seedStockAdjustments() {
 }
 
 async function seedInvoices() {
+  // Get only prescriptions with enough related data
   const prescriptions = await prisma.prescription.findMany({
-    where: { status: 'DISPENSED' }
+    where: { 
+      status: 'DISPENSED',
+      dispensingRecords: { some: {} } // Ensure it has dispensing records
+    },
+    include: { dispensingRecords: true }
   });
+
   const transactions = await prisma.transaction.findMany();
+
+  // Only proceed if we have the required data
+  if (prescriptions.length < 3 || transactions.length < 2) {
+    console.log('Not enough prescriptions or transactions to seed invoices');
+    return;
+  }
 
   await prisma.invoice.createMany({
     data: [
@@ -1216,24 +1228,26 @@ async function seedInvoices() {
         totalAmount: 60000,
         status: 'PAID',
         paymentMethod: 'CASH',
-        transactionId: transactions[0].id
+        transactionId: transactions[0]?.id
       },
       {
         prescriptionId: prescriptions[1].id,
         totalAmount: 15000,
         status: 'PAID',
         paymentMethod: 'INSURANCE',
-        transactionId: transactions[1].id
+        transactionId: transactions[1]?.id
       },
       {
         prescriptionId: prescriptions[2].id,
         totalAmount: 50000,
-        status: 'PENDING',
-        paymentMethod: null
+        status: 'PENDING'
+        // paymentMethod and transactionId intentionally omitted for PENDING
       }
-    ]
+    ],
+    skipDuplicates: true
   });
-  console.log('Seeded 3 invoices (only 3 prescriptions were dispensed)');
+
+  console.log(`Seeded ${Math.min(prescriptions.length, 3)} invoices`);
 }
 
 async function seedRefunds() {
