@@ -5,13 +5,22 @@ const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
+    const id = parseInt(params.id);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: 'Invalid medical record ID' }, { status: 400 });
+    }
+
     const medicalRecord = await prisma.medicalRecord.findUnique({
-      where: { id: parseInt(params.id) },
-      include: { patient: { include: { user: true } } },
+      where: { id },
+      include: {
+        patient: true,
+      },
     });
+
     if (!medicalRecord) {
       return NextResponse.json({ error: 'Medical record not found' }, { status: 404 });
     }
+
     return NextResponse.json(medicalRecord);
   } catch (error) {
     console.error('GET /api/medical-records/[id] error:', error);
@@ -23,11 +32,20 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    const id = parseInt(params.id);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: 'Invalid medical record ID' }, { status: 400 });
+    }
+
     const data = await request.json();
+    if (!data.patientId || !data.recordId || !data.diagnosis || !data.date || !data.doctorName) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
     const medicalRecord = await prisma.medicalRecord.update({
-      where: { id: parseInt(params.id) },
+      where: { id },
       data: {
-        patient: data.patientId ? { connect: { patientId: data.patientId } } : undefined,
+        patientId: parseInt(data.patientId),
         recordId: data.recordId,
         diagnosis: data.diagnosis,
         presentingComplaint: data.presentingComplaint || null,
@@ -36,11 +54,11 @@ export async function PUT(request, { params }) {
         pastMedicalHistory: data.pastMedicalHistory || null,
         allergies: data.allergies || null,
         medications: data.medications || null,
-        date: data.date ? new Date(data.date) : undefined,
+        date: new Date(data.date),
         doctorName: data.doctorName,
       },
-      include: { patient: { include: { user: true } } },
     });
+
     return NextResponse.json(medicalRecord);
   } catch (error) {
     console.error('PUT /api/medical-records/[id] error:', error);
@@ -52,10 +70,16 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const id = parseInt(params.id);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: 'Invalid medical record ID' }, { status: 400 });
+    }
+
     await prisma.medicalRecord.delete({
-      where: { id: parseInt(params.id) },
+      where: { id },
     });
-    return NextResponse.json({ message: 'Medical record deleted' });
+
+    return NextResponse.json({ message: 'Medical record deleted successfully' });
   } catch (error) {
     console.error('DELETE /api/medical-records/[id] error:', error);
     return NextResponse.json({ error: 'Failed to delete medical record', details: error.message }, { status: 500 });
