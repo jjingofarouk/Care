@@ -5,7 +5,7 @@ import PatientForm from './PatientForm';
 import PatientList from './PatientList';
 import MedicalRecordsList from './MedicalRecordsList';
 import { getPatients } from './patientService';
-import { getMedicalRecords } from './medicalRecordsService';
+import { getMedicalRecords } from '../medical-records/medicalRecordsService';
 import styles from './PatientPage.module.css';
 
 export default function PatientPage() {
