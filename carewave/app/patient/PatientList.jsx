@@ -44,6 +44,7 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
             socialHistory: patient.socialHistory || 'N/A',
             pastMedicalHistory: patient.pastMedicalHistory || 'N/A',
             medications: patient.medications || 'N/A',
+            medicalRecords: patient.medicalRecords || [],
           }))
         );
         setError(null);
@@ -79,6 +80,7 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
           socialHistory: patient.socialHistory || 'N/A',
           pastMedicalHistory: patient.pastMedicalHistory || 'N/A',
           medications: patient.medications || 'N/A',
+          medicalRecords: patient.medicalRecords || [],
         }))
       );
     }
@@ -126,6 +128,7 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
             socialHistory: patient.socialHistory || 'N/A',
             pastMedicalHistory: patient.pastMedicalHistory || 'N/A',
             medications: patient.medications || 'N/A',
+            medicalRecords: patient.medicalRecords || [],
           }))
         );
       } catch (error) {
