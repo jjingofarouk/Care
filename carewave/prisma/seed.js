@@ -1251,30 +1251,56 @@ async function seedInvoices() {
 }
 
 async function seedRefunds() {
+  // Get paid invoices that don't already have refunds
   const invoices = await prisma.invoice.findMany({
-    where: { status: 'PAID' }
+    where: { 
+      status: 'PAID',
+      refunds: { none: {} } // Only invoices without existing refunds
+    },
+    orderBy: { createdAt: 'asc' } // Get oldest first
   });
-  const users = await prisma.user.findMany();
 
-  await prisma.refund.createMany({
-    data: [
-      {
-        invoiceId: invoices[0].id,
-        reason: 'Overcharged',
-        amount: 10000,
-        refundDate: new Date('2023-05-29T10:00:00'),
-        processedById: users[0].id
-      },
-      {
-        invoiceId: invoices[1].id,
-        reason: 'Wrong medication dispensed',
-        amount: 15000,
-        refundDate: new Date('2023-05-30T14:30:00'),
-        processedById: users[1].id
-      }
-    ]
+  // Get users who can process refunds (e.g., admins or accountants)
+  const users = await prisma.user.findMany({
+    where: {
+      OR: [
+        { role: 'ADMIN' },
+        { role: 'ACCOUNTANT' }
+      ]
+    },
+    take: 2 // We only need 2 users
   });
-  console.log('Seeded 2 refunds');
+
+  // Validate we have enough data
+  if (invoices.length < 2 || users.length < 2) {
+    console.log(`Skipping refund seeding - need 2 paid invoices and 2 eligible users. Found ${invoices.length} invoices and ${users.length} users.`);
+    return;
+  }
+
+  try {
+    await prisma.refund.createMany({
+      data: [
+        {
+          invoiceId: invoices[0].id,
+          reason: 'Overcharged',
+          amount: 10000,
+          refundDate: new Date('2023-05-29T10:00:00'),
+          processedById: users[0].id
+        },
+        {
+          invoiceId: invoices[1].id,
+          reason: 'Wrong medication dispensed',
+          amount: 15000,
+          refundDate: new Date('2023-05-30T14:30:00'),
+          processedById: users[1].id
+        }
+      ],
+      skipDuplicates: true
+    });
+    console.log('Successfully seeded 2 refunds');
+  } catch (error) {
+    console.error('Error seeding refunds:', error);
+  }
 }
 
 async function seedCostCenters() {
