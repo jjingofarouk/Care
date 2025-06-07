@@ -24,7 +24,7 @@ import {
   getMedicalRecord,
   updateMedicalRecord,
   deleteMedicalRecord,
-} from './medicalRecordsService';
+} from '../medical-records/medicalRecordsService';
 import MedicalHistoryForm from './MedicalHistoryForm';
 
 export default function MedicalRecordsList({ medicalRecords, patients, onSuccess }) {
