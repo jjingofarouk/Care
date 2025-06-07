@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -14,7 +13,6 @@ export async function GET(request, { params }) {
     const patient = await prisma.patient.findUnique({
       where: { id },
       include: {
-        user: true,
         admissions: true,
         discharges: true,
         transactions: true,
@@ -45,64 +43,33 @@ export async function PUT(request, { params }) {
     }
 
     const data = await request.json();
-    if (!) {
+    if (!data.name) {
       return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 });
     }
 
-    const patient = await prisma.$transaction(async (prisma) => {
-      let user = null;
-      if (data.email && data.password) {
-        const hashedPassword = await bcrypt.hash(data.password, 10);
-        user = await prisma.user.upsert({
-          where: { id: data.userId || 0 },
-          update: {
-            email: data.email,
-            name: data.name,
-            role: 'PATIENT',
-            password: hashedPassword,
-          },
-          create: {
-            email: data.email,
-            name: data.name,
-            role: 'PATIENT',
-            password: hashedPassword,
-          },
-        });
-      } else if (data.email) {
-        user = await prisma.user.upsert({
-          where: { id: data.userId || 0 },
-          update: {
-            email: data.email,
-            name: data.name,
-            role: 'PATIENT',
-          },
-          create: {
-            email: data.email,
-            name: data.name,
-            role: 'PATIENT',
-          },
-        });
-      }
-
-      return await prisma.patient.update({
-        where: { id },
-        data: {
-          patientId: data.patientId || undefined,
-          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-          gender: data.gender || null,
-          phone: data.phone || null,
-          address: data.address || null,
-          emergencyContact: data.emergencyContact || null,
-          emergencyContactPhone: data.emergencyContactPhone || null,
-          insuranceProvider: data.insuranceProvider || null,
-          insurancePolicy: data.insurancePolicy || null,
-          bloodType: data.bloodType || null,
-          allergies: data.allergies || null,
-          medicalHistory: data.medicalHistory || null,
-          user: user ? { connect: { id: user.id } } : data.userId ? { connect: { id: data.userId } } : { disconnect: true },
-        },
-        include: { user: true },
-      });
+    const patient = await prisma.patient.update({
+      where: { id },
+      data: {
+        patientId: data.patientId || undefined,
+        name: data.name,
+        email: data.email || null,
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+        gender: data.gender || null,
+        phone: data.phone || null,
+        address: data.address || null,
+        emergencyContact: data.emergencyContact || null,
+        emergencyContactPhone: data.emergencyContactPhone || null,
+        insuranceProvider: data.insuranceProvider || null,
+        insurancePolicy: data.insurancePolicy || null,
+        bloodType: data.bloodType || null,
+        allergies: data.allergies || null,
+        medicalHistory: data.medicalHistory || null,
+        presentingComplaint: data.presentingComplaint || null,
+        familyHistory: data.familyHistory || null,
+        socialHistory: data.socialHistory || null,
+        pastMedicalHistory: data.pastMedicalHistory || null,
+        medications: data.medications || null,
+      },
     });
 
     return NextResponse.json(patient);
