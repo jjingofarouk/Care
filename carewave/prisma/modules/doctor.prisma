@@ -1,3 +1,4 @@
+
 model Doctor {
   id                Int                   @id @default(autoincrement())
   userId            Int?                  @unique
