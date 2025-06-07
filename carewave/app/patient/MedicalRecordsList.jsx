@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useState, useEffect } from 'react';
 import {
   Table,
@@ -24,7 +24,8 @@ import {
   getMedicalRecord,
   updateMedicalRecord,
   deleteMedicalRecord,
-} from '../medical-records/medicalRecordsService';
+} from './medicalRecordsService';
+import MedicalHistoryForm from './MedicalHistoryForm';
 
 export default function MedicalRecordsList({ medicalRecords, patients, onSuccess }) {
   const [filteredRecords, setFilteredRecords] = useState(medicalRecords);
@@ -33,6 +34,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
   const [sortOrder, setSortOrder] = useState('desc');
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [editFormData, setEditFormData] = useState({
     patientId: '',
@@ -56,7 +58,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
     const patientId = e.target.value;
     setSelectedPatient(patientId);
     if (patientId) {
-      setFilteredRecords(medicalRecords.filter((record) => record.patientId === patientId));
+      setFilteredRecords(medicalRecords.filter((record) => record.patientId === parseInt(patientId)));
     } else {
       setFilteredRecords(medicalRecords);
     }
@@ -76,8 +78,8 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
             : new Date(bValue) - new Date(aValue);
         }
         return isAsc
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+          ? aValue.toString().localeCompare(bValue.toString())
+          : bValue.toString().localeCompare(aValue.toString());
       })
     );
   };
@@ -97,7 +99,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
       const record = await getMedicalRecord(id);
       setSelectedRecord(record);
       setEditFormData({
-        patientId: record.patientId || '',
+        patientId: record.patientId.toString() || '',
         recordId: record.recordId || '',
         diagnosis: record.diagnosis || '',
         presentingComplaint: record.presentingComplaint || '',
@@ -115,6 +117,10 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
     }
   };
 
+  const handleAdd = () => {
+    setAddDialogOpen(true);
+  };
+
   const handleEditChange = (e) => {
     setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
   };
@@ -122,7 +128,10 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateMedicalRecord(selectedRecord.id, editFormData);
+      await updateMedicalRecord(selectedRecord.id, {
+        ...editFormData,
+        patientId: parseInt(editFormData.patientId),
+      });
       alert('Medical record updated successfully');
       setEditDialogOpen(false);
       setSelectedRecord(null);
@@ -154,25 +163,41 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
     setSelectedRecord(null);
   };
 
+  const handleCloseAdd = () => {
+    setAddDialogOpen(false);
+  };
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>Medical Records</Typography>
-      <Box sx={{ mb: 2 }}>
-        <TextField
-          select
-          label="Filter by Patient"
-          value={selectedPatient}
-          onChange={handleFilterChange}
-          sx={{ minWidth: 200 }}
-        >
-          <MenuItem value="">All Patients</MenuItem>
-          {patients.map((patient) => (
-            <MenuItem key={patient.id} value={patient.patientId}>
-              {patient.name} ({patient.patientId})
-            </MenuItem>
-          ))}
-        </TextField>
-      </Box>
+      {patients.length > 1 && (
+        <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
+          <TextField
+            select
+            label="Filter by Patient"
+            value={selectedPatient}
+            onChange={handleFilterChange}
+            sx={{ minWidth: 200 }}
+          >
+            <MenuItem value="">All Patients</MenuItem>
+            {patients.map((patient) => (
+              <MenuItem key={patient.id} value={patient.id}>
+                {patient.name} ({patient.patientId})
+              </MenuItem>
+            ))}
+          </TextField>
+          <Button variant="contained" color="primary" onClick={handleAdd}>
+            Add Record
+          </Button>
+        </Box>
+      )}
+      {patients.length === 1 && (
+        <Box sx={{ mb: 2 }}>
+          <Button variant="contained" color="primary" onClick={handleAdd}>
+            Add Record
+          </Button>
+        </Box>
+      )}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -186,15 +211,17 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                   Record ID
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'patientId'}
-                  direction={sortField === 'patientId' ? sortOrder : 'asc'}
-                  onClick={() => handleSort('patientId')}
-                >
-                  Patient
-                </TableSortLabel>
-              </TableCell>
+              {patients.length > 1 && (
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'patientId'}
+                    direction={sortField === 'patientId' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('patientId')}
+                  >
+                    Patient
+                  </TableSortLabel>
+                </TableCell>
+              )}
               <TableCell>
                 <TableSortLabel
                   active={sortField === 'diagnosis'}
@@ -229,7 +256,9 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
             {filteredRecords.map((record) => (
               <TableRow key={record.id}>
                 <TableCell>{record.recordId}</TableCell>
-                <TableCell>{record.patient?.name || 'Unknown'} ({record.patientId})</TableCell>
+                {patients.length > 1 && (
+                  <TableCell>{record.patient?.name || 'Unknown'} ({record.patientId})</TableCell>
+                )}
                 <TableCell>{record.diagnosis}</TableCell>
                 <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
                 <TableCell>{record.doctorName}</TableCell>
@@ -267,7 +296,6 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
         </Table>
       </TableContainer>
 
-      {/* View Dialog */}
       <Dialog open={viewDialogOpen} onClose={handleCloseView} maxWidth="md" fullWidth>
         <DialogTitle>Medical Record Details</DialogTitle>
         <DialogContent>
@@ -292,7 +320,6 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
         </DialogActions>
       </Dialog>
 
-      {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onClose={handleCloseEdit} maxWidth="md" fullWidth>
         <DialogTitle>Edit Medical Record</DialogTitle>
         <DialogContent>
@@ -309,7 +336,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 sx={{ mb: 2 }}
               >
                 {patients.map((patient) => (
-                  <MenuItem key={patient.id} value={patient.patientId}>
+                  <MenuItem key={patient.id} value={patient.id}>
                     {patient.name} ({patient.patientId})
                   </MenuItem>
                 ))}
@@ -345,16 +372,6 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
               />
               <TextField
                 fullWidth
-                label="Presenting Complaint"
-                name="presentingComplaint"
-                value={editFormData.presentingComplaint}
-                onChange={handleEditChange}
-                multiline
-                rows={3}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
                 label="Diagnosis"
                 name="diagnosis"
                 value={editFormData.diagnosis}
@@ -362,6 +379,16 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 multiline
                 rows={3}
                 required
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Presenting Complaint"
+                name="presentingComplaint"
+                value={editFormData.presentingComplaint}
+                onChange={handleEditChange}
+                multiline
+                rows={3}
                 sx={{ mb: 2 }}
               />
               <TextField
@@ -421,6 +448,22 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
             </DialogActions>
           </form>
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={addDialogOpen} onClose={handleCloseAdd} maxWidth="md" fullWidth>
+        <DialogTitle>Add Medical Record</DialogTitle>
+        <DialogContent>
+          <MedicalHistoryForm
+            patient={patients[0] || {}}
+            onSubmit={() => {
+              setAddDialogOpen(false);
+              onSuccess();
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAdd} variant="outlined">Cancel</Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
