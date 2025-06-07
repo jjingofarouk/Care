@@ -146,8 +146,8 @@ async function seedDoctors() {
     select: { id: true }
   });
 
-  // Create doctors without user relationships first
-  const doctors = await prisma.doctor.createMany({
+  // Create doctors first
+  await prisma.doctor.createMany({
     data: [
       {
         doctorId: 'DOC001',
@@ -192,17 +192,20 @@ async function seedDoctors() {
     ]
   });
 
-  // Update user-doctor relationships if users exist
+  // Connect users to doctors (if users exist)
   if (doctorUsers.length > 0) {
-    await Promise.all(doctorUsers.map((user, index) => 
-      prisma.doctor.update({
-        where: { doctorId: `DOC00${index + 1}` },
-        data: { userId: user.id }
-      })
-    ));
+    await Promise.all(
+      doctorUsers.map((user, index) => 
+        prisma.doctor.update({
+          where: { doctorId: `DOC00${index + 1}` },
+          data: { 
+            user: { connect: { id: user.id } } 
+          }
+        })
+    );
   }
 
-  console.log('Seeded 5 doctors');
+  console.log('Successfully seeded 5 doctors');
 }
 
 async function seedPatients() {
