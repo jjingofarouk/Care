@@ -4,13 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request) {
+export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const includeParam = searchParams.get('include');
     const includeRelations = includeParam?.split(',') || [];
     
-    // Build the include object dynamically based on valid relations
     const validRelations = [
       'admissions', 'discharges', 'transactions', 
       'appointments', 'prescriptions', 'medicalRecords'
@@ -25,7 +24,7 @@ export async function GET(request: Request) {
 
     const patients = await prisma.patient.findMany({
       include,
-      orderBy: { createdAt: 'desc' } // Newest patients first
+      orderBy: { createdAt: 'desc' }
     });
 
     return NextResponse.json(patients);
@@ -40,11 +39,10 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request) {
   try {
     const data = await request.json();
     
-    // Required field validation
     if (!data.name) {
       return NextResponse.json(
         { error: 'Name is required' }, 
@@ -52,7 +50,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Email uniqueness check
     if (data.email) {
       const existingPatient = await prisma.patient.findUnique({
         where: { email: data.email },
@@ -65,7 +62,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Patient ID uniqueness check and generation
     let patientId = data.patientId;
     if (!patientId) {
       let isUnique = false;
@@ -88,7 +84,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Date validation
     let dateOfBirth = null;
     if (data.dateOfBirth) {
       dateOfBirth = new Date(data.dateOfBirth);
@@ -100,7 +95,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Create patient with all fields
     const patient = await prisma.patient.create({
       data: {
         patientId,
