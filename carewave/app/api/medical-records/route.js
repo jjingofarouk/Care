@@ -1,16 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request) {
   try {
-    if (!prisma.medicalRecord) {
-      throw new Error('MedicalRecord model is not defined in Prisma schema');
-    }
     const medicalRecords = await prisma.medicalRecord.findMany({
-      include: { patient: { include: { user: true } } },
+      include: {
+        patient: true,
+      },
     });
+
     return NextResponse.json(medicalRecords);
   } catch (error) {
     console.error('GET /api/medical-records error:', error);
@@ -26,9 +27,17 @@ export async function POST(request) {
     if (!data.patientId || !data.recordId || !data.diagnosis || !data.date || !data.doctorName) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    const existingRecord = await prisma.medicalRecord.findUnique({
+      where: { recordId: data.recordId },
+    });
+    if (existingRecord) {
+      return NextResponse.json({ error: 'Record ID already exists' }, { status: 400 });
+    }
+
     const medicalRecord = await prisma.medicalRecord.create({
       data: {
-        patient: { connect: { patientId: data.patientId } },
+        patientId: parseInt(data.patientId),
         recordId: data.recordId,
         diagnosis: data.diagnosis,
         presentingComplaint: data.presentingComplaint || null,
@@ -40,8 +49,8 @@ export async function POST(request) {
         date: new Date(data.date),
         doctorName: data.doctorName,
       },
-      include: { patient: { include: { user: true } } },
     });
+
     return NextResponse.json(medicalRecord, { status: 201 });
   } catch (error) {
     console.error('POST /api/medical-records error:', error);
