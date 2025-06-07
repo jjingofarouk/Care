@@ -141,69 +141,70 @@ async function seedUsers() {
 
 async function seedDoctors() {
   const departments = await prisma.department.findMany();
-  const doctorUsers = await prisma.user.findMany({
-    where: { role: 'DOCTOR' },
-    select: { id: true }
-  });
+  
+  const doctorsData = [
+    {
+      doctorId: 'DOC001',
+      name: 'Dr. James Kato',
+      email: 'j.kato@mulago.go.ug',
+      specialty: 'Cardiology',
+      licenseNumber: 'UMDPC001',
+      phone: '+256772123456',
+      office: 'Block A, Room 101',
+      departmentId: departments.find(d => d.name === 'Internal Medicine')?.id
+    },
+    {
+      doctorId: 'DOC002',
+      name: 'Dr. Sarah Nalwoga',
+      email: 's.nalwoga@mulago.go.ug',
+      specialty: 'Pediatrics',
+      licenseNumber: 'UMDPC002',
+      phone: '+256772654321',
+      office: 'Block B, Room 205',
+      departmentId: departments.find(d => d.name === 'Pediatrics')?.id
+    },
+    {
+      doctorId: 'DOC003',
+      name: 'Dr. Robert Kibuuka',
+      email: 'r.kibuuka@mulago.go.ug',
+      specialty: 'General Surgery',
+      licenseNumber: 'UMDPC003',
+      phone: '+256752987654',
+      office: 'Block C, Room 310',
+      departmentId: departments.find(d => d.name === 'Surgery')?.id
+    },
+    {
+      doctorId: 'DOC004',
+      name: 'Dr. Grace Nakimera',
+      email: 'g.nakimera@mulago.go.ug',
+      specialty: 'Obstetrics',
+      licenseNumber: 'UMDPC004',
+      phone: '+256712345678',
+      office: 'Maternity Wing, Room 12',
+      departmentId: departments.find(d => d.name === 'Obstetrics & Gynecology')?.id
+    },
+    {
+      doctorId: 'DOC005',
+      name: 'Dr. David Ssemwanga',
+      email: 'd.ssemwanga@mulago.go.ug',
+      specialty: 'Emergency Medicine',
+      licenseNumber: 'UMDPC005',
+      phone: '+256782876543',
+      office: 'Emergency Block, Room 5',
+      departmentId: departments.find(d => d.name === 'Emergency')?.id
+    }
+  ];
 
-  // Create doctors first
-  await prisma.doctor.createMany({
-    data: [
-      {
-        doctorId: 'DOC001',
-        specialty: 'Cardiology',
-        licenseNumber: 'UMDPC001',
-        phone: '+256772123456',
-        office: 'Block A, Room 101',
-        departmentId: departments[0]?.id
-      },
-      {
-        doctorId: 'DOC002',
-        specialty: 'Pediatrics',
-        licenseNumber: 'UMDPC002',
-        phone: '+256772654321',
-        office: 'Block B, Room 205',
-        departmentId: departments[1]?.id
-      },
-      {
-        doctorId: 'DOC003',
-        specialty: 'General Surgery',
-        licenseNumber: 'UMDPC003',
-        phone: '+256752987654',
-        office: 'Block C, Room 310',
-        departmentId: departments[2]?.id
-      },
-      {
-        doctorId: 'DOC004',
-        specialty: 'Obstetrics',
-        licenseNumber: 'UMDPC004',
-        phone: '+256712345678',
-        office: 'Maternity Wing, Room 12',
-        departmentId: departments[3]?.id
-      },
-      {
-        doctorId: 'DOC005',
-        specialty: 'Emergency Medicine',
-        licenseNumber: 'UMDPC005',
-        phone: '+256782876543',
-        office: 'Emergency Block, Room 5',
-        departmentId: departments[4]?.id
-      }
-    ]
-  });
-
-  // Connect users to doctors (if users exist)
-  if (doctorUsers.length > 0) {
-    await Promise.all(
-      doctorUsers.map((user, index) => 
-        prisma.doctor.update({
-          where: { doctorId: `DOC00${index + 1}` },
-          data: { 
-            user: { connect: { id: user.id } } 
-          }
-        })
-    );
-  }
+  // Upsert doctors to prevent duplicates
+  await Promise.all(
+    doctorsData.map(doctor =>
+      prisma.doctor.upsert({
+        where: { doctorId: doctor.doctorId },
+        update: {},
+        create: doctor
+      })
+    )
+  );
 
   console.log('Successfully seeded 5 doctors');
 }
