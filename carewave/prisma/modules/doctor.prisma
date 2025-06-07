@@ -1,11 +1,12 @@
 
 model Doctor {
   id                Int                   @id @default(autoincrement())
-  user              User?                 @relation(fields: [userId], references: [id])
   doctorId          String                @unique
+  name              String
+  email             String?               @unique
   specialty         String
   licenseNumber     String                @unique
-  phone             String?
+  phone             String
   office            String?
   departmentId      Int?
   department        Department?           @relation(fields: [departmentId], references: [id])
@@ -16,7 +17,6 @@ model Doctor {
   appointments      Appointment[]         @relation("DoctorAppointments")
   availability      DoctorAvailability[]
   prescriptions     Prescription[]        @relation("Prescriptions")
-  prescriberId      Int?
 }
 
 model DoctorAvailability {
