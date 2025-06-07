@@ -231,7 +231,7 @@ export default function PatientForm({ patient, onSubmit }) {
               onChange={handleChange}
               fullWidth
               multiline
-              rows=3
+              rows={3}
             />
           </Grid>
           <Grid item xs={12}>
@@ -242,7 +242,7 @@ export default function PatientForm({ patient, onSubmit }) {
               onChange={handleChange}
               fullWidth
               multiline
-              rows=3
+              rows={3}
             />
           </Grid>
           <Grid item xs={12}>
@@ -253,7 +253,7 @@ export default function PatientForm({ patient, onSubmit }) {
               onChange={handleChange}
               fullWidth
               multiline
-              rows=3
+              rows={3}
             />
           </Grid>
           <Grid item xs={12}>
@@ -264,7 +264,7 @@ export default function PatientForm({ patient, onSubmit }) {
               onChange={handleChange}
               fullWidth
               multiline
-              rows=3
+              rows={3}
             />
           </Grid>
           <Grid item xs={12}>
@@ -275,7 +275,7 @@ export default function PatientForm({ patient, onSubmit }) {
               onChange={handleChange}
               fullWidth
               multiline
-              rows=3
+              rows={3}
             />
           </Grid>
           <Grid item xs={12}>
