@@ -46,20 +46,32 @@ async function main() {
 }
 
 async function clearDatabase() {
-  const tablenames = await prisma.$queryRaw`
-    SELECT tablename FROM pg_tables WHERE schemaname='public'
+  // Get list of all tables in SQLite database
+  const tables = await prisma.$queryRaw`
+    SELECT name FROM sqlite_schema 
+    WHERE type = 'table' 
+    AND name NOT LIKE 'sqlite_%'
+    AND name NOT LIKE '_prisma_%'
   `;
 
-  for (const { tablename } of tablenames) {
-    if (tablename !== '_prisma_migrations') {
-      try {
-        await prisma.$executeRawUnsafe(`TRUNCATE TABLE "public"."${tablename}" CASCADE;`);
-      } catch (error) {
-        console.log({ error });
-      }
+  // Disable foreign key constraints temporarily
+  await prisma.$executeRaw`PRAGMA foreign_keys = OFF`;
+
+  // Delete all data from each table
+  for (const { name } of tables) {
+    try {
+      await prisma.$executeRawUnsafe(`DELETE FROM "${name}";`);
+      // For SQLite, you might also want to reset autoincrement counters
+      await prisma.$executeRawUnsafe(`DELETE FROM sqlite_sequence WHERE name = '${name}';`);
+    } catch (error) {
+      console.log(`Error clearing table ${name}:`, error);
     }
   }
+
+  // Re-enable foreign key constraints
+  await prisma.$executeRaw`PRAGMA foreign_keys = ON`;
 }
+
 
 async function seedDepartments() {
   await prisma.department.createMany({
