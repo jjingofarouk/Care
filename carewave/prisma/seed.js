@@ -141,9 +141,13 @@ async function seedUsers() {
 
 async function seedDoctors() {
   const departments = await prisma.department.findMany();
-  const users = await prisma.user.findMany({ where: { role: 'DOCTOR' } });
+  const doctorUsers = await prisma.user.findMany({
+    where: { role: 'DOCTOR' },
+    select: { id: true }
+  });
 
-  await prisma.doctor.createMany({
+  // Create doctors without user relationships first
+  const doctors = await prisma.doctor.createMany({
     data: [
       {
         doctorId: 'DOC001',
@@ -151,8 +155,7 @@ async function seedDoctors() {
         licenseNumber: 'UMDPC001',
         phone: '+256772123456',
         office: 'Block A, Room 101',
-        departmentId: departments[0].id,
-        userId: users[0]?.id  // Optional chaining in case user doesn't exist
+        departmentId: departments[0]?.id
       },
       {
         doctorId: 'DOC002',
@@ -160,8 +163,7 @@ async function seedDoctors() {
         licenseNumber: 'UMDPC002',
         phone: '+256772654321',
         office: 'Block B, Room 205',
-        departmentId: departments[1].id,
-        userId: users[1]?.id
+        departmentId: departments[1]?.id
       },
       {
         doctorId: 'DOC003',
@@ -169,8 +171,7 @@ async function seedDoctors() {
         licenseNumber: 'UMDPC003',
         phone: '+256752987654',
         office: 'Block C, Room 310',
-        departmentId: departments[2].id,
-        userId: users[2]?.id
+        departmentId: departments[2]?.id
       },
       {
         doctorId: 'DOC004',
@@ -178,8 +179,7 @@ async function seedDoctors() {
         licenseNumber: 'UMDPC004',
         phone: '+256712345678',
         office: 'Maternity Wing, Room 12',
-        departmentId: departments[3].id,
-        userId: users[3]?.id
+        departmentId: departments[3]?.id
       },
       {
         doctorId: 'DOC005',
@@ -187,11 +187,21 @@ async function seedDoctors() {
         licenseNumber: 'UMDPC005',
         phone: '+256782876543',
         office: 'Emergency Block, Room 5',
-        departmentId: departments[4].id,
-        userId: users[4]?.id
+        departmentId: departments[4]?.id
       }
     ]
   });
+
+  // Update user-doctor relationships if users exist
+  if (doctorUsers.length > 0) {
+    await Promise.all(doctorUsers.map((user, index) => 
+      prisma.doctor.update({
+        where: { doctorId: `DOC00${index + 1}` },
+        data: { userId: user.id }
+      })
+    ));
+  }
+
   console.log('Seeded 5 doctors');
 }
 
