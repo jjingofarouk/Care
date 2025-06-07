@@ -1,6 +1,7 @@
 model Doctor {
   id                Int                   @id @default(autoincrement())
-  user              User?                 @relation
+  userId            Int?                  @unique
+  user              User?                 @relation(fields: [userId], references: [id])
   doctorId          String                @unique
   specialty         String
   licenseNumber     String                @unique
