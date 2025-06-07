@@ -4,52 +4,109 @@ import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
-export async function GET(request) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const includeRelations = searchParams.get('include')?.split(',') || [];
-    const include = {
-      admissions: includeRelations.includes('admissions'),
-      discharges: includeRelations.includes('discharges'),
-      transactions: includeRelations.includes('transactions'),
-      appointments: includeRelations.includes('appointments'),
-      prescriptions: includeRelations.includes('prescriptions'),
-      medicalRecords: includeRelations.includes('medicalRecords'),
-    };
+    const includeParam = searchParams.get('include');
+    const includeRelations = includeParam?.split(',') || [];
+    
+    // Build the include object dynamically based on valid relations
+    const validRelations = [
+      'admissions', 'discharges', 'transactions', 
+      'appointments', 'prescriptions', 'medicalRecords'
+    ];
+    
+    const include = validRelations.reduce((acc, relation) => {
+      if (includeRelations.includes(relation)) {
+        return { ...acc, [relation]: true };
+      }
+      return acc;
+    }, {});
 
     const patients = await prisma.patient.findMany({
       include,
+      orderBy: { createdAt: 'desc' } // Newest patients first
     });
 
     return NextResponse.json(patients);
   } catch (error) {
     console.error('GET /api/patient error:', error);
-    return NextResponse.json({ error: 'Failed to fetch patients', details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch patients', details: error.message }, 
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }
 }
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const data = await request.json();
+    
+    // Required field validation
     if (!data.name) {
-      return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Name is required' }, 
+        { status: 400 }
+      );
     }
 
-    const existingPatient = await prisma.patient.findUnique({
-      where: { email: data.email },
-    });
-    if (existingPatient && data.email) {
-      return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
+    // Email uniqueness check
+    if (data.email) {
+      const existingPatient = await prisma.patient.findUnique({
+        where: { email: data.email },
+      });
+      if (existingPatient) {
+        return NextResponse.json(
+          { error: 'Email already exists' }, 
+          { status: 409 }
+        );
+      }
     }
 
+    // Patient ID uniqueness check and generation
+    let patientId = data.patientId;
+    if (!patientId) {
+      let isUnique = false;
+      while (!isUnique) {
+        patientId = `P-${uuidv4().slice(0, 8)}`;
+        const existing = await prisma.patient.findUnique({
+          where: { patientId }
+        });
+        isUnique = !existing;
+      }
+    } else {
+      const existing = await prisma.patient.findUnique({
+        where: { patientId }
+      });
+      if (existing) {
+        return NextResponse.json(
+          { error: 'Patient ID already exists' }, 
+          { status: 409 }
+        );
+      }
+    }
+
+    // Date validation
+    let dateOfBirth = null;
+    if (data.dateOfBirth) {
+      dateOfBirth = new Date(data.dateOfBirth);
+      if (isNaN(dateOfBirth.getTime())) {
+        return NextResponse.json(
+          { error: 'Invalid date format for dateOfBirth' }, 
+          { status: 400 }
+        );
+      }
+    }
+
+    // Create patient with all fields
     const patient = await prisma.patient.create({
       data: {
-        patientId: data.patientId || `P-${uuidv4().slice(0, 8)}`,
+        patientId,
         name: data.name,
         email: data.email || null,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+        dateOfBirth,
         gender: data.gender || null,
         phone: data.phone || null,
         address: data.address || null,
@@ -71,7 +128,10 @@ export async function POST(request) {
     return NextResponse.json(patient, { status: 201 });
   } catch (error) {
     console.error('POST /api/patient error:', error);
-    return NextResponse.json({ error: 'Failed to create patient', details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to create patient', details: error.message }, 
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }
