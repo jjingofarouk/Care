@@ -25,6 +25,7 @@ import {
   updateMedicalRecord,
   deleteMedicalRecord,
 } from './medicalRecordsService';
+import MedicalHistoryForm from './MedicalHistoryForm';
 
 export default function MedicalRecordsList({ medicalRecords, patients, onSuccess }) {
   const [filteredRecords, setFilteredRecords] = useState(medicalRecords);
@@ -33,6 +34,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
   const [sortOrder, setSortOrder] = useState('desc');
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [editFormData, setEditFormData] = useState({
     patientId: '',
@@ -115,6 +117,10 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
     }
   };
 
+  const handleAdd = () => {
+    setAddDialogOpen(true);
+  };
+
   const handleEditChange = (e) => {
     setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
   };
@@ -157,11 +163,15 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
     setSelectedRecord(null);
   };
 
+  const handleCloseAdd = () => {
+    setAddDialogOpen(false);
+  };
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>Medical Records</Typography>
       {patients.length > 1 && (
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
           <TextField
             select
             label="Filter by Patient"
@@ -176,6 +186,16 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
               </MenuItem>
             ))}
           </TextField>
+          <Button variant="contained" color="primary" onClick={handleAdd}>
+            Add Record
+          </Button>
+        </Box>
+      )}
+      {patients.length === 1 && (
+        <Box sx={{ mb: 2 }}>
+          <Button variant="contained" color="primary" onClick={handleAdd}>
+            Add Record
+          </Button>
         </Box>
       )}
       <TableContainer component={Paper}>
@@ -428,6 +448,22 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
             </DialogActions>
           </form>
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={addDialogOpen} onClose={handleCloseAdd} maxWidth="md" fullWidth>
+        <DialogTitle>Add Medical Record</DialogTitle>
+        <DialogContent>
+          <MedicalHistoryForm
+            patient={patients[0] || {}}
+            onSubmit={() => {
+              setAddDialogOpen(false);
+              onSuccess();
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAdd} variant="outlined">Cancel</Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
