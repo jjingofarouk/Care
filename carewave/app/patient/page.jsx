@@ -18,7 +18,10 @@ export default function PatientPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [patientsData, recordsData] = await Promise.all([getPatients(), getMedicalRecords()]);
+        const [patientsData, recordsData] = await Promise.all([
+          getPatients(),
+          getMedicalRecords(),
+        ]);
         setPatients(patientsData);
         setMedicalRecords(recordsData);
       } catch (err) {
@@ -68,7 +71,6 @@ export default function PatientPage() {
         <Box className={styles.content}>
           {tabValue === 0 && (
             <PatientList
-              key={refreshKey}
               patients={patients}
               onSuccess={handleSuccess}
               onEdit={handleEdit}
