@@ -1,3 +1,4 @@
+// pharmacy/PharmacyPrescriptions.jsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Autocomplete, Alert, Skeleton, MenuItem } from '@mui/material';
@@ -5,7 +6,7 @@ import { DataGrid, GridToolbarContainer, GridToolbarFilterButton } from '@mui/x-
 import PharmacyCard from './PharmacyCard';
 import { getPrescriptions, createPrescription, checkDrugInteractions, getDoctors, getPatients } from './pharmacyService';
 
-const PharmacyPrescriptions = () => {
+export default function PharmacyPrescriptions() {
   const [prescriptions, setPrescriptions] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -22,6 +23,7 @@ const PharmacyPrescriptions = () => {
   const [genderFilter, setGenderFilter] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [interactions, setInteractions] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,7 +59,6 @@ const PharmacyPrescriptions = () => {
         setFilteredPatients(patientData);
         setError(null);
       } catch (error) {
-        console.error('Error fetching data:', error);
         setError(error.response?.data?.details || error.message);
       } finally {
         setLoading(false);
@@ -94,11 +95,12 @@ const PharmacyPrescriptions = () => {
       setSpecialtyFilter('');
       setGenderFilter('');
       const medicationIds = newPrescription.items.map(item => item.medicationId);
-      const interactionData = await checkDrugInteractions(medicationIds);
-      setInteractions(interactionData);
+      if (medicationIds.length > 0) {
+        const interactionData = await checkDrugInteractions(medicationIds);
+        setInteractions(interactionData);
+      }
       setError(null);
     } catch (error) {
-      console.error('Error creating prescription:', error);
       setError(error.response?.data?.details || error.message);
     }
   };
@@ -107,7 +109,7 @@ const PharmacyPrescriptions = () => {
   const genders = [...new Set(patients.map(patient => patient.gender))].filter(g => g !== 'N/A');
 
   const CustomToolbar = () => (
-    <div className="flex flex-wrap gap-4 p-4 bg-hospital-gray-50 dark:bg-hospital-gray-800">
+    <GridToolbarContainer className="flex flex-wrap gap-4 p-4 bg-hospital-gray-50 dark:bg-hospital-gray-800">
       <TextField
         label="Search Doctor by Name, ID, or Email"
         variant="outlined"
@@ -153,16 +155,21 @@ const PharmacyPrescriptions = () => {
         ))}
       </TextField>
       <GridToolbarFilterButton className="text-hospital-gray-900 dark:text-hospital-white" />
-    </div>
+    </GridToolbarContainer>
   );
 
   return (
     <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
       <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Prescription Management</h2>
       {error && (
-        <div className="mb-4 p-3 bg-hospital-error/10 text-hospital-error border border-hospital-error/20 rounded-md">
+        <Alert severity="error" className="mb-4">
           {error}
-        </div>
+        </Alert>
+      )}
+      {interactions && interactions.length > 0 && (
+        <Alert severity="warning" className="mb-4">
+          Drug Interactions Detected: {interactions.map(i => i.description).join(', ')}
+        </Alert>
       )}
       {loading ? (
         <div className="space-y-4">
@@ -182,7 +189,7 @@ const PharmacyPrescriptions = () => {
                   label="Select Doctor"
                   value={doctorSearch}
                   onChange={(e) => setDoctorSearch(e.target.value)}
-                  className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md w-64"
+                  className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md w-64"
                 />
               )}
             />
@@ -196,14 +203,14 @@ const PharmacyPrescriptions = () => {
                   label="Select Patient"
                   value={patientSearch}
                   onChange={(e) => setPatientSearch(e.target.value)}
-                  className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md w-64"
+                  className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md w-64"
                 />
               )}
             />
             <Button
               variant="contained"
               onClick={handleAddPrescription}
-              className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light transition-transform duration-fast ease-in-out transform hover:-translate-y-1 rounded-md px-4 py-2"
+              className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
             >
               Create Prescription
             </Button>
@@ -227,7 +234,7 @@ const PharmacyPrescriptions = () => {
                 initialState={{
                   pagination: { paginationModel: { pageSize: 10 } },
                 }}
-                className="text-hospital-gray-900 dark:text-hospital-white"
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
                 slots={{ toolbar: CustomToolbar }}
               />
             </div>
@@ -249,7 +256,7 @@ const PharmacyPrescriptions = () => {
                 initialState={{
                   pagination: { paginationModel: { pageSize: 10 } },
                 }}
-                className="text-hospital-gray-900 dark:text-hospital-white"
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
                 slots={{ toolbar: CustomToolbar }}
               />
             </div>
@@ -263,6 +270,4 @@ const PharmacyPrescriptions = () => {
       )}
     </div>
   );
-};
-
-export default PharmacyPrescriptions;
+}
