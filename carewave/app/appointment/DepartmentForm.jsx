@@ -11,7 +11,6 @@ export default function DepartmentForm() {
   const [departments, setDepartments] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchDepartments() {
