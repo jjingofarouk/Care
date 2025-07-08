@@ -1,3 +1,4 @@
+// app/medical-records/page.js
 "use client";
 import React, { useState, useEffect } from 'react';
 import {
@@ -21,8 +22,8 @@ import {
 import { updateMedicalRecord, deleteMedicalRecord } from './medicalRecordsService';
 import MedicalHistoryForm from './MedicalHistoryForm';
 
-export default function MedicalRecordsList({ medicalRecords, patients, onSuccess }) {
-  const [filteredRecords, setFilteredRecords] = useState(medicalRecords);
+export default function MedicalRecordsList({ medicalRecords = [], patients = [], onSuccess = () => {} }) {
+  const [filteredRecords, setFilteredRecords] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState('');
   const [sortField, setSortField] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -45,7 +46,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
   });
 
   useEffect(() => {
-    setFilteredRecords(medicalRecords);
+    setFilteredRecords(medicalRecords || []);
   }, [medicalRecords]);
 
   const handleFilterChange = (e) => {
@@ -54,7 +55,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
     if (patientId) {
       setFilteredRecords(medicalRecords.filter((record) => record.patientId === parseInt(patientId)));
     } else {
-      setFilteredRecords(medicalRecords);
+      setFilteredRecords(medicalRecords || []);
     }
   };
 
@@ -63,7 +64,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
     setSortOrder(isAsc ? 'desc' : 'asc');
     setSortField(field);
     setFilteredRecords((prev) =>
-      [...prev].sort((a, b) => {
+      [...(prev || [])].sort((a, b) => {
         const aValue = a[field] || '';
         const bValue = b[field] || '';
         if (field === 'date') {
@@ -86,17 +87,17 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
   const handleEdit = (record) => {
     setSelectedRecord(record);
     setEditFormData({
-      patientId: record.patientId.toString() || '',
-      recordId: record.recordId || '',
-      diagnosis: record.diagnosis || '',
-      presentingComplaint: record.presentingComplaint || '',
-      familyHistory: record.familyHistory || '',
-      socialHistory: record.socialHistory || '',
-      pastMedicalHistory: record.pastMedicalHistory || '',
-      allergies: record.allergies || '',
-      medications: record.medications || '',
-      date: record.date ? record.date.split('T')[0] : '',
-      doctorName: record.doctorName || '',
+      patientId: record?.patientId?.toString() || '',
+      recordId: record?.recordId || '',
+      diagnosis: record?.diagnosis || '',
+      presentingComplaint: record?.presentingComplaint || '',
+      familyHistory: record?.familyHistory || '',
+      socialHistory: record?.socialHistory || '',
+      pastMedicalHistory: record?.pastMedicalHistory || '',
+      allergies: record?.allergies || '',
+      medications: record?.medications || '',
+      date: record?.date ? record.date.split('T')[0] : '',
+      doctorName: record?.doctorName || '',
     });
     setEditDialogOpen(true);
   };
@@ -112,7 +113,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateMedicalRecord(selectedRecord.id, {
+      await updateMedicalRecord(selectedRecord?.id, {
         ...editFormData,
         patientId: parseInt(editFormData.patientId),
       });
@@ -154,7 +155,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
   return (
     <Box className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
       <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Medical Records</h2>
-      {patients.length > 1 && (
+      {patients?.length > 1 && (
         <Box className="mb-4 flex gap-4">
           <TextField
             select
@@ -165,8 +166,8 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
           >
             <MenuItem value="">All Patients</MenuItem>
             {patients.map((patient) => (
-              <MenuItem key={patient.id} value={patient.id}>
-                {patient.name} ({patient.patientId})
+              <MenuItem key={patient?.id} value={patient?.id}>
+                {patient?.name || 'Unknown'} ({patient?.patientId || 'N/A'})
               </MenuItem>
             ))}
           </TextField>
@@ -179,7 +180,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
           </Button>
         </Box>
       )}
-      {patients.length === 1 && (
+      {patients?.length === 1 && (
         <Box className="mb-4">
           <Button
             variant="contained"
@@ -204,7 +205,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                   Record ID
                 </TableSortLabel>
               </TableCell>
-              {patients.length > 1 && (
+              {patients?.length > 1 && (
                 <TableCell>
                   <TableSortLabel
                     active={sortField === 'patientId'}
@@ -250,15 +251,15 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredRecords.map((record) => (
-              <TableRow key={record.id}>
-                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record.recordId}</TableCell>
-                {patients.length > 1 && (
-                  <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record.patient?.name || 'Unknown'} ({record.patientId})</TableCell>
+            {filteredRecords?.map((record) => (
+              <TableRow key={record?.id}>
+                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record?.recordId || 'N/A'}</TableCell>
+                {patients?.length > 1 && (
+                  <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record?.patient?.name || 'Unknown'} ({record?.patientId || 'N/A'})</TableCell>
                 )}
-                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record.diagnosis}</TableCell>
-                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{new Date(record.date).toLocaleDateString()}</TableCell>
-                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record.doctorName}</TableCell>
+                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record?.diagnosis || 'N/A'}</TableCell>
+                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record?.date ? new Date(record.date).toLocaleDateString() : 'N/A'}</TableCell>
+                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record?.doctorName || 'N/A'}</TableCell>
                 <TableCell>
                   <Button
                     variant="outlined"
@@ -280,7 +281,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                     variant="outlined"
                     className="border-hospital-error text-hospital-error hover:bg-hospital-error hover:text-hospital-white rounded-md px-4 py-2"
                     size="small"
-                    onClick={() => handleDelete(record.id)}
+                    onClick={() => handleDelete(record?.id)}
                   >
                     Delete
                   </Button>
@@ -296,17 +297,17 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
         <DialogContent className="bg-hospital-white dark:bg-hospital-gray-900">
           {selectedRecord && (
             <Box className="space-y-2 text-hospital-gray-900 dark:text-hospital-white">
-              <p><strong>Record ID:</strong> {selectedRecord.recordId}</p>
-              <p><strong>Patient:</strong> {selectedRecord.patient?.name || 'Unknown'} ({selectedRecord.patientId})</p>
-              <p><strong>Diagnosis:</strong> {selectedRecord.diagnosis}</p>
-              <p><strong>Presenting Complaint:</strong> {selectedRecord.presentingComplaint || 'N/A'}</p>
-              <p><strong>Family History:</strong> {selectedRecord.familyHistory || 'N/A'}</p>
-              <p><strong>Social History:</strong> {selectedRecord.socialHistory || 'N/A'}</p>
-              <p><strong>Past Medical History:</strong> {selectedRecord.pastMedicalHistory || 'N/A'}</p>
-              <p><strong>Allergies:</strong> {selectedRecord.allergies || 'N/A'}</p>
-              <p><strong>Medications:</strong> {selectedRecord.medications || 'N/A'}</p>
-              <p><strong>Date:</strong> {new Date(selectedRecord.date).toLocaleDateString()}</p>
-              <p><strong>Doctor:</strong> {selectedRecord.doctorName}</p>
+              <p><strong>Record ID:</strong> {selectedRecord?.recordId || 'N/A'}</p>
+              <p><strong>Patient:</strong> {selectedRecord?.patient?.name || 'Unknown'} ({selectedRecord?.patientId || 'N/A'})</p>
+              <p><strong>Diagnosis:</strong> {selectedRecord?.diagnosis || 'N/A'}</p>
+              <p><strong>Presenting Complaint:</strong> {selectedRecord?.presentingComplaint || 'N/A'}</p>
+              <p><strong>Family History:</strong> {selectedRecord?.familyHistory || 'N/A'}</p>
+              <p><strong>Social History:</strong> {selectedRecord?.socialHistory || 'N/A'}</p>
+              <p><strong>Past Medical History:</strong> {selectedRecord?.pastMedicalHistory || 'N/A'}</p>
+              <p><strong>Allergies:</strong> {selectedRecord?.allergies || 'N/A'}</p>
+              <p><strong>Medications:</strong> {selectedRecord?.medications || 'N/A'}</p>
+              <p><strong>Date:</strong> {selectedRecord?.date ? new Date(selectedRecord.date).toLocaleDateString() : 'N/A'}</p>
+              <p><strong>Doctor:</strong> {selectedRecord?.doctorName || 'N/A'}</p>
             </Box>
           )}
         </DialogContent>
@@ -336,8 +337,8 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               >
                 {patients.map((patient) => (
-                  <MenuItem key={patient.id} value={patient.id}>
-                    {patient.name} ({patient.patientId})
+                  <MenuItem key={patient?.id} value={patient?.id}>
+                    {patient?.name || 'Unknown'} ({patient?.patientId || 'N/A'})
                   </MenuItem>
                 ))}
               </TextField>
@@ -439,7 +440,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 onChange={handleEditChange}
                 multiline
                 rows={3}
-                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
             </Box>
             <DialogActions className="bg-hospital-gray-50 dark:bg-hospital-gray-800">
@@ -465,6 +466,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
         <DialogContent className="bg-hospital-white dark:bg-hospital-gray-900">
           <MedicalHistoryForm
             patient={patients[0] || {}}
+            patients={patients}
             onSubmit={() => {
               setAddDialogOpen(false);
               onSuccess();
