@@ -134,7 +134,6 @@ export default function DashboardOverview() {
         const dashboardData = await getDashboardData();
         setData(dashboardData);
       } catch (err) {
-        console.error('Error fetching dashboard data:', err);
         setError('Failed to fetch dashboard data');
       } finally {
         setIsLoading(false);
@@ -147,21 +146,21 @@ export default function DashboardOverview() {
     {
       icon: Analytics,
       title: "Total Transactions",
-      value: data.totalTransactions,
+      value: data.totalTransactions || 0,
       subtitle: "All time transactions",
       gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
     },
     {
       icon: PendingActions,
       title: "Pending Transactions",
-      value: data.pendingTransactions,
+      value: data.pendingTransactions || 0,
       subtitle: "Awaiting processing",
       gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
     },
     {
       icon: MonetizationOn,
       title: "Total Revenue",
-      value: data.totalRevenue,
+      value: data.totalRevenue || 0,
       subtitle: "Current fiscal period",
       gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
     }
