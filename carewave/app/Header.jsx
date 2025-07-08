@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Bars3Icon, BellIcon, UserIcon, CogIcon, ArrowRightOnRectangleIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { AccountCircle } from '@mui/icons-material';
@@ -67,7 +68,6 @@ export default function Header() {
     <>
       <header className="fixed top-0 left-0 z-50 w-full bg-gradient-to-r from-hospital-white to-hospital-gray-50 dark:from-hospital-gray-900 dark:to-hospital-gray-800 border-b border-hospital-gray-200 dark:border-hospital-gray-700 shadow-md backdrop-blur-md">
         <div className="flex items-center justify-between h-16 px-4 sm:h-20 sm:px-6 lg:h-24">
-          {/* Logo and Menu Toggle */}
           <div className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-hospital-accent/10 transition-all duration-200 sm:gap-3">
             <button
               className="p-1 text-hospital-gray-500 hover:bg-transparent focus:outline-none focus:ring-2 focus:ring-hospital-accent"
@@ -76,23 +76,22 @@ export default function Header() {
             >
               <Bars3Icon className="w-6 h-6 sm:w-7 h-7" />
             </button>
-            <img
+            <Image
               src="/logo.png"
               alt="CareWave Logo"
-              className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg shadow-sm object-contain"
-              loading="lazy"
+              className="rounded-lg shadow-sm object-contain"
               width={40}
               height={40}
+              quality={75}
+              priority={true}
             />
             <h1 className="hidden sm:block text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent sm:text-2xl">
               CareWave
             </h1>
           </div>
 
-          {/* Spacer */}
           <div className="flex-grow" />
 
-          {/* Navigation Items (for non-authenticated users) */}
           {!user && (
             <div className="hidden md:flex gap-2 mr-4">
               {userMenuItems.slice(0, -1).map(({ name, path }) => (
@@ -107,9 +106,7 @@ export default function Header() {
             </div>
           )}
 
-          {/* User Info Section */}
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* User Name and Role */}
             {user && (
               <div className="hidden lg:block text-right">
                 <span className="font-semibold text-hospital-gray-900 dark:text-hospital-white text-sm">
@@ -121,7 +118,6 @@ export default function Header() {
               </div>
             )}
 
-            {/* Notifications */}
             {user && (
               <button
                 onClick={handleNotificationOpen}
@@ -137,7 +133,6 @@ export default function Header() {
               </button>
             )}
 
-            {/* User Avatar/Menu */}
             <button
               onClick={handleMenuOpen}
               className="p-0 focus:outline-none focus:ring-2 focus:ring-hospital-accent"
@@ -155,13 +150,12 @@ export default function Header() {
         </div>
       </header>
 
-      {/* User Menu Dropdown */}
       <div
         className={`fixed top-16 sm:top-20 lg:top-24 right-4 bg-hospital-white dark:bg-hospital-gray-800 rounded-xl shadow-lg border border-hospital-gray-200 dark:border-hospital-gray-700 w-64 sm:w-72 max-h-[calc(100vh-6rem)] overflow-y-auto transition-all duration-200 ${anchorEl ? 'block' : 'hidden'}`}
       >
         {user && (
           <div className="p-4 border-b border-hospital-gray-200 dark:border-hospital-gray-700">
-            <div className="font-semibold text-hospital-gray-900 dark$text-hospital-white text-sm">
+            <div className="font-semibold text-hospital-gray-900 dark:text-hospital-white text-sm">
               {user.name || user.email}
             </div>
             <div className="text-xs text-hospital-gray-500">
@@ -187,7 +181,6 @@ export default function Header() {
         ))}
       </div>
 
-      {/* Notifications Dropdown */}
       {user && (
         <div
           className={`fixed top-16 sm:top-20 lg:top-24 right-4 bg-hospital-white dark:bg-hospital-gray-800 rounded-xl shadow-lg border border-hospital-gray-200 dark:border-hospital-gray-700 w-64 sm:w-72 max-h-[calc(100vh-6rem)] overflow-y-auto transition-all duration-200 ${notificationAnchor ? 'block' : 'hidden'}`}
@@ -199,6 +192,7 @@ export default function Header() {
             <div
               key={notification.id}
               className={`p-3 m-2 rounded-lg text-sm ${notification.unread ? 'bg-hospital-accent/5 border-l-4 border-hospital-accent' : 'border-l-4 border-transparent'}`}
+              onClick={handleNotificationClose}
             >
               <div className={`font-${notification.unread ? 'semibold' : 'normal'}`}>
                 {notification.title}
