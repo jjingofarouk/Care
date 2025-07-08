@@ -1,15 +1,17 @@
+// pharmacy/PharmacyNarcotics.jsx
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { TextField, Typography, IconButton, Alert } from '@mui/material';
+import { TextField, IconButton, Alert } from '@mui/material';
 import { Search, Delete, Edit, QrCodeScanner } from '@mui/icons-material';
 import { getInventory, updateStock, deleteMedication, getStockAlerts, scanBarcode } from './pharmacyService';
 
-const PharmacyNarcotics = () => {
+export default function PharmacyNarcotics() {
   const [narcotics, setNarcotics] = useState([]);
   const [search, setSearch] = useState('');
   const [stockAlerts, setStockAlerts] = useState([]);
   const [barcode, setBarcode] = useState('');
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchNarcotics();
@@ -18,21 +20,18 @@ const PharmacyNarcotics = () => {
 
   const fetchNarcotics = async () => {
     try {
+      setLoading(true);
       const data = await getInventory();
-      console.log('Inventory data:', data);
       const narcoticDrugs = Array.isArray(data)
-        ? data.filter(item => {
-            const isNarcotic = item?.narcotic === true;
-            if (!isNarcotic) console.log('Non-narcotic item filtered out:', item);
-            return isNarcotic;
-          })
+        ? data.filter(item => item?.narcotic === true)
         : [];
       setNarcotics(narcoticDrugs);
       setError(null);
     } catch (error) {
-      console.error('Failed to fetch narcotics:', error);
-      setError('Failed to fetch narcotic inventory');
+      setError(error.response?.data?.details || error.message);
       setNarcotics([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,8 +43,7 @@ const PharmacyNarcotics = () => {
         : [];
       setStockAlerts(narcoticAlerts);
     } catch (error) {
-      console.error('Failed to fetch stock alerts:', error);
-      setError('Failed to fetch stock alerts');
+      setError(error.response?.data?.details || error.message);
     }
   };
 
@@ -61,8 +59,7 @@ const PharmacyNarcotics = () => {
       await fetchStockAlerts();
       setError(null);
     } catch (error) {
-      console.error('Failed to update stock:', error);
-      setError('Failed to update stock');
+      setError(error.response?.data?.details || error.message);
     }
   };
 
@@ -73,8 +70,7 @@ const PharmacyNarcotics = () => {
       await fetchStockAlerts();
       setError(null);
     } catch (error) {
-      console.error('Failed to delete medication:', error);
-      setError('Failed to delete medication');
+      setError(error.response?.data?.details || error.message);
     }
   };
 
@@ -89,8 +85,7 @@ const PharmacyNarcotics = () => {
         setError('Scanned medication is not a narcotic or not found');
       }
     } catch (error) {
-      console.error('Failed to scan barcode:', error);
-      setError('Failed to scan barcode');
+      setError(error.response?.data?.details || error.message);
     }
   };
 
@@ -125,10 +120,16 @@ const PharmacyNarcotics = () => {
       width: 150,
       renderCell: (params) => (
         <>
-          <IconButton onClick={() => handleStockUpdate(params.row.id, params.row.stockQuantity)}>
+          <IconButton 
+            onClick={() => handleStockUpdate(params.row.id, params.row.stockQuantity)}
+            className="text-hospital-accent dark:text-hospital-teal-light hover:text-hospital-teal-light"
+          >
             <Edit />
           </IconButton>
-          <IconButton onClick={() => handleDelete(params.row.id)}>
+          <IconButton 
+            onClick={() => handleDelete(params.row.id)}
+            className="text-hospital-error hover:text-hospital-error-dark"
+          >
             <Delete />
           </IconButton>
         </>
@@ -144,57 +145,65 @@ const PharmacyNarcotics = () => {
     <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
       <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Narcotic Drug Tracking</h2>
       {error && (
-        <div className="mb-4 p-3 bg-hospital-error/10 text-hospital-error border border-hospital-error/20 rounded-md">
+        <Alert severity="error" className="mb-4">
           {error}
-        </div>
+        </Alert>
       )}
       {stockAlerts.length > 0 && (
-        <div className="mb-4 p-3 bg-hospital-warning/10 text-hospital-warning border border-hospital-warning/20 rounded-md">
+        <Alert severity="warning" className="mb-4">
           Low stock alert for {stockAlerts.length} narcotic medications
-        </div>
+        </Alert>
       )}
-      <div className="mb-4">
-        <TextField
-          label="Search Narcotics"
-          variant="outlined"
-          value={search ?? ''}
-          onChange={(e) => setSearch(e.target.value ?? '')}
-          InputProps={{ startAdornment: <Search /> }}
-          fullWidth
-          className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md mb-4"
-        />
-        <div className="flex gap-2">
-          <TextField
-            label="Scan Barcode"
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md flex-grow"
-          />
-          <button
-            onClick={handleBarcodeScan}
-            className="p-2 bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md transition-transform duration-fast ease-in-out transform hover:-translate-y-1"
-          >
-            <QrCodeScanner />
-          </button>
+      {loading ? (
+        <div className="space-y-4">
+          <div className="h-16 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></div>
+          <div className="h-96 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></div>
         </div>
-      </div>
-      <div className="w-full">
-        <DataGrid
-          rows={filteredNarcotics}
-          columns={columns}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-          pageSizeOptions={[10, 25, 50]}
-          className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
-          autoHeight
-          onCellEditStop={(params, event) => {
-            if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
-              handleStockUpdate(params.row.id, event.target.value);
-            }
-          }}
-        />
-      </div>
+      ) : (
+        <>
+          <div className="mb-4">
+            <TextField
+              label="Search Narcotics"
+              variant="outlined"
+              value={search ?? ''}
+              onChange={(e) => setSearch(e.target.value ?? '')}
+              InputProps={{ startAdornment: <Search /> }}
+              fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md mb-4"
+            />
+            <div className="flex gap-2">
+              <TextField
+                label="Scan Barcode"
+                value={barcode}
+                onChange={(e) => setBarcode(e.target.value)}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md flex-grow"
+              />
+              <IconButton 
+                onClick={handleBarcodeScan}
+                className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md"
+              >
+                <QrCodeScanner />
+              </IconButton>
+            </div>
+          </div>
+          <div className="w-full">
+            <DataGrid
+              rows={filteredNarcotics}
+              columns={columns}
+              pageSizeOptions={[10, 25, 50]}
+              initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+              disableRowSelectionOnClick
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md shadow-md"
+              autoHeight
+              onCellEditStop={(params, event) => {
+                if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
+                  handleStockUpdate(params.row.id, event.target.value);
+                }
+              }}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
-};
-
-export default PharmacyNarcotics;
+}
