@@ -12,19 +12,13 @@ import {
   Box,
   TextField,
   MenuItem,
-  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TableSortLabel,
 } from '@mui/material';
-import {
-  getMedicalRecords,
-  getMedicalRecord,
-  updateMedicalRecord,
-  deleteMedicalRecord,
-} from './medicalRecordsService';
+import { updateMedicalRecord, deleteMedicalRecord } from './medicalRecordsService';
 import MedicalHistoryForm from './MedicalHistoryForm';
 
 export default function MedicalRecordsList({ medicalRecords, patients, onSuccess }) {
@@ -84,37 +78,27 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
     );
   };
 
-  const handleView = async (id) => {
-    try {
-      const record = await getMedicalRecord(id);
-      setSelectedRecord(record);
-      setViewDialogOpen(true);
-    } catch (error) {
-      alert('Error fetching medical record');
-    }
+  const handleView = (record) => {
+    setSelectedRecord(record);
+    setViewDialogOpen(true);
   };
 
-  const handleEdit = async (id) => {
-    try {
-      const record = await getMedicalRecord(id);
-      setSelectedRecord(record);
-      setEditFormData({
-        patientId: record.patientId.toString() || '',
-        recordId: record.recordId || '',
-        diagnosis: record.diagnosis || '',
-        presentingComplaint: record.presentingComplaint || '',
-        familyHistory: record.familyHistory || '',
-        socialHistory: record.socialHistory || '',
-        pastMedicalHistory: record.pastMedicalHistory || '',
-        allergies: record.allergies || '',
-        medications: record.medications || '',
-        date: record.date ? record.date.split('T')[0] : '',
-        doctorName: record.doctorName || '',
-      });
-      setEditDialogOpen(true);
-    } catch (error) {
-      alert('Error fetching medical record');
-    }
+  const handleEdit = (record) => {
+    setSelectedRecord(record);
+    setEditFormData({
+      patientId: record.patientId.toString() || '',
+      recordId: record.recordId || '',
+      diagnosis: record.diagnosis || '',
+      presentingComplaint: record.presentingComplaint || '',
+      familyHistory: record.familyHistory || '',
+      socialHistory: record.socialHistory || '',
+      pastMedicalHistory: record.pastMedicalHistory || '',
+      allergies: record.allergies || '',
+      medications: record.medications || '',
+      date: record.date ? record.date.split('T')[0] : '',
+      doctorName: record.doctorName || '',
+    });
+    setEditDialogOpen(true);
   };
 
   const handleAdd = () => {
@@ -168,16 +152,16 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
   };
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>Medical Records</Typography>
+    <Box className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Medical Records</h2>
       {patients.length > 1 && (
-        <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
+        <Box className="mb-4 flex gap-4">
           <TextField
             select
             label="Filter by Patient"
             value={selectedPatient}
             onChange={handleFilterChange}
-            sx={{ minWidth: 200 }}
+            className="min-w-[200px] bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
           >
             <MenuItem value="">All Patients</MenuItem>
             {patients.map((patient) => (
@@ -186,19 +170,27 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
               </MenuItem>
             ))}
           </TextField>
-          <Button variant="contained" color="primary" onClick={handleAdd}>
+          <Button
+            variant="contained"
+            className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
+            onClick={handleAdd}
+          >
             Add Record
           </Button>
         </Box>
       )}
       {patients.length === 1 && (
-        <Box sx={{ mb: 2 }}>
-          <Button variant="contained" color="primary" onClick={handleAdd}>
+        <Box className="mb-4">
+          <Button
+            variant="contained"
+            className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
+            onClick={handleAdd}
+          >
             Add Record
           </Button>
         </Box>
       )}
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} className="bg-hospital-white dark:bg-hospital-gray-900 rounded-md shadow-md">
         <Table>
           <TableHead>
             <TableRow>
@@ -207,6 +199,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                   active={sortField === 'recordId'}
                   direction={sortField === 'recordId' ? sortOrder : 'asc'}
                   onClick={() => handleSort('recordId')}
+                  className="text-hospital-gray-900 dark:text-hospital-white"
                 >
                   Record ID
                 </TableSortLabel>
@@ -217,6 +210,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                     active={sortField === 'patientId'}
                     direction={sortField === 'patientId' ? sortOrder : 'asc'}
                     onClick={() => handleSort('patientId')}
+                    className="text-hospital-gray-900 dark:text-hospital-white"
                   >
                     Patient
                   </TableSortLabel>
@@ -227,6 +221,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                   active={sortField === 'diagnosis'}
                   direction={sortField === 'diagnosis' ? sortOrder : 'asc'}
                   onClick={() => handleSort('diagnosis')}
+                  className="text-hospital-gray-900 dark:text-hospital-white"
                 >
                   Diagnosis
                 </TableSortLabel>
@@ -236,6 +231,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                   active={sortField === 'date'}
                   direction={sortField === 'date' ? sortOrder : 'asc'}
                   onClick={() => handleSort('date')}
+                  className="text-hospital-gray-900 dark:text-hospital-white"
                 >
                   Date
                 </TableSortLabel>
@@ -245,6 +241,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                   active={sortField === 'doctorName'}
                   direction={sortField === 'doctorName' ? sortOrder : 'asc'}
                   onClick={() => handleSort('doctorName')}
+                  className="text-hospital-gray-900 dark:text-hospital-white"
                 >
                   Doctor
                 </TableSortLabel>
@@ -255,35 +252,33 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
           <TableBody>
             {filteredRecords.map((record) => (
               <TableRow key={record.id}>
-                <TableCell>{record.recordId}</TableCell>
+                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record.recordId}</TableCell>
                 {patients.length > 1 && (
-                  <TableCell>{record.patient?.name || 'Unknown'} ({record.patientId})</TableCell>
+                  <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record.patient?.name || 'Unknown'} ({record.patientId})</TableCell>
                 )}
-                <TableCell>{record.diagnosis}</TableCell>
-                <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
-                <TableCell>{record.doctorName}</TableCell>
+                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record.diagnosis}</TableCell>
+                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{new Date(record.date).toLocaleDateString()}</TableCell>
+                <TableCell className="text-hospital-gray-900 dark:text-hospital-white">{record.doctorName}</TableCell>
                 <TableCell>
                   <Button
                     variant="outlined"
-                    color="primary"
+                    className="border-hospital-accent text-hospital-accent hover:bg-hospital-accent hover:text-hospital-white rounded-md px-4 py-2 mr-2"
                     size="small"
-                    onClick={() => handleView(record.id)}
-                    sx={{ mr: 1 }}
+                    onClick={() => handleView(record)}
                   >
                     View
                   </Button>
                   <Button
                     variant="outlined"
-                    color="secondary"
+                    className="border-hospital-teal-light text-hospital-teal-light hover:bg-hospital-teal-light hover:text-hospital-white rounded-md px-4 py-2 mr-2"
                     size="small"
-                    onClick={() => handleEdit(record.id)}
-                    sx={{ mr: 1 }}
+                    onClick={() => handleEdit(record)}
                   >
                     Edit
                   </Button>
                   <Button
                     variant="outlined"
-                    color="error"
+                    className="border-hospital-error text-hospital-error hover:bg-hospital-error hover:text-hospital-white rounded-md px-4 py-2"
                     size="small"
                     onClick={() => handleDelete(record.id)}
                   >
@@ -297,34 +292,39 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
       </TableContainer>
 
       <Dialog open={viewDialogOpen} onClose={handleCloseView} maxWidth="md" fullWidth>
-        <DialogTitle>Medical Record Details</DialogTitle>
-        <DialogContent>
+        <DialogTitle className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white">Medical Record Details</DialogTitle>
+        <DialogContent className="bg-hospital-white dark:bg-hospital-gray-900">
           {selectedRecord && (
-            <Box>
-              <Typography><strong>Record ID:</strong> {selectedRecord.recordId}</Typography>
-              <Typography><strong>Patient:</strong> {selectedRecord.patient?.name || 'Unknown'} ({selectedRecord.patientId})</Typography>
-              <Typography><strong>Diagnosis:</strong> {selectedRecord.diagnosis}</Typography>
-              <Typography><strong>Presenting Complaint:</strong> {selectedRecord.presentingComplaint || 'N/A'}</Typography>
-              <Typography><strong>Family History:</strong> {selectedRecord.familyHistory || 'N/A'}</Typography>
-              <Typography><strong>Social History:</strong> {selectedRecord.socialHistory || 'N/A'}</Typography>
-              <Typography><strong>Past Medical History:</strong> {selectedRecord.pastMedicalHistory || 'N/A'}</Typography>
-              <Typography><strong>Allergies:</strong> {selectedRecord.allergies || 'N/A'}</Typography>
-              <Typography><strong>Medications:</strong> {selectedRecord.medications || 'N/A'}</Typography>
-              <Typography><strong>Date:</strong> {new Date(selectedRecord.date).toLocaleDateString()}</Typography>
-              <Typography><strong>Doctor:</strong> {selectedRecord.doctorName}</Typography>
+            <Box className="space-y-2 text-hospital-gray-900 dark:text-hospital-white">
+              <p><strong>Record ID:</strong> {selectedRecord.recordId}</p>
+              <p><strong>Patient:</strong> {selectedRecord.patient?.name || 'Unknown'} ({selectedRecord.patientId})</p>
+              <p><strong>Diagnosis:</strong> {selectedRecord.diagnosis}</p>
+              <p><strong>Presenting Complaint:</strong> {selectedRecord.presentingComplaint || 'N/A'}</p>
+              <p><strong>Family History:</strong> {selectedRecord.familyHistory || 'N/A'}</p>
+              <p><strong>Social History:</strong> {selectedRecord.socialHistory || 'N/A'}</p>
+              <p><strong>Past Medical History:</strong> {selectedRecord.pastMedicalHistory || 'N/A'}</p>
+              <p><strong>Allergies:</strong> {selectedRecord.allergies || 'N/A'}</p>
+              <p><strong>Medications:</strong> {selectedRecord.medications || 'N/A'}</p>
+              <p><strong>Date:</strong> {new Date(selectedRecord.date).toLocaleDateString()}</p>
+              <p><strong>Doctor:</strong> {selectedRecord.doctorName}</p>
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseView} variant="contained">Close</Button>
+        <DialogActions className="bg-hospital-gray-50 dark:bg-hospital-gray-800">
+          <Button
+            onClick={handleCloseView}
+            className="border-hospital-gray-400 text-hospital-gray-400 hover:bg-hospital-gray-400 hover:text-hospital-white rounded-md px-4 py-2"
+          >
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={editDialogOpen} onClose={handleCloseEdit} maxWidth="md" fullWidth>
-        <DialogTitle>Edit Medical Record</DialogTitle>
-        <DialogContent>
+        <DialogTitle className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white">Edit Medical Record</DialogTitle>
+        <DialogContent className="bg-hospital-white dark:bg-hospital-gray-900">
           <form onSubmit={handleEditSubmit}>
-            <Box sx={{ mt: 2 }}>
+            <Box className="mt-4 space-y-4">
               <TextField
                 select
                 fullWidth
@@ -333,7 +333,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 value={editFormData.patientId}
                 onChange={handleEditChange}
                 required
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               >
                 {patients.map((patient) => (
                   <MenuItem key={patient.id} value={patient.id}>
@@ -348,7 +348,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 value={editFormData.recordId}
                 onChange={handleEditChange}
                 required
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
               <TextField
                 fullWidth
@@ -359,7 +359,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 onChange={handleEditChange}
                 InputLabelProps={{ shrink: true }}
                 required
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
               <TextField
                 fullWidth
@@ -368,7 +368,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 value={editFormData.doctorName}
                 onChange={handleEditChange}
                 required
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
               <TextField
                 fullWidth
@@ -379,7 +379,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 multiline
                 rows={3}
                 required
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
               <TextField
                 fullWidth
@@ -389,7 +389,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 onChange={handleEditChange}
                 multiline
                 rows={3}
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
               <TextField
                 fullWidth
@@ -399,7 +399,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 onChange={handleEditChange}
                 multiline
                 rows={3}
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
               <TextField
                 fullWidth
@@ -409,7 +409,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 onChange={handleEditChange}
                 multiline
                 rows={3}
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
               <TextField
                 fullWidth
@@ -419,7 +419,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 onChange={handleEditChange}
                 multiline
                 rows={3}
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
               <TextField
                 fullWidth
@@ -429,7 +429,7 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 onChange={handleEditChange}
                 multiline
                 rows={2}
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
               <TextField
                 fullWidth
@@ -439,20 +439,30 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
                 onChange={handleEditChange}
                 multiline
                 rows={3}
-                sx={{ mb: 2 }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
               />
             </Box>
-            <DialogActions>
-              <Button onClick={handleCloseEdit} variant="outlined">Cancel</Button>
-              <Button type="submit" variant="contained" color="primary">Save</Button>
+            <DialogActions className="bg-hospital-gray-50 dark:bg-hospital-gray-800">
+              <Button
+                onClick={handleCloseEdit}
+                className="border-hospital-gray-400 text-hospital-gray-400 hover:bg-hospital-gray-400 hover:text-hospital-white rounded-md px-4 py-2"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
+              >
+                Save
+              </Button>
             </DialogActions>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={addDialogOpen} onClose={handleCloseAdd} maxWidth="md" fullWidth>
-        <DialogTitle>Add Medical Record</DialogTitle>
-        <DialogContent>
+        <DialogTitle className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white">Add Medical Record</DialogTitle>
+        <DialogContent className="bg-hospital-white dark:bg-hospital-gray-900">
           <MedicalHistoryForm
             patient={patients[0] || {}}
             onSubmit={() => {
@@ -461,8 +471,13 @@ export default function MedicalRecordsList({ medicalRecords, patients, onSuccess
             }}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseAdd} variant="outlined">Cancel</Button>
+        <DialogActions className="bg-hospital-gray-50 dark:bg-hospital-gray-800">
+          <Button
+            onClick={handleCloseAdd}
+            className="border-hospital-gray-400 text-hospital-gray-400 hover:bg-hospital-gray-400 hover:text-hospital-white rounded-md px-4 py-2"
+          >
+            Cancel
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
