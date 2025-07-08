@@ -325,7 +325,7 @@ export default function AppointmentList({ onEdit }) {
                 }}
                 className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
                 autoHeight
-                onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
+                onCellEditStart={(params) => setEditingCell({ может быть id: params.id, field: params.field })}
                 onCellEditStop={() => setEditingCell(null)}
                 onCellEditCommit={handleCellEditCommit}
               />
