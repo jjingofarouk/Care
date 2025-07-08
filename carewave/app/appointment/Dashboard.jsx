@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Skeleton, Alert, Card, CardContent, Grid, styled } from '@mui/material';
-import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -18,17 +17,17 @@ import api from '../api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-const ModernBox = styled(Box)(({ theme }) => ({
+const ModernBox = styled(Box)(() => ({
   padding: '2rem',
   background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
   minHeight: '100vh',
   color: '#ffffff',
-  [theme.breakpoints.down('sm')]: {
+  '@media (max-width: 600px)': {
     padding: '1rem',
   },
 }));
 
-const ModernTypography = styled(Typography)(({ theme }) => ({
+const ModernTypography = styled(Typography)(() => ({
   fontWeight: 700,
   background: 'linear-gradient(45deg, #00b0ff, #80d8ff)',
   WebkitBackgroundClip: 'text',
@@ -36,12 +35,12 @@ const ModernTypography = styled(Typography)(({ theme }) => ({
   textShadow: '0 2px 4px rgba(0, 123, 255, 0.3)',
   marginBottom: '1.5rem',
   textAlign: 'center',
-  [theme.breakpoints.down('sm')]: {
+  '@media (max-width: 600px)': {
     fontSize: '1.8rem',
   },
 }));
 
-const ModernCard = styled(Card)(({ theme }) => ({
+const ModernCard = styled(Card)(() => ({
   background: 'rgba(255, 255, 255, 0.1)',
   backdropFilter: 'blur(10px)',
   borderRadius: '16px',
@@ -51,12 +50,12 @@ const ModernCard = styled(Card)(({ theme }) => ({
     transform: 'translateY(-5px)',
     boxShadow: '0 8px 32px rgba(0, 123, 255, 0.3)',
   },
-  [theme.breakpoints.down('sm')]: {
+  '@media (max-width: 600px)': {
     marginBottom: '1rem',
   },
 }));
 
-const ModernCardContent = styled(CardContent)(({ theme }) => ({
+const ModernCardContent = styled(CardContent)(() => ({
   color: '#ffffff',
   textAlign: 'center',
   '& .MuiTypography-h6': {
@@ -72,14 +71,14 @@ const ModernCardContent = styled(CardContent)(({ theme }) => ({
   },
 }));
 
-const ChartContainer = styled(Box)(({ theme }) => ({
+const ChartContainer = styled(Box)(() => ({
   background: 'rgba(255, 255, 255, 0.05)',
   borderRadius: '16px',
   padding: '1.5rem',
   marginBottom: '2rem',
   maxWidth: '800px',
   margin: '0 auto',
-  [theme.breakpoints.down('sm')]: {
+  '@media (max-width: 600px)': {
     padding: '1rem',
   },
 }));
@@ -142,84 +141,89 @@ export default function Dashboard() {
     activeQueues: data.queues.filter((queue) => queue.status === 'WAITING' || queue.status === 'IN_PROGRESS').length,
   };
 
-  const appointmentChartData = {
-    labels: ['Scheduled', 'Checked In', 'Completed', 'Cancelled'],
-    datasets: [
-      {
-        label: 'Today\'s Appointments',
-        data: [stats.scheduled, stats.checkedIn, stats.completed, stats.cancelled],
-        backgroundColor: [
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-        ],
-        borderColor: [
-          'rgba(75, 192, 192, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const doctorChartData = {
-    labels: ['Available Doctors', 'Active Queues'],
-    datasets: [
-      {
-        data: [stats.availableDoctors, stats.activeQueues],
-        backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'],
-        borderColor: ['rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        color: '#ffffff',
-        font: { size: 16 },
-      },
-      legend: {
-        labels: {
+  const appointmentChart = {
+    type: 'bar',
+    data: {
+      labels: ['Scheduled', 'Checked In', 'Completed', 'Cancelled'],
+      datasets: [
+        {
+          label: 'Today\'s Appointments',
+          data: [stats.scheduled, stats.checkedIn, stats.completed, stats.cancelled],
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+          ],
+          borderColor: [
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Today\'s Appointment Status',
           color: '#ffffff',
+          font: { size: 16 },
+        },
+        legend: {
+          labels: {
+            color: '#ffffff',
+          },
         },
       },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { color: '#ffffff' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#ffffff' },
+          grid: { color: 'rgba(255, 255, 255, 0.1)' },
+        },
+        x: {
+          ticks: { color: '#ffffff' },
+          grid: { color: 'rgba(255, 255, 255, 0.1)' },
+        },
       },
-      x: {
-        ticks: { color: '#ffffff' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-      },
-    },
+    }
   };
 
-  const doughnutOptions = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: 'Doctor & Queue Overview',
-        color: '#ffffff',
-        font: { size: 16 },
-      },
-      legend: {
-        labels: {
-          color: '#ffffff',
+  const doctorChart = {
+    type: 'doughnut',
+    data: {
+      labels: ['Available Doctors', 'Active Queues'],
+      datasets: [
+        {
+          data: [stats.availableDoctors, stats.activeQueues],
+          backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'],
+          borderColor: ['rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
+          borderWidth: 1,
         },
-        position: 'bottom',
-      },
+      ],
     },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Doctor & Queue Overview',
+          color: '#ffffff',
+          font: { size: 16 },
+        },
+        legend: {
+          labels: {
+            color: '#ffffff',
+          },
+          position: 'bottom',
+        },
+      },
+    }
   };
 
   return (
@@ -247,7 +251,7 @@ export default function Dashboard() {
             <Grid item xs={12} sm={6} md={3}>
               <ModernCard>
                 <ModernCardContent>
-                  <Typography variant="h6">Today's Appointments</Typography>
+                  <Typography variant="h6">Today&apos;s Appointments</Typography>
                   <Typography variant="h4">{stats.todayAppointments}</Typography>
                 </ModernCardContent>
               </ModernCard>
@@ -272,21 +276,18 @@ export default function Dashboard() {
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <ChartContainer>
-                <Bar
-                  data={appointmentChartData}
-                  options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, text: 'Today\'s Appointment Status' } } }}
-                />
+                {appointmentChart}
               </ChartContainer>
             </Grid>
             <Grid item xs={12} md={6}>
               <ChartContainer>
-                <Doughnut data={doctorChartData} options={doughnutOptions} />
+                {doctorChart}
               </ChartContainer>
             </Grid>
           </Grid>
           <Box sx={{ mt: 4 }}>
             <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
-              Today's Appointments
+              Today&apos;s Appointments
             </Typography>
             <Grid container spacing={2}>
               {todayAppointments.map((appt) => (
