@@ -32,13 +32,13 @@ export default function AppointmentPage({ user }) {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('No authentication token found');
         const [patientsRes, doctorsRes, departmentsRes] = await Promise.all([
-          axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=patients`, {
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.PATIENT}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=doctors`, {
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.DOCTOR}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=departments`, {
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.DEPARTMENT}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
