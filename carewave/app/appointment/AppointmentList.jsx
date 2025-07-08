@@ -14,7 +14,6 @@ export default function AppointmentList({ onEdit }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '', type: 'ALL' });
-  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
