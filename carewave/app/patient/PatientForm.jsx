@@ -1,8 +1,7 @@
 "use client";
 import React, { useState } from 'react';
-import { Box, TextField, MenuItem, Button, Grid, Paper, Typography, Alert } from '@mui/material';
-import { createPatient, updatePatient } from './patientService';
-import styles from './PatientForm.module.css';
+import { TextField, MenuItem, Button, Grid, Paper, Alert } from '@mui/material';
+import { createPatient } from './patientService';
 
 export default function PatientForm({ patient, onSubmit }) {
   const [formData, setFormData] = useState({
@@ -37,54 +36,47 @@ export default function PatientForm({ patient, onSubmit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (patient) {
-        await updatePatient(patient.id, formData);
-      } else {
-        await createPatient(formData);
-      }
+      await createPatient(formData);
       onSubmit();
-      if (!patient) {
-        setFormData({
-          name: '',
-          email: '',
-          patientId: '',
-          dateOfBirth: '',
-          gender: '',
-          phone: '',
-          address: '',
-          emergencyContact: '',
-          emergencyContactPhone: '',
-          insuranceProvider: '',
-          insurancePolicy: '',
-          bloodType: '',
-          allergies: '',
-          medicalHistory: '',
-          presentingComplaint: '',
-          familyHistory: '',
-          socialHistory: '',
-          pastMedicalHistory: '',
-          medications: '',
-        });
-      }
+      setFormData({
+        name: '',
+        email: '',
+        patientId: '',
+        dateOfBirth: '',
+        gender: '',
+        phone: '',
+        address: '',
+        emergencyContact: '',
+        emergencyContactPhone: '',
+        insuranceProvider: '',
+        insurancePolicy: '',
+        bloodType: '',
+        allergies: '',
+        medicalHistory: '',
+        presentingComplaint: '',
+        familyHistory: '',
+        socialHistory: '',
+        pastMedicalHistory: '',
+        medications: '',
+      });
       setError(null);
     } catch (error) {
-      console.error(`Error ${patient ? 'updating' : 'creating'} patient:`, error);
       setError(error.response?.data?.details || error.message);
     }
   };
 
   return (
-    <Paper className={styles.paper}>
-      <Typography variant="h6" className={styles.title}>
+    <Paper className="p-6 bg-hospital-white dark:bg-hospital-gray-900 rounded-md shadow-md">
+      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">
         {patient ? 'Edit Patient' : 'Add New Patient'}
-      </Typography>
+      </h2>
       {error && (
-        <Alert severity="error" className={styles.alert}>
+        <Alert severity="error" className="mb-4">
           {error}
         </Alert>
       )}
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2} className={styles.formGrid}>
+        <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField
               label="Name"
@@ -93,6 +85,7 @@ export default function PatientForm({ patient, onSubmit }) {
               onChange={handleChange}
               fullWidth
               required
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -102,6 +95,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.email}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -111,6 +105,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.patientId}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -122,6 +117,7 @@ export default function PatientForm({ patient, onSubmit }) {
               onChange={handleChange}
               fullWidth
               InputLabelProps={{ shrink: true }}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -132,6 +128,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.gender}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             >
               <MenuItem value="Male">Male</MenuItem>
               <MenuItem value="Female">Female</MenuItem>
@@ -145,6 +142,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.phone}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12}>
@@ -154,6 +152,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.address}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -163,6 +162,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.emergencyContact}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -172,6 +172,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.emergencyContactPhone}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -181,6 +182,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.insuranceProvider}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -190,6 +192,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.insurancePolicy}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -199,6 +202,7 @@ export default function PatientForm({ patient, onSubmit }) {
               value={formData.bloodType}
               onChange={handleChange}
               fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12}>
@@ -210,6 +214,7 @@ export default function PatientForm({ patient, onSubmit }) {
               fullWidth
               multiline
               rows={2}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12}>
@@ -221,6 +226,7 @@ export default function PatientForm({ patient, onSubmit }) {
               fullWidth
               multiline
               rows={4}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12}>
@@ -232,6 +238,7 @@ export default function PatientForm({ patient, onSubmit }) {
               fullWidth
               multiline
               rows={3}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12}>
@@ -243,6 +250,7 @@ export default function PatientForm({ patient, onSubmit }) {
               fullWidth
               multiline
               rows={3}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12}>
@@ -254,6 +262,7 @@ export default function PatientForm({ patient, onSubmit }) {
               fullWidth
               multiline
               rows={3}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12}>
@@ -265,6 +274,7 @@ export default function PatientForm({ patient, onSubmit }) {
               fullWidth
               multiline
               rows={3}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12}>
@@ -276,10 +286,15 @@ export default function PatientForm({ patient, onSubmit }) {
               fullWidth
               multiline
               rows={3}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
           </Grid>
           <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" className={styles.submitButton}>
+            <Button
+              type="submit"
+              variant="contained"
+              className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
+            >
               {patient ? 'Update Patient' : 'Add Patient'}
             </Button>
           </Grid>
