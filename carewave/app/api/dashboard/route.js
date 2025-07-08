@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(request) {
+export async function GET() {
   try {
     const transactions = await prisma.transaction.findMany({
       include: { costCenter: true },
