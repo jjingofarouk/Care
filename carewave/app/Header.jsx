@@ -38,7 +38,6 @@ export default function Header() {
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
   const handleNotificationOpen = (event) => setNotificationAnchor(event.currentTarget);
-  const handleNotificationClose = () => setNotificationAnchor(null);
   
   const handleLogout = async () => {
     await logout();
