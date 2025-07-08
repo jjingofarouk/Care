@@ -1,43 +1,14 @@
 "use client";
-
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  HomeIcon,
-  UserIcon,
-  CalendarIcon,
-  CalculatorIcon,
-  CogIcon,
-  BeakerIcon,
-  BriefcaseIcon,
-  ClipboardDocumentListIcon,
-  DocumentTextIcon,
-  HeartIcon,
-  IdentificationIcon,
-  InboxIcon,
-  KeyIcon,
-  ShieldCheckIcon,
-  ShoppingCartIcon,
-  Squares2X2Icon,
-  TableCellsIcon,
-  UsersIcon,
-  WrenchIcon,
-  XCircleIcon,
+  HomeIcon, UserIcon, CalendarIcon, CalculatorIcon, CogIcon, BeakerIcon, BriefcaseIcon,
+  ClipboardDocumentListIcon, DocumentTextIcon, HeartIcon, IdentificationIcon, InboxIcon,
+  KeyIcon, ShieldCheckIcon, ShoppingCartIcon, Squares2X2Icon, TableCellsIcon, UsersIcon,
+  WrenchIcon, XCircleIcon,
 } from '@heroicons/react/24/outline';
-import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  Box,
-  Divider,
-  Chip,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, Box, Divider, Chip, useTheme, alpha } from '@mui/material';
 import useAuth from './useAuth';
 
 const roleBasedNavItems = {
@@ -164,7 +135,8 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   }, {});
 
   const sidebarStyles = {
-    width: 280,
+    width: { xs: '75vw', sm: 280 },
+    maxWidth: '100vw',
     background: '#0d5c66',
     color: '#ffffff',
     borderRight: '1px solid #115e59',
@@ -172,7 +144,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   };
 
   const logoStyles = {
-    padding: '24px 20px',
+    padding: { xs: '16px', sm: '24px 20px' },
     borderBottom: '1px solid #115e59',
     background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)',
     color: '#ffffff',
@@ -186,23 +158,25 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   const logoContainerStyles = {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: { xs: '8px', sm: '12px' },
   };
 
   const logoImageStyles = {
-    width: '32px',
-    height: '32px',
+    width: { xs: '28px', sm: '32px' },
+    height: { xs: '28px', sm: '32px' },
     borderRadius: '8px',
     filter: 'brightness(1.2)',
+    objectFit: 'contain',
   };
 
   const navListStyles = {
-    padding: '16px 0',
+    padding: { xs: '8px 0', sm: '16px 0' },
     '& .MuiListItem-root': {
-      margin: '2px 12px',
+      margin: { xs: '2px 8px', sm: '2px 12px' },
       borderRadius: '12px',
       transition: 'all 0.2s ease',
       color: '#ffffff',
+      padding: { xs: '8px', sm: '10px' },
       '&:hover': {
         backgroundColor: alpha(theme.palette.primary.main, 0.2),
         transform: 'translateX(4px)',
@@ -222,14 +196,14 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   };
 
   const categoryHeaderStyles = {
-    padding: '16px 20px 8px 20px',
+    padding: { xs: '12px 16px 6px 16px', sm: '16px 20px 8px 20px' },
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
   };
 
   const dividerStyles = {
-    margin: '8px 16px',
+    margin: { xs: '6px 12px', sm: '8px 16px' },
     backgroundColor: '#115e59',
   };
 
@@ -247,17 +221,20 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
             src="/logo.png"
             alt="CareWave Logo"
             style={logoImageStyles}
+            loading="lazy"
+            width={32}
+            height={32}
           />
           <Typography
             variant="h6"
-            sx={{ fontWeight: 700, fontSize: '1.25rem', color: '#ffffff' }}
+            sx={{ fontWeight: 700, fontSize: { xs: '1.1rem', sm: '1.25rem' }, color: '#ffffff' }}
           >
             CareWave
           </Typography>
         </Box>
       </Box>
 
-      <Box sx={{ overflowY: 'auto', flex: 1 }}>
+      <Box sx={{ overflowY: 'auto', flex: 1, maxHeight: 'calc(100vh - 80px)' }}>
         {Object.entries(groupedNavItems).map(([category, items], index) => (
           <Box key={category}>
             {index > 0 && <Divider sx={dividerStyles} />}
@@ -268,9 +245,9 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
                 sx={{
                   backgroundColor: alpha(categoryColors[category] || '#4b5563', 0.2),
                   color: '#ffffff',
-                  fontSize: '0.75rem',
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
                   fontWeight: 600,
-                  height: '24px',
+                  height: { xs: '22px', sm: '24px' },
                 }}
               />
             </Box>
@@ -284,13 +261,13 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
                   onClick={toggleSidebar}
                   sx={{ cursor: 'pointer' }}
                 >
-                  <ListItemIcon sx={{ minWidth: '40px', color: '#ffffff' }}>
-                    <Icon style={{ width: '20px', height: '20px' }} />
+                  <ListItemIcon sx={{ minWidth: { xs: '36px', sm: '40px' }, color: '#ffffff' }}>
+                    <Icon style={{ width: { xs: '18px', sm: '20px' }, height: { xs: '18px', sm: '20px' } }} />
                   </ListItemIcon>
                   <ListItemText
                     primary={name}
                     primaryTypographyProps={{
-                      fontSize: '0.875rem',
+                      fontSize: { xs: '0.8rem', sm: '0.875rem' },
                       fontWeight: 500,
                       color: '#ffffff',
                     }}
@@ -305,7 +282,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
       {user && (
         <Box
           sx={{
-            padding: '16px 20px',
+            padding: { xs: '12px 16px', sm: '16px 20px' },
             borderTop: '1px solid #115e59',
             backgroundColor: '#134e4a',
           }}
@@ -317,13 +294,14 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
               fontWeight: 500,
               display: 'block',
               marginBottom: '4px',
+              fontSize: { xs: '0.7rem', sm: '0.75rem' },
             }}
           >
             Logged in as
           </Typography>
           <Typography
             variant="body2"
-            sx={{ fontWeight: 600, color: '#ffffff' }}
+            sx={{ fontWeight: 600, color: '#ffffff', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
           >
             {user.role?.replace('_', ' ')} User
           </Typography>
