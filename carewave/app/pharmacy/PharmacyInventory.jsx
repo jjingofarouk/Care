@@ -1,14 +1,17 @@
+// pharmacy/PharmacyInventory.jsx
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { TextField, Typography, IconButton, Alert } from '@mui/material';
+import { TextField, IconButton, Alert } from '@mui/material';
 import { Search, Delete, Edit, QrCodeScanner } from '@mui/icons-material';
 import { getInventory, updateStock, deleteMedication, getStockAlerts, scanBarcode } from './pharmacyService';
 
-const PharmacyInventory = () => {
+export default function PharmacyInventory() {
   const [inventory, setInventory] = useState([]);
   const [search, setSearch] = useState('');
   const [stockAlerts, setStockAlerts] = useState([]);
   const [barcode, setBarcode] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchInventory();
@@ -17,10 +20,14 @@ const PharmacyInventory = () => {
 
   const fetchInventory = async () => {
     try {
+      setLoading(true);
       const data = await getInventory();
       setInventory(data);
+      setError(null);
     } catch (error) {
-      console.error('Failed to fetch inventory:', error);
+      setError(error.response?.data?.details || error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,7 +36,7 @@ const PharmacyInventory = () => {
       const alerts = await getStockAlerts();
       setStockAlerts(alerts);
     } catch (error) {
-      console.error('Failed to fetch stock alerts:', error);
+      setError(error.response?.data?.details || error.message);
     }
   };
 
@@ -38,8 +45,9 @@ const PharmacyInventory = () => {
       await updateStock(id, parseInt(newStock));
       await fetchInventory();
       await fetchStockAlerts();
+      setError(null);
     } catch (error) {
-      console.error('Failed to update stock:', error);
+      setError(error.response?.data?.details || error.message);
     }
   };
 
@@ -48,8 +56,9 @@ const PharmacyInventory = () => {
       await deleteMedication(id);
       await fetchInventory();
       await fetchStockAlerts();
+      setError(null);
     } catch (error) {
-      console.error('Failed to delete medication:', error);
+      setError(error.response?.data?.details || error.message);
     }
   };
 
@@ -59,9 +68,10 @@ const PharmacyInventory = () => {
       if (medication) {
         setInventory([medication, ...inventory.filter(item => item.id !== medication.id)]);
         setBarcode('');
+        setError(null);
       }
     } catch (error) {
-      console.error('Failed to scan barcode:', error);
+      setError(error.response?.data?.details || error.message);
     }
   };
 
@@ -90,10 +100,16 @@ const PharmacyInventory = () => {
       width: 150,
       renderCell: (params) => (
         <>
-          <IconButton onClick={() => handleStockUpdate(params.row.id, params.row.stockQuantity)}>
+          <IconButton 
+            onClick={() => handleStockUpdate(params.row.id, params.row.stockQuantity)}
+            className="text-hospital-accent dark:text-hospital-teal-light hover:text-hospital-teal-light"
+          >
             <Edit />
           </IconButton>
-          <IconButton onClick={() => handleDelete(params.row.id)}>
+          <IconButton 
+            onClick={() => handleDelete(params.row.id)}
+            className="text-hospital-error hover:text-hospital-error-dark"
+          >
             <Delete />
           </IconButton>
         </>
@@ -108,51 +124,67 @@ const PharmacyInventory = () => {
   return (
     <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
       <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Inventory Management</h2>
-      {stockAlerts.length > 0 && (
-        <div className="mb-4 p-3 bg-hospital-warning/10 text-hospital-warning border border-hospital-warning/20 rounded-md">
-          Low stock alert for {stockAlerts.length} medications
-        </div>
+      {error && (
+        <Alert severity="error" className="mb-4">
+          {error}
+        </Alert>
       )}
-      <div className="mb-4">
-        <TextField
-          label="Search Medications"
-          variant="outlined"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <Search /> }}
-          fullWidth
-          className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md"
-        />
-        <div className="flex gap-2 mt-2">
-          <TextField
-            label="Scan Barcode"
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md flex-grow"
-          />
-          <button 
-            onClick={handleBarcodeScan}
-            className="p-2 bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md transition-transform duration-fast ease-in-out transform hover:-translate-y-1"
-          >
-            <QrCodeScanner />
-          </button>
+      {stockAlerts.length > 0 && (
+        <Alert severity="warning" className="mb-4">
+          Low stock alert for {stockAlerts.length} medications
+        </Alert>
+      )}
+      {loading ? (
+        <div className="space-y-4">
+          <div className="h-16 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></div>
+          <div className="h-96 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></div>
         </div>
-      </div>
-      <div className="h-[600px] w-full">
-        <DataGrid
-          rows={filteredInventory}
-          columns={columns}
-          pageSizeOptions={[10, 25, 50]}
-          className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
-          onCellEditStop={(params, event) => {
-            if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
-              handleStockUpdate(params.row.id, event.target.value);
-            }
-          }}
-        />
-      </div>
+      ) : (
+        <>
+          <div className="mb-4">
+            <TextField
+              label="Search Medications"
+              variant="outlined"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              InputProps={{ startAdornment: <Search /> }}
+              fullWidth
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+            />
+            <div className="flex gap-2 mt-2">
+              <TextField
+                label="Scan Barcode"
+                value={barcode}
+                onChange={(e) => setBarcode(e.target.value)}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md flex-grow"
+              />
+              <IconButton 
+                onClick={handleBarcodeScan}
+                className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md"
+              >
+                <QrCodeScanner />
+              </IconButton>
+            </div>
+          </div>
+          <div className="h-[600px] w-full">
+            <DataGrid
+              rows={filteredInventory}
+              columns={columns}
+              pageSizeOptions={[10, 25, 50]}
+              disableRowSelectionOnClick
+              initialState={{
+                pagination: { paginationModel: { pageSize: 10 } },
+              }}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md shadow-md"
+              onCellEditStop={(params, event) => {
+                if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
+                  handleStockUpdate(params.row.id, event.target.value);
+                }
+              }}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
-};
-
-export default PharmacyInventory;
+}
