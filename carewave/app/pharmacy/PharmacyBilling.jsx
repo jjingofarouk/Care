@@ -2,29 +2,41 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box, TextField, Button, Alert } from '@mui/material';
-import { createInvoice, processRefund, getPrescriptions } from './pharmacyService';
+import { processRefund, getPrescriptions } from './pharmacyService';
 
 export default function PharmacyBilling() {
   const [invoices, setInvoices] = useState([]);
-  const [refundData, setRefundData] = useState({ invoiceId: '', reason: '', amount: 0, processedById: '' });
+  const [refundData, setRefundData] = useState({
+    invoiceId: '',
+    reason: '',
+    amount: 0,
+    processedById: '',
+  });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch invoices on component mount
   useEffect(() => {
     fetchInvoices();
   }, []);
 
+  // Load prescriptions and extract invoice info
   const fetchInvoices = async () => {
     try {
       setLoading(true);
       const prescriptions = await getPrescriptions();
-      setInvoices(prescriptions.filter(p => p.invoice).map(p => ({
-        id: p.invoice.id,
-        prescriptionId: p.id,
-        totalAmount: p.invoice.totalAmount || 0,
-        status: p.invoice.status || 'N/A',
-        paymentMethod: p.invoice.paymentMethod || 'N/A',
-      })));
+
+      const invoiceRows = prescriptions
+        .filter((p) => p.invoice)
+        .map((p) => ({
+          id: p.invoice.id,
+          prescriptionId: p.id,
+          totalAmount: p.invoice.totalAmount || 0,
+          status: p.invoice.status || 'N/A',
+          paymentMethod: p.invoice.paymentMethod || 'N/A',
+        }));
+
+      setInvoices(invoiceRows);
       setError(null);
     } catch (error) {
       setError(error.response?.data?.details || error.message);
@@ -33,26 +45,16 @@ export default function PharmacyBilling() {
     }
   };
 
-  const handleCreateInvoice = async (prescriptionId, totalAmount) => {
-    try {
-      const invoice = await createInvoice({ prescriptionId, totalAmount });
-      setInvoices([...invoices, {
-        id: invoice.id,
-        prescriptionId: invoice.prescriptionId,
-        totalAmount: invoice.totalAmount,
-        status: invoice.status,
-        paymentMethod: invoice.paymentMethod,
-      }]);
-      setError(null);
-    } catch (error) {
-      setError(error.response?.data?.details || error.message);
-    }
-  };
-
+  // Handle refund processing
   const handleProcessRefund = async () => {
     try {
       await processRefund(refundData);
-      setRefundData({ invoiceId: '', reason: '', amount: 0, processedById: '' });
+      setRefundData({
+        invoiceId: '',
+        reason: '',
+        amount: 0,
+        processedById: '',
+      });
       await fetchInvoices();
       setError(null);
     } catch (error) {
@@ -60,6 +62,7 @@ export default function PharmacyBilling() {
     }
   };
 
+  // DataGrid columns definition
   const columns = [
     { field: 'id', headerName: 'Invoice ID', width: 100 },
     { field: 'prescriptionId', headerName: 'Prescription ID', width: 150 },
@@ -70,12 +73,16 @@ export default function PharmacyBilling() {
 
   return (
     <Box className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
-      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Billing & Invoicing</h2>
+      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">
+        Billing & Invoicing
+      </h2>
+
       {error && (
         <Alert severity="error" className="mb-4">
           {error}
         </Alert>
       )}
+
       {loading ? (
         <Box className="space-y-4">
           <Box className="h-16 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></Box>
@@ -83,7 +90,8 @@ export default function PharmacyBilling() {
         </Box>
       ) : (
         <>
-          <Box className="mb-4 flex gap-4">
+          {/* Refund Form */}
+          <Box className="mb-4 flex flex-wrap gap-4">
             <TextField
               label="Invoice ID"
               name="invoiceId"
@@ -103,7 +111,9 @@ export default function PharmacyBilling() {
               name="amount"
               type="number"
               value={refundData.amount}
-              onChange={(e) => setRefundData({ ...refundData, amount: e.target.value })}
+              onChange={(e) =>
+                setRefundData({ ...refundData, amount: parseFloat(e.target.value) || 0 })
+              }
               className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
             />
             <TextField
@@ -115,12 +125,14 @@ export default function PharmacyBilling() {
             />
             <Button
               variant="contained"
-              className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
               onClick={handleProcessRefund}
+              className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
             >
               Process Refund
             </Button>
           </Box>
+
+          {/* Invoice Table */}
           <DataGrid
             rows={invoices}
             columns={columns}
