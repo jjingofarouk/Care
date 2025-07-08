@@ -516,7 +516,7 @@ export async function scanBarcode(barcode) {
   }
 }
 
-export async function generateStockReport(timeRange) {
+export async function generateStockReport() {
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=inventory`, {
@@ -529,7 +529,7 @@ export async function generateStockReport(timeRange) {
   }
 }
 
-export async function generateSalesReport(timeRange) {
+export async function generateSalesReport() {
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=prescriptions`, {
