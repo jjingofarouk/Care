@@ -1,33 +1,9 @@
 "use client";
-
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  Box, 
-  Avatar, 
-  Menu, 
-  MenuItem, 
-  IconButton,
-  Chip,
-  Badge,
-  Divider,
-  useTheme,
-  alpha
-} from '@mui/material';
-import {
-  Bars3Icon,
-  BellIcon,
-  UserIcon,
-  CogIcon,
-  ArrowRightOnRectangleIcon,
-  HomeIcon
-} from '@heroicons/react/24/outline';
-import { AccountCircle, Notifications } from '@mui/icons-material';
+import { Bars3Icon, BellIcon, UserIcon, CogIcon, ArrowRightOnRectangleIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { AccountCircle } from '@mui/icons-material';
 import Sidebar from './Sidebar';
 import useAuth from './useAuth';
 
@@ -53,7 +29,6 @@ const roleDisplayNames = {
 
 export default function Header() {
   const pathname = usePathname();
-  const theme = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificationAnchor, setNotificationAnchor] = useState(null);
@@ -97,7 +72,6 @@ export default function Header() {
     { name: 'Register', path: '/auth/register', icon: UserIcon },
   ];
 
-  // Mock notifications - in real app, these would come from your notification system
   const notifications = [
     { id: 1, title: 'New appointment scheduled', time: '5 min ago', unread: true },
     { id: 2, title: 'Lab results available', time: '1 hour ago', unread: true },
@@ -106,306 +80,143 @@ export default function Header() {
 
   const unreadCount = notifications.filter(n => n.unread).length;
 
-  const headerStyles = {
-    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-    backdropFilter: 'blur(10px)',
-    borderBottom: '1px solid #e2e8f0',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    color: '#1e293b',
-    '& .MuiToolbar-root': {
-      minHeight: '72px',
-      padding: '0 24px',
-    }
-  };
-
-  const logoContainerStyles = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    cursor: 'pointer',
-    padding: '8px 16px',
-    borderRadius: '12px',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-      transform: 'scale(1.02)',
-    }
-  };
-
-  const logoImageStyles = {
-    width: '40px',
-    height: '40px',
-    borderRadius: '10px',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-  };
-
-  const headerTitleStyles = {
-    fontWeight: 700,
-    fontSize: '1.5rem',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    display: { xs: 'none', sm: 'block' }
-  };
-
-  const navButtonStyles = {
-    borderRadius: '10px',
-    padding: '8px 16px',
-    fontWeight: 500,
-    textTransform: 'none',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-      transform: 'translateY(-1px)',
-    },
-    '&.active': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.12),
-      color: theme.palette.primary.main,
-    }
-  };
-
-  const userInfoStyles = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-  };
-
-  const userNameStyles = {
-    fontWeight: 600,
-    color: '#1e293b',
-    display: { xs: 'none', md: 'block' }
-  };
-
-  const menuStyles = {
-    '& .MuiPaper-root': {
-      borderRadius: '16px',
-      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-      border: '1px solid #e2e8f0',
-      minWidth: '280px',
-      marginTop: '8px',
-    }
-  };
-
-  const menuItemStyles = {
-    padding: '12px 20px',
-    borderRadius: '8px',
-    margin: '4px 8px',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-    },
-    '&.danger:hover': {
-      backgroundColor: alpha('#ef4444', 0.08),
-      color: '#ef4444',
-    }
-  };
-
-  const avatarStyles = {
-    width: 36,
-    height: 36,
-    fontSize: '1rem',
-    fontWeight: 600,
-    backgroundColor: user ? roleColors[user.role] || '#64748b' : '#64748b',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      transform: 'scale(1.05)',
-    }
-  };
-
-  const notificationStyles = {
-    color: '#64748b',
-    transition: 'color 0.2s ease',
-    '&:hover': {
-      color: theme.palette.primary.main,
-    }
-  };
-
   return (
     <>
-      <AppBar position="fixed" sx={headerStyles} elevation={0}>
-        <Toolbar>
+      <header className="fixed w-full bg-gradient-to-r from-hospital-white to-hospital-gray-50 dark:from-hospital-gray-900 dark:to-hospital-gray-800 border-b border-hospital-gray-200 dark:border-hospital-gray-700 shadow-md backdrop-blur-md">
+        <div className="flex items-center justify-between h-18 px-6">
           {/* Logo and Menu Toggle */}
-          <Box sx={logoContainerStyles} onClick={toggleSidebar}>
-            <IconButton 
-              sx={{ 
-                p: 0.5, 
-                color: '#64748b',
-                '&:hover': { backgroundColor: 'transparent' }
-              }}
-            >
-              <Bars3Icon style={{ width: '20px', height: '20px' }} />
-            </IconButton>
-            <img src="/logo.png" alt="CareWave Logo" style={logoImageStyles} />
-            <Typography sx={headerTitleStyles}>
+          <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-hospital-accent/10 hover:scale-105 transition-all duration-fast" onClick={toggleSidebar}>
+            <button className="p-1 text-hospital-gray-500 hover:bg-transparent">
+              <Bars3Icon className="w-5 h-5" />
+            </button>
+            <img src="/logo.png" alt="CareWave Logo" className="w-10 h-10 rounded-lg shadow-sm" />
+            <h1 className="hidden sm:block text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">
               CareWave
-            </Typography>
-          </Box>
+            </h1>
+          </div>
 
           {/* Spacer */}
-          <Box sx={{ flexGrow: 1 }} />
+          <div className="flex-grow" />
 
           {/* Navigation Items (for non-authenticated users) */}
           {!user && (
-            <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
+            <div className="flex gap-2 mr-4">
               {userMenuItems.slice(0, -1).map(({ name, path }) => (
-                <Button
+                <Link
                   key={path}
-                  component={Link}
                   href={path}
-                  sx={{
-                    ...navButtonStyles,
-                    ...(pathname === path && { 
-                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                      color: theme.palette.primary.main 
-                    })
-                  }}
+                  className={`rounded-lg px-4 py-2 font-medium transition-all duration-fast hover:bg-hospital-accent/10 hover:-translate-y-0.5 ${pathname === path ? 'bg-hospital-accent/20 text-hospital-accent' : 'text-hospital-gray-900 dark:text-hospital-white'}`}
                 >
                   {name}
-                </Button>
+                </Link>
               ))}
-            </Box>
+            </div>
           )}
 
           {/* User Info Section */}
-          <Box sx={userInfoStyles}>
+          <div className="flex items-center gap-4">
             {/* User Name and Role */}
             {user && (
-              <Box sx={{ textAlign: 'right', display: { xs: 'none', md: 'block' } }}>
-                <Typography sx={userNameStyles}>
+              <div className="hidden md:block text-right">
+                <span className="font-semibold text-hospital-gray-900 dark:text-hospital-white">
                   {user.name || user.email}
-                </Typography>
-                <Chip
-                  label={roleDisplayNames[user.role] || 'User'}
-                  size="small"
-                  sx={{
-                    backgroundColor: alpha(roleColors[user.role] || '#64748b', 0.1),
-                    color: roleColors[user.role] || '#64748b',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    height: '20px',
-                  }}
-                />
-              </Box>
+                </span>
+                <div className="text-xs font-semibold text-[${roleColors[user.role] || '#64748b'}] bg-[${roleColors[user.role] || '#64748b'}]/10 rounded px-2 py-1 mt-1">
+                  {roleDisplayNames[user.role] || 'User'}
+                </div>
+              </div>
             )}
 
             {/* Notifications */}
             {user && (
-              <IconButton 
+              <button 
                 onClick={handleNotificationOpen}
-                sx={notificationStyles}
+                className="text-hospital-gray-500 hover:text-hospital-accent transition-colors duration-fast"
               >
-                <Badge badgeContent={unreadCount} color="error">
-                  <BellIcon style={{ width: '20px', height: '20px' }} />
-                </Badge>
-              </IconButton>
+                <div className="relative">
+                  <BellIcon className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-hospital-error text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+              </button>
             )}
 
             {/* User Avatar/Menu */}
-            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+            <button onClick={handleMenuOpen} className="p-0">
               {user ? (
-                <Avatar sx={avatarStyles}>
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white font-semibold text-sm bg-[${roleColors[user.role] || '#64748b'}] hover:scale-105 transition-transform duration-fast`}>
                   {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                </Avatar>
+                </div>
               ) : (
-                <AccountCircle sx={{ fontSize: 36, color: '#64748b' }} />
+                <AccountCircle className="text-hospital-gray-500 w-9 h-9" />
               )}
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
+            </button>
+          </div>
+        </div>
+      </header>
 
       {/* User Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        sx={menuStyles}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      <div
+        className={`absolute top-20 right-4 bg-hospital-white dark:bg-hospital-gray-800 rounded-xl shadow-lg border border-hospital-gray-200 dark:border-hospital-gray-700 min-w-[280px] transition-all duration-fast ${anchorEl ? 'block' : 'hidden'}`}
       >
         {user && (
-          <Box sx={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+          <div className="p-4 border-b border-hospital-gray-200 dark:border-hospital-gray-700">
+            <div className="font-semibold text-hospital-gray-900 dark:text-hospital-white">
               {user.name || user.email}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b' }}>
+            </div>
+            <div className="text-sm text-hospital-gray-500">
               {roleDisplayNames[user.role]} Account
-            </Typography>
-          </Box>
+            </div>
+          </div>
         )}
         
         {userMenuItems.map(({ name, path, onClick, icon: Icon, description, danger }) => (
-          <MenuItem
+          <Link
             key={path}
+            href={onClick ? '#' : path}
             onClick={onClick || handleMenuClose}
-            component={onClick ? 'div' : Link}
-            href={onClick ? undefined : path}
-            sx={{
-              ...menuItemStyles,
-              ...(danger && { '&:hover': { backgroundColor: alpha('#ef4444', 0.08), color: '#ef4444' } })
-            }}
+            className={`flex items-center gap-4 p-3 m-2 rounded-lg hover:bg-hospital-accent/10 transition-all duration-fast ${danger ? 'hover:bg-hospital-error/10 hover:text-hospital-error' : ''}`}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-              {Icon && <Icon style={{ width: '18px', height: '18px' }} />}
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  {name}
-                </Typography>
-                {description && (
-                  <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
-                    {description}
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-          </MenuItem>
+            {Icon && <Icon className="w-5 h-5" />}
+            <div>
+              <div className="font-medium">{name}</div>
+              {description && (
+                <div className="text-sm text-hospital-gray-500">{description}</div>
+              )}
+            </div>
+          </Link>
         ))}
-      </Menu>
+      </div>
 
       {/* Notifications Menu */}
       {user && (
-        <Menu
-          anchorEl={notificationAnchor}
-          open={Boolean(notificationAnchor)}
-          onClose={handleNotificationClose}
-          sx={menuStyles}
-          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        <div
+          className={`absolute top-20 right-4 bg-hospital-white dark:bg-hospital-gray-800 rounded-xl shadow-lg border border-hospital-gray-200 dark:border-hospital-gray-700 min-w-[280px] transition-all duration-fast ${notificationAnchor ? 'block' : 'hidden'}`}
         >
-          <Box sx={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Notifications
-            </Typography>
-          </Box>
+          <div className="p-4 border-b border-hospital-gray-200 dark:border-hospital-gray-700">
+            <div className="font-semibold">Notifications</div>
+          </div>
           
-          {notifications.map((notification, index) => (
-            <MenuItem
+          {notifications.map((notification) => (
+            <div
               key={notification.id}
-              sx={{
-                ...menuItemStyles,
-                backgroundColor: notification.unread ? alpha(theme.palette.primary.main, 0.02) : 'transparent',
-                borderLeft: notification.unread ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
-              }}
+              className={`p-3 m-2 rounded-lg ${notification.unread ? 'bg-hospital-accent/5 border-l-4 border-hospital-accent' : 'border-l-4 border-transparent'}`}
             >
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: notification.unread ? 600 : 400 }}>
-                  {notification.title}
-                </Typography>
-                <Typography variant="caption" sx={{ color: '#64748b' }}>
-                  {notification.time}
-                </Typography>
-              </Box>
-            </MenuItem>
+              <div className={`font-${notification.unread ? 'semibold' : 'normal'}`}>
+                {notification.title}
+              </div>
+              <div className="text-sm text-hospital-gray-500">{notification.time}</div>
+            </div>
           ))}
           
-          <Divider sx={{ margin: '8px 0' }} />
-          <MenuItem sx={menuItemStyles}>
-            <Typography variant="body2" sx={{ color: theme.palette.primary.main, fontWeight: 500 }}>
-              View all notifications
-            </Typography>
-          </MenuItem>
-        </Menu>
+          <div className="border-t border-hospital-gray-200 dark:border-hospital-gray-700 m-2" />
+          <div className="p-3 m-2 rounded-lg hover:bg-hospital-accent/10">
+            <div className="font-medium text-hospital-accent">View all notifications</div>
+          </div>
+        </div>
       )}
 
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
