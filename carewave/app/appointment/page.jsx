@@ -14,7 +14,7 @@ import axios from 'axios';
 import api from '../api';
 import styles from './page.module.css';
 
-export default function AppointmentPage({ user }) {
+export default function AppointmentPage() {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [refreshKey, setRefreshKey] = useState(0);
