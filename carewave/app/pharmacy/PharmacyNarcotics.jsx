@@ -1,12 +1,8 @@
-// pharmacy/PharmacyNarcotics.jsx
-// Narcotic drug tracking component
-
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { TextField, Box, Typography, IconButton, Alert } from '@mui/material';
+import { TextField, Typography, IconButton, Alert } from '@mui/material';
 import { Search, Delete, Edit, QrCodeScanner } from '@mui/icons-material';
 import { getInventory, updateStock, deleteMedication, getStockAlerts, scanBarcode } from './pharmacyService';
-import styles from './PharmacyNarcotics.module.css';
 
 const PharmacyNarcotics = () => {
   const [narcotics, setNarcotics] = useState([]);
@@ -23,9 +19,7 @@ const PharmacyNarcotics = () => {
   const fetchNarcotics = async () => {
     try {
       const data = await getInventory();
-      // Log inventory for debugging
       console.log('Inventory data:', data);
-      // Filter for narcotic medications
       const narcoticDrugs = Array.isArray(data)
         ? data.filter(item => {
             const isNarcotic = item?.narcotic === true;
@@ -45,7 +39,6 @@ const PharmacyNarcotics = () => {
   const fetchStockAlerts = async () => {
     try {
       const alerts = await getStockAlerts();
-      // Filter alerts for narcotic medications only
       const narcoticAlerts = Array.isArray(alerts)
         ? alerts.filter(alert => alert?.narcotic === true)
         : [];
@@ -148,19 +141,19 @@ const PharmacyNarcotics = () => {
   );
 
   return (
-    <Box className={styles.container}>
-      <Typography variant="h6" gutterBottom>Narcotic Drug Tracking</Typography>
+    <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Narcotic Drug Tracking</h2>
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="mb-4 p-3 bg-hospital-error/10 text-hospital-error border border-hospital-error/20 rounded-md">
           {error}
-        </Alert>
+        </div>
       )}
       {stockAlerts.length > 0 && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
+        <div className="mb-4 p-3 bg-hospital-warning/10 text-hospital-warning border border-hospital-warning/20 rounded-md">
           Low stock alert for {stockAlerts.length} narcotic medications
-        </Alert>
+        </div>
       )}
-      <Box className={styles.searchBar}>
+      <div className="mb-4">
         <TextField
           label="Search Narcotics"
           variant="outlined"
@@ -168,33 +161,39 @@ const PharmacyNarcotics = () => {
           onChange={(e) => setSearch(e.target.value ?? '')}
           InputProps={{ startAdornment: <Search /> }}
           fullWidth
-          margin="normal"
+          className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md mb-4"
         />
-        <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+        <div className="flex gap-2">
           <TextField
             label="Scan Barcode"
             value={barcode}
             onChange={(e) => setBarcode(e.target.value)}
+            className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md flex-grow"
           />
-          <IconButton onClick={handleBarcodeScan}>
+          <button
+            onClick={handleBarcodeScan}
+            className="p-2 bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md transition-transform duration-fast ease-in-out transform hover:-translate-y-1"
+          >
             <QrCodeScanner />
-          </IconButton>
-        </Box>
-      </Box>
-      <DataGrid
-        rows={filteredNarcotics}
-        columns={columns}
-        initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-        pageSizeOptions={[10, 25, 50]}
-        className={styles.grid}
-        autoHeight
-        onCellEditStop={(params, event) => {
-          if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
-            handleStockUpdate(params.row.id, params.value);
-          }
-        }}
-      />
-    </Box>
+          </button>
+        </div>
+      </div>
+      <div className="w-full">
+        <DataGrid
+          rows={filteredNarcotics}
+          columns={columns}
+          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          pageSizeOptions={[10, 25, 50]}
+          className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
+          autoHeight
+          onCellEditStop={(params, event) => {
+            if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
+              handleStockUpdate(params.row.id, event.target.value);
+            }
+          }}
+        />
+      </div>
+    </div>
   );
 };
 
