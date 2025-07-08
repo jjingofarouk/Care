@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAppointments, createAppointment, getPatients, getDoctors, getDepartments, getAvailability, createAvailability, getQueue, updateQueue } from '../../appointment/appointmentService';
+import { getAppointments, createAppointment, getPatients, getDoctors, getDepartments, getAvailability, createAvailability, getQueue } from '../../appointment/appointmentService';
 import jwt from 'jsonwebtoken';
 
 const authenticate = (request) => {
