@@ -20,7 +20,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request) {
+export async function POST() {
   try {
     const data = await request.json();
     if (!data.patientId || !data.recordId || !data.diagnosis || !data.date || !data.doctorName) {
