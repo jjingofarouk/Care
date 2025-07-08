@@ -1,20 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Alert, Button, Skeleton, TextField, Select, MenuItem } from '@mui/material';
+import { Alert, Button, TextField, Select, MenuItem } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import AppointmentFilter from './AppointmentFilter';
 import axios from 'axios';
 import api from '../api';
 
-export default function AppointmentList({ onEdit }) {
+export default function AppointmentList() {
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '', type: 'ALL' });
-  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -100,10 +99,6 @@ export default function AppointmentList({ onEdit }) {
     }
   };
 
-  const handleEdit = (row) => {
-    onEdit(row);
-  };
-
   const handleCellEditCommit = async (params) => {
     try {
       const token = localStorage.getItem('token');
@@ -134,7 +129,6 @@ export default function AppointmentList({ onEdit }) {
         } : appt
       ));
       setError(null);
-      setEditingCell(null);
     } catch (err) {
       setError('Failed to update appointment: ' + (err.response?.data?.error || err.message));
     }
@@ -233,9 +227,12 @@ export default function AppointmentList({ onEdit }) {
       align: 'center',
       headerAlign: 'center',
       renderCell: (params) => (
-        <Box className={`status ${params.value.toLowerCase()}`}>
+        <div className={`px-2 py-1 rounded-md text-sm ${params.value.toLowerCase() === 'cancelled' ? 'bg-hospital-error text-hospital-white' : 
+                         params.value.toLowerCase() === 'checked_in' ? 'bg-hospital-success text-hospital-white' : 
+                         params.value.toLowerCase() === 'checked_out' ? 'bg-hospital-gray-400 text-hospital-white' : 
+                         'bg-hospital-accent text-hospital-white'}`}>
           {params.value}
-        </Box>
+        </div>
       ),
     },
     {
@@ -257,36 +254,29 @@ export default function AppointmentList({ onEdit }) {
       headerName: 'Actions',
       width: 300,
       renderCell: (params) => (
-        <Box className="actionContainer">
-          <Button
-            onClick={() => handleEdit(params.row)}
-            disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
-            className="actionButton editButton"
-          >
-            Edit
-          </Button>
+        <div className="flex gap-2">
           <Button
             onClick={() => handleCancel(params.row.id)}
             disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
-            className="actionButton cancelButton"
+            className="border-hospital-error text-hospital-error hover:bg-hospital-error hover:text-hospital-white rounded-md px-4 py-2"
           >
             Cancel
           </Button>
           <Button
             onClick={() => handleCheckIn(params.row.id)}
             disabled={params.row.status !== 'SCHEDULED'}
-            className="actionButton checkInButton"
+            className="border-hospital-success text-hospital-success hover:bg-hospital-success hover:text-hospital-white rounded-md px-4 py-2"
           >
             Check In
           </Button>
           <Button
             onClick={() => handleCheckOut(params.row.id)}
             disabled={params.row.status !== 'CHECKED_IN'}
-            className="actionButton checkOutButton"
+            className="border-hospital-gray-400 text-hospital-gray-400 hover:bg-hospital-gray-400 hover:text-hospital-white rounded-md px-4 py-2"
           >
             Check Out
           </Button>
-        </Box>
+        </div>
       ),
     },
   ];
@@ -303,9 +293,9 @@ export default function AppointmentList({ onEdit }) {
         )}
         {loading ? (
           <div className="space-y-4">
-            <Skeleton variant="rectangular" width="100%" height={400} />
-            <Skeleton variant="text" width="60%" />
-            <Skeleton variant="text" width="80%" />
+            <div className="h-96 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></div>
+            <div className="h-6 w-3/5 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></div>
+            <div className="h-6 w-4/5 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></div>
           </div>
         ) : (
           <>
@@ -323,10 +313,8 @@ export default function AppointmentList({ onEdit }) {
                 initialState={{
                   pagination: { paginationModel: { pageSize: 10 } },
                 }}
-                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md shadow-md"
                 autoHeight
-onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
-                onCellEditStop={() => setEditingCell(null)}
                 onCellEditCommit={handleCellEditCommit}
               />
             </div>
