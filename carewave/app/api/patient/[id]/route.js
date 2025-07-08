@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request, { params }) {
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) {
@@ -44,7 +44,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request, { params }) {
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) {
@@ -117,7 +117,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request, { params }) {
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) {
