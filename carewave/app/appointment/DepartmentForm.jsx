@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, TextField, Button, Skeleton } from '@mui/material';
+import { Alert, TextField, Button, Skeleton } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import api from '../api';
@@ -11,7 +11,6 @@ export default function DepartmentForm() {
   const [departments, setDepartments] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchDepartments() {
@@ -89,7 +88,6 @@ export default function DepartmentForm() {
         dept.id === id ? { ...dept, [field]: value } : dept
       ));
       setError(null);
-      setEditingCell(null);
     } catch (err) {
       setError('Failed to update department: ' + (err.response?.data?.error || err.message));
     }
@@ -195,8 +193,6 @@ export default function DepartmentForm() {
               disableRowSelectionOnClick
               className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
               autoHeight
-              onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
-              onCellEditStop={() => setEditingCell(null)}
               onCellEditCommit={handleCellEditCommit}
             />
           </div>
