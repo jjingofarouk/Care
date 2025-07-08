@@ -14,6 +14,7 @@ export default function AppointmentList({ onEdit }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '', type: 'ALL' });
+  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -22,8 +23,8 @@ export default function AppointmentList({ onEdit }) {
         const token = localStorage.getItem('token');
         const [appointmentsData, patientsData, doctorsData] = await Promise.all([
           axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=patients`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=doctors`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.PATIENT}`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.DOCTOR}`, { headers: { Authorization: `Bearer ${token}` } }),
         ]);
 
         setAppointments(appointmentsData.data.map(appt => ({
@@ -291,49 +292,47 @@ export default function AppointmentList({ onEdit }) {
   ];
 
   return (
-    <Box className="container">
-      <Box className="header">
-        <Typography variant="h6" className="title">
-          Appointments
-        </Typography>
+    <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <div className="bg-hospital-gray-50 dark:bg-hospital-gray-800 p-4 rounded-lg shadow-md">
+        <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Appointments</h2>
         <AppointmentFilter onFilter={setFilter} patients={patients} doctors={doctors} />
-      </Box>
-      {error && (
-        <Alert severity="error" className="alert">
-          {error}
-        </Alert>
-      )}
-      {loading ? (
-        <Box className="loading">
-          <Skeleton variant="rectangular" width="100%" height={400} />
-          <Skeleton variant="text" width="60%" />
-          <Skeleton variant="text" width="80%" />
-        </Box>
-      ) : (
-        <>
-          {filteredAppointments.length === 0 && !error && (
-            <Alert severity="info" className="alert">
-              No appointments found
-            </Alert>
-          )}
-          <Box className="tableWrapper">
-            <DataGrid
-              rows={filteredAppointments}
-              columns={columns}
-              pageSizeOptions={[5, 10, 25]}
-              disableRowSelectionOnClick
-              initialState={{
-                pagination: { paginationModel: { pageSize: 10 } },
-              }}
-              className="dataGrid"
-              autoHeight
-              onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
-              onCellEditStop={() => setEditingCell(null)}
-              onCellEditCommit={handleCellEditCommit}
-            />
-          </Box>
-        </>
-      )}
-    </Box>
+        {error && (
+          <Alert severity="error" className="mb-4">
+            {error}
+          </Alert>
+        )}
+        {loading ? (
+          <div className="space-y-4">
+            <Skeleton variant="rectangular" width="100%" height={400} />
+            <Skeleton variant="text" width="60%" />
+            <Skeleton variant="text" width="80%" />
+          </div>
+        ) : (
+          <>
+            {filteredAppointments.length === 0 && !error && (
+              <Alert severity="info" className="mb-4">
+                No appointments found
+              </Alert>
+            )}
+            <div className="mt-4">
+              <DataGrid
+                rows={filteredAppointments}
+                columns={columns}
+                pageSizeOptions={[5, 10, 25]}
+                disableRowSelectionOnClick
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 10 } },
+                }}
+                className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
+                autoHeight
+                onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
+                onCellEditStop={() => setEditingCell(null)}
+                onCellEditCommit={handleCellEditCommit}
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
