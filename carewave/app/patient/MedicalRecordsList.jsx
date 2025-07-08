@@ -18,8 +18,8 @@ import {
   DialogActions,
   TableSortLabel,
 } from '@mui/material';
-import { updateMedicalRecord, deleteMedicalRecord } from './medicalRecordsService';
-import MedicalHistoryForm from './MedicalHistoryForm';
+import { updateMedicalRecord, deleteMedicalRecord } from '../medical-records/medicalRecordsService';
+import MedicalHistoryForm from '../medical-records/MedicalHistoryForm';
 
 export default function MedicalRecordsList({ medicalRecords, patients, onSuccess }) {
   const [filteredRecords, setFilteredRecords] = useState(medicalRecords);
