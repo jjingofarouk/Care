@@ -4,7 +4,7 @@ import { Alert, Button, TextField, MenuItem } from '@mui/material';
 import { DataGrid, GridToolbarContainer, GridToolbarFilterButton } from '@mui/x-data-grid';
 import { getDoctors, updateDoctor, deleteDoctor } from './doctorService';
 
-export default function DoctorList({ onEdit, onSelect }) {
+export default function DoctorList() {
   const [doctors, setDoctors] = useState([]);
   const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [error, setError] = useState(null);
