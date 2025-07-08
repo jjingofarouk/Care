@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import PatientForm from './PatientForm';
 import MedicalRecordsList from './MedicalRecordsList';
-import { getPatients, updatePatient, deletePatient } from './patientService';
+import { getPatients, deletePatient } from './patientService';
 
-export default function PatientList({ patients, onSuccess, onEdit }) {
+export default function PatientList({ patients, onSuccess }) {
   const [localPatients, setLocalPatients] = useState([]);
   const [error, setError] = useState(null);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -87,7 +87,6 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
   }, [patients]);
 
   const handleEdit = (patient) => {
-    if (onEdit) onEdit(patient);
     setSelectedPatient(patient);
     setOpenEditModal(true);
   };
@@ -195,14 +194,8 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
       renderCell: (params) => (
         <Button
           variant="outlined"
-          color="primary"
+          className="border-hospital-accent text-hospital-accent hover:bg-hospital-accent hover:text-hospital-white rounded-md px-4 py-2"
           onClick={() => handleViewMedicalRecords(params.row)}
-          sx={{
-            fontSize: { xs: '0.675rem', sm: '0.75rem' },
-            padding: { xs: '3px 6px', sm: '4px 8px' },
-            textTransform: 'none',
-            borderRadius: '4px',
-          }}
         >
           Open
         </Button>
@@ -213,30 +206,18 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
       headerName: 'Actions',
       width: 200,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box className="flex gap-2">
           <Button
             variant="outlined"
-            color="primary"
+            className="border-hospital-teal-light text-hospital-teal-light hover:bg-hospital-teal-light hover:text-hospital-white rounded-md px-4 py-2"
             onClick={() => handleEdit(params.row)}
-            sx={{
-              fontSize: { xs: '0.675rem', sm: '0.75rem' },
-              padding: { xs: '3px 6px', sm: '4px 8px' },
-              textTransform: 'none',
-              borderRadius: '4px',
-            }}
           >
             Edit
           </Button>
           <Button
             variant="outlined"
-            color="error"
+            className="border-hospital-error text-hospital-error hover:bg-hospital-error hover:text-hospital-white rounded-md px-4 py-2"
             onClick={() => handleDeleteConfirm(params.row.id)}
-            sx={{
-              fontSize: { xs: '0.675rem', sm: '0.75rem' },
-              padding: { xs: '3px 6px', sm: '4px 8px' },
-              textTransform: 'none',
-              borderRadius: '4px',
-            }}
           >
             Delete
           </Button>
@@ -246,70 +227,21 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
   ];
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        maxWidth: '100vw',
-        minHeight: '100vh',
-        margin: 0,
-        padding: { xs: '4px', sm: '8px' },
-        boxSizing: 'border-box',
-        backgroundColor: '#f5f5f5',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-      }}
-    >
-      <Typography
-        variant="h6"
-        sx={{
-          fontSize: { xs: '1.25rem', sm: '1.5rem' },
-          fontWeight: 600,
-          color: '#333',
-          margin: 0,
-          padding: '8px 0',
-          textAlign: 'left',
-        }}
-      >
+    <Box className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">
         Patients List
-      </Typography>
+      </h2>
       {error && (
-        <Alert
-          severity="error"
-          sx={{
-            width: '100%',
-            maxWidth: '100%',
-            margin: 0,
-            padding: '8px',
-            fontSize: { xs: '0.75rem', sm: '0.875rem' },
-            borderRadius: '4px',
-          }}
-        >
+        <Alert severity="error" className="mb-4">
           Failed to load patients: {error}
         </Alert>
       )}
       {localPatients.length === 0 && !error && (
-        <Alert
-          severity="info"
-          sx={{
-            width: '100%',
-            maxWidth: '100%',
-            margin: 0,
-            padding: '8px',
-            fontSize: { xs: '0.75rem', sm: '0.875rem' },
-            borderRadius: '4px',
-          }}
-        >
+        <Alert severity="info" className="mb-4">
           No patients found.
         </Alert>
       )}
-      <Box
-        sx={{
-          width: '100%',
-          flexGrow: 1,
-          overflowX: 'auto',
-        }}
-      >
+      <Box className="w-full overflow-x-auto">
         <DataGrid
           rows={localPatients}
           columns={columns}
@@ -318,66 +250,57 @@ export default function PatientList({ patients, onSuccess, onEdit }) {
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
           }}
-          sx={{
-            width: '100%',
-            border: 'none',
-            backgroundColor: '#fff',
-            borderRadius: '4px',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-            fontSize: { xs: '0.75rem', sm: '0.875rem' },
-            '& .MuiDataGrid-cell': {
-              padding: '4px 8px',
-            },
-            '& .MuiDataGrid-columnHeader': {
-              padding: '4px 8px',
-              backgroundColor: '#f9f9f9',
-              color: '#333',
-            },
-            '& .MuiDataGrid-toolbarContainer': {
-              padding: '4px',
-            },
-            '& .MuiDataGrid-footerContainer': {
-              padding: '4px',
-            },
-          }}
+          className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md shadow-md"
         />
       </Box>
       <Dialog open={openEditModal} onClose={handleCloseEditModal} maxWidth="md" fullWidth>
-        <DialogTitle>Edit Patient</DialogTitle>
-        <DialogContent>
+        <DialogTitle className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white">Edit Patient</DialogTitle>
+        <DialogContent className="bg-hospital-white dark:bg-hospital-gray-900">
           <PatientForm patient={selectedPatient} onSubmit={handleSuccess} />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEditModal} color="secondary">
+        <DialogActions className="bg-hospital-gray-50 dark:bg-hospital-gray-800">
+          <Button
+            onClick={handleCloseEditModal}
+            className="border-hospital-gray-400 text-hospital-gray-400 hover:bg-hospital-gray-400 hover:text-hospital-white rounded-md px-4 py-2"
+          >
             Cancel
           </Button>
         </DialogActions>
       </Dialog>
       <Dialog open={openDeleteConfirm} onClose={() => setOpenDeleteConfirm(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete this patient?</Typography>
+        <DialogTitle className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white">Confirm Delete</DialogTitle>
+        <DialogContent className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white">
+          <p>Are you sure you want to delete this patient?</p>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteConfirm(false)} color="secondary">
+        <DialogActions className="bg-hospital-gray-50 dark:bg-hospital-gray-800">
+          <Button
+            onClick={() => setOpenDeleteConfirm(false)}
+            className="border-hospital-gray-400 text-hospital-gray-400 hover:bg-hospital-gray-400 hover:text-hospital-white rounded-md px-4 py-2"
+          >
             Cancel
           </Button>
-          <Button onClick={handleDelete} color="error">
+          <Button
+            onClick={handleDelete}
+            className="border-hospital-error text-hospital-error hover:bg-hospital-error hover:text-hospital-white rounded-md px-4 py-2"
+          >
             Delete
           </Button>
         </DialogActions>
       </Dialog>
       <Dialog open={openMedicalRecordsModal} onClose={handleCloseMedicalRecordsModal} maxWidth="lg" fullWidth>
-        <DialogTitle>Medical Records for {medicalRecordsPatient?.name}</DialogTitle>
-        <DialogContent>
+        <DialogTitle className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white">Medical Records for {medicalRecordsPatient?.name}</DialogTitle>
+        <DialogContent className="bg-hospital-white dark:bg-hospital-gray-900">
           <MedicalRecordsList
             medicalRecords={medicalRecordsPatient?.medicalRecords || []}
             patients={[medicalRecordsPatient]}
             onSuccess={handleSuccess}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseMedicalRecordsModal} color="secondary">
+        <DialogActions className="bg-hospital-gray-50 dark:bg-hospital-gray-800">
+          <Button
+            onClick={handleCloseMedicalRecordsModal}
+            className="border-hospital-gray-400 text-hospital-gray-400 hover:bg-hospital-gray-400 hover:text-hospital-white rounded-md px-4 py-2"
+          >
             Close
           </Button>
         </DialogActions>
