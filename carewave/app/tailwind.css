@@ -2,179 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Properties for Consistent Theming */
-:root {
-  /* Hospital Color Palette */
-  --hospital-teal: #0f4c4c;
-  --hospital-teal-light: #175757;
-  --hospital-teal-lighter: #1f6363;
-  --hospital-accent: #0891b2;
-  --hospital-success: #059669;
-  --hospital-warning: #d97706;
-  --hospital-error: #dc2626;
-  --hospital-gray-50: #f8fafc;
-  --hospital-gray-100: #f1f5f9;
-  --hospital-gray-200: #e2e8f0;
-  --hospital-gray-300: #cbd5e1;
-  --hospital-gray-400: #94a3b8;
-  --hospital-gray-500: #64748b;
-  --hospital-gray-600: #475569;
-  --hospital-gray-700: #334155;
-  --hospital-gray-800: #1e293b;
-  --hospital-gray-900: #0f172a;
-  --hospital-white: #ffffff;
-
-  /* Spacing */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-}
-
-/* Dark Mode Colors */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: var(--hospital-gray-900);
-    --bg-secondary: var(--hospital-gray-800);
-    --text-primary: var(--hospital-white);
-    --text-secondary: var(--hospital-gray-400);
-    --border-primary: var(--hospital-gray-700);
-  }
-}
-
-/* Image Optimization */
-img {
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
 @layer base {
-  html {
-    @apply scroll-smooth;
-    font-size: clamp(14px, 4vw, 16px);
-    line-height: 1.5;
+  :root {
+    --border-primary: #e5e7eb;
+    --bg-secondary: #f9fafb;
+    --text-primary: #111827;
+    --hospital-white: #ffffff;
+    --hospital-gray-50: #f9fafb;
+    --hospital-gray-200: #e5e7eb;
+    --hospital-gray-500: #6b7280;
+    --hospital-gray-700: #374151;
+    --hospital-gray-800: #1f2937;
+    --hospital-gray-900: #111827;
+    --hospital-accent: #059669;
+    --hospital-error: #dc2626;
   }
 
-  body {
-    @apply font-primary bg-[var(--bg-primary)] text-[var(--text-primary)] font-normal leading-6;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    margin: 0;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold text-[var(--text-primary)] mb-2;
-  }
-
-  h1 {
-    @apply text-3xl sm:text-4xl leading-tight;
-  }
-
-  h2 {
-    @apply text-2xl sm:text-3xl leading-snug;
-  }
-
-  h3 {
-    @apply text-xl sm:text-2xl leading-relaxed;
+  [data-theme='dark'] {
+    --border-primary: #374151;
+    --bg-secondary: #1f2937;
+    --text-primary: #f9fafb;
+    --hospital-white: #1f2937;
+    --hospital-gray-50: #111827;
+    --hospital-gray-200: #4b5563;
+    --hospital-gray-500: #9ca3af;
+    --hospital-gray-700: #d1d5db;
+    --hospital-gray-800: #e5e7eb;
+    --hospital-gray-900: #f9fafb;
+    --hospital-accent: #34d399;
+    --hospital-error: #f87171;
   }
 }
 
 @layer components {
-  .btn {
-    @apply font-primary cursor-pointer border-none rounded-md transition-all duration-200 ease-in-out text-sm sm:text-base;
+  .input,
+  .select,
+  .textarea {
+    @apply font-primary border rounded-md p-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors duration-200 ease-in-out text-sm sm:text-base;
+    border-color: var(--border-primary);
   }
-
-  .btn:hover {
-    @apply -translate-y-px;
-  }
-
-  .input, .select, .textarea {
-    @apply font-primary border border-[var(--border-primary)] rounded-md p-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-border duration-200 ease-in-out text-sm sm:text-base;
-  }
-
-  .input:focus, .select:focus, .textarea:focus {
-    @apply outline-none border-[var(--hospital-accent)] ring-2 ring-[rgba(8,145,178,0.1)];
-  }
-
-  .focus-visible {
-    @apply outline-2 outline-[var(--hospital-accent)] outline-offset-2;
-  }
-}
-
-@layer utilities {
-  /* Scrollbar Styling */
-  .scrollbar::-webkit-scrollbar {
-    @apply w-1.5 h-1.5;
-  }
-
-  .scrollbar::-webkit-scrollbar-track {
-    @apply bg-[var(--hospital-gray-100)] dark:bg-[var(--hospital-gray-700)];
-  }
-
-  .scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-[var(--hospital-gray-400)] dark:bg-[var(--hospital-gray-500)] rounded-md;
-  }
-
-  .scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-[var(--hospital-gray-500)] dark:bg-[var(--hospital-gray-400)];
-  }
-
-  /* Responsive container */
-  .container {
-    @apply w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8;
-  }
-}
-
-/* Responsive Typography */
-@media (max-width: 640px) {
-  html {
-    @apply text-[14px];
-  }
-
-  h1 {
-    @apply text-2xl;
-  }
-
-  h2 {
-    @apply text-xl;
-  }
-
-  h3 {
-    @apply text-lg;
-  }
-}
-
-@media (min-width: 1920px) {
-  html {
-    @apply text-[18px];
-  }
-}
-
-/* Print Styles */
-@media print {
-  body {
-    @apply bg-white text-black;
-  }
-
-  .input, .select, .textarea {
-    @apply border border-black;
-  }
-
-  .no-print {
-    @apply hidden;
-  }
-}
-
-/* Font Definitions */
-@font-face {
-  font-family: 'Inter';
-  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-}
-
-@font-face {
-  font-family: 'Fira Code';
-  src: url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
 }
