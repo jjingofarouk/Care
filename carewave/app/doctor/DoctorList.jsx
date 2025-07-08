@@ -1,9 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, TextField, MenuItem, Skeleton } from '@mui/material';
+import { Alert, Button, TextField, MenuItem } from '@mui/material';
 import { DataGrid, GridToolbarContainer, GridToolbarFilterButton } from '@mui/x-data-grid';
 import { getDoctors, updateDoctor, deleteDoctor } from './doctorService';
-import styles from './DoctorList.module.css';
 
 export default function DoctorList({ onEdit, onSelect }) {
   const [doctors, setDoctors] = useState([]);
@@ -32,7 +31,6 @@ export default function DoctorList({ onEdit, onSelect }) {
         setFilteredDoctors(mappedDoctors);
         setError(null);
       } catch (error) {
-        console.error('Error fetching doctors:', error);
         setError(error.response?.data?.details || error.message);
       } finally {
         setLoading(false);
@@ -67,7 +65,6 @@ export default function DoctorList({ onEdit, onSelect }) {
         row.id === params.id ? { ...row, [params.field]: params.value } : row
       ));
     } catch (error) {
-      console.error('Error updating doctor:', error);
       setError(error.response?.data?.details || error.message);
     }
   };
@@ -77,7 +74,6 @@ export default function DoctorList({ onEdit, onSelect }) {
       await deleteDoctor(id);
       setDoctors(doctors.filter(row => row.id !== id));
     } catch (error) {
-      console.error('Error deleting doctor:', error);
       setError(error.response?.data?.details || error.message);
     }
   };
@@ -100,7 +96,7 @@ export default function DoctorList({ onEdit, onSelect }) {
           variant="outlined"
           color="error"
           onClick={() => handleDelete(params.row.id)}
-          className={styles.actionButton}
+          className="border-hospital-error text-hospital-error hover:bg-hospital-error hover:text-hospital-white rounded-md px-4 py-2"
         >
           Delete
         </Button>
@@ -111,14 +107,14 @@ export default function DoctorList({ onEdit, onSelect }) {
   const specialties = [...new Set(doctors.map(doctor => doctor.specialty))].filter(s => s !== 'N/A');
 
   const CustomToolbar = () => (
-    <GridToolbarContainer className={styles.toolbar}>
+    <GridToolbarContainer className="flex items-center p-4 bg-hospital-gray-50 dark:bg-hospital-gray-800">
       <TextField
         label="Search by Name, ID, or Email"
         variant="outlined"
         size="small"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        sx={{ mr: 2, width: 250 }}
+        className="mr-4 w-64 bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
       />
       <TextField
         label="Filter by Specialty"
@@ -127,54 +123,50 @@ export default function DoctorList({ onEdit, onSelect }) {
         size="small"
         value={specialtyFilter}
         onChange={(e) => setSpecialtyFilter(e.target.value)}
-        sx={{ mr: 2, width: 200 }}
+        className="mr-4 w-48 bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
       >
         <MenuItem value="">All Specialties</MenuItem>
         {specialties.map(specialty => (
           <MenuItem key={specialty} value={specialty}>{specialty}</MenuItem>
         ))}
       </TextField>
-      <GridToolbarFilterButton />
+      <GridToolbarFilterButton className="text-hospital-gray-900 dark:text-hospital-white" />
     </GridToolbarContainer>
   );
 
   return (
-    <Box className={styles.container}>
-      <Typography variant="h6" className={styles.title}>
-        Doctors List
-      </Typography>
+    <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Doctors List</h2>
       {error && (
-        <Alert severity="error" className={styles.alert}>
+        <Alert severity="error" className="mb-4">
           Failed to load doctors: {error}
         </Alert>
       )}
       {loading ? (
-        <Box className={styles.skeletonWrapper}>
-          <Skeleton variant="rectangular" height={60} className={styles.skeleton} />
-          <Skeleton variant="rectangular" height={400} className={styles.skeleton} />
-        </Box>
+        <div className="space-y-4">
+          <div className="h-16 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></div>
+          <div className="h-96 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></div>
+        </div>
       ) : doctors.length === 0 && !error ? (
-        <Alert severity="info" className={styles.alert}>
+        <Alert severity="info" className="mb-4">
           No doctors found.
         </Alert>
       ) : (
-        <Box className={styles.tableWrapper}>
-          <Box className={styles.dataGridWrapper}>
-            <DataGrid
-              rows={filteredDoctors}
-              columns={columns}
-              pageSizeOptions={[5, 10, 25]}
-              disableRowSelectionOnClick
-              initialState={{
-                pagination: { paginationModel: { pageSize: 10 } },
-              }}
-              className={styles.dataGrid}
-              onCellEditStop={handleCellEditStop}
-              slots={{ toolbar: CustomToolbar }}
-            />
-          </Box>
-        </Box>
+        <div className="mt-4">
+          <DataGrid
+            rows={filteredDoctors}
+            columns={columns}
+            pageSizeOptions={[5, 10, 25]}
+            disableRowSelectionOnClick
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10 } },
+            }}
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md shadow-md"
+            onCellEditStop={handleCellEditStop}
+            slots={{ toolbar: CustomToolbar }}
+          />
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
