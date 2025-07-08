@@ -43,18 +43,26 @@
   }
 }
 
-/* Custom Tailwind Layer */
+/* Image Optimization */
+img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
 @layer base {
   html {
     @apply scroll-smooth;
-    font-size: 16px;
+    font-size: clamp(14px, 4vw, 16px);
     line-height: 1.5;
   }
 
   body {
-    @apply font-primary bg-[var(--bg-primary)] text-[var(--text-primary)] text-base font-normal leading-6;
+    @apply font-primary bg-[var(--bg-primary)] text-[var(--text-primary)] font-normal leading-6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    margin: 0;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -62,21 +70,21 @@
   }
 
   h1 {
-    @apply text-4xl leading-tight;
+    @apply text-3xl sm:text-4xl leading-tight;
   }
 
   h2 {
-    @apply text-3xl leading-snug;
+    @apply text-2xl sm:text-3xl leading-snug;
   }
 
   h3 {
-    @apply text-2xl leading-relaxed;
+    @apply text-xl sm:text-2xl leading-relaxed;
   }
 }
 
 @layer components {
   .btn {
-    @apply font-primary cursor-pointer border-none rounded-md transition-all duration-200 ease-in-out;
+    @apply font-primary cursor-pointer border-none rounded-md transition-all duration-200 ease-in-out text-sm sm:text-base;
   }
 
   .btn:hover {
@@ -84,7 +92,7 @@
   }
 
   .input, .select, .textarea {
-    @apply font-primary border border-[var(--border-primary)] rounded-md p-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-border duration-200 ease-in-out;
+    @apply font-primary border border-[var(--border-primary)] rounded-md p-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-border duration-200 ease-in-out text-sm sm:text-base;
   }
 
   .input:focus, .select:focus, .textarea:focus {
@@ -103,34 +111,45 @@
   }
 
   .scrollbar::-webkit-scrollbar-track {
-    @apply bg-[var(--hospital-gray-100)];
+    @apply bg-[var(--hospital-gray-100)] dark:bg-[var(--hospital-gray-700)];
   }
 
   .scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-[var(--hospital-gray-400)] rounded-md;
+    @apply bg-[var(--hospital-gray-400)] dark:bg-[var(--hospital-gray-500)] rounded-md;
   }
 
   .scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-[var(--hospital-gray-500)];
+    @apply bg-[var(--hospital-gray-500)] dark:bg-[var(--hospital-gray-400)];
+  }
+
+  /* Responsive container */
+  .container {
+    @apply w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8;
   }
 }
 
 /* Responsive Typography */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   html {
-    @apply text-[15px];
+    @apply text-[14px];
   }
 
   h1 {
-    @apply text-3xl;
-  }
-
-  h2 {
     @apply text-2xl;
   }
 
-  h3 {
+  h2 {
     @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+}
+
+@media (min-width: 1920px) {
+  html {
+    @apply text-[18px];
   }
 }
 
@@ -143,15 +162,19 @@
   .input, .select, .textarea {
     @apply border border-black;
   }
+
+  .no-print {
+    @apply hidden;
+  }
 }
 
 /* Font Definitions */
 @font-face {
   font-family: 'Inter';
-  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 }
 
 @font-face {
   font-family: 'Fira Code';
-  src: url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
+  src: url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
 }
