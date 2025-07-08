@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, Skeleton, TextField, Select, MenuItem } from '@mui/material';
+import { Box, Alert, Button, Skeleton, TextField, Select, MenuItem } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import AppointmentFilter from './AppointmentFilter';
 import axios from 'axios';
