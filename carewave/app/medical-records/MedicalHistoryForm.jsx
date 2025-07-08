@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { Box, TextField, Button, Grid, Typography, Alert } from '@mui/material';
+import { TextField, Button, Typography, Alert } from '@mui/material';
 import { createMedicalRecord } from './medicalRecordsService';
 
 export default function MedicalHistoryForm({ patient, onSubmit }) {
