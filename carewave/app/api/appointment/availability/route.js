@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAvailability, createAvailability } from '../../appointment/appointmentService';
+import { getAvailability, createAvailability } from '../../../appointment/appointmentService';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
