@@ -1,12 +1,9 @@
 // pharmacy/PharmacyForm.jsx
-// Medication addition form
-
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, MenuItem, FormControlLabel, Checkbox, Alert } from '@mui/material';
+import { Box, TextField, Button, MenuItem, FormControlLabel, Checkbox, Alert } from '@mui/material';
 import { addMedication, getSuppliers, getFormularies } from './pharmacyService';
-import styles from './PharmacyForm.module.css';
 
-const PharmacyForm = () => {
+export default function PharmacyForm() {
   const [medicationData, setMedicationData] = useState({
     name: '',
     genericName: '',
@@ -26,18 +23,23 @@ const PharmacyForm = () => {
   const [formularies, setFormularies] = useState([]);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const [supplierData, formularyData] = await Promise.all([
           getSuppliers(),
           getFormularies(),
         ]);
         setSuppliers(supplierData);
         setFormularies(formularyData);
+        setError(null);
       } catch (err) {
         setError('Failed to fetch data: ' + err.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -89,7 +91,7 @@ const PharmacyForm = () => {
         supplierId: medicationData.supplierId ? parseInt(medicationData.supplierId) : null,
         formularyId: medicationData.formularyId ? parseInt(medicationData.formularyId) : null,
       };
-      await addMediation(payload);
+      await addMedication(payload);
       setMedicationData({
         name: '',
         genericName: '',
@@ -114,156 +116,167 @@ const PharmacyForm = () => {
   };
 
   return (
-    <Box className={styles.container}>
-      <Typography variant="h6" gutterBottom>Add New Medication</Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-      <form onSubmit={handleMedicationSubmit} className={styles.form}>
-        <TextField
-          label="Medication Name"
-          name="name"
-          value={medicationData.name}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Generic Name"
-          name="genericName"
-          value={medicationData.genericName}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          select
-          label="Category"
-          name="category"
-          value={medicationData.category}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-          required
-        >
-          <MenuItem value="Analgesics">Analgesics</MenuItem>
-          <MenuItem value="Antibiotics">Antibiotics</MenuItem>
-          <MenuItem value="Antivirals">Antivirals</MenuItem>
-          <MenuItem value="Narcotics">Narcotics</MenuItem>
-        </TextField>
-        <TextField
-          label="Batch Number"
-          name="batchNumber"
-          value={medicationData.batchNumber}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Barcode"
-          name="barcode"
-          value={medicationData.barcode}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="RFID"
-          name="rfid"
-          value={medicationData.rfid}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Stock Quantity"
-          name="stockQuantity"
-          type="number"
-          value={medicationData.stockQuantity}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Minimum Stock Threshold"
-          name="minStockThreshold"
-          type="number"
-          value={medicationData.minStockThreshold}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Price"
-          name="price"
-          type="number"
-          value={medicationData.price}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Expiry Date"
-          name="expiryDate"
-          type="date"
-          value={medicationData.expiryDate}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-          InputLabelProps={{ shrink: true }}
-          required
-        />
-        <TextField
-          select
-          label="Supplier"
-          name="supplierId"
-          value={medicationData.supplierId}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-        >
-          <MenuItem value="">None</MenuItem>
-          {suppliers.map(supplier => (
-            <MenuItem key={supplier.id} value={supplier.id}>
-              {supplier.name}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          select
-          label="Formulary"
-          name="formularyId"
-          value={medicationData.formularyId}
-          onChange={handleMedicationChange}
-          fullWidth
-          margin="normal"
-        >
-          <MenuItem value="">None</MenuItem>
-          {formularies.map(formulary => (
-            <MenuItem key={formulary.id} value={formulary.id}>
-              {formulary.name}
-            </MenuItem>
-          ))}
-        </TextField>
-        <FormControlLabel
-          control={
-            <Checkbox
-              name="narcotic"
-              checked={medicationData.narcotic}
-              onChange={handleMedicationChange}
-            />
-          }
-          label="Narcotic"
-        />
-        <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-          Add Medication
-        </Button>
-      </form>
+    <Box className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Add New Medication</h2>
+      {error && <Alert severity="error" className="mb-4">{error}</Alert>}
+      {success && <Alert severity="success" className="mb-4">{success}</Alert>}
+      {loading ? (
+        <Box className="space-y-4">
+          <Box className="h-16 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></Box>
+          <Box className="h-96 bg-hospital-gray-100 dark:bg-hospital-gray-700 rounded-md animate-pulse"></Box>
+        </Box>
+      ) : (
+        <form onSubmit={handleMedicationSubmit} className="space-y-4">
+          <TextField
+            label="Medication Name"
+            name="name"
+            value={medicationData.name}
+            onChange={handleMedicationChange}
+            fullWidth
+            required
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            label="Generic Name"
+            name="genericName"
+            value={medicationData.genericName}
+            onChange={handleMedicationChange}
+            fullWidth
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            select
+            label="Category"
+            name="category"
+            value={medicationData.category}
+            onChange={handleMedicationChange}
+            fullWidth
+            required
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          >
+            <MenuItem value="Analgesics">Analgesics</MenuItem>
+            <MenuItem value="Antibiotics">Antibiotics</MenuItem>
+            <MenuItem value="Antivirals">Antivirals</MenuItem>
+            <MenuItem value="Narcotics">Narcotics</MenuItem>
+          </TextField>
+          <TextField
+            label="Batch Number"
+            name="batchNumber"
+            value={medicationData.batchNumber}
+            onChange={handleMedicationChange}
+            fullWidth
+            required
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            label="Barcode"
+            name="barcode"
+            value={medicationData.barcode}
+            onChange={handleMedicationChange}
+            fullWidth
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            label="RFID"
+            name="rfid"
+            value={medicationData.rfid}
+            onChange={handleMedicationChange}
+            fullWidth
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            label="Stock Quantity"
+            name="stockQuantity"
+            type="number"
+            value={medicationData.stockQuantity}
+            onChange={handleMedicationChange}
+            fullWidth
+            required
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            label="Minimum Stock Threshold"
+            name="minStockThreshold"
+            type="number"
+            value={medicationData.minStockThreshold}
+            onChange={handleMedicationChange}
+            fullWidth
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            label="Price"
+            name="price"
+            type="number"
+            value={medicationData.price}
+            onChange={handleMedicationChange}
+            fullWidth
+            required
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            label="Expiry Date"
+            name="expiryDate"
+            type="date"
+            value={medicationData.expiryDate}
+            onChange={handleMedicationChange}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            required
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            select
+            label="Supplier"
+            name="supplierId"
+            value={medicationData.supplierId}
+            onChange={handleMedicationChange}
+            fullWidth
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          >
+            <MenuItem value="">None</MenuItem>
+            {suppliers.map(supplier => (
+              <MenuItem key={supplier.id} value={supplier.id}>
+                {supplier.name}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            label="Formulary"
+            name="formularyId"
+            value={medicationData.formularyId}
+            onChange={handleMedicationChange}
+            fullWidth
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          >
+            <MenuItem value="">None</MenuItem>
+            {formularies.map(formulary => (
+              <MenuItem key={formulary.id} value={formulary.id}>
+                {formulary.name}
+              </MenuItem>
+            ))}
+          </TextField>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="narcotic"
+                checked={medicationData.narcotic}
+                onChange={handleMedicationChange}
+                className="text-hospital-accent dark:text-hospital-teal-light"
+              />
+            }
+            label="Narcotic"
+            className="text-hospital-gray-900 dark:text-hospital-white"
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
+          >
+            Add Medication
+          </Button>
+        </form>
+      )}
     </Box>
   );
-};
-
-export default PharmacyForm;
+}
