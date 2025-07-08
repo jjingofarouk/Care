@@ -14,7 +14,6 @@ export default function DischargeForm({ discharge, onSubmit, doctors }) {
     medications: discharge?.medications || '',
   });
   const [patients, setPatients] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function fetchPatients() {
