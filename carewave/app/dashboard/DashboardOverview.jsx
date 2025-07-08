@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Alert } from '@mui/material';
-import { TrendingUp, PendingActions, MonetizationOn, Assessment, Analytics, AccountBalance } from '@mui/icons-material';
+import { PendingActions, MonetizationOn, Assessment, Analytics, AccountBalance } from '@mui/icons-material';
 import AccountingChart from './AccountingChart';
 import FinancialSummary from '../adt/FinancialSummary';
 import { getDashboardData } from './dashboardService';
