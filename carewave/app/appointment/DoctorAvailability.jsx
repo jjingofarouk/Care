@@ -16,6 +16,7 @@ export default function DoctorAvailability({ doctors }) {
   const [filter, setFilter] = useState({ status: '', date: '' });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchAllAvailability() {
@@ -26,7 +27,7 @@ export default function DoctorAvailability({ doctors }) {
         
         for (const doctor of doctors || []) {
           try {
-            const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctor.id}`, {
+            const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}?doctorId=${doctor.id}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
             const doctorAvailability = response.data.map((item, index) => ({
@@ -99,8 +100,8 @@ export default function DoctorAvailability({ doctors }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`,
-        { resource: 'availability', ...formData, doctorId: selectedDoctorId },
+        `${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}`,
+        { ...formData, doctorId: selectedDoctorId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
@@ -126,7 +127,7 @@ export default function DoctorAvailability({ doctors }) {
     try {
       const token = localStorage.getItem('token');
       const { id, field, value } = params;
-      let updatePayload = { resource: 'availability', [field]: value };
+      let updatePayload = { [field]: value };
 
       if (field === 'startTime' || field === 'endTime') {
         updatePayload[field] = new Date(value).toISOString();
@@ -135,7 +136,7 @@ export default function DoctorAvailability({ doctors }) {
       }
 
       await axios.put(
-        `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${id}`,
+        `${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}/${id}`,
         updatePayload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -143,7 +144,7 @@ export default function DoctorAvailability({ doctors }) {
       setAvailability(availability.map(item =>
         item.id === id ? {
           ...item,
-          [field]: field === 'startTime' || field === 'endTime' ? new Date(value).toISOString() :
+          [field]: field === 'startTime' || field === 'endTime' ? new Date(value).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) :
                   field === 'doctorId' ? {
                     ...item,
                     doctorId: parseInt(value),
@@ -191,7 +192,7 @@ export default function DoctorAvailability({ doctors }) {
       headerName: 'Start Time',
       width: 200,
       editable: true,
-      renderCell: (params) => (params.row.startTime ? new Date(params.row.startTime).toLocaleString() : 'N/A'),
+      renderCell: (params) => (params.row.startTime ? new Date(params.row.startTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A'),
       renderEditCell: (params) => (
         <TextField
           type="datetime-local"
@@ -206,7 +207,7 @@ export default function DoctorAvailability({ doctors }) {
       headerName: 'End Time',
       width: 200,
       editable: true,
-      renderCell: (params) => (params.row.endTime ? new Date(params.row.endTime).toLocaleString() : 'N/A'),
+      renderCell: (params) => (params.row.endTime ? new Date(params.row.endTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A'),
       renderEditCell: (params) => (
         <TextField
           type="datetime-local"
@@ -232,97 +233,124 @@ export default function DoctorAvailability({ doctors }) {
         </Select>
       ),
     },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      renderCell: (params) => (
+        <Button
+          variant="contained"
+          color="error"
+          onClick={async () => {
+            try {
+              const token = localStorage.getItem('token');
+              await axios.delete(`${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}/${params.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              setAvailability(availability.filter(avail => avail.id !== params.id));
+              applyFilters(availability.filter(avail => avail.id !== params.id), filter, selectedDoctorId);
+            } catch (error) {
+              console.error('Error deleting availability:', error);
+            }
+          }}
+        >
+          Delete
+        </Button>
+      ),
+    },
   ];
 
   return (
-    <Box className={styles.container}>
-      <Typography variant="h5" gutterBottom className={styles.title}>
-        Doctor Availability
-      </Typography>
-      
-      <Box component="form" onSubmit={handleSubmit} className={styles.form}>
-        <SearchableSelect
-          label="Select Doctor (Required for adding availability)"
-          options={doctors || []}
-          value={selectedDoctorId}
-          onChange={setSelectedDoctorId}
-          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-          getOptionValue={(doctor) => doctor.id}
-          className={styles.input}
-        />
-        <TextField
-          label="Start Time"
-          type="datetime-local"
-          name="startTime"
-          value={formData.startTime}
-          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-          InputLabelProps={{ shrink: true }}
-          required
-          className={styles.input}
-        />
-        <TextField
-          label="End Time"
-          type="datetime-local"
-          name="endTime"
-          value={formData.endTime}
-          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-          InputLabelProps={{ shrink: true }}
-          required
-          className={styles.input}
-        />
-        <FormControl className={styles.input}>
-          <InputLabel>Status</InputLabel>
-          <Select
-            name="status"
-            value={formData.status}
+    <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <div className="p-4 bg-hospital-gray-50 dark:bg-hospital-gray-800 rounded-lg shadow-md">
+        <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Doctor Availability</h2>
+        <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+          <SearchableSelect
+            label="Select Doctor (Required for adding availability)"
+            options={doctors || []}
+            value={selectedDoctorId}
+            onChange={setSelectedDoctorId}
+            getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+            getOptionValue={(doctor) => doctor.id}
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            label="Start Time"
+            type="datetime-local"
+            name="startTime"
+            value={formData.startTime}
             onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+            InputLabelProps={{ shrink: true }}
+            required
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <TextField
+            label="End Time"
+            type="datetime-local"
+            name="endTime"
+            value={formData.endTime}
+            onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+            InputLabelProps={{ shrink: true }}
+            required
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          <FormControl className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md">
+            <InputLabel>Status</InputLabel>
+            <Select
+              name="status"
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+            >
+              <MenuItem value="AVAILABLE">Available</MenuItem>
+              <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+            </Select>
+          </FormControl>
+          <Button
+            type="submit"
+            variant="contained"
+            className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
           >
-            <MenuItem value="AVAILABLE">Available</MenuItem>
-            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
-          </Select>
-        </FormControl>
-        <Button type="submit" variant="contained" className={styles.button}>
-          Add Availability
-        </Button>
-      </Box>
-
-      <Box className={styles.filterContainer}>
-        <FormControl className={styles.filterInput}>
-          <InputLabel>Filter by Status</InputLabel>
-          <Select
-            name="status"
-            value={filter.status}
-            onChange={handleFilterChange}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="AVAILABLE">Available</MenuItem>
-            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
-      {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
-      
-      <Box className={styles.gridContainer}>
+            Add Availability
+          </Button>
+        </form>
+        <div className="space-y-4 mb-6">
+          <FormControl className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md">
+            <InputLabel>Filter by Status</InputLabel>
+            <Select
+              name="status"
+              value={filter.status}
+              onChange={handleFilterChange}
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="AVAILABLE">Available</MenuItem>
+              <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+        {error && <Alert severity="error" className="mb-4">{error}</Alert>}
         {loading ? (
-          <Box className={styles.loader}>
+          <div className="space-y-4">
             <Skeleton variant="rectangular" width="100%" height={400} />
             <Skeleton variant="text" width="60%" />
             <Skeleton variant="text" width="80%" />
-          </Box>
+          </div>
         ) : (
-          <DataGrid
-            rows={filteredAvailability}
-            columns={columns}
-            pageSizeOptions={[5, 10, 20]}
-            disableRowSelectionOnClick
-            getRowId={(row) => row.id}
-            onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
-            onCellEditStop={() => setEditingCell(null)}
-            onCellEditCommit={handleCellEditCommit}
-          />
+          <div className="mt-4">
+            <DataGrid
+              rows={filteredAvailability}
+              columns={columns}
+              pageSizeOptions={[5, 10, 20]}
+              disableRowSelectionOnClick
+              getRowId={(row) => row.id}
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
+              autoHeight
+              onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
+              onCellEditStop={() => setEditingCell(null)}
+              onCellEditCommit={handleCellEditCommit}
+            />
+          </div>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
