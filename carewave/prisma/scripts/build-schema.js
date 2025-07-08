@@ -1,4 +1,3 @@
-// prisma/scripts/build-schema.js
 const fs = require('fs');
 const path = require('path');
 
@@ -64,8 +63,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 `;
