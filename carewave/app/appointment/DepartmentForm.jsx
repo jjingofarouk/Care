@@ -11,13 +11,14 @@ export default function DepartmentForm() {
   const [departments, setDepartments] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchDepartments() {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=departments`, {
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.DEPARTMENT}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedDepartments = response.data.map((dept, index) => ({
@@ -58,7 +59,7 @@ export default function DepartmentForm() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setFormData({ name: '', description: '' });
-      const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=departments`, {
+      const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.DEPARTMENT}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const formattedDepartments = response.data.map((dept, index) => ({
@@ -147,49 +148,60 @@ export default function DepartmentForm() {
   ];
 
   return (
-    <Box sx={{ p: 2, maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h5" gutterBottom>Manage Departments</Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
-        <TextField
-          label="Department Name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          fullWidth
-        />
-        <TextField
-          label="Description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          multiline
-          rows={3}
-          fullWidth
-        />
-        {error && <Alert severity="error">{error}</Alert>}
-        <Button type="submit" variant="contained" disabled={loading}>
-          {loading ? 'Creating...' : 'Add Department'}
-        </Button>
-      </Box>
-      {loading ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Skeleton variant="rectangular" width="100%" height={400} />
-          <Skeleton variant="text" width="60%" />
-          <Skeleton variant="text" width="80%" />
-        </Box>
-      ) : (
-        <Box sx={{ height: 400, width: '100%' }}>
-          <DataGrid
-            rows={departments}
-            columns={columns}
-            pageSizeOptions={[5, 10, 20]}
-            disableRowSelectionOnClick
-            onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
-            onCellEditStop={() => setEditingCell(null)}
-            onCellEditCommit={handleCellEditCommit}
+    <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <div className="p-4 bg-hospital-gray-50 dark:bg-hospital-gray-800 rounded-lg shadow-md max-w-4xl mx-auto">
+        <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Manage Departments</h2>
+        <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+          <TextField
+            label="Department Name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            fullWidth
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
           />
-        </Box>
-      )}
-    </Box>
+          <TextField
+            label="Description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            multiline
+            rows={3}
+            fullWidth
+            className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
+          />
+          {error && <Alert severity="error" className="mb-4">{error}</Alert>}
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading}
+            className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md px-4 py-2"
+          >
+            {loading ? 'Creating...' : 'Add Department'}
+          </Button>
+        </form>
+        {loading ? (
+          <div className="space-y-4">
+            <Skeleton variant="rectangular" width="100%" height={400} />
+            <Skeleton variant="text" width="60%" />
+            <Skeleton variant="text" width="80%" />
+          </div>
+        ) : (
+          <div className="mt-4">
+            <DataGrid
+              rows={departments}
+              columns={columns}
+              pageSizeOptions={[5, 10, 20]}
+              disableRowSelectionOnClick
+              className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
+              autoHeight
+              onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
+              onCellEditStop={() => setEditingCell(null)}
+              onCellEditCommit={handleCellEditCommit}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
