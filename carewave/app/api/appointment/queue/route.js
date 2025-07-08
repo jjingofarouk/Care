@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getQueue, updateQueue } from '../../appointment/appointmentService';
+import { getQueue, updateQueue } from '../../../appointment/appointmentService';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
