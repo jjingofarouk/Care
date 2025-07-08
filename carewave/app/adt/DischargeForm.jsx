@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, MenuItem, Grid, Paper, Typography, Box, Autocomplete } from '@mui/material';
+import { TextField, Button, MenuItem, Autocomplete } from '@mui/material';
 import { createDischarge, updateDischarge, getPatients } from './adtService';
 
 export default function DischargeForm({ discharge, onSubmit, doctors }) {
@@ -13,7 +13,6 @@ export default function DischargeForm({ discharge, onSubmit, doctors }) {
     medications: discharge?.medications || '',
   });
   const [patients, setPatients] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function fetchPatients() {
@@ -63,7 +62,6 @@ export default function DischargeForm({ discharge, onSubmit, doctors }) {
         followUpInstructions: '',
         medications: '',
       });
-      setSearchQuery('');
     } catch (error) {
       console.error('Error submitting discharge:', error);
     }
@@ -87,7 +85,6 @@ export default function DischargeForm({ discharge, onSubmit, doctors }) {
                   label="Search Patient"
                   fullWidth
                   required
-                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md"
                 />
               )}
