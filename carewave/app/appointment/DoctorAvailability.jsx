@@ -1,22 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, TextField, FormControl, InputLabel, Select, MenuItem, Skeleton } from '@mui/material';
+import { Alert, Button, TextField, FormControl, InputLabel, Select, MenuItem, Skeleton } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
 import api from '../api';
-import styles from './DoctorAvailability.module.css';
 
 export default function DoctorAvailability({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [formData, setFormData] = useState({ startTime: '', endTime: '', status: 'AVAILABLE' });
   const [availability, setAvailability] = useState([]);
   const [filteredAvailability, setFilteredAvailability] = useState([]);
-  const [filter, setFilter] = useState({ status: '', date: '' });
+  const [filter, setFilter] = useState({ status: '' });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchAllAvailability() {
@@ -76,14 +74,6 @@ export default function DoctorAvailability({ doctors }) {
       filtered = filtered.filter(item => item.status === currentFilter.status);
     }
     
-    if (currentFilter.date) {
-      const filterDate = new Date(currentFilter.date).toDateString();
-      filtered = filtered.filter(item => {
-        const itemDate = new Date(item.startTime).toDateString();
-        return itemDate === filterDate;
-      });
-    }
-    
     setFilteredAvailability(filtered);
   };
 
@@ -141,7 +131,7 @@ export default function DoctorAvailability({ doctors }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setAvailability(availability.map(item =>
+      const updatedAvailability = availability.map(item =>
         item.id === id ? {
           ...item,
           [field]: field === 'startTime' || field === 'endTime' ? new Date(value).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) :
@@ -152,10 +142,10 @@ export default function DoctorAvailability({ doctors }) {
                     specialty: doctors.find(d => d.id === parseInt(value))?.specialty || 'N/A'
                   } : value
         } : item
-      ));
-      applyFilters(availability, filter, selectedDoctorId);
+      );
+      setAvailability(updatedAvailability);
+      applyFilters(updatedAvailability, filter, selectedDoctorId);
       setError(null);
-      setEditingCell(null);
     } catch (err) {
       setError('Failed to update availability: ' + (err.response?.data?.error || err.message));
     }
@@ -247,10 +237,11 @@ export default function DoctorAvailability({ doctors }) {
               await axios.delete(`${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}/${params.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
-              setAvailability(availability.filter(avail => avail.id !== params.id));
-              applyFilters(availability.filter(avail => avail.id !== params.id), filter, selectedDoctorId);
+              const updatedAvailability = availability.filter(avail => avail.id !== params.id);
+              setAvailability(updatedAvailability);
+              applyFilters(updatedAvailability, filter, selectedDoctorId);
             } catch (error) {
-              console.error('Error deleting availability:', error);
+              setError('Error deleting availability: ' + (error.response?.data?.error || error.message));
             }
           }}
         >
@@ -344,8 +335,6 @@ export default function DoctorAvailability({ doctors }) {
               getRowId={(row) => row.id}
               className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
               autoHeight
-              onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
-              onCellEditStop={() => setEditingCell(null)}
               onCellEditCommit={handleCellEditCommit}
             />
           </div>
