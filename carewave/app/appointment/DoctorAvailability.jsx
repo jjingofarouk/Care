@@ -16,7 +16,6 @@ export default function DoctorAvailability({ doctors }) {
   const [filter, setFilter] = useState({ status: '', date: '' });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchAllAvailability() {
