@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
             sx={{ 
               flex: 1, 
               m: 0, 
-              p: 0, 
+              pt: { xs: '64px', sm: '80px', lg: '96px' },
               maxWidth: '100%', 
               boxSizing: 'border-box',
               overflowX: 'hidden'
