@@ -1,10 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Autocomplete, Alert, Skeleton, MenuItem } from '@mui/material';
+import { TextField, Button, Autocomplete, Alert, Skeleton, MenuItem } from '@mui/material';
 import { DataGrid, GridToolbarContainer, GridToolbarFilterButton } from '@mui/x-data-grid';
 import PharmacyCard from './PharmacyCard';
 import { getPrescriptions, createPrescription, checkDrugInteractions, getDoctors, getPatients } from './pharmacyService';
-import styles from './PharmacyPrescriptions.module.css';
 
 const PharmacyPrescriptions = () => {
   const [prescriptions, setPrescriptions] = useState([]);
@@ -17,7 +16,6 @@ const PharmacyPrescriptions = () => {
     doctorId: '',
     items: [],
   });
-  const [interactions, setInteractions] = useState([]);
   const [doctorSearch, setDoctorSearch] = useState('');
   const [patientSearch, setPatientSearch] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState('');
@@ -109,14 +107,14 @@ const PharmacyPrescriptions = () => {
   const genders = [...new Set(patients.map(patient => patient.gender))].filter(g => g !== 'N/A');
 
   const CustomToolbar = () => (
-    <GridToolbarContainer className={styles.toolbar}>
+    <div className="flex flex-wrap gap-4 p-4 bg-hospital-gray-50 dark:bg-hospital-gray-800">
       <TextField
         label="Search Doctor by Name, ID, or Email"
         variant="outlined"
         size="small"
         value={doctorSearch}
         onChange={(e) => setDoctorSearch(e.target.value)}
-        sx={{ mr: 2, width: 250 }}
+        className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md w-64"
       />
       <TextField
         label="Filter by Specialty"
@@ -125,7 +123,7 @@ const PharmacyPrescriptions = () => {
         size="small"
         value={specialtyFilter}
         onChange={(e) => setSpecialtyFilter(e.target.value)}
-        sx={{ mr: 2, width: 200 }}
+        className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md w-48"
       >
         <MenuItem value="">All Specialties</MenuItem>
         {specialties.map(specialty => (
@@ -138,7 +136,7 @@ const PharmacyPrescriptions = () => {
         size="small"
         value={patientSearch}
         onChange={(e) => setPatientSearch(e.target.value)}
-        sx={{ mr: 2, width: 250 }}
+        className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md w-64"
       />
       <TextField
         label="Filter by Gender"
@@ -147,33 +145,33 @@ const PharmacyPrescriptions = () => {
         size="small"
         value={genderFilter}
         onChange={(e) => setGenderFilter(e.target.value)}
-        sx={{ mr: 2, width: 200 }}
+        className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white rounded-md w-48"
       >
         <MenuItem value="">All Genders</MenuItem>
         {genders.map(gender => (
           <MenuItem key={gender} value={gender}>{gender}</MenuItem>
         ))}
       </TextField>
-      <GridToolbarFilterButton />
-    </GridToolbarContainer>
+      <GridToolbarFilterButton className="text-hospital-gray-900 dark:text-hospital-white" />
+    </div>
   );
 
   return (
-    <Box className={styles.container}>
-      <Typography variant="h6" gutterBottom>Prescription Management</Typography>
+    <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Prescription Management</h2>
       {error && (
-        <Alert severity="error" className={styles.alert}>
+        <div className="mb-4 p-3 bg-hospital-error/10 text-hospital-error border border-hospital-error/20 rounded-md">
           {error}
-        </Alert>
+        </div>
       )}
       {loading ? (
-        <Box className={styles.skeletonWrapper}>
-          <Skeleton variant="rectangular" height={60} className={styles.skeleton} />
-          <Skeleton variant="rectangular" height={400} className={styles.skeleton} />
-        </Box>
+        <div className="space-y-4">
+          <Skeleton variant="rectangular" height={60} className="rounded-md" />
+          <Skeleton variant="rectangular" height={400} className="rounded-md" />
+        </div>
       ) : (
         <>
-          <Box className={styles.form}>
+          <div className="flex flex-wrap gap-4 mb-4">
             <Autocomplete
               options={filteredDoctors}
               getOptionLabel={(option) => `${option.name} (${option.doctorId})`}
@@ -184,9 +182,9 @@ const PharmacyPrescriptions = () => {
                   label="Select Doctor"
                   value={doctorSearch}
                   onChange={(e) => setDoctorSearch(e.target.value)}
+                  className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md w-64"
                 />
               )}
-              sx={{ width: 250, mr: 2 }}
             />
             <Autocomplete
               options={filteredPatients}
@@ -198,16 +196,20 @@ const PharmacyPrescriptions = () => {
                   label="Select Patient"
                   value={patientSearch}
                   onChange={(e) => setPatientSearch(e.target.value)}
+                  className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md w-64"
                 />
               )}
-              sx={{ width: 250, mr: 2 }}
             />
-            <Button variant="contained" onClick={handleAddPrescription}>
+            <Button
+              variant="contained"
+              onClick={handleAddPrescription}
+              className="bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light transition-transform duration-fast ease-in-out transform hover:-translate-y-1 rounded-md px-4 py-2"
+            >
               Create Prescription
             </Button>
-          </Box>
-          <Box className={styles.tableWrapper}>
-            <Box className={styles.dataGridWrapper}>
+          </div>
+          <div className="space-y-4">
+            <div className="bg-hospital-white dark:bg-hospital-gray-900 rounded-lg shadow-md">
               <DataGrid
                 rows={filteredDoctors}
                 columns={[
@@ -225,11 +227,11 @@ const PharmacyPrescriptions = () => {
                 initialState={{
                   pagination: { paginationModel: { pageSize: 10 } },
                 }}
-                className={styles.dataGrid}
+                className="text-hospital-gray-900 dark:text-hospital-white"
                 slots={{ toolbar: CustomToolbar }}
               />
-            </Box>
-            <Box className={styles.dataGridWrapper}>
+            </div>
+            <div className="bg-hospital-white dark:bg-hospital-gray-900 rounded-lg shadow-md">
               <DataGrid
                 rows={filteredPatients}
                 columns={[
@@ -247,19 +249,19 @@ const PharmacyPrescriptions = () => {
                 initialState={{
                   pagination: { paginationModel: { pageSize: 10 } },
                 }}
-                className={styles.dataGrid}
+                className="text-hospital-gray-900 dark:text-hospital-white"
                 slots={{ toolbar: CustomToolbar }}
               />
-            </Box>
-          </Box>
-          <Box className={styles.list}>
+            </div>
+          </div>
+          <div className="space-y-4 mt-4">
             {prescriptions.map((prescription) => (
               <PharmacyCard key={prescription.id} prescription={prescription} />
             ))}
-          </Box>
+          </div>
         </>
       )}
-    </Box>
+    </div>
   );
 };
 
