@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { TextField, Box, Typography, IconButton, Alert } from '@mui/material';
+import { TextField, Typography, IconButton, Alert } from '@mui/material';
 import { Search, Delete, Edit, QrCodeScanner } from '@mui/icons-material';
 import { getInventory, updateStock, deleteMedication, getStockAlerts, scanBarcode } from './pharmacyService';
-import styles from './PharmacyInventory.module.css';
 
 const PharmacyInventory = () => {
   const [inventory, setInventory] = useState([]);
@@ -107,14 +106,14 @@ const PharmacyInventory = () => {
   );
 
   return (
-    <Box className={styles.container}>
-      <Typography variant="h6" gutterBottom>Inventory Management</Typography>
+    <div className="p-6 bg-hospital-white dark:bg-hospital-gray-900">
+      <h2 className="text-lg font-semibold text-hospital-gray-900 dark:text-hospital-white mb-4">Inventory Management</h2>
       {stockAlerts.length > 0 && (
-        <Alert severity="warning">
+        <div className="mb-4 p-3 bg-hospital-warning/10 text-hospital-warning border border-hospital-warning/20 rounded-md">
           Low stock alert for {stockAlerts.length} medications
-        </Alert>
+        </div>
       )}
-      <Box className={styles.searchBar}>
+      <div className="mb-4">
         <TextField
           label="Search Medications"
           variant="outlined"
@@ -122,32 +121,37 @@ const PharmacyInventory = () => {
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{ startAdornment: <Search /> }}
           fullWidth
+          className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md"
         />
-        <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+        <div className="flex gap-2 mt-2">
           <TextField
             label="Scan Barcode"
             value={barcode}
             onChange={(e) => setBarcode(e.target.value)}
+            className="bg-hospital-gray-50 dark:bg-hospital-gray-800 text-hospital-gray-900 dark:text-hospital-white rounded-md flex-grow"
           />
-          <IconButton onClick={handleBarcodeScan}>
+          <button 
+            onClick={handleBarcodeScan}
+            className="p-2 bg-hospital-accent text-hospital-white hover:bg-hospital-teal-light rounded-md transition-transform duration-fast ease-in-out transform hover:-translate-y-1"
+          >
             <QrCodeScanner />
-          </IconButton>
-        </Box>
-      </Box>
-      <Box sx={{ height: 600, width: '100%' }}>
+          </button>
+        </div>
+      </div>
+      <div className="h-[600px] w-full">
         <DataGrid
           rows={filteredInventory}
           columns={columns}
           pageSizeOptions={[10, 25, 50]}
-          className={styles.grid}
+          className="bg-hospital-white dark:bg-hospital-gray-900 text-hospital-gray-900 dark:text-hospital-white"
           onCellEditStop={(params, event) => {
             if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
-              handleStockUpdate(params.row.id, params.value);
+              handleStockUpdate(params.row.id, event.target.value);
             }
           }}
         />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 
