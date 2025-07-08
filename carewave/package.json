@@ -9,27 +9,22 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    
     "schema:build": "node prisma/scripts/build-schema.js",
     "schema:watch": "node prisma/scripts/watch-schema.js",
     "schema:validate": "npm run schema:build && prisma validate",
-    
     "migrate:dev": "npm run schema:build && prisma migrate dev",
     "migrate:deploy": "npm run schema:build && prisma migrate deploy",
     "migrate:reset": "npm run schema:build && prisma migrate reset",
-    
     "prisma:generate": "npm run schema:build && prisma generate",
     "prisma:studio": "npm run schema:build && prisma studio",
     "prisma:format": "npm run schema:build && prisma format",
     "prisma:push": "npm run schema:build && prisma db push",
-    
     "db:seed": "npm run schema:build && npx prisma db seed -- --seed-file prisma/seed.js",
     "db:reset": "npm run schema:build && prisma migrate reset --force",
-    
     "dev:full": "concurrently \"npm run schema:watch\" \"next dev\"",
-    
     "prepare": "husky install",
-    "send:reminders": "node scripts/sendReminders.js"
+    "send:reminders": "node scripts/sendReminders.js",
+    "postcss": "postcss ./app/globals.css -o ./app/output.css"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -66,6 +61,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.47",
+    "postcss-cli": "^11.0.0",
     "prisma": "^5.21.1"
   },
   "prisma": {
