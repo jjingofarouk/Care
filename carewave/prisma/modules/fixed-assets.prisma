@@ -24,33 +24,33 @@ enum AssetType {
 model FixedAsset {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  name                  String              // Asset name (e.g., "MRI Scanner")
-  assetCode             String?             @unique // Unique identifier (e.g., "FA-001")
-  description           String?             // Detailed description of asset
-  assetType             AssetType           // Type of asset
-  purchaseDate          DateTime            // Date of purchase
-  purchaseCost          Float               // Initial cost of asset
-  depreciationMethod    DepreciationMethod? // Method used for depreciation
-  depreciationRate      Float?              // Annual depreciation rate (percentage)
-  depreciationAmount    Float               @default(0.0) // Accumulated depreciation
-  currentValue          Float               // Current book value
+  name                  String
+  assetCode             String?             @unique
+  description           String?
+  assetType             AssetType
+  purchaseDate          DateTime
+  purchaseCost          Float
+  depreciationMethod    DepreciationMethod?
+  depreciationRate      Float?
+  depreciationAmount    Float               @default(0.0)
+  currentValue          Float
   status                AssetStatus         @default(ACTIVE)
-  departmentId          Int?                // Link to department using the asset
+  departmentId          Int?
   department            Department?         @relation(fields: [departmentId], references: [id])
-  location              String?             // Physical location (e.g., "Radiology Lab")
-  serialNumber          String?             // Manufacturer serial number
-  manufacturer          String?             // Manufacturer name
-  model                 String?             // Model number
-  warrantyEndDate       DateTime?           // Warranty expiration date
-  maintenanceSchedule   String?             // JSON for maintenance schedule (e.g., {"frequency": "ANNUAL"})
-  lastMaintenanceDate   DateTime?           // Last maintenance performed
-  disposalDate          DateTime?           // Date of disposal, if applicable
-  disposalReason        String?             // Reason for disposal (e.g., "Obsolete")
-  disposalValue         Float?              @default(0.0) // Value received on disposal
-  createdById           Int?                // User who created the asset record
-  createdBy             User?               @relation(fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
-  updatedBy             User?               @relation(fields: [updatedById], references: [id])
+  location              String?
+  serialNumber          String?
+  manufacturer          String?
+  model                 String?
+  warrantyEndDate       DateTime?
+  maintenanceSchedule   String?
+  lastMaintenanceDate   DateTime?
+  disposalDate          DateTime?
+  disposalReason        String?
+  disposalValue         Float?              @default(0.0)
+  createdById           Int?
+  createdBy             User?               @relation("FixedAssetCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?
+  updatedBy             User?               @relation("FixedAssetUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("FixedAssetAuditLogs")
   maintenanceRecords    MaintenanceRecord[] @relation("AssetMaintenanceRecords")
   createdAt             DateTime            @default(now())
@@ -63,16 +63,16 @@ model MaintenanceRecord {
   fixedAssetId          Int
   fixedAsset            FixedAsset          @relation("AssetMaintenanceRecords", fields: [fixedAssetId], references: [id])
   maintenanceDate       DateTime            @default(now())
-  maintenanceType       String              // e.g., "Routine", "Repair"
-  description           String?             // Details of maintenance performed
-  cost                  Float?              @default(0.0) // Cost of maintenance
-  performedById         Int?                // User or technician who performed maintenance
-  performedBy           User?               @relation(fields: [performedById], references: [id])
-  notes                 String?             // Additional notes
-  createdById           Int?                // User who created the record
-  createdBy             User?               @relation(fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
-  updatedBy             User?               @relation(fields: [updatedById], references: [id])
+  maintenanceType       String
+  description           String?
+  cost                  Float?              @default(0.0)
+  performedById         Int?
+  performedBy           User?               @relation("MaintenancePerformedBy", fields: [performedById], references: [id])
+  createdById           Int?
+  createdBy             User?               @relation("MaintenanceCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?
+  updatedBy             User?               @relation("MaintenanceUpdatedBy", fields: [updatedById], references: [id])
+  notes                 String?
   auditLogs             AuditLog[]          @relation("MaintenanceRecordAuditLogs")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
