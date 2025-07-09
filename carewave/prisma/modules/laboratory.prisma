@@ -21,47 +21,48 @@ enum LabTestType {
 model Laboratory {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  testCode              String              @unique // e.g., "LAB-001"
+  testCode              String              @unique
   patientId             Int
   patient               Patient             @relation(fields: [patientId], references: [id])
-  doctorId              Int?                // Link to ordering doctor
+  doctorId              Int?
   doctor                Doctor?             @relation("LaboratoryOrders", fields: [doctorId], references: [id])
-  appointmentId         Int?                // Link to appointment
+  appointmentId         Int?
   appointment           Appointment?        @relation(fields: [appointmentId], references: [id])
-  admissionId           Int?                // Link to admission
+  admissionId           Int?
   admission             Admission?          @relation(fields: [admissionId], references: [id])
-  clinicalRecordId      Int?                // Link to clinical record
+  clinicalRecordId      Int?
   clinicalRecord        ClinicalRecord?     @relation(fields: [clinicalRecordId], references: [id])
-  departmentId          Int?                // Link to department
+  departmentId          Int?
   department            Department?         @relation(fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                // Link to clinical setting
+  clinicalSettingId     Int?
   clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
-  testType              LabTestType         // Type of lab test
+  testType              LabTestType
   status                LabTestStatus       @default(ORDERED)
-  testName              String              // Name of the test (e.g., "Complete Blood Count")
-  description           String?             // Detailed description of test
-  orderDate             DateTime            @default(now()) // Date test was ordered
-  sampleCollectionDate  DateTime?           // Date sample was collected
-  resultDate            DateTime?           // Date results were available
-  results               String?             // JSON or text for test results
-  normalRange           String?             // JSON or text for reference range (e.g., {"hb": "12-16 g/dL"})
-  billingId             Int?                // Link to billing for lab test
+  testName              String
+  description           String?
+  orderDate             DateTime            @default(now())
+  sampleCollectionDate  DateTime?
+  resultDate            DateTime?
+  results               String?
+  normalRange           String?
+  billingId             Int?
   billing               Billing?            @relation(fields: [billingId], references: [id])
-  claimId               Int?                // Link to insurance claim
+  claimId               Int?
   claim                 Claim?              @relation(fields: [claimId], references: [id])
-  sampleId              String?             // Unique sample identifier (e.g., barcode)
-  performedById         Int?                // User or technician who performed the test
+  sampleId              String?
+  performedById         Int?
   performedBy           User?               @relation("PerformedBy", fields: [performedById], references: [id])
-  reviewedById          Int?                // User who reviewed the results
+  reviewedById          Int?
   reviewedBy            User?               @relation("ReviewedBy", fields: [reviewedById], references: [id])
-  notes                 String?             // Additional notes for the test
-  createdById           Int?                // User who created the lab record
+  notes                 String?
+  createdById           Int?
   createdBy             User?               @relation("LaboratoryCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
+  updatedById           Int?
   updatedBy             User?               @relation("LaboratoryUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("LaboratoryAuditLogs")
   labDocuments          LabDocument[]       @relation("LaboratoryDocuments")
   labNotifications      LabNotification[]   @relation("LaboratoryNotifications")
+  dashboardWidget       DashboardWidget?     @relation("DashboardWidgetLaboratory")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
