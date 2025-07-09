@@ -12,17 +12,24 @@ enum DeliveryType {
   ASSISTED
 }
 
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  DELIVERED
+}
+
 model Maternity {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
   patientId             Int
-  patient               Patient             @relation(fields: [patientId], references: [id])
+  patient               Patient             @relation("PatientMaternityRecords", fields: [patientId], references: [id])
   doctorId              Int?
   doctor                Doctor?             @relation("DoctorMaternityRecords", fields: [doctorId], references: [id])
   admissionId           Int?
-  admission             Admission?          @relation(fields: [admissionId], references: [id])
+  admission             Admission?          @relation("AdmissionMaternity", fields: [admissionId], references: [id])
   departmentId          Int?
-  department            Department?         @relation(fields: [departmentId], references: [id])
+  department            Department?         @relation("DepartmentMaternityRecords", fields: [departmentId], references: [id])
   clinicalSettingId     Int?
   clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
   status                MaternityStatus     @default(PENDING)
@@ -46,11 +53,12 @@ model Maternity {
   laboratoryId          Int?
   laboratory            Laboratory?         @relation(fields: [laboratoryId], references: [id])
   radiologyId           Int?
-  radiology             Radiology?          @relation(fields: [radiologyId], references: [id])
+  radiology             Radiology?            @relation("MaternityRadiology", fields: [radiologyId], references: [id])
   pharmacyId            Int?
-  pharmacy              Pharmacy?           @relation(fields: [pharmacyId], references: [id])
+  pharmacy              Pharmacy?           @relation("MaternityPharmacy", fields: [pharmacyId], references: [id])
   operationTheatreId    Int?
-  operationTheatre      OperationTheatre?   @relation(fields: [operationTheatreId], references: [id])
+  operationTheatre      OperationTheatre?   @relation("MaternityOperationTheatre", fields: [operationTheatreId], references: [id])
+  medicalRecord         MedicalRecord?       @relation("MedicalRecordMaternity", fields: [maternityId], references: [id])
   notes                 String?
   createdById           Int?
   createdBy             User?               @relation("MaternityCreatedBy", fields: [createdById], references: [id])
@@ -73,7 +81,7 @@ model MaternityDocument {
   filePath              String
   description           String?
   uploadedById          Int?
-  uploadedBy            User?               @relation(fields: [uploadedById], references: [id])
+  uploadedBy            User?               @relation("MaternityDocumentUploadedBy", fields: [uploadedById], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   auditLogs             AuditLog[]          @relation("MaternityDocumentAuditLogs")
@@ -88,7 +96,7 @@ model MaternityNotification {
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
   recipientId           Int?
-  recipient             User?               @relation(fields: [recipientId], references: [id])
+  recipient             User?               @relation("MaternityNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
   createdAt             DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
