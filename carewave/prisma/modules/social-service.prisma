@@ -24,12 +24,51 @@ enum SocialServicePriority {
   URGENT
 }
 
+enum SocialServiceStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model SocialService {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  patientId           Int?                  // Link to patient
+  patient             Patient?              @relation(fields: [patientId], references: [id])
+  dischargeId         Int?                  // Link to discharge
+  discharge           Discharge?            @relation(fields: [dischargeId], references: [id])
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  socialWorkerId      Int?                  // Link to social worker
+  socialWorker        User?                 @relation("SocialServiceWorker", fields: [socialWorkerId], references: [id])
+  status              SocialServiceStatus   @default(PENDING) // Status of social service
+  serviceType         SocialServiceType?    // Type of social service
+  startDate           DateTime              @default(now())   // Start date of social service
+  endDate             DateTime?             // End date of social service
+  notes               String?               // General notes
+  socialServiceCases  SocialServiceCase[]   // Specific cases linked to this service
+  billingId           Int?                  // Link to billing for social services
+  billing             Billing?              @relation(fields: [billingId], references: [id])
+  createdById         Int?                  // User who created the record
+  createdBy           User?                 @relation("SocialServiceCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("SocialServiceUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("SocialServiceAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
 model SocialServiceCase {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
   caseNumber          String                @unique // Unique case ID (e.g., "SSC-2025-001")
   patientId           Int?                  // Link to patient
   patient             Patient?              @relation(fields: [patientId], references: [id])
+  socialServiceId     Int?                  // Link to parent social service
+  socialService       SocialService?        @relation(fields: [socialServiceId], references: [id])
   socialWorkerId      Int?                  // Link to social worker
   socialWorker        User?                 @relation("SocialWorker", fields: [socialWorkerId], references: [id])
   departmentId        Int?                  // Link to department
@@ -37,8 +76,8 @@ model SocialServiceCase {
   clinicalSettingId   Int?                  // Link to clinical setting
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
   type                SocialServiceType     // Type of social service
-  status              SocialServiceCaseStatus @default("OPEN")
-  priority            SocialServicePriority @default("MEDIUM")
+  status              SocialServiceCaseStatus @default(OPEN)
+  priority            SocialServicePriority @default(MEDIUM)
   openDate            DateTime              @default(now()) // Case open date
   closeDate           DateTime?             // Case close date
   description         String?               // Case description
