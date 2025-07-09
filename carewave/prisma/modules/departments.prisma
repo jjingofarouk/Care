@@ -11,7 +11,7 @@ model Department {
   description         String?
   status              DepartmentStatus      @default(ACTIVE)
   location            String?
-  headId              Int?                  @unique
+  headId              Int?
   head                User?                 @relation("DepartmentHead", fields: [headId], references: [id])
   phoneNumber         String?
   email               String?
@@ -41,14 +41,20 @@ model Department {
   vaccinationRecords  Vaccination[]         @relation("DepartmentVaccinationRecords")
   reports             Report[]              @relation("DepartmentReports")
   helpdeskTickets     Helpdesk[]            @relation("DepartmentHelpdeskTickets")
-  createdById         Int?                  @unique
+  createdById         Int?
   createdBy           User?                 @relation("DepartmentCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
+  updatedById         Int?
   updatedBy           User?                 @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("DepartmentAuditLogs")
   incentives          Incentive[]           @relation("DepartmentIncentives")
   users               User[]                @relation("UserDepartment")
   dashboards          Dashboard[]           @relation("DepartmentDashboards")
+  services            Service[]             @relation("DepartmentServices")
+  payrolls            Payroll[]             @relation("PayrollDepartment")
+  bankAccounts        BankAccount[]         @relation("BankAccountDepartment")
+  generalLedgers      GeneralLedger[]       @relation("GeneralLedgerDepartment")
+  doctorAvailability  DoctorAvailability[]  @relation("DepartmentDoctorAvailability")
+  recurringAppointments RecurringAppointment[] @relation("DepartmentRecurringAppointments")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
