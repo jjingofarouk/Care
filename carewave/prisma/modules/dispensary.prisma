@@ -1,11 +1,4 @@
-enum PrescriptionStatus {
-  PENDING
-  DISPENSED
-  PARTIALLY_DISPENSED
-  CANCELLED
-  ON_HOLD
-  EXPIRED
-}
+
 
 enum PatientType {
   INPATIENT
@@ -20,42 +13,6 @@ enum StockAdjustmentType {
   TRANSFER
 }
 
-model Prescription {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  patientId           Int
-  patient             Patient               @relation("Prescriptions", fields: [patientId], references: [id])
-  doctorId            Int
-  doctor              Doctor                @relation("Prescriptions", fields: [doctorId], references: [id])
-  appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("PrescriptionAppointments", fields: [appointmentId], references: [id])
-  admissionId         Int?                  @unique
-  admission           Admission?            @relation("PrescriptionAdmissions", fields: [admissionId], references: [id])
-  clinicalRecordId    Int?                  @unique
-  clinicalRecord      ClinicalRecord?       @relation("PrescriptionClinicalRecords", fields: [clinicalRecordId], references: [id])
-  pharmacyId          Int?                  @unique
-  pharmacy            Pharmacy?             @relation("PrescriptionPharmacy", fields: [pharmacyId], references: [id])
-  status              PrescriptionStatus    @default(PENDING)
-  prescriptionDate    DateTime              @default(now())
-  expiryDate          DateTime?
-  notes               String?
-  priority            String?
-  items               PrescriptionItem[]    @relation("PrescriptionItems")
-  dispensingRecords   DispensingRecord[]    @relation("PrescriptionDispensingRecords")
-  invoiceId           Int?                  @unique
-  invoice             Invoice?              @relation("InvoicePrescription", fields: [invoiceId], references: [id])
-  claimId             Int?                  @unique
-  claim               Claim?                @relation("PrescriptionClaims", fields: [claimId], references: [id])
-  nhifClaimId         Int?                  @unique
-  nhifClaim           NhifClaim?            @relation("PrescriptionNhifClaims", fields: [nhifClaimId], references: [id])
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("PrescriptionCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("PrescriptionUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("PrescriptionAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
 
 model PrescriptionItem {
   id                  Int                   @id @default(autoincrement())
