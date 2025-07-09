@@ -60,19 +60,19 @@ model InventoryTransaction {
   uuid                  String              @unique @default(uuid())
   inventoryId           Int
   inventory             Inventory           @relation("InventoryTransactions", fields: [inventoryId], references: [id])
-  transactionType       String              // e.g., "RESTOCK", "DISPENSE", "ADJUSTMENT", "DISPOSAL"
-  quantity              Int                 // Quantity added or removed
+  transactionType       String
+  quantity              Int
   transactionDate       DateTime            @default(now())
-  reason                String?             // Reason for transaction (e.g., "Patient use", "Expired")
-  referenceId           Int?                // Link to related entity (e.g., prescriptionId, orderId)
-  referenceType         String?             // Type of reference (e.g., "Prescription", "PurchaseOrder")
-  performedById         Int?                // User who performed the transaction
-  performedBy           User?               @relation(fields: [performedById], references: [id])
-  notes                 String?             // Additional notes
-  createdById           Int?                // User who created the transaction record
-  createdBy             User?               @relation(fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
-  updatedBy             User?               @relation(fields: [updatedById], references: [id])
+  reason                String?
+  referenceId           Int?
+  referenceType         String?
+  performedById         Int?
+  performedBy           User?               @relation("InventoryTransactionPerformedBy", fields: [performedById], references: [id])
+  createdById           Int?
+  createdBy             User?               @relation("InventoryTransactionCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?
+  updatedBy             User?               @relation("InventoryTransactionUpdatedBy", fields: [updatedById], references: [id])
+  notes                 String?
   auditLogs             AuditLog[]          @relation("InventoryTransactionAuditLogs")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -96,14 +96,14 @@ model InventoryNotification {
 model InventorySupplier {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  name                  String              // Supplier name
-  contactDetails        String?             // JSON or text for contact info (e.g., {"phone": "1234567890", "email": "supplier@example.com"})
-  address               String?             // Supplier address
-  supplierCode          String?             @unique // Unique supplier code (e.g., "SUP-001")
-  createdById           Int?                // User who created the supplier record
-  createdBy             User?               @relation(fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
-  updatedBy             User?               @relation(fields: [updatedById], references: [id])
+  name                  String
+  contactDetails        String?
+  address               String?
+  supplierCode          String?             @unique
+  createdById           Int?
+  createdBy             User?               @relation("InventorySupplierCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?
+  updatedBy             User?               @relation("InventorySupplierUpdatedBy", fields: [updatedById], references: [id])
   inventory             Inventory[]         @relation
   auditLogs             AuditLog[]          @relation("SupplierAuditLogs")
   createdAt             DateTime            @default(now())
