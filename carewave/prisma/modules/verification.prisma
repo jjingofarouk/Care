@@ -1,0 +1,86 @@
+// verification.prisma
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+  IN_PROGRESS
+}
+
+enum VerificationType {
+  EMAIL
+  PHONE
+  IDENTITY
+  INSURANCE
+  MEDICAL_LICENSE
+  EMPLOYMENT
+  ADDRESS
+}
+
+enum VerificationMethod {
+  OTP
+  DOCUMENT_UPLOAD
+  THIRD_PARTY_API
+  MANUAL_REVIEW
+  BIOMETRIC
+}
+
+model Verification {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  verificationNumber  String                @unique // Unique verification ID (e.g., "VER-2025-001")
+  userId              Int?                  // Link to user being verified
+  user                User?                 @relation("VerifiedUser", fields: [userId], references: [id])
+  patientId           Int?                  // Link to patient
+  patient             Patient?              @relation(fields: [patientId], references: [id])
+  doctorId            Int?                  // Link to doctor
+  doctor              Doctor?               @relation(fields: [doctorId], references: [id])
+  type                VerificationType      // Type of verification
+  status              VerificationStatus    @default("PENDING")
+  method              VerificationMethod    // Method used for verification
+  requestDate         DateTime              @default(now()) // Date verification was requested
+  verificationDate    DateTime?             // Date verification was completed
+  expiryDate          DateTime?             // Expiry date for verification (e.g., for OTP)
+  token               String?               // OTP or token for verification
+  documentPath        String?               // JSON or file paths for uploaded documents
+  documentType        String?               // e.g., "Passport", "Driver's License", "Medical License"
+  thirdPartyReference String?               // Reference ID from third-party API
+  rejectionReason     String?               // Reason for rejection, if applicable
+  notes               String?               // Additional notes
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  verifiedById        Int?                  // User who performed verification
+  verifiedBy          User?                 @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  auditLogs           AuditLog[]            @relation("VerificationAuditLogs")
+  createdById         Int?                  // User who initiated verification
+  createdBy           User?                 @relation("VerificationCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("VerificationUpdatedBy", fields: [updatedById], references: [id])
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model VerificationConfiguration {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  type                VerificationType      // Type of verification this config applies to
+  method              VerificationMethod    // Default verification method
+  maxAttempts         Int                   @default(3) // Max verification attempts
+  tokenExpiryMinutes  Int                   @default(10) // Token/OTP expiry time in minutes
+  requiredDocuments   String?               // JSON or text for required document types
+  thirdPartyApi       String?               // API provider for third-party verification
+  apiCredentials      String?               // Encrypted JSON for API credentials
+  autoVerify          Boolean               @default(false) // Auto-verify if possible
+  notificationSettings String?               // JSON for notification settings (e.g., SMS, email)
+  status              String                @default("ACTIVE") // ACTIVE, INACTIVE
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  notes               String?               // Additional notes
+  createdById         Int?                  // User who created configuration
+  createdBy           User?                 @relation("ConfigCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("ConfigUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("VerificationConfigAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
