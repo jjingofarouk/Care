@@ -101,7 +101,7 @@ model RoomSchedule {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
   roomId                Int
-  room                  Room                @relation("RoomSchedules", fields: [roomId], references: [id])
+  room                  Room                  @relation("RoomSchedules", fields: [roomId], references: [id])
   startTime             DateTime
   endTime               DateTime
   appointmentId         Int?                  // Link to appointment
@@ -109,9 +109,9 @@ model RoomSchedule {
   status                String                @default("AVAILABLE") // AVAILABLE, BOOKED, MAINTENANCE
   notes                 String?               // Additional notes for schedule
   createdById           Int?                  // User who created schedule
-  createdBy             User?                 @relation(fields: [createdById], references: [id])
+  createdBy             User?                 @relation("CreatedByUser", fields: [createdById], references: [id])
   updatedById           Int?                  // User who last updated
-  updatedBy             User?                 @relation(fields: [updatedById], references: [id])
+  updatedBy             User?                 @relation("UpdatedByUser", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("RoomScheduleAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
