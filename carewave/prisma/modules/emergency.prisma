@@ -7,12 +7,6 @@ enum EmergencyStatus {
   CANCELLED
 }
 
-enum TriagePriority {
-  EMERGENCY
-  URGENT
-  NON_URGENT
-  CRITICAL
-}
 
 
 model Emergency {
