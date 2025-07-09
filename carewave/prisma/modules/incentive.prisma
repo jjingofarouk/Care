@@ -1,12 +1,69 @@
-model Payroll {
-  id        Int       @id @default(autoincrement())
-  userId    Int
-  user      User      @relation(fields: [userId], references: [id])
-  salary    Float
-  taxes     Float
-  benefits  Float
-  period    String
-  status    String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+enum IncentiveStatus {
+  PENDING
+  APPROVED
+  DISBURSED
+  REJECTED
+  CANCELLED
+}
+
+enum IncentiveType {
+  PERFORMANCE
+  ATTENDANCE
+  SPECIALTY
+  BONUS
+  REFERRAL
+  OTHER
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+model Incentive {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  userId                Int                 // Link to user (e.g., doctor, nurse, staff)
+  user                  User                @relation(fields: [userId], references: [id])
+  doctorId              Int?                // Link to doctor if applicable
+  doctor                Doctor?             @relation(fields: [doctorId], references: [id])
+  departmentId          Int?                // Link to department
+  department            Department?         @relation(fields: [departmentId], references: [id])
+  incentiveType         IncentiveType       // Type of incentive
+  status                IncentiveStatus     @default(PENDING)
+  amount                Float               // Incentive amount
+  description           String?             // Description of incentive (e.g., "Performance bonus for Q1")
+  calculationBasis      String?             // JSON or text for calculation criteria (e.g., {"metric": "patient_satisfaction", "value": 95})
+  awardedDate           DateTime?           // Date incentive was awarded
+  disbursedDate         DateTime?           // Date incentive was paid
+  transactionId         Int?                // Link to accounting transaction
+  transaction           Transaction?        @relation(fields: [transactionId], references: [id])
+  rejectionReason       String?             // Reason for rejection, if applicable
+  createdById           Int?                // User who created the incentive record
+  createdBy             User?               @relation("IncentiveCreatedBy", fields: [createdById], references: [id])
+  approvedById          Int?                // User who approved the incentive
+  approvedBy            User?               @relation("IncentiveApprovedBy", fields: [approvedById], references: [id])
+  updatedById           Int?                // User who last updated
+  updatedBy             User?               @relation("IncentiveUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]          @relation("IncentiveAuditLogs")
+  incentiveNotifications IncentiveNotification[] @relation("IncentiveNotifications")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
+model IncentiveNotification {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  incentiveId           Int
+  incentive             Incentive           @relation("IncentiveNotifications", fields: [incentiveId], references: [id])
+  notificationType      String              // e.g., "SMS", "Email", "App Push"
+  status                NotificationStatus  @default(PENDING)
+  sentAt                DateTime?
+  recipientId           Int?                // User receiving notification
+  recipient             User?               @relation(fields: [recipientId], references: [id])
+  message               String?             // Notification content
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
 }
