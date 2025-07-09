@@ -224,9 +224,9 @@ model PaymentPlan {
   endDate               DateTime?
   status                String              @default("ACTIVE") // ACTIVE, COMPLETED, DEFAULTED
   createdById           Int?                // User who created payment plan
-  createdBy             User?               @relation(fields: [createdById], references: [id])
+  createdBy             User?               @relation("CreatedByUser", fields: [createdById], references: [id])
   approvedById          Int?                // User who approved payment plan
-  approvedBy            User?               @relation(fields: [approvedById], references: [id])
+  approvedBy            User?               @relation("ApprovedByUser", fields: [approvedById], references: [id])
   payments              Payment[]           @relation("PaymentPlanPayments")
   auditLogs             AuditLog[]          @relation("PaymentPlanAuditLogs")
   notifications         BillingNotification[] @relation("PaymentPlanNotifications")
