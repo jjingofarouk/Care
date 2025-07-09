@@ -119,27 +119,7 @@ model Prescription {
   updatedAt             DateTime              @updatedAt
 }
 
-model DispensingRecord {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  prescriptionId        Int
-  prescription          Prescription          @relation("PrescriptionDispensingRecords", fields: [prescriptionId], references: [id])
-  medicationId          Int
-  medication            Medication            @relation("MedicationDispensingRecords", fields: [medicationId], references: [id])
-  pharmacyId            Int?
-  pharmacy              Pharmacy?             @relation("PharmacyDispensingRecords", fields: [pharmacyId], references: [id])
-  invoiceId             Int?
-  invoice               Invoice?              @relation("InvoiceDispensingRecords", fields: [invoiceId], references: [id])
-  quantity              Int
-  dispensedDate         DateTime              @default(now())
-  status                DispensingStatus      @default(PENDING)
-  dispensedById         Int?
-  dispensedBy           User?                 @relation("DispensedBy", fields: [dispensedById], references: [id])
-  notes                 String?
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  auditLogs             AuditLog[]            @relation("DispensingRecordAuditLogs")
-}
+
 
 model Formulary {
   id                    Int                   @id @default(autoincrement())
