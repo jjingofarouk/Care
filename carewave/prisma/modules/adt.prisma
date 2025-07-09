@@ -150,9 +150,9 @@ model Bed {
   lastCleaned          DateTime?           // Last cleaning timestamp
   maintenanceNotes     String?             // Notes for maintenance issues
   createdById          Int?                // User who created bed
-  createdBy            User?               @relation(fields: [createdById], references: [id])
+  createdBy            User?               @relation("CreatedByUser", fields: [createdById], references: [id])
   updatedById          Int?                // User who last updated
-  updatedBy            User?               @relation(fields: [updatedById], references: [id])
+  updatedBy            User?               @relation("UpdatedByUser", fields: [updatedById], references: [id])
   auditLogs            AuditLog[]          @relation("BedAuditLogs")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
