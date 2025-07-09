@@ -1,0 +1,121 @@
+// system-admin.prisma
+enum UserRole {
+  ADMIN
+  DOCTOR
+  NURSE
+  PHARMACIST
+  RADIOLOGIST
+  SOCIAL_WORKER
+  PATIENT
+  BILLING_OFFICER
+  RECEPTIONIST
+  LAB_TECHNICIAN
+  IT_SUPPORT
+}
+
+enum PermissionLevel {
+  FULL_ACCESS
+  READ_ONLY
+  WRITE
+  RESTRICTED
+}
+
+enum SystemLogType {
+  LOGIN
+  LOGOUT
+  DATA_MODIFICATION
+  ERROR
+  SECURITY
+  SYSTEM_EVENT
+}
+
+model User {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  email                 String                @unique // User email
+  name                  String                // Full name
+  password              String                // Hashed password
+  role                  UserRole              @default("PATIENT") // User role
+  status                String                @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  departmentId          Int?                  // Link to department
+  department            Department?           @relation(fields: [departmentId], references: [id])
+  phone                 String?               // Contact number
+  address               String?               // Physical address
+  profileImage          String?               // Path to profile image
+  lastLogin             DateTime?             // Last login timestamp
+  loginAttempts         Int                   @default(0) // Failed login attempts
+  accountLocked         Boolean               @default(false) // Account lock status
+  permissions           String?               // JSON or text for specific permissions
+  createdById           Int?                  // User who created this user
+  createdBy             User?                 @relation("UserCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                  // User who last updated
+  updatedBy             User?                 @relation("UserUpdatedBy", fields: [updatedById], references: [id])
+  payrolls              Payroll[]             // Payroll records for staff
+  cssdLogs              CSSDLog[]             @relation("LoggedBy")
+  cssdRequisitions      CSSDRequisition[]     @relation("RequisitionRequestedBy")
+  appointments          Appointment[]         @relation("BookedBy")
+  dispensingRecords     DispensingRecord[]    @relation("DispensedBy")
+  refunds               Refund[]              @relation("ProcessedBy")
+  stockAdjustments      StockAdjustment[]     @relation("AdjustedBy")
+  socialServiceCases    SocialServiceCase[]   @relation("SocialWorker")
+  radiologyTests        RadiologyTest[]       @relation("Radiologist")
+  nursingCare           NursingCare[]         @relation("NurseAssigned")
+  nursingTasks          NursingTask[]         @relation("TaskAssignedNurse")
+  nursingShifts         NursingShift[]        @relation("ShiftNurse")
+  surgicalStaff         SurgicalStaff[]       @relation("SurgicalStaff")
+  systemLogs            SystemLog[]           @relation("LoggedBy")
+  auditLogs             AuditLog[]            @relation("PerformedBy")
+  patientRecords        Patient[]             @relation("PatientUser")
+  doctorRecords         Doctor[]              @relation("DoctorUser")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model SystemConfiguration {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  key                 String                @unique // e.g., "SYSTEM_TIMEZONE"
+  value               String                // Configuration value
+  description         String?               // Description of config
+  category            String?               // e.g., "General", "Security", "Notification"
+  status              String                @default("ACTIVE") // ACTIVE, INACTIVE
+  createdById         Int?                  // User who created config
+  createdBy           User?                 @relation("ConfigCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("ConfigUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("SystemConfigAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model SystemLog {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  userId              Int?                  // Link to user
+  user                User?                 @relation("LoggedBy", fields: [userId], references: [id])
+  type                SystemLogType         // Type of log
+  description         String                // Log details
+  ipAddress           String?               // IP address of action
+  deviceInfo          String?               // JSON or text for device details
+  module              String?               // e.g., "Patient", "Billing"
+  action              String                // e.g., "CREATE", "UPDATE", "DELETE"
+  entityId            Int?                  // ID of affected entity
+  entityType          String?               // Type of entity (e.g., "Patient", "Appointment")
+  createdAt           DateTime              @default(now())
+}
+
+model RolePermission {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  role                UserRole              // Role to which permission applies
+  module              String                // e.g., "Patient", "Billing"
+  permissionLevel     PermissionLevel       // FULL_ACCESS, READ_ONLY, etc.
+  description         String?               // Permission description
+  createdById         Int?                  // User who created permission
+  createdBy           User?                 @relation("PermissionCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("PermissionUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("RolePermissionAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
