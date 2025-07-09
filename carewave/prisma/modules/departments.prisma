@@ -48,6 +48,7 @@ model Department {
   auditLogs           AuditLog[]            @relation("DepartmentAuditLogs")
   incentives          Incentive[]           @relation("DepartmentIncentives")
   users               User[]                @relation("UserDepartment")
+  dashboards          Dashboard[]           @relation("DepartmentDashboards")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
