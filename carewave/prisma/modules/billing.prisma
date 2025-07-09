@@ -296,7 +296,7 @@ model BillingNotification {
   uuid                  String              @unique @default(uuid())
   invoiceId             Int?                @unique
   invoice               Invoice?            @relation("InvoiceNotifications", fields: [invoiceId], references: [id])
-  Comments:             Int?                @unique
+  Comments              Int?                @unique
   refund                Refund?             @relation("RefundNotifications", fields: [refundId], references: [id])
   paymentId             Int?                @unique
   payment               Payment?            @relation("PaymentNotifications", fields: [paymentId], references: [id])
