@@ -138,9 +138,9 @@ model Budget {
   costCenter        CostCenter?         @relation(fields: [costCenterId], references: [id])
   transactions      Transaction[]
   createdById       Int?
-  createdBy         User?               @relation(fields: [createdById], references: [id])
+  createdBy         User?               @relation("CreatedByUser", fields: [createdById], references: [id])
   approvedById      Int?
-  approvedBy        User?               @relation(fields: [approvedById], references: [id])
+  approvedBy        User?               @relation("ApprovedByUser", fields: [approvedById], references: [id])
   status            BudgetStatus        @default(DRAFT)
   startDate         DateTime
   endDate           DateTime
