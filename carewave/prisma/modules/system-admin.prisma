@@ -1,3 +1,11 @@
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+
 enum UserRole {
   ADMIN
   DOCTOR
