@@ -1,51 +1,85 @@
-model Patient {
-  id                    Int               @id @default(autoincrement())
-  patientId             String            @unique
-  name                  String?
-  email                 String?           @unique
-  dateOfBirth           DateTime?
-  gender                String?
-  phone                 String?
-  address               String?
-  emergencyContact      String?
-  emergencyContactPhone String?
-  insuranceProvider     String?
-  insurancePolicy       String?
-  bloodType             String?
-  allergies             String?
-  medicalHistory        String?
-  presentingComplaint   String?
-  familyHistory         String?
-  socialHistory         String?
-  pastMedicalHistory    String?
-  medications           String?
-  admissions            Admission[]
-  discharges            Discharge[]       @relation("DischargedPatient")
-  transactions          Transaction[]     @relation("PatientTransactions")
-  appointments          Appointment[]     @relation("PatientAppointments")
-  prescriptions         Prescription[]    @relation("Prescriptions")
-  prescribedToId        Int?
-  medicalRecords        MedicalRecord[]   @relation("PatientMedicalRecords")
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
+// patients.prisma
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
-model User {
-  id                Int                @id @default(autoincrement())
-  email             String             @unique
-  name              String
-  password          String
-  role              String             @default("PATIENT")
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  payrolls          Payroll[]
-  cssdLogs          CSSDLog[]          @relation("LoggedBy")
-  cssdRequisitions  CSSDRequisition[]  @relation("RequisitionRequestedBy")
-  appointments      Appointment[]      @relation("BookedBy")
-  dispensingRecords DispensingRecord[] @relation("DispensedBy")
-  dispensedById     Int?
-  refunds           Refund[]           @relation("ProcessedBy")
-  processedById     Int?
-  stockAdjustments  StockAdjustment[]  @relation("AdjustedBy")
-  adjustedById      Int?
+enum BloodType {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+}
+
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+  DECEASED
+  TRANSFERRED
+}
+
+model Patient {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  patientId             String                @unique // Unique patient identifier (e.g., "PAT-2025-001")
+  userId                Int?                  // Link to user account for patient portal access
+  user                  User?                 @relation("PatientUser", fields: [userId], references: [id])
+  name                  String?               // Full name
+  email                 String?               @unique // Patient email
+  dateOfBirth           DateTime?             // Date of birth
+  gender                Gender?               // MALE, FEMALE, OTHER
+  phone                 String?               // Primary contact number
+  address               String?               // Physical address
+  emergencyContact      String?               // Emergency contact name
+  emergencyContactPhone String?               // Emergency contact phone
+  insuranceProvider     String?               // e.g., "NHIF", "Aetna"
+  insurancePolicy       String?               // Insurance policy number
+  nhifNumber            String?               @unique // NHIF membership number
+  bloodType             BloodType?            // Blood type
+  allergies             String?               // JSON or text for allergies
+  medicalHistory        String?               // JSON or text for medical history
+  presentingComplaint   String?               // Current chief complaint
+  familyHistory         String?               // Family medical history
+  socialHistory         String?               // Social history (e.g., smoking, alcohol)
+  pastMedicalHistory    String?               // Past medical history
+  medications           String?               // Current medications
+  status                PatientStatus         @default("ACTIVE")
+  registrationDate      DateTime              @default(now()) // Date of registration
+  lastVisitDate        DateTime?             // Date of last visit
+  preferredDoctorId    Int?                  // Link to preferred doctor
+  preferredDoctor      Doctor?               @relation("PreferredDoctor", fields: [preferredDoctorId], references: [id])
+  departmentId          Int?                  // Link to primary department
+  department           Department?           @relation(fields: [departmentId], references: [id])
+  admissions           Admission[]           // Admissions for patient
+  discharges           Discharge[]           @relation("DischargedPatient")
+  transactions         Transaction[]         @relation("PatientTransactions")
+  appointments         Appointment[]         @relation("PatientAppointments")
+  prescriptions        Prescription[]        @relation("Prescriptions")
+  medicalRecords       MedicalRecord[]       @relation("PatientMedicalRecords")
+  laboratoryTests      Laboratory[]          // Lab tests for patient
+  radiologyTests       Radiology[]           // Radiology tests for patient
+  pharmacyRecords      Pharmacy[]            // Pharmacy records for patient
+  operationProcedures  SurgicalProcedure[]   // Surgical procedures for patient
+  nursingCare          NursingCare[]         // Nursing care records
+  maternityRecords     Maternity[]           // Maternity records
+  vaccinationRecords   Vaccination[]         // Vaccination records
+  claims               Claim[]               // Insurance claims
+  nhifClaims           NhifClaim[]           // NHIF claims
+  referrals            Referral[]            // Referrals involving patient
+  helpdeskTickets      Helpdesk[]            // Helpdesk tickets raised by patient
+  billingRecords       Billing[]             // Billing records for patient
+  documents            String?               // JSON or file paths for patient documents
+  consentForms         String?               // JSON or text for signed consent forms
+  createdById          Int?                  // User who created patient record
+  createdBy            User?                 @relation("PatientCreatedBy", fields: [createdById], references: [id])
+  updatedById          Int?                  // User who last updated
+  updatedBy            User?                 @relation("PatientUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs            AuditLog[]            @relation("PatientAuditLogs")
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 }
