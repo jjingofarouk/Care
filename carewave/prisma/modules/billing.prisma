@@ -121,6 +121,7 @@ model Billing {
   notifications         BillingNotification[] @relation("BillingNotifications")
   admissions            Admission[]         @relation("AdmissionBilling")
   discharges            Discharge[]         @relation("DischargeBilling")
+  dashboardWidget       DashboardWidget?     @relation("DashboardWidgetBilling")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
