@@ -133,19 +133,6 @@ model AppointmentDocument {
   auditLogs           AuditLog[]          @relation("AppointmentDocumentAuditLogs")
 }
 
-model QueueLog {
-  id                  Int                 @id @default(autoincrement())
-  uuid                String              @unique @default(uuid())
-  queueId             Int
-  queue               Queue               @relation("QueueLogs", fields: [queueId], references: [id])
-  action              String              // e.g., "Added", "Called", "Skipped"
-  actionById          Int?                // User who performed action
-  actionBy            User?               @relation(fields: [actionById], references: [id])
-  actionDate          DateTime            @default(now())
-  notes               String?             // Notes for the action
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-}
 
 model RecurringAppointment {
   id                  Int                 @id @default(autoincrement())
