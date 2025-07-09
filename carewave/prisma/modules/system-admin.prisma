@@ -35,7 +35,7 @@ model User {
   email                 String                @unique // User email
   name                  String                // Full name
   password              String                // Hashed password
-  role                  UserRole              @default("PATIENT") // User role
+  role                  UserRole              @default(PATIENT) // User role
   status                String                @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
   departmentId          Int?                  // Link to department
   department            Department?           @relation(fields: [departmentId], references: [id])
