@@ -93,6 +93,8 @@ model DashboardWidget {
   nhifClaim           NhifClaim?            @relation("DashboardWidgetNhifClaims", fields: [nhifClaimId], references: [id])
   medicalRecordId     Int?                  @unique
   medicalRecord       MedicalRecord?        @relation("DashboardWidgetMedicalRecords", fields: [medicalRecordId], references: [id])
+  maternityId         Int?                  @unique
+  maternity           Maternity?            @relation("DashboardWidgetMaternity", fields: [maternityId], references: [id])
   positionX           Int
   positionY           Int
   width               Int
