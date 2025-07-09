@@ -1,63 +1,168 @@
+// cssd.prisma
+enum CSSDInstrumentStatus {
+  AVAILABLE
+  IN_USE
+  UNDER_MAINTENANCE
+  STERILIZATION_IN_PROGRESS
+  OUT_OF_SERVICE
+  RESERVED
+}
+
+enum CSSDSterilizationMethod {
+  STEAM
+  ETHYLENE_OXIDE
+  PLASMA
+  DRY_HEAT
+  CHEMICAL
+}
+
+enum CSSDRecordStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum CSSDRequisitionStatus {
+  PENDING
+  APPROVED
+  DISPATCHED
+  REJECTED
+  RETURNED
+}
+
 model CSSDInstrument {
-  id                 Int                @id @default(autoincrement())
-  name               String
-  serialNumber       String             @unique
-  type               String?
-  status             String             @default("AVAILABLE")
-  lastSterilized     DateTime?
-  location           String?
-  stockQuantity      Int                @default(1)
-  minStockThreshold  Int                @default(1)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  cssdRecords        CSSDRecord[]
-  requisitions       CSSDRequisition[]  @relation("RequisitionInstrument")
-  logs               CSSDLog[]          @relation("InstrumentLogs")
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // e.g., "Surgical Scalpel"
+  serialNumber        String                @unique // Unique identifier for tracking
+  type                String?               // e.g., "Surgical", "Diagnostic"
+  status              CSSDInstrumentStatus  @default("AVAILABLE")
+  lastSterilized      DateTime?             // Last sterilization date
+  lastMaintenance     DateTime?             // Last maintenance date
+  location            String?               // Current location (e.g., "CSSD Storage", "OT-1")
+  stockQuantity       Int                   @default(1) // Current stock
+  minStockThreshold   Int                   @default(1) // Minimum stock before alert
+  maxStockThreshold   Int?                  // Maximum stock capacity
+  manufacturer        String?               // Manufacturer name
+  model               String?               // Model number
+  purchaseDate        DateTime?             // Date of purchase
+  warrantyExpires     DateTime?             // Warranty expiration date
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  operationTheatreId  Int?                  // Link to operation theatre
+  operationTheatre    OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  procurementId       Int?                  // Link to procurement for acquisition
+  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
+  fixedAssetId        Int?                  // Link to fixed assets for inventory
+  fixedAsset          FixedAsset?           @relation(fields: [fixedAssetId], references: [id])
+  cssdRecords         CSSDRecord[]          // Sterilization records
+  requisitions        CSSDRequisition[]     @relation("RequisitionInstrument")
+  logs                CSSDLog[]             @relation("InstrumentLogs")
+  maintenanceRecords  CSSDMaintenance[]     // Maintenance history
+  createdById         Int?                  // User who added instrument
+  createdBy           User?                 @relation("InstrumentCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("InstrumentUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("CSSDInstrumentAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
 
 model CSSDRecord {
-  id                 Int                @id @default(autoincrement())
-  instrumentId       Int
-  instrument         CSSDInstrument     @relation(fields: [instrumentId], references: [id])
-  sterilizationDate   DateTime?
-  sterilizationMethod String?
-  cycleNumber        String?
-  status             String             @default("PENDING")
-  qualityCheck       String?
-  notes              String?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  logs               CSSDLog[]          @relation("RecordLogs")
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  instrumentId        Int                   // Link to instrument
+  instrument          CSSDInstrument        @relation(fields: [instrumentId], references: [id])
+  sterilizationDate   DateTime?             // Date of sterilization
+  sterilizationMethod CSSDSterilizationMethod? // Method used
+  cycleNumber         String?               // Sterilization cycle identifier
+  status              CSSDRecordStatus      @default("PENDING")
+  qualityCheck        String?               // Quality check results (e.g., "Pass", "Fail")
+  qualityCheckDate    DateTime?             // Date of quality check
+  sterilizerId        String?               // ID of sterilizer machine
+  batchNumber         String?               // Batch number for sterilization
+  expiryDate          DateTime?             // Expiry date of sterilization
+  notes               String?               // Additional notes
+  operationTheatreId  Int?                  // Link to operation theatre
+  operationTheatre    OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  createdById         Int?                  // User who created record
+  createdBy           User?                 @relation("RecordCreatedBy", fields: [createdById], references: [id])
+  qualityCheckedById  Int?                  // User who performed quality check
+  qualityCheckedBy    User?                 @relation("RecordQualityCheckedBy", fields: [qualityCheckedById], references: [id])
+  logs                CSSDLog[]             @relation("RecordLogs")
+  auditLogs           AuditLog[]            @relation("CSSDRecordAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
 
 model CSSDRequisition {
-  id              Int                @id @default(autoincrement())
-  instrumentId    Int
-  instrument      CSSDInstrument     @relation("RequisitionInstrument", fields: [instrumentId], references: [id])
-  department      String
-  requestedBy     Int
-  user            User               @relation("RequisitionRequestedBy", fields: [requestedBy], references: [id])
-  quantity        Int
-  requestDate     DateTime           @default(now())
-  dispatchDate    DateTime?
-  status          String             @default("PENDING")
-  notes           String?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  logs            CSSDLog[]          @relation("RequisitionLogs")
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  instrumentId        Int                   // Link to instrument
+  instrument          CSSDInstrument        @relation("RequisitionInstrument", fields: [instrumentId], references: [id])
+  departmentId        Int?                  // Link to requesting department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  operationTheatreId  Int?                  // Link to operation theatre
+  operationTheatre    OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
+  requestedById       Int                   // User who requested
+  requestedBy         User                  @relation("RequisitionRequestedBy", fields: [requestedById], references: [id])
+  approvedById        Int?                  // User who approved
+  approvedBy          User?                 @relation("RequisitionApprovedBy", fields: [approvedById], references: [id])
+  quantity            Int                   // Requested quantity
+  requestDate         DateTime              @default(now())
+  dispatchDate        DateTime?             // Date instruments were dispatched
+  returnDate          DateTime?             // Date instruments were returned
+  status              CSSDRequisitionStatus @default("PENDING")
+  notes               String?               // Additional notes
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  procurementId       Int?                  // Link to procurement for restocking
+  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
+  logs                CSSDLog[]             @relation("RequisitionLogs")
+  auditLogs           AuditLog[]            @relation("CSSDRequisitionAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model CSSDMaintenance {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  instrumentId        Int                   // Link to instrument
+  instrument          CSSDInstrument        @relation(fields: [instrumentId], references: [id])
+  maintenanceDate     DateTime              @default(now())
+  maintenanceType     String?               // e.g., "Routine", "Repair"
+  description         String?               // Details of maintenance
+  performedById       Int?                  // User or technician who performed maintenance
+  performedBy         User?                 @relation(fields: [performedById], references: [id])
+  cost                Float?                // Cost of maintenance
+  status              String                @default("PENDING") // PENDING, COMPLETED, FAILED
+  notes               String?               // Additional notes
+  procurementId       Int?                  // Link to procurement for parts
+  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
 
 model CSSDLog {
-  id              Int                @id @default(autoincrement())
-  instrumentId    Int?
-  instrument      CSSDInstrument?    @relation("InstrumentLogs", fields: [instrumentId], references: [id])
-  recordId        Int?
-  record          CSSDRecord?        @relation("RecordLogs", fields: [recordId], references: [id])
-  requisitionId   Int?
-  requisition     CSSDRequisition?   @relation("RequisitionLogs", fields: [requisitionId], references: [id])
-  userId          Int
-  user            User               @relation("LoggedBy", fields: [userId], references: [id])
-  action          String
-  details         String?
-  createdAt       DateTime           @default(now())
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  instrumentId        Int?                  // Link to instrument
+  instrument          CSSDInstrument?       @relation("InstrumentLogs", fields: [instrumentId], references: [id])
+  recordId            Int?                  // Link to sterilization record
+  record              CSSDRecord?           @relation("RecordLogs", fields: [recordId], references: [id])
+  requisitionId       Int?                  // Link to requisition
+  requisition         CSSDRequisition?      @relation("RequisitionLogs", fields: [requisitionId], references: [id])
+  maintenanceId       Int?                  // Link to maintenance record
+  maintenance         CSSDMaintenance?      @relation(fields: [maintenanceId], references: [id])
+  userId              Int                   // User who performed action
+  user                User                  @relation("LoggedBy", fields: [userId], references: [id])
+  action              String                // e.g., "Sterilized", "Requested", "Maintained"
+  details             String?               // Detailed description of action
+  createdAt           DateTime              @default(now())
 }
