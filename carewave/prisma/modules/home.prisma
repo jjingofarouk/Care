@@ -1,0 +1,104 @@
+enum HomeCareStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  ON_HOLD
+}
+
+enum HomeCareServiceType {
+  NURSING
+  PHYSIOTHERAPY
+  OCCUPATIONAL_THERAPY
+  MEDICAL_CHECKUP
+  PALLIATIVE_CARE
+  OTHER
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+model HomeCare {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  patientId             Int
+  patient               Patient             @relation(fields: [patientId], references: [id])
+  doctorId              Int?                // Link to assigned doctor
+  doctor                Doctor?             @relation("DoctorHomeCare", fields: [doctorId], references: [id])
+  nurseId               Int?                // Link to assigned nurse
+  nurse                 User?               @relation("NurseHomeCare", fields: [nurseId], references: [id])
+  departmentId          Int?                // Link to department
+  department            Department?         @relation(fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                // Link to clinical setting
+  clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
+  serviceType           HomeCareServiceType // Type of home care service
+  status                HomeCareStatus      @default(SCHEDULED)
+  startDate             DateTime            // Start date of home care service
+  endDate               DateTime?           // End date of home care service
+  frequency             String?             // JSON or text for visit frequency (e.g., {"type": "WEEKLY", "days": ["MON", "WED"]})
+  address               String              // Patient's home address for service
+  carePlan              String?             // JSON or text for care plan details
+  notes                 String?             // Additional notes for home care
+  billingId             Int?                // Link to billing for home care services
+  billing               Billing?            @relation(fields: [billingId], references: [id])
+  claimId               Int?                // Link to insurance claim
+  claim                 Claim?              @relation(fields: [claimId], references: [id])
+  pharmacyId            Int?                // Link to prescriptions
+  pharmacy              Pharmacy?           @relation(fields: [pharmacyId], references: [id])
+  laboratoryId          Int?                // Link to lab tests ordered
+  laboratory            Laboratory?         @relation(fields: [laboratoryId], references: [id])
+  radiologyId           Int?                // Link to radiology tests ordered
+  radiology             Radiology?          @relation(fields: [radiologyId], references: [id])
+  appointmentId         Int?                // Link to related appointment
+  appointment           Appointment?        @relation(fields: [appointmentId], references: [id])
+  createdById           Int?                // User who created the home care record
+  createdBy             User?               @relation("HomeCareCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                // User who last updated
+  updatedBy             User?               @relation("HomeCareUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]          @relation("HomeCareAuditLogs")
+  homeCareVisits        HomeCareVisit[]     @relation("HomeCareVisits")
+  homeCareNotifications HomeCareNotification[] @relation("HomeCareNotifications")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
+model HomeCareVisit {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  homeCareId            Int
+  homeCare              HomeCare            @relation("HomeCareVisits", fields: [homeCareId], references: [id])
+  visitDate             DateTime            // Date and time of visit
+  caregiverId           Int?                // User performing the visit
+  caregiver             User?               @relation(fields: [caregiverId], references: [id])
+  status                String              @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
+  visitNotes            String?             // Notes from the visit
+  vitals                String?             // JSON for vital signs (e.g., {"bp": "120/80", "pulse": 72})
+  clinicalRecordId      Int?                // Link to clinical record
+  clinicalRecord        ClinicalRecord?     @relation(fields: [clinicalRecordId], references: [id])
+  createdById           Int?                // User who created the visit record
+  createdBy             User?               @relation(fields: [createdById], references: [id])
+  updatedById           Int?                // User who last updated
+  updatedBy             User?               @relation(fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]          @relation("HomeCareVisitAuditLogs")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
+model HomeCareNotification {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  homeCareId            Int
+  homeCare              HomeCare            @relation("HomeCareNotifications", fields: [homeCareId], references: [id])
+  notificationType      String              // e.g., "SMS", "Email", "App Push"
+  status                NotificationStatus  @default(PENDING)
+  sentAt                DateTime?
+  recipientId           Int?                // User or patient receiving notification
+  recipient             User?               @relation(fields: [recipientId], references: [id])
+  message               String?             // Notification content
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
