@@ -15,53 +15,7 @@ enum IncentiveType {
   OTHER
 }
 
-model Department {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String                @unique
-  description         String?
-  status              DepartmentStatus      @default(ACTIVE)
-  location            String?
-  headId              Int?                  @unique
-  head                User?                 @relation("DepartmentHead", fields: [headId], references: [id])
-  phoneNumber         String?
-  email               String?
-  operatingHours      String?
-  capacity            Int?
-  doctors             Doctor[]              @relation("DepartmentDoctors")
-  appointments        Appointment[]         @relation("DepartmentAppointments")
-  admissions          Admission[]           @relation("DepartmentAdmissions")
-  wards               Ward[]                @relation("DepartmentWards")
-  clinicalRecords     ClinicalRecord[]      @relation("DepartmentClinicalRecords")
-  clinicalSettings    ClinicalSetting[]     @relation("DepartmentClinicalSettings")
-  cssdRequisitions    CSSDRequisition[]     @relation("DepartmentCSSDRequisitions")
-  inventoryItems      Inventory[]           @relation("DepartmentInventory")
-  procurements        Procurement[]         @relation("DepartmentProcurements")
-  costCenters         CostCenter[]          @relation("DepartmentCostCenters")
-  budgets             Budget[]              @relation("DepartmentBudgets")
-  transactions        Transaction[]         @relation("DepartmentTransactions")
-  invoices            Invoice[]             @relation("DepartmentInvoices")
-  claims              Claim[]               @relation("DepartmentClaims")
-  nhifClaims          NhifClaim[]           @relation("DepartmentNhifClaims")
-  laboratoryTests     Laboratory[]          @relation("DepartmentLaboratoryTests")
-  radiologyTests      Radiology[]           @relation("DepartmentRadiologyTests")
-  pharmacyRecords     Pharmacy[]            @relation("DepartmentPharmacyRecords")
-  operationTheatres   OperationTheatre[]    @relation("DepartmentOperationTheatres")
-  nursingRecords      Nursing[]             @relation("DepartmentNursingRecords")
-  maternityRecords    Maternity[]           @relation("DepartmentMaternityRecords")
-  vaccinationRecords  Vaccination[]         @relation("DepartmentVaccinationRecords")
-  reports             Report[]              @relation("DepartmentReports")
-  helpdeskTickets     Helpdesk[]            @relation("DepartmentHelpdeskTickets")
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("DepartmentCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("DepartmentAuditLogs")
-  incentives          Incentive[]           @relation("DepartmentIncentives")
-  users               User[]                @relation("UserDepartment")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
+
 
 model Incentive {
   id                    Int                 @id @default(autoincrement())
