@@ -23,57 +23,59 @@ enum ClaimType {
 }
 
 
+
 model Claim {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
   patientId             Int
-  patient               Patient             @relation(fields: [patientId], references: [id])
-  invoiceId             Int?
-  invoice               Invoice?            @relation(fields: [invoiceId], references: [id])
-  appointmentId         Int?
-  appointment           Appointment?        @relation(fields: [appointmentId], references: [id])
-  admissionId           Int?
-  admission             Admission?          @relation(fields: [admissionId], references: [id])
-  pharmacyId            Int?
-  pharmacy              Pharmacy?           @relation(fields: [pharmacyId], references: [id])
-  laboratoryId          Int?
-  laboratory            Laboratory?         @relation(fields: [laboratoryId], references: [id])
-  radiologyId           Int?
-  radiology             Radiology?          @relation(fields: [radiologyId], references: [id])
-  operationTheatreId    Int?
-  operationTheatre      OperationTheatre?   @relation(fields: [operationTheatreId], references: [id])
-  nhifClaimId           Int?
-  nhifClaim             NhifClaim?          @relation(fields: [nhifClaimId], references: [id])
-  transactionId         Int?
+  patient               Patient             @relation("PatientClaims", fields: [patientId], references: [id])
+  invoiceId             Int?                @unique
+  invoice               Invoice?            @relation("InvoiceClaims", fields: [invoiceId], references: [id])
+  appointmentId         Int?                @unique
+  appointment           Appointment?        @relation("ClaimAppointments", fields: [appointmentId], references: [id])
+  admissionId           Int?                @unique
+  admission             Admission?          @relation("AdmissionClaims", fields: [admissionId], references: [id])
+  pharmacyId            Int?                @unique
+  pharmacy              Pharmacy?           @relation("ClaimPharmacy", fields: [pharmacyId], references: [id])
+  laboratoryId          Int?                @unique
+  laboratory            Laboratory?         @relation("ClaimLaboratory", fields: [laboratoryId], references: [id])
+  radiologyId           Int?                @unique
+  radiology             Radiology?          @relation("ClaimRadiology", fields: [radiologyId], references: [id])
+  operationTheatreId    Int?                @unique
+  operationTheatre      OperationTheatre?   @relation("ClaimOperationTheatre", fields: [operationTheatreId], references: [id])
+  nhifClaimId           Int?                @unique
+  nhifClaim             NhifClaim?          @relation("ClaimNhifClaims", fields: [nhifClaimId], references: [id])
+  transactionId         Int?                @unique
   transaction           Transaction?        @relation("TransactionClaims", fields: [transactionId], references: [id])
-  claimNumber           String              @unique // e.g., "CLM-2025-001"
+  claimNumber           String              @unique
   claimType             ClaimType
   status                ClaimStatus         @default(PENDING)
-  submittedDate         DateTime?           // Date claim was submitted to insurer
-  approvedDate          DateTime?           // Date claim was approved
-  paidDate              DateTime?           // Date claim was paid
+  submittedDate         DateTime?
+  approvedDate          DateTime?
+  paidDate              DateTime?
   totalAmount           Float
   approvedAmount        Float?              @default(0.0)
-  patientResponsibility Float?              @default(0.0) // Patient's out-of-pocket amount
-  rejectionReason       String?             // Reason for rejection or denial
-  appealReason          String?             // Reason for appeal, if applicable
-  appealDate            DateTime?           // Date of appeal submission
-  insuranceId           Int?                // Link to insurance details
-  insurance             Insurance?          @relation(fields: [insuranceId], references: [id])
-  insuranceProvider     String?             // Name of insurance provider
-  policyNumber          String?             // Patient's insurance policy number
-  preAuthorizationCode  String?             // Pre-authorization code from insurer
-  claimNotes            String?             // General notes for claim
-  createdById           Int?                // User who created the claim
+  patientResponsibility Float?              @default(0.0)
+  rejectionReason       String?
+  appealReason          String?
+  appealDate            DateTime?
+  insuranceId           Int?                @unique
+  insurance             Insurance?          @relation("ClaimInsurance", fields: [insuranceId], references: [id])
+  insuranceProvider     String?
+  policyNumber          String?
+  preAuthorizationCode  String?
+  claimNotes            String?
+  createdById           Int?                @unique
   createdBy             User?               @relation("ClaimCreatedBy", fields: [createdById], references: [id])
-  approvedById          Int?                // User who approved the claim internally
+  approvedById          Int?                @unique
   approvedBy            User?               @relation("ClaimApprovedBy", fields: [approvedById], references: [id])
-  updatedById           Int?                // User who last updated the claim
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("ClaimUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("ClaimAuditLogs")
   claimDocuments        ClaimDocument[]     @relation("ClaimDocuments")
   claimNotifications    ClaimNotification[] @relation("ClaimNotifications")
   claimAdjustments      ClaimAdjustment[]   @relation("ClaimAdjustments")
+  department            Department[]        @relation("DepartmentClaims")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
@@ -83,11 +85,11 @@ model ClaimDocument {
   uuid                  String              @unique @default(uuid())
   claimId               Int
   claim                 Claim               @relation("ClaimDocuments", fields: [claimId], references: [id])
-  documentType          String              // e.g., "Medical Report", "Invoice", "Authorization"
-  filePath              String              // Path to stored document
-  uploadedById          Int?                // User who uploaded document
-  uploadedBy            User?               @relation(fields: [uploadedById], references: [id])
-  description           String?             // Description of document
+  documentType          String
+  filePath              String
+  uploadedById          Int?                @unique
+  uploadedBy            User?               @relation("ClaimDocumentUploadedBy", fields: [uploadedById], references: [id])
+  description           String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   auditLogs             AuditLog[]          @relation("ClaimDocumentAuditLogs")
@@ -98,12 +100,12 @@ model ClaimNotification {
   uuid                  String              @unique @default(uuid())
   claimId               Int
   claim                 Claim               @relation("ClaimNotifications", fields: [claimId], references: [id])
-  notificationType      String              // e.g., "SMS", "Email", "App Push"
+  notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?                // User or patient receiving notification
-  recipient             User?               @relation(fields: [recipientId], references: [id])
-  message               String?             // Notification content
+  recipientId           Int?                @unique
+  recipient             User?               @relation("ClaimNotificationRecipient", fields: [recipientId], references: [id])
+  message               String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
@@ -116,9 +118,9 @@ model ClaimAdjustment {
   adjustmentAmount      Float
   adjustmentReason      String
   adjustmentDate        DateTime            @default(now())
-  createdById           Int?
+  createdById           Int?                @unique
   createdBy             User?               @relation("ClaimAdjustmentCreatedBy", fields: [createdById], references: [id])
-  approvedById          Int?
+  approvedById          Int?                @unique
   approvedBy            User?               @relation("ClaimAdjustmentApprovedBy", fields: [approvedById], references: [id])
   notes                 String?
   auditLogs             AuditLog[]          @relation("ClaimAdjustmentAuditLogs")
@@ -129,11 +131,14 @@ model ClaimAdjustment {
 model Insurance {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  providerName          String              // Name of insurance provider
-  providerCode          String?             @unique // Unique code for provider
-  contactDetails        String?             // JSON or text for contact info
-  claims                Claim[]             // Claims associated with this insurance
-  patients              Patient[]           // Patients covered by this insurance
+  providerName          String
+  providerCode          String?             @unique
+  contactDetails        String?
+  claims                Claim[]             @relation("ClaimInsurance")
+  patients              Patient[]           @relation("PatientInsurance")
+  admissions            Admission[]         @relation("AdmissionInsurance")
+  appointments          Appointment[]       @relation("AppointmentInsurance")
+  invoices              Invoice[]           @relation("InvoiceInsurance")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   auditLogs             AuditLog[]          @relation("InsuranceAuditLogs")
