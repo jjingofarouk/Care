@@ -1,0 +1,72 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "aws-0-us-east-1.pooler.supabase.com:5432"
+
+
+Error: Prisma schema validation - (validate wasm)
+Error code: P1012
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `PENDING`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1732[0m
+[1;94m   | [0m
+[1;94m1731 | [0m  cost                Float?                // Cost of maintenance
+[1;94m1732 | [0m  status              String                [1;91m@default(PENDING)[0m // PENDING, COMPLETED, FAILED
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `ACTIVE`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:2129[0m
+[1;94m   | [0m
+[1;94m2128 | [0m  department          Department?           @relation(fields: [departmentId], references: [id])
+[1;94m2129 | [0m  status              String                [1;91m@default(ACTIVE)[0m // ACTIVE, INACTIVE, COMPLETED
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `PENDING`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:2195[0m
+[1;94m   | [0m
+[1;94m2194 | [0m  department          Department?           @relation(fields: [departmentId], references: [id])
+[1;94m2195 | [0m  status              String                [1;91m@default(PENDING)[0m // e.g., PENDING, DISPENSED
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `ACTIVE`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:2265[0m
+[1;94m   | [0m
+[1;94m2264 | [0m  description         String?
+[1;94m2265 | [0m  status              String                [1;91m@default(ACTIVE)[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `DISPENSED`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:2488[0m
+[1;94m   | [0m
+[1;94m2487 | [0m  notes               String?               // Additional dispensing notes
+[1;94m2488 | [0m  status              String                [1;91m@default(DISPENSED)[0m // DISPENSED, PARTIALLY_DISPENSED, RETURNED
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected an enum value, but found `"PENDING"`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4212[0m
+[1;94m   | [0m
+[1;94m4211 | [0m  department          Department?           @relation(fields: [departmentId], references: [id])
+[1;94m4212 | [0m  status              ReferralStatus        [1;91m@default("PENDING")[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected an enum value, but found `"PATIENT"`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4468[0m
+[1;94m   | [0m
+[1;94m4467 | [0m  password              String                // Hashed password
+[1;94m4468 | [0m  role                  UserRole              [1;91m@default("PATIENT")[0m // User role
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `ACTIVE`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4649[0m
+[1;94m   | [0m
+[1;94m4648 | [0m  contractDetails     String?               // JSON or text for contract terms
+[1;94m4649 | [0m  status              String                [1;91m@default(ACTIVE)[0m // ACTIVE, INACTIVE
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `PENDING`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4672[0m
+[1;94m   | [0m
+[1;94m4671 | [0m  cost                Float?                // Cost of maintenance
+[1;94m4672 | [0m  status              String                [1;91m@default(PENDING)[0m // PENDING, COMPLETED, FAILED
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `ACTIVE`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4765[0m
+[1;94m   | [0m
+[1;94m4764 | [0m  notificationSettings String?               // JSON for notification settings (e.g., SMS, email)
+[1;94m4765 | [0m  status              String                [1;91m@default(ACTIVE)[0m // ACTIVE, INACTIVE
+[1;94m   | [0m
+
+Validation Error Count: 10
+[Context: validate]
+
+Prisma CLI Version : 5.22.0

@@ -1,0 +1,25 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Error: Prisma schema validation - (get-config wasm)
+Error code: P1012
+error: Error validating: This line is not a valid field or attribute definition.
+  -->  prisma/schema.prisma:3036
+   | 
+3035 |   createdAt         DateTime            @default(now())
+3036 |   updatedAt         DateTime           ожалуй
+3037 | 
+   | 
+
+
+error: Error validating: This line is not a valid field or attribute definition.
+  -->  prisma/schema.prisma:3038
+   | 
+3037 | 
+3038 | model BankAccount {
+3039 |   id                Int                 @id @default(autoincrement())
+   | 
+
+Validation Error Count: 2
+[Context: getConfig]
+
+Prisma CLI Version : 5.22.0

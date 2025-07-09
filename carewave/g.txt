@@ -1,0 +1,66 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "aws-0-us-east-1.pooler.supabase.com:5432"
+
+
+Error: Prisma schema validation - (validate wasm)
+Error code: P1012
+[1;91merror[0m: [1mThe model "TaxCategory" cannot be defined because a model with that name already exists.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:3074[0m
+[1;94m   | [0m
+[1;94m3073 | [0m
+[1;94m3074 | [0mmodel [1;91mTaxCategory[0m {
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `PENDING`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1732[0m
+[1;94m   | [0m
+[1;94m1731 | [0m  cost                Float?                // Cost of maintenance
+[1;94m1732 | [0m  status              String                [1;91m@default(PENDING)[0m // PENDING, COMPLETED, FAILED
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `ACTIVE`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:2129[0m
+[1;94m   | [0m
+[1;94m2128 | [0m  department          Department?           @relation(fields: [departmentId], references: [id])
+[1;94m2129 | [0m  status              String                [1;91m@default(ACTIVE)[0m // ACTIVE, INACTIVE, COMPLETED
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `DISPENSED`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:2488[0m
+[1;94m   | [0m
+[1;94m2487 | [0m  notes               String?               // Additional dispensing notes
+[1;94m2488 | [0m  status              String                [1;91m@default(DISPENSED)[0m // DISPENSED, PARTIALLY_DISPENSED, RETURNED
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected an enum value, but found `"PENDING"`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4223[0m
+[1;94m   | [0m
+[1;94m4222 | [0m  department          Department?           @relation(fields: [departmentId], references: [id])
+[1;94m4223 | [0m  status              ReferralStatus        [1;91m@default("PENDING")[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected an enum value, but found `"PATIENT"`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4479[0m
+[1;94m   | [0m
+[1;94m4478 | [0m  password              String                // Hashed password
+[1;94m4479 | [0m  role                  UserRole              [1;91m@default("PATIENT")[0m // User role
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `ACTIVE`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4660[0m
+[1;94m   | [0m
+[1;94m4659 | [0m  contractDetails     String?               // JSON or text for contract terms
+[1;94m4660 | [0m  status              String                [1;91m@default(ACTIVE)[0m // ACTIVE, INACTIVE
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `PENDING`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4683[0m
+[1;94m   | [0m
+[1;94m4682 | [0m  cost                Float?                // Cost of maintenance
+[1;94m4683 | [0m  status              String                [1;91m@default(PENDING)[0m // PENDING, COMPLETED, FAILED
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@default": Expected a String value, but found `ACTIVE`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:4776[0m
+[1;94m   | [0m
+[1;94m4775 | [0m  notificationSettings String?               // JSON for notification settings (e.g., SMS, email)
+[1;94m4776 | [0m  status              String                [1;91m@default(ACTIVE)[0m // ACTIVE, INACTIVE
+[1;94m   | [0m
+
+Validation Error Count: 9
+[Context: validate]
+
+Prisma CLI Version : 5.22.0
