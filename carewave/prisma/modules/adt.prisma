@@ -8,13 +8,6 @@ enum AdmissionStatus {
   AWAITING_BED
 }
 
-enum TriagePriority {
-  EMERGENCY
-  URGENT
-  NON_URGENT
-  CRITICAL
-}
-
 enum BedStatus {
   AVAILABLE
   OCCUPIED
