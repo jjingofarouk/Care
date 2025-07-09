@@ -34,11 +34,11 @@ model Appointment {
   uuid                  String              @unique @default(uuid())
   patientId             Int
   patient               Patient             @relation("PatientAppointments", fields: [patientId], references: [id])
-  doctorId              Int?                @unique
+  doctorId              Int?
   doctor                Doctor?             @relation("DoctorAppointments", fields: [doctorId], references: [id])
   departmentId          Int?
   department            Department?         @relation("DepartmentAppointments", fields: [departmentId], references: [id])
-  bookedById            Int?                @unique
+  bookedById            Int?
   bookedBy              User?               @relation("AppointmentBookedBy", fields: [bookedById], references: [id])
   date                  DateTime
   endDate               DateTime?
@@ -50,31 +50,32 @@ model Appointment {
   checkOutTime          DateTime?
   reminderSent          Boolean             @default(false)
   reminderDate          DateTime?
-  medicalRecordId       Int?                @unique
+  medicalRecordId       Int?
   medicalRecord         MedicalRecord?      @relation("AppointmentMedicalRecord", fields: [medicalRecordId], references: [id])
-  billingId             Int?                @unique
+  billingId             Int?
   billing               Billing?            @relation("AppointmentBilling", fields: [billingId], references: [id])
-  queueId               Int?                @unique
+  queueId               Int?
   queue                 Queue?              @relation("AppointmentQueue", fields: [queueId], references: [id])
-  admissionId           Int?                @unique
+  admissionId           Int?
   admission             Admission?          @relation("AppointmentAdmission", fields: [admissionId], references: [id])
-  dischargeId           Int?                @unique
+  dischargeId           Int?
   discharge             Discharge?          @relation("AppointmentDischarge", fields: [dischargeId], references: [id])
-  laboratoryId          Int?                @unique
+  laboratoryId          Int?
   laboratory            Laboratory?         @relation("AppointmentLaboratory", fields: [laboratoryId], references: [id])
-  radiologyId           Int?                @unique
+  radiologyId           Int?
   radiology             Radiology?          @relation("AppointmentRadiology", fields: [radiologyId], references: [id])
-  pharmacyId            Int?                @unique
+  radiologyTests        RadiologyTest[]     @relation("AppointmentRadiologyTests")
+  pharmacyId            Int?
   pharmacy              Pharmacy?           @relation("AppointmentPharmacy", fields: [pharmacyId], references: [id])
-  operationTheatreId    Int?                @unique
+  operationTheatreId    Int?
   operationTheatre      OperationTheatre?   @relation("AppointmentOperationTheatre", fields: [operationTheatreId], references: [id])
-  createdById           Int?                @unique
+  createdById           Int?
   createdBy             User?               @relation("AppointmentCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
+  updatedById           Int?
   updatedBy             User?               @relation("AppointmentUpdatedBy", fields: [updatedById], references: [id])
-  insuranceId           Int?                @unique
+  insuranceId           Int?
   insurance             Insurance?          @relation("AppointmentInsurance", fields: [insuranceId], references: [id])
-  referralId            Int?                @unique
+  referralId            Int?
   referral              Referral?           @relation("AppointmentReferral", fields: [referralId], references: [id])
   location              String?
   teleconsultationLink  String?
@@ -89,6 +90,8 @@ model Appointment {
   recurringAppointmentId Int?               @unique
   recurringAppointment   RecurringAppointment? @relation("RecurringAppointmentAppointments", fields: [recurringAppointmentId], references: [id])
   dashboardWidget        DashboardWidget?     @relation("DashboardWidgetAppointments")
+  doctorAvailability    DoctorAvailability?   @relation("DoctorAvailabilityAppointments")
+  invoice               Invoice?            @relation("AppointmentInvoices")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
@@ -101,7 +104,7 @@ model AppointmentNotification {
   notificationType    String
   status              NotificationStatus  @default(PENDING)
   sentAt              DateTime?
-  recipientId         Int?                @unique
+  recipientId         Int?
   recipient           User?               @relation("NotificationRecipient", fields: [recipientId], references: [id])
   message             String?
   createdAt           DateTime            @default(now())
@@ -115,7 +118,7 @@ model AppointmentDocument {
   appointment         Appointment         @relation("AppointmentDocuments", fields: [appointmentId], references: [id])
   documentType        String
   filePath            String
-  uploadedById        Int?                @unique
+  uploadedById        Int?
   uploadedBy          User?               @relation("DocumentUploadedBy", fields: [uploadedById], references: [id])
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
@@ -127,7 +130,7 @@ model RecurringAppointment {
   uuid                String              @unique @default(uuid())
   patientId           Int
   patient             Patient             @relation("PatientRecurringAppointments", fields: [patientId], references: [id])
-  doctorId            Int?                @unique
+  doctorId            Int?
   doctor              Doctor?             @relation("DoctorRecurringAppointments", fields: [doctorId], references: [id])
   departmentId        Int?
   department          Department?         @relation("DepartmentRecurringAppointments", fields: [departmentId], references: [id])
@@ -136,9 +139,9 @@ model RecurringAppointment {
   endDate             DateTime?
   occurrences         Int?
   appointments        Appointment[]       @relation("RecurringAppointmentAppointments")
-  createdById         Int?                @unique
+  createdById         Int?
   createdBy           User?               @relation("RecurringAppointmentCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                @unique
+  updatedById         Int?
   updatedBy           User?               @relation("RecurringAppointmentUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]          @relation("RecurringAppointmentAuditLogs")
   createdAt           DateTime            @default(now())
