@@ -100,7 +100,7 @@ model DispensingRecord {
   batchNumber         String?               // Batch number of medication
   expiryDate          DateTime?             // Expiry date of dispensed medication
   notes               String?               // Additional dispensing notes
-  status              String                @default(DISPENSED) // DISPENSED, PARTIALLY_DISPENSED, RETURNED
+  status              String                @default("DISPENSED") // DISPENSED, PARTIALLY_DISPENSED, RETURNED
   createdById         Int?                  // User who created record
   createdBy           User?                 @relation("DispensingRecordCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?                  // User who last updated
