@@ -133,11 +133,11 @@ model RecurringAppointment {
   startDate           DateTime
   endDate             DateTime?
   occurrences         Int?                // Number of occurrences
-  appointments        Appointment[]       @relation
+  appointments        Appointment[]       @relation("RecurringAppointmentAppointments")
   createdById         Int?                // User who created recurring appointment
-  createdBy           User?               @relation(fields: [createdById], references: [id])
+  createdBy           User?               @relation("CreatedByUser", fields: [createdById], references: [id])
   updatedById         Int?                // User who last updated
-  updatedBy           User?               @relation(fields: [updatedById], references: [id])
+  updatedBy           User?               @relation("UpdatedByUser", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]          @relation("RecurringAppointmentAuditLogs")
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
