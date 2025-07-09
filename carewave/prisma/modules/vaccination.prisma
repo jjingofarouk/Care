@@ -49,7 +49,7 @@ model Vaccination {
   vaccineId           Int?                  // Link to vaccine (medication)
   vaccine             Medication?           @relation(fields: [vaccineId], references: [id])
   type                VaccineType           // Type of vaccine
-  status              VaccinationStatus     @default("SCHEDULED")
+  status              VaccinationStatus     @default(SCHEDULED)
   scheduledDate       DateTime?             // Scheduled vaccination date
   administeredDate    DateTime?             // Actual administration date
   batchNumber         String?               // Vaccine batch number
@@ -94,7 +94,7 @@ model VaccinationCampaign {
   targetPopulation    String?               // e.g., "Children under 5", "Healthcare Workers"
   departmentId        Int?                  // Link to department
   department          Department?           @relation(fields: [departmentId], references: [id])
-  status              String                @default("ACTIVE") // ACTIVE, INACTIVE, COMPLETED
+  status              String                @default(ACTIVE) // ACTIVE, INACTIVE, COMPLETED
   targetCount         Int?                  // Target number of vaccinations
   actualCount         Int?                  // Actual number of vaccinations
   budget              Float?                // Campaign budget
