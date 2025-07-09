@@ -67,7 +67,7 @@ model Referral {
   doctor              Doctor?               @relation(fields: [doctorId], references: [id])
   departmentId        Int?                  // Link to target department
   department          Department?           @relation(fields: [departmentId], references: [id])
-  status              ReferralStatus        @default("PENDING")
+  status              ReferralStatus        @default(PENDING)
   referralDate        DateTime              @default(now())
   completionDate      DateTime?             // Date referral was completed
   appointmentId       Int?                  // Link to appointment created from referral
