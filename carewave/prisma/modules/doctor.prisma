@@ -44,7 +44,7 @@ model Doctor {
   profileImage          String?
   consultationFee       Float?
   maxPatientsPerSlot    Int?
-  clinicalSettingId     Int?                  @unique
+  clinicalSettingId     Int?
   clinicalSetting       ClinicalSetting?      @relation("DoctorClinicalSettings", fields: [clinicalSettingId], references: [id])
   admissions            Admission[]           @relation("DoctorAdmissions")
   discharges            Discharge[]           @relation("DischargingDoctor")
@@ -54,6 +54,7 @@ model Doctor {
   clinicalRecords       ClinicalRecord[]      @relation("DoctorClinicalRecords")
   laboratoryOrders      Laboratory[]          @relation("LaboratoryOrders")
   radiologyOrders       Radiology[]           @relation("RadiologyOrders")
+  radiologyTests        RadiologyTest[]       @relation("RadiologyDoctor")
   operationTheatres     OperationTheatre[]    @relation("DoctorOperationTheatres")
   nursingRecords        Nursing[]             @relation("DoctorNursingRecords")
   maternityRecords      Maternity[]           @relation("DoctorMaternityRecords")
@@ -62,9 +63,9 @@ model Doctor {
   doctorQualifications  DoctorQualification[] @relation("DoctorQualifications")
   doctorNotifications   DoctorNotification[]  @relation("DoctorNotifications")
   recurringAppointments  RecurringAppointment[] @relation("DoctorRecurringAppointments")
-  createdById           Int?                  @unique
+  createdById           Int?
   createdBy             User?                 @relation("DoctorCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                  @unique
+  updatedById           Int?
   updatedBy             User?                 @relation("DoctorUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorAuditLogs")
   createdAt             DateTime              @default(now())
@@ -76,25 +77,17 @@ model DoctorAvailability {
   uuid                  String                @unique @default(uuid())
   doctorId              Int
   doctor                Doctor                @relation("DoctorAvailability", fields: [doctorId], references: [id])
+  departmentId          Int?
+  department            Department?           @relation("DepartmentDoctorAvailability", fields: [departmentId], references: [id])
   startTime             DateTime
   endTime               DateTime
   status                AvailabilityStatus    @default(AVAILABLE)
   location              String?
-  departmentId          Int?
-  department            Department?           @relation("DepartmentDoctorAvailability", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                  @unique
-  clinicalSetting       ClinicalSetting?      @relation("DoctorAvailabilityClinicalSettings", fields: [clinicalSettingId], references: [id])
-  appointmentId         Int?                  @unique
-  appointment           Appointment?          @relation("DoctorAvailabilityAppointments", fields: [appointmentId], references: [id])
-  operationTheatreId    Int?                  @unique
-  operationTheatre      OperationTheatre?     @relation("DoctorAvailabilityOperationTheatres", fields: [operationTheatreId], references: [id])
   notes                 String?
-  isRecurring           Boolean               @default(false)
-  recurrenceRule        String?
-  recurrenceEndDate     DateTime?
-  createdById           Int?                  @unique
+  appointment           Appointment?          @relation("DoctorAvailabilityAppointments")
+  createdById           Int?
   createdBy             User?                 @relation("DoctorAvailabilityCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                  @unique
+  updatedById           Int?
   updatedBy             User?                 @relation("DoctorAvailabilityUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorAvailabilityAuditLogs")
   createdAt             DateTime              @default(now())
@@ -106,15 +99,17 @@ model DoctorQualification {
   uuid                  String                @unique @default(uuid())
   doctorId              Int
   doctor                Doctor                @relation("DoctorQualifications", fields: [doctorId], references: [id])
-  qualificationType     QualificationType
-  qualificationName     String
+  type                  QualificationType
+  name                  String
   institution           String?
   issueDate             DateTime?
   expiryDate            DateTime?
+  certificateNumber     String?               @unique
+  verificationStatus    String?               @default("PENDING")
   documentPath          String?
-  createdById           Int?                  @unique
+  createdById           Int?
   createdBy             User?                 @relation("DoctorQualificationCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                  @unique
+  updatedById           Int?
   updatedBy             User?                 @relation("DoctorQualificationUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorQualificationAuditLogs")
   createdAt             DateTime              @default(now())
@@ -129,9 +124,9 @@ model DoctorNotification {
   notificationType      String
   status                NotificationStatus    @default(PENDING)
   sentAt                DateTime?
-  message               String?
-  recipientId           Int?                  @unique
+  recipientId           Int?
   recipient             User?                 @relation("DoctorNotificationRecipient", fields: [recipientId], references: [id])
+  message               String?
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
