@@ -36,7 +36,7 @@ model FixedAsset {
   currentValue          Float
   status                AssetStatus         @default(ACTIVE)
   departmentId          Int?
-  department            Department?         @relation(fields: [departmentId], references: [id])
+  department            Department?         @relation("DepartmentFixedAssets", fields: [departmentId], references: [id])
   location              String?
   serialNumber          String?
   manufacturer          String?
@@ -47,9 +47,10 @@ model FixedAsset {
   disposalDate          DateTime?
   disposalReason        String?
   disposalValue         Float?              @default(0.0)
-  createdById           Int?
+  cssdInstrument        CSSDInstrument?     @relation("CSSDInstrumentFixedAsset")
+  createdById           Int?                @unique
   createdBy             User?               @relation("FixedAssetCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("FixedAssetUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("FixedAssetAuditLogs")
   maintenanceRecords    MaintenanceRecord[] @relation("AssetMaintenanceRecords")
@@ -66,11 +67,11 @@ model MaintenanceRecord {
   maintenanceType       String
   description           String?
   cost                  Float?              @default(0.0)
-  performedById         Int?
+  performedById         Int?                @unique
   performedBy           User?               @relation("MaintenancePerformedBy", fields: [performedById], references: [id])
-  createdById           Int?
+  createdById           Int?                @unique
   createdBy             User?               @relation("MaintenanceCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("MaintenanceUpdatedBy", fields: [updatedById], references: [id])
   notes                 String?
   auditLogs             AuditLog[]          @relation("MaintenanceRecordAuditLogs")
