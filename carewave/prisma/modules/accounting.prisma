@@ -1,26 +1,151 @@
+// accounting.prisma
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+  REFUND
+  ADJUSTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  ON_HOLD
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  MOBILE_PAYMENT
+  INSURANCE
+  BANK_TRANSFER
+  CHECK
+}
+
 model Transaction {
-  id            Int           @id @default(autoincrement())
-  description   String
-  amount        Float
-  category      String
-  status        String
-  date          DateTime      @default(now())
-  type          String
-  costCenterId  Int?
-  costCenter    CostCenter?   @relation(fields: [costCenterId], references: [id])
-  patientId     Int?
-  patient       Patient?      @relation("PatientTransactions", fields: [patientId], references: [id])
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  invoices      Invoice[]     @relation("TransactionInvoices")
-  transactionId Int?
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid()) // Unique identifier for external integrations
+  description       String              // Detailed description of transaction (e.g., "Payment for surgery")
+  amount            Float               // Transaction amount
+  currency          String              @default("USD") // Support multi-currency
+  type              TransactionType     // INCOME, EXPENSE, TRANSFER, etc.
+  status            TransactionStatus   // PENDING, COMPLETED, etc.
+  paymentMethod     PaymentMethod?      // Method of payment
+  date              DateTime            @default(now()) // Transaction date
+  referenceNumber   String?             @unique // External reference (e.g., bank transaction ID)
+  taxAmount         Float?              // Tax component of transaction
+  discountAmount    Float?              // Discount applied
+  costCenterId      Int?                // Link to cost center
+  costCenter        CostCenter?         @relation(fields: [costCenterId], references: [id])
+  patientId         Int?                // Link to patient for billing-related transactions
+  patient           Patient?            @relation("PatientTransactions", fields: [patientId], references: [id])
+  invoiceId         Int?                // Link to invoice
+  invoice           Invoice?            @relation("TransactionInvoices", fields: [invoiceId], references: [id])
+  claimId           Int?                // Link to insurance claims
+  claim             Claim?              @relation("TransactionClaims", fields: [claimId], references: [id])
+  nhifClaimId       Int?                // Link to NHIF claims
+  nhifClaim         NhifClaim?          @relation("TransactionNhifClaims", fields: [nhifClaimId], references: [id])
+  departmentId      Int?                // Link to department for cost allocation
+  department        Department?         @relation(fields: [departmentId], references: [id])
+  procurementId     Int?                // Link to procurement for expense tracking
+  procurement       Procurement?        @relation("TransactionProcurement", fields: [procurementId], references: [id])
+  fixedAssetId      Int?                // Link to fixed assets for depreciation or acquisition
+  fixedAsset        FixedAsset?         @relation("TransactionFixedAssets", fields: [fixedAssetId], references: [id])
+  createdById       Int?                // User who created the transaction
+  createdBy         User?               @relation("TransactionCreatedBy", fields: [createdById], references: [id])
+  approvedById      Int?                // User who approved the transaction
+  approvedBy        User?               @relation("TransactionApprovedBy", fields: [approvedById], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  auditLogs         AuditLog[]          @relation("TransactionAuditLogs") // Track changes for compliance
+  reconciliations   Reconciliation[]    @relation("TransactionReconciliations") // Bank reconciliation
+  budgetId          Int?                // Link to budget for tracking
+  budget            Budget?             @relation(fields: [budgetId], references: [id])
 }
 
 model CostCenter {
-  id            Int           @id @default(autoincrement())
-  name          String
-  department    String
-  transactions  Transaction[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  name              String              // e.g., "Cardiology Department"
+  description       String?             // Detailed description
+  departmentId      Int?                // Link to department
+  department        Department?         @relation(fields: [departmentId], references: [id])
+  transactions      Transaction[]       // Transactions associated with this cost center
+  budgetId          Int?                // Link to budget
+  budget            Budget?             @relation(fields: [budgetId], references: [id])
+  managerId         Int?                // User responsible for the cost center
+  manager           User?               @relation(fields: [managerId], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  auditLogs         AuditLog[]          @relation("CostCenterAuditLogs")
+}
+
+model Budget {
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  name              String              // e.g., "2025 Operating Budget"
+  fiscalYear        Int                 // e.g., 2025
+  amount            Float               // Total budget amount
+  remainingAmount   Float               // Remaining budget after transactions
+  departmentId      Int?                // Link to department
+  department        Department?         @relation(fields: [departmentId], references: [id])
+  costCenterId      Int?                // Link to cost center
+  costCenter        CostCenter?         @relation(fields: [costCenterId], references: [id])
+  transactions      Transaction[]       // Transactions tied to this budget
+  createdById       Int?                // User who created the budget
+  createdBy         User?               @relation(fields: [createdById], references: [id])
+  approvedById      Int?                // User who approved the budget
+  approvedBy        User?               @relation(fields: [approvedById], references: [id])
+  status            String              @default("DRAFT") // DRAFT, APPROVED, CLOSED
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  auditLogs         AuditLog[]          @relation("BudgetAuditLogs")
+}
+
+model Reconciliation {
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  transactionId     Int                 // Link to transaction
+  transaction       Transaction         @relation("TransactionReconciliations", fields: [transactionId], references: [id])
+  bankStatementId   Int?                // Link to external bank statement (if applicable)
+  bankStatement     BankStatement?      @relation(fields: [bankStatementId], references: [id])
+  reconciledDate    DateTime?           // Date of reconciliation
+  status            String              @default("PENDING") // PENDING, RECONCILED, DISCREPANCY
+  discrepancyAmount Float?              // Amount if there's a mismatch
+  notes             String?             // Notes for reconciliation
+  createdById       Int?                // User who performed reconciliation
+  createdBy         User?               @relation(fields: [createdById], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
+
+model BankStatement {
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  statementDate     DateTime            // Date of the bank statement
+  referenceNumber   String              @unique // Bank statement reference
+  amount            Float               // Total amount in statement
+  transactions      Reconciliation[]    // Reconciliations linked to this statement
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  auditLogs         AuditLog[]          @relation("BankStatementAuditLogs")
+}
+
+model GeneralLedger {
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  accountCode       String              @unique // e.g., "GL-001" for chart of accounts
+  accountName       String              // e.g., "Revenue - Patient Services"
+  accountType       String              // ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
+  balance           Float               @default(0.0) // Current balance
+  transactionId     Int?                // Link to transactions
+  transaction       Transaction?        @relation(fields: [transactionId], references: [id])
+  departmentId      Int?                // Link to department
+  department        Department?         @relation(fields: [departmentId], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  auditLogs         AuditLog[]          @relation("GeneralLedgerAuditLogs")
 }
