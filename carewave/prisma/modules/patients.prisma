@@ -48,7 +48,7 @@ model Patient {
   socialHistory         String?               // Social history (e.g., smoking, alcohol)
   pastMedicalHistory    String?               // Past medical history
   medications           String?               // Current medications
-  status                PatientStatus         @default("ACTIVE")
+  status                PatientStatus         @default(ACTIVE)
   registrationDate      DateTime              @default(now()) // Date of registration
   lastVisitDate        DateTime?             // Date of last visit
   preferredDoctorId    Int?                  // Link to preferred doctor
