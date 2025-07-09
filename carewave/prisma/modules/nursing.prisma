@@ -23,6 +23,47 @@ enum NursingTaskStatus {
   MISSED
 }
 
+enum NursingStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Nursing {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  patientId           Int?                  // Link to patient
+  patient             Patient?              @relation(fields: [patientId], references: [id])
+  doctorId            Int?                  // Link to doctor
+  doctor              Doctor?               @relation("DoctorNursingRecords", fields: [doctorId], references: [id])
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  clinicalRecordId    Int?                  // Link to clinical record
+  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  admissionId         Int?                  // Link to admission
+  admission           Admission?            @relation(fields: [admissionId], references: [id])
+  wardId              Int?                  // Link to ward
+  ward                Ward?                 @relation(fields: [wardId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  status              NursingStatus         @default(PENDING) // Status of nursing service
+  startDate           DateTime              @default(now())   // Start date of nursing service
+  endDate             DateTime?             // End date of nursing service
+  nursingCareId       Int?                  // Link to specific nursing care
+  nursingCare         NursingCare?          @relation(fields: [nursingCareId], references: [id])
+  billingId           Int?                  // Link to billing for nursing services
+  billing             Billing?              @relation(fields: [billingId], references: [id])
+  notes               String?               // General notes
+  createdById         Int?                  // User who created the record
+  createdBy           User?                 @relation("NursingCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("NursingUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("NursingAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
 model NursingCare {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
@@ -43,7 +84,7 @@ model NursingCare {
   clinicalSettingId   Int?                  // Link to clinical setting
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
   type                NursingCareType       // Type of nursing care
-  status              NursingCareStatus     @default("PENDING")
+  status              NursingCareStatus     @default(PENDING)
   carePlan            String?               // JSON or text for care plan details
   vitals              String?               // JSON or text for vital signs (e.g., {"bp": "120/80", "pulse": 72})
   medicationsAdministered String?           // JSON or text for medications given
@@ -58,6 +99,7 @@ model NursingCare {
   pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
   billingId           Int?                  // Link to billing for nursing services
   billing             Billing?              @relation(fields: [billingId], references: [id])
+  nursing             Nursing[]             @relation
   tasks               NursingTask[]         // Nursing tasks associated with this care
   documents           String?               // JSON or file paths for attached documents
   createdById         Int?                  // User who created the record
@@ -78,7 +120,7 @@ model NursingTask {
   nurse               User?                 @relation("TaskAssignedNurse", fields: [nurseId], references: [id])
   taskType            String                // e.g., "Medication Administration", "Wound Care"
   description         String?               // Task details
-  status              NursingTaskStatus     @default("PENDING")
+  status              NursingTaskStatus     @default(PENDING)
   scheduledTime       DateTime?             // Scheduled time for task
   completedTime       DateTime?             // Time task was completed
   priority            String?               // e.g., "HIGH", "MEDIUM", "LOW"
