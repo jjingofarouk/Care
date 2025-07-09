@@ -94,7 +94,7 @@ model VaccinationCampaign {
   targetPopulation    String?               // e.g., "Children under 5", "Healthcare Workers"
   departmentId        Int?                  // Link to department
   department          Department?           @relation(fields: [departmentId], references: [id])
-  status              String                @default(ACTIVE) // ACTIVE, INACTIVE, COMPLETED
+  status              String                @default("ACTIVE") // ACTIVE, INACTIVE, COMPLETED
   targetCount         Int?                  // Target number of vaccinations
   actualCount         Int?                  // Actual number of vaccinations
   budget              Float?                // Campaign budget
