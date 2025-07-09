@@ -170,9 +170,9 @@ model Transfer {
   toWardId             Int?
   toWard               Ward?               @relation("ToWardTransfers", fields: [toWardId], references: [id])
   fromBedId            Int?
-  fromBed              Bed?                @relation(fields: [fromBedId], references: [id])
+  fromBed              Bed?                @relation("FromBedTransfers", fields: [fromBedId], references: [id])
   toBedId              Int?
-  toBed                Bed?                @relation(fields: [toBedId], references: [id])
+  toBed                Bed?                @relation("ToBedTransfers", fields: [toBedId], references: [id])
   transferDate         DateTime            @default(now())
   reason               String?             // Reason for transfer
   notes                String?             // Additional notes
