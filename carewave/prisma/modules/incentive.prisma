@@ -15,31 +15,78 @@ enum IncentiveType {
   OTHER
 }
 
+model Department {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                @unique
+  description         String?
+  status              DepartmentStatus      @default(ACTIVE)
+  location            String?
+  headId              Int?                  @unique
+  head                User?                 @relation("DepartmentHead", fields: [headId], references: [id])
+  phoneNumber         String?
+  email               String?
+  operatingHours      String?
+  capacity            Int?
+  doctors             Doctor[]              @relation("DepartmentDoctors")
+  appointments        Appointment[]         @relation("DepartmentAppointments")
+  admissions          Admission[]           @relation("DepartmentAdmissions")
+  wards               Ward[]                @relation("DepartmentWards")
+  clinicalRecords     ClinicalRecord[]      @relation("DepartmentClinicalRecords")
+  clinicalSettings    ClinicalSetting[]     @relation("DepartmentClinicalSettings")
+  cssdRequisitions    CSSDRequisition[]     @relation("DepartmentCSSDRequisitions")
+  inventoryItems      Inventory[]           @relation("DepartmentInventory")
+  procurements        Procurement[]         @relation("DepartmentProcurements")
+  costCenters         CostCenter[]          @relation("DepartmentCostCenters")
+  budgets             Budget[]              @relation("DepartmentBudgets")
+  transactions        Transaction[]         @relation("DepartmentTransactions")
+  invoices            Invoice[]             @relation("DepartmentInvoices")
+  claims              Claim[]               @relation("DepartmentClaims")
+  nhifClaims          NhifClaim[]           @relation("DepartmentNhifClaims")
+  laboratoryTests     Laboratory[]          @relation("DepartmentLaboratoryTests")
+  radiologyTests      Radiology[]           @relation("DepartmentRadiologyTests")
+  pharmacyRecords     Pharmacy[]            @relation("DepartmentPharmacyRecords")
+  operationTheatres   OperationTheatre[]    @relation("DepartmentOperationTheatres")
+  nursingRecords      Nursing[]             @relation("DepartmentNursingRecords")
+  maternityRecords    Maternity[]           @relation("DepartmentMaternityRecords")
+  vaccinationRecords  Vaccination[]         @relation("DepartmentVaccinationRecords")
+  reports             Report[]              @relation("DepartmentReports")
+  helpdeskTickets     Helpdesk[]            @relation("DepartmentHelpdeskTickets")
+  createdById         Int?                  @unique
+  createdBy           User?                 @relation("DepartmentCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  @unique
+  updatedBy           User?                 @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("DepartmentAuditLogs")
+  incentives          Incentive[]           @relation("DepartmentIncentives")
+  users               User[]                @relation("UserDepartment")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
 
 model Incentive {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  userId                Int                 // Link to user (e.g., doctor, nurse, staff)
-  user                  User                @relation(fields: [userId], references: [id])
-  doctorId              Int?                // Link to doctor if applicable
-  doctor                Doctor?             @relation(fields: [doctorId], references: [id])
-  departmentId          Int?                // Link to department
-  department            Department?         @relation(fields: [departmentId], references: [id])
-  incentiveType         IncentiveType       // Type of incentive
+  userId                Int                 @unique
+  user                  User                @relation("IncentiveUser", fields: [userId], references: [id])
+  doctorId              Int?                @unique
+  doctor                Doctor?             @relation("IncentiveDoctor", fields: [doctorId], references: [id])
+  departmentId          Int?                @unique
+  department            Department?         @relation("DepartmentIncentives", fields: [departmentId], references: [id])
+  incentiveType         IncentiveType
   status                IncentiveStatus     @default(PENDING)
-  amount                Float               // Incentive amount
-  description           String?             // Description of incentive (e.g., "Performance bonus for Q1")
-  calculationBasis      String?             // JSON or text for calculation criteria (e.g., {"metric": "patient_satisfaction", "value": 95})
-  awardedDate           DateTime?           // Date incentive was awarded
-  disbursedDate         DateTime?           // Date incentive was paid
-  transactionId         Int?                // Link to accounting transaction
-  transaction           Transaction?        @relation(fields: [transactionId], references: [id])
-  rejectionReason       String?             // Reason for rejection, if applicable
-  createdById           Int?                // User who created the incentive record
+  amount                Float
+  description           String?
+  calculationBasis      String?
+  awardedDate           DateTime?
+  disbursedDate         DateTime?
+  transactionId         Int?                @unique
+  transaction           Transaction?        @relation("IncentiveTransaction", fields: [transactionId], references: [id])
+  rejectionReason       String?
+  createdById           Int?                @unique
   createdBy             User?               @relation("IncentiveCreatedBy", fields: [createdById], references: [id])
-  approvedById          Int?                // User who approved the incentive
+  approvedById          Int?                @unique
   approvedBy            User?               @relation("IncentiveApprovedBy", fields: [approvedById], references: [id])
-  updatedById           Int?                // User who last updated
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("IncentiveUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("IncentiveAuditLogs")
   incentiveNotifications IncentiveNotification[] @relation("IncentiveNotifications")
@@ -52,12 +99,12 @@ model IncentiveNotification {
   uuid                  String              @unique @default(uuid())
   incentiveId           Int
   incentive             Incentive           @relation("IncentiveNotifications", fields: [incentiveId], references: [id])
-  notificationType      String              // e.g., "SMS", "Email", "App Push"
+  notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?                // User receiving notification
-  recipient             User?               @relation(fields: [recipientId], references: [id])
-  message               String?             // Notification content
+  recipientId           Int?                @unique
+  recipient             User?               @relation("IncentiveNotificationRecipient", fields: [recipientId], references: [id])
+  message               String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
