@@ -1,0 +1,116 @@
+enum InventoryStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+  EXPIRED
+  DISPOSED
+}
+
+enum InventoryType {
+  MEDICATION
+  MEDICAL_SUPPLIES
+  EQUIPMENT
+  CONSUMABLES
+  OTHER
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+model Inventory {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  itemCode              String              @unique // e.g., "INV-001"
+  name                  String              // Item name (e.g., "Paracetamol 500mg")
+  description           String?             // Detailed description of item
+  type                  InventoryType       // Type of inventory item
+  status                InventoryStatus     @default(IN_STOCK)
+  quantity              Int                 // Current quantity in stock
+  minimumStockLevel     Int?                // Minimum stock threshold for alerts
+  maximumStockLevel     Int?                // Maximum stock level for reordering
+  unitPrice             Float?              // Cost per unit
+  totalValue            Float?              @default(0.0) // Total value of stock (quantity * unitPrice)
+  batchNumber           String?             // Batch number for tracking
+  expiryDate            DateTime?           // Expiry date for perishable items
+  purchaseDate          DateTime?           // Date of purchase
+  supplierId            Int?                // Link to supplier
+  supplier              Supplier?           @relation(fields: [supplierId], references: [id])
+  departmentId          Int?                // Link to department using the item
+  department            Department?         @relation(fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                // Link to clinical setting
+  clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
+  pharmacyId            Int?                // Link to pharmacy for medication items
+  pharmacy              Pharmacy?           @relation(fields: [pharmacyId], references: [id])
+  storageLocation       String?             // Physical storage location (e.g., "Shelf A-12")
+  reorderPoint          Int?                // Quantity at which to reorder
+  reorderQuantity       Int?                // Quantity to order when reordering
+  lastRestockedDate     DateTime?           // Last restock date
+  createdById           Int?                // User who created the inventory record
+  createdBy             User?               @relation("InventoryCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                // User who last updated
+  updatedBy             User?               @relation("InventoryUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]          @relation("InventoryAuditLogs")
+  inventoryTransactions InventoryTransaction[] @relation("InventoryTransactions")
+  inventoryNotifications InventoryNotification[] @relation("InventoryNotifications")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
+model InventoryTransaction {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  inventoryId           Int
+  inventory             Inventory           @relation("InventoryTransactions", fields: [inventoryId], references: [id])
+  transactionType       String              // e.g., "RESTOCK", "DISPENSE", "ADJUSTMENT", "DISPOSAL"
+  quantity              Int                 // Quantity added or removed
+  transactionDate       DateTime            @default(now())
+  reason                String?             // Reason for transaction (e.g., "Patient use", "Expired")
+  referenceId           Int?                // Link to related entity (e.g., prescriptionId, orderId)
+  referenceType         String?             // Type of reference (e.g., "Prescription", "PurchaseOrder")
+  performedById         Int?                // User who performed the transaction
+  performedBy           User?               @relation(fields: [performedById], references: [id])
+  notes                 String?             // Additional notes
+  createdById           Int?                // User who created the transaction record
+  createdBy             User?               @relation(fields: [createdById], references: [id])
+  updatedById           Int?                // User who last updated
+  updatedBy             User?               @relation(fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]          @relation("InventoryTransactionAuditLogs")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
+model InventoryNotification {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  inventoryId           Int
+  inventory             Inventory           @relation("InventoryNotifications", fields: [inventoryId], references: [id])
+  notificationType      String              // e.g., "SMS", "Email", "App Push"
+  status                NotificationStatus  @default(PENDING)
+  sentAt                DateTime?
+  recipientId           Int?                // User receiving notification
+  recipient             User?               @relation(fields: [recipientId], references: [id])
+  message               String?             // Notification content (e.g., "Low stock alert for Paracetamol")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
+model Supplier {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  name                  String              // Supplier name
+  contactDetails        String?             // JSON or text for contact info (e.g., {"phone": "1234567890", "email": "supplier@example.com"})
+  address               String?             // Supplier address
+  supplierCode          String?             @unique // Unique supplier code (e.g., "SUP-001")
+  createdById           Int?                // User who created the supplier record
+  createdBy             User?               @relation(fields: [createdById], references: [id])
+  updatedById           Int?                // User who last updated
+  updatedBy             User?               @relation(fields: [updatedById], references: [id])
+  inventory             Inventory[]         @relation
+  auditLogs             AuditLog[]          @relation("SupplierAuditLogs")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
