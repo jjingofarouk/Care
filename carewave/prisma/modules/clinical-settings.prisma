@@ -1,0 +1,68 @@
+// clinical-settings.prisma
+enum ClinicalSettingType {
+  GENERAL
+  SPECIALTY
+  EMERGENCY
+  OUTPATIENT
+  INPATIENT
+}
+
+enum ConfigurationStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+}
+
+model ClinicalSetting {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // e.g., "Cardiology Clinic Settings"
+  type                ClinicalSettingType   // Type of clinical setting
+  status              ConfigurationStatus   @default("DRAFT")
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  protocols           String?               // JSON or text for clinical protocols (e.g., treatment guidelines)
+  defaultRoomId       Int?                  // Default room for this setting
+  defaultRoom         Room?                 @relation(fields: [defaultRoomId], references: [id])
+  equipmentList       String?               // JSON or text for required equipment
+  staffRoles          String?               // JSON or text for required staff roles (e.g., ["DOCTOR", "NURSE"])
+  appointmentDuration  Int?                  // Default duration for appointments (in minutes)
+  maxPatientsPerSlot  Int?                  // Max patients per appointment slot
+  operatingHours      String?               // JSON or text for operating hours (e.g., {"mon": "08:00-17:00"})
+  billingRules        String?               // JSON or text for billing rules specific to this setting
+  laboratoryId        Int?                  // Link to default laboratory for tests
+  laboratory          Laboratory?           @relation(fields: [laboratoryId], references: [id])
+  radiologyId         Int?                  // Link to default radiology for imaging
+  radiology           Radiology?            @relation(fields: [radiologyId], references: [id])
+  pharmacyId          Int?                  // Link to default pharmacy for prescriptions
+  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  operationTheatreId  Int?                  // Link to default operation theatre
+  operationTheatre    OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
+  nursingId           Int?                  // Link to nursing protocols
+  nursing             Nursing?              @relation(fields: [nursingId], references: [id])
+  cssdId              Int?                  // Link to CSSD for sterilization protocols
+  cssd                Cssd?                 @relation(fields: [cssdId], references: [id])
+  createdById         Int?                  // User who created the setting
+  createdBy           User?                 @relation("ClinicalSettingCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("ClinicalSettingUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("ClinicalSettingAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model Room {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  roomNumber          String                @unique // e.g., "R-101"
+  name                String?               // e.g., "Consultation Room 1"
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  status              String                @default("AVAILABLE") // AVAILABLE, OCCUPIED, MAINTENANCE
+  capacity            Int?                  // Max capacity (e.g., number of patients)
+  equipment           String?               // JSON or text for equipment in room
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
