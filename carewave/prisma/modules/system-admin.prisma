@@ -1,4 +1,3 @@
-// system-admin.prisma
 enum UserRole {
   ADMIN
   DOCTOR
@@ -75,6 +74,8 @@ model User {
   departmentsHeaded     Department[]          @relation("DepartmentHead")
   createdDepartments    Department[]          @relation("DepartmentCreatedBy")
   updatedDepartments    Department[]          @relation("DepartmentUpdatedBy")
+  widgetCreated         DashboardWidget[]     @relation("WidgetCreatedBy")
+  widgetUpdated         DashboardWidget[]     @relation("WidgetUpdatedBy")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
@@ -82,14 +83,14 @@ model User {
 model SystemConfiguration {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  key                 String                @unique // e.g., "SYSTEM_TIMEZONE"
-  value               String                // Configuration value
-  description         String?               // Description of config
-  category            String?               // e.g., "General", "Security", "Notification"
-  status              String                @default("ACTIVE") // ACTIVE, INACTIVE
-  createdById         Int?                  // User who created config
+  key                 String                @unique
+  value               String
+  description         String?
+  category            String?
+  status              String                @default("ACTIVE")
+  createdById         Int?
   createdBy           User?                 @relation("ConfigCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("ConfigUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("SystemConfigAuditLogs")
   createdAt           DateTime              @default(now())
@@ -99,29 +100,29 @@ model SystemConfiguration {
 model SystemLog {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  userId              Int?                  // Link to user
+  userId              Int?
   user                User?                 @relation("LoggedBy", fields: [userId], references: [id])
-  type                SystemLogType         // Type of log
-  description         String                // Log details
-  ipAddress           String?               // IP address of action
-  deviceInfo          String?               // JSON or text for device details
-  module              String?               // e.g., "Patient", "Billing"
-  action              String                // e.g., "CREATE", "UPDATE", "DELETE"
-  entityId            Int?                  // ID of affected entity
-  entityType          String?               // Type of entity (e.g., "Patient", "Appointment")
+  type                SystemLogType
+  description         String
+  ipAddress           String?
+  deviceInfo          String?
+  module              String?
+  action              String
+  entityId            Int?
+  entityType          String?
   createdAt           DateTime              @default(now())
 }
 
 model RolePermission {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  role                UserRole              // Role to which permission applies
-  module              String                // e.g., "Patient", "Billing"
-  permissionLevel     PermissionLevel       // FULL_ACCESS, READ_ONLY, etc.
-  description         String?               // Permission description
-  createdById         Int?                  // User who created permission
+  role                UserRole
+  module              String
+  permissionLevel     PermissionLevel
+  description         String?
+  createdById         Int?
   createdBy           User?                 @relation("PermissionCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("PermissionUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("RolePermissionAuditLogs")
   createdAt           DateTime              @default(now())
@@ -129,14 +130,14 @@ model RolePermission {
 }
 
 model AuditLog {
-  id          Int       @id @default(autoincrement())
-  uuid        String    @unique @default(uuid())
-  action      String
-  entity      String
-  entityId    Int
-  userId      Int?
-  user        User?     @relation(fields: [userId], references: [id])
-  dashboard   Dashboard? @relation("DashboardAuditLogs", fields: [entityId], references: [id])
-  details     String?
-  createdAt   DateTime  @default(now())
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  action              String
+  entity              String
+  entityId            Int
+  userId              Int?
+  user                User?                 @relation(fields: [userId], references: [id])
+  dashboard           Dashboard?            @relation("DashboardAuditLogs", fields: [entityId], references: [id])
+  details             String?
+  createdAt           DateTime              @default(now())
 }
