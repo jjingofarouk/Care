@@ -6,21 +6,19 @@ import './tailwind.css';
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, padding: 0 }}>
+      <body style={{ margin: 0 }}>
         <Box sx={{ 
           display: 'flex', 
           flexDirection: 'column', 
           minHeight: '100vh', 
-          m: 0, 
-          p: 0,
+          m: 0,
         }}>
           <Header />
           <Box 
             component="main" 
             sx={{ 
               flex: 1, 
-              m: 0, 
-              pt: { xs: '64px', sm: '80px', lg: '96px' },
+              m: 0,
               maxWidth: '100%', 
               boxSizing: 'border-box',
               overflowX: 'hidden'
