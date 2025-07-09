@@ -44,25 +44,3 @@ model MedicalRecord {
   updatedAt             DateTime              @updatedAt
 }
 
-model ClinicalRecord {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  patientId             Int
-  patient               Patient               @relation("PatientClinicalRecords", fields: [patientId], references: [id])
-  doctorId              Int?
-  doctor                Doctor?               @relation("DoctorClinicalRecords", fields: [doctorId], references: [id])
-  departmentId          Int?
-  department            Department?           @relation("DepartmentClinicalRecords", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?      @relation("ClinicalRecordClinicalSettings", fields: [clinicalSettingId], references: [id])
-  vitalSigns            String?
-  symptoms              String?
-  diagnosis             String?
-  treatment             String?
-  medicalRecord         MedicalRecord?        @relation("MedicalRecordClinicalRecords")
-  prescriptions         Prescription[]        @relation("PrescriptionClinicalRecords")
-  radiologyTests        RadiologyTest[]       @relation("ClinicalRecordRadiologyTests")
-  maternity             Maternity?            @relation("MaternityClinicalRecords")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-}
