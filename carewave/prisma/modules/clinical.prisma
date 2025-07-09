@@ -1,0 +1,61 @@
+// clinical.prisma
+enum ClinicalRecordType {
+  CONSULTATION
+  PROCEDURE
+  DIAGNOSIS
+  TREATMENT_PLAN
+  OBSERVATION
+}
+
+enum ClinicalStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model ClinicalRecord {
+  id                  Int                 @id @default(autoincrement())
+  uuid                String              @unique @default(uuid())
+  patientId           Int                 // Link to patient
+  patient             Patient             @relation(fields: [patientId], references: [id])
+  doctorId            Int?                // Link to doctor
+  doctor              Doctor?             @relation("DoctorClinicalRecords", fields: [doctorId], references: [id])
+  appointmentId       Int?                // Link to appointment
+  appointment         Appointment?        @relation(fields: [appointmentId], references: [id])
+  admissionId         Int?                // Link to admission
+  admission           Admission?          @relation(fields: [admissionId], references: [id])
+  medicalRecordId     Int?                // Link to medical record
+  medicalRecord       MedicalRecord?      @relation(fields: [medicalRecordId], references: [id])
+  clinicalSettingId   Int?                // Link to clinical setting
+  clinicalSetting     ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
+  departmentId        Int?                // Link to department
+  department          Department?         @relation(fields: [departmentId], references: [id])
+  type                ClinicalRecordType  // Type of clinical record
+  status              ClinicalStatus      @default("DRAFT")
+  diagnosis           String?             // Diagnosis details
+  treatmentPlan       String?             // Treatment plan details
+  procedureDetails    String?             // Procedure details (if applicable)
+  observationNotes    String?             // Observation notes
+  vitals              String?             // JSON or text for vital signs (e.g., {"bp": "120/80", "pulse": 72})
+  laboratoryId        Int?                // Link to lab tests ordered
+  laboratory          Laboratory?         @relation(fields: [laboratoryId], references: [id])
+  radiologyId         Int?                // Link to radiology tests ordered
+  radiology           Radiology?          @relation(fields: [radiologyId], references: [id])
+  pharmacyId          Int?                // Link to prescriptions
+  pharmacy            Pharmacy?           @relation(fields: [pharmacyId], references: [id])
+  operationTheatreId  Int?                // Link to surgical procedures
+  operationTheatre    OperationTheatre?   @relation(fields: [operationTheatreId], references: [id])
+  nursingId           Int?                // Link to nursing care provided
+  nursing             Nursing?            @relation(fields: [nursingId], references: [id])
+  billingId           Int?                // Link to billing for clinical services
+  billing             Billing?            @relation(fields: [billingId], references: [id])
+  documents           String?             // JSON or file path for attached clinical documents
+  createdById         Int?                // User who created the record
+  createdBy           User?               @relation("ClinicalRecordCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                // User who last updated
+  updatedBy           User?               @relation("ClinicalRecordUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]          @relation("ClinicalRecordAuditLogs")
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+}
