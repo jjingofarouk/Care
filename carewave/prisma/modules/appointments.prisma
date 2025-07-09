@@ -87,28 +87,7 @@ model Appointment {
   updatedAt             DateTime            @updatedAt
 }
 
-model Queue {
-  id                  Int                 @id @default(autoincrement())
-  uuid                String              @unique @default(uuid())
-  appointmentId       Int?                @unique
-  appointment         Appointment?        @relation(fields: [appointmentId], references: [id])
-  queueNumber         Int
-  status              String              @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED, SKIPPED, DELAYED
-  priority            TriagePriority?
-  departmentId        Int?
-  department          Department?         @relation(fields: [departmentId], references: [id])
-  estimatedWaitTime   Int?                // Estimated wait time in minutes
-  calledAt            DateTime?           // Time when patient was called
-  createdById         Int?                // User who added to queue
-  createdBy           User?               @relation(fields: [createdById], references: [id])
-  updatedById         Int?                // User who last updated queue
-  updatedBy           User?               @relation(fields: [updatedById], references: [id])
-  queueLogs           QueueLog[]          @relation("QueueLogs")
-  notifications       QueueNotification[] @relation("QueueNotifications")
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  auditLogs           AuditLog[]          @relation("QueueAuditLogs")
-}
+
 
 model AppointmentNotification {
   id                  Int                 @id @default(autoincrement())
