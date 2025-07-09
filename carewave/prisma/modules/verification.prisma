@@ -72,7 +72,7 @@ model VerificationConfiguration {
   apiCredentials      String?               // Encrypted JSON for API credentials
   autoVerify          Boolean               @default(false) // Auto-verify if possible
   notificationSettings String?               // JSON for notification settings (e.g., SMS, email)
-  status              String                @default(ACTIVE) // ACTIVE, INACTIVE
+  status              String                @default("ACTIVE") // ACTIVE, INACTIVE
   departmentId        Int?                  // Link to department
   department          Department?           @relation(fields: [departmentId], references: [id])
   notes               String?               // Additional notes
