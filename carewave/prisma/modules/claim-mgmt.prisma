@@ -114,13 +114,13 @@ model ClaimAdjustment {
   claimId               Int
   claim                 Claim               @relation("ClaimAdjustments", fields: [claimId], references: [id])
   adjustmentAmount      Float
-  adjustmentReason      String              // Reason for adjustment (e.g., "Coding Error", "Overcharge")
+  adjustmentReason      String
   adjustmentDate        DateTime            @default(now())
-  createdById           Int?                // User who made adjustment
-  createdBy             User?               @relation(fields: [createdById], references: [id])
-  approvedById          Int?                // User who approved adjustment
-  approvedBy            User?               @relation(fields: [approvedById], references: [id])
-  notes                 String?             // Additional notes for adjustment
+  createdById           Int?
+  createdBy             User?               @relation("ClaimAdjustmentCreatedBy", fields: [createdById], references: [id])
+  approvedById          Int?
+  approvedBy            User?               @relation("ClaimAdjustmentApprovedBy", fields: [approvedById], references: [id])
+  notes                 String?
   auditLogs             AuditLog[]          @relation("ClaimAdjustmentAuditLogs")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
