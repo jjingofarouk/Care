@@ -23,11 +23,55 @@ enum PurchaseOrderItemStatus {
   CANCELLED
 }
 
+enum ProcurementStatus {
+  PENDING
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Procurement {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  requestNumber       String                @unique // Unique procurement request number (e.g., "PR-2025-001")
+  departmentId        Int?                  // Link to requesting department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  requesterId         Int?                  // Link to user who created the request
+  requester           User?                 @relation("ProcurementRequester", fields: [requesterId], references: [id])
+  status              ProcurementStatus     @default(PENDING) // Status of procurement request
+  requestDate         DateTime              @default(now())   // Date of procurement request
+  approvedDate        DateTime?             // Date of approval
+  completionDate      DateTime?             // Date of completion
+  description         String?               // Description of procurement needs
+  budgetId            Int?                  // Link to budget
+  budget              Budget?               @relation(fields: [budgetId], references: [id])
+  purchaseOrderId     Int?                  // Link to associated purchase order
+  purchaseOrder       PurchaseOrder?        @relation(fields: [purchaseOrderId], references: [id])
+  medicationId        Int?                  // Link to medication (optional)
+  medication          Medication?           @relation(fields: [medicationId], references: [id])
+  cssdInstrumentId    Int?                  // Link to CSSD instrument (optional)
+  cssdInstrument      CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
+  inventoryItemId     Int?                  // Link to inventory item (optional)
+  inventoryItem       Inventory?            @relation(fields: [inventoryItemId], references: [id])
+  billingId           Int?                  // Link to billing for procurement
+  billing             Billing?              @relation(fields: [billingId], references: [id])
+  notes               String?               // Additional notes
+  documents           String?               // JSON or file paths for procurement documents
+  createdById         Int?                  // User who created the record
+  createdBy           User?                 @relation("ProcurementCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("ProcurementUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("ProcurementAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
 model Supplier {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
   name                String                // Supplier name (e.g., "MediCorp Supplies")
-  status              SupplierStatus        @default("PENDING_APPROVAL")
+  status              SupplierStatus        @default(PENDING_APPROVAL)
   contactName         String?               // Primary contact person
   contactPhone        String?               // Contact phone number
   email               String?               @unique // Supplier email
@@ -66,10 +110,12 @@ model PurchaseOrder {
   supplier            Supplier              @relation(fields: [supplierId], references: [id])
   departmentId        Int?                  // Link to department
   department          Department?           @relation(fields: [departmentId], references: [id])
+  procurementId       Int?                  // Link to procurement request
+  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
   orderDate           DateTime              @default(now())
   expectedDeliveryDate DateTime?            // Expected delivery date
   actualDeliveryDate  DateTime?             // Actual delivery date
-  status              PurchaseOrderStatus   @default("PENDING")
+  status              PurchaseOrderStatus   @default(PENDING)
   totalAmount         Float                 // Total order amount
   taxAmount           Float?                // Tax component
   discountAmount      Float?                // Discount applied
@@ -111,7 +157,7 @@ model PurchaseOrderItem {
   totalPrice          Float                 // Total price for item
   batchNumber         String?               // Batch number
   expiryDate          DateTime?             // Expiry date of item
-  status              PurchaseOrderItemStatus @default("PENDING")
+  status              PurchaseOrderItemStatus @default(PENDING)
   receivedQuantity    Int?                  // Quantity received
   receivedDate        DateTime?             // Date items were received
   notes               String?               // Additional notes
