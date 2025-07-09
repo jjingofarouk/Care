@@ -28,7 +28,7 @@ model OperationTheatre {
   uuid                String                @unique @default(uuid())
   name                String                // e.g., "OT-1 Main Theatre"
   theatreNumber       String                @unique // e.g., "OT-001"
-  status              OperationTheatreStatus @default("AVAILABLE")
+  status              OperationTheatreStatus @default(AVAILABLE)
   departmentId        Int?                  // Link to department
   department          Department?           @relation(fields: [departmentId], references: [id])
   clinicalSettingId   Int?                  // Link to clinical setting
@@ -70,7 +70,7 @@ model SurgicalProcedure {
   clinicalSettingId   Int?                  // Link to clinical setting
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
   type                ProcedureType         // ELECTIVE, EMERGENCY, etc.
-  status              ProcedureStatus       @default("SCHEDULED")
+  status              ProcedureStatus       @default(SCHEDULED)
   procedureCode       String?               // e.g., ICD-10-PCS code
   description         String?               // Procedure description
   startTime           DateTime              // Scheduled start time
