@@ -29,15 +29,15 @@ model Radiology {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
   patientId           Int?
-  patient             Patient?              @relation(fields: [patientId], references: [id])
+  patient             Patient?              @relation("PatientRadiologyTests", fields: [patientId], references: [id])
   appointmentId       Int?
-  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  appointment         Appointment?          @relation("AppointmentRadiology", fields: [appointmentId], references: [id])
   emergencyId         Int?
   emergency           Emergency?            @relation(fields: [emergencyId], references: [id])
   invoiceId           Int?
-  invoice             Invoice?              @relation(fields: [invoiceId], references: [id])
+  invoice             Invoice?              @relation("InvoiceRadiology", fields: [invoiceId], references: [id])
   departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
+  department          Department?           @relation("DepartmentRadiologyTests", fields: [departmentId], references: [id])
   status              RadiologyTestStatus   @default(SCHEDULED)
   createdById         Int?
   createdBy           User?                 @relation("RadiologyCreatedBy", fields: [createdById], references: [id])
@@ -47,7 +47,7 @@ model Radiology {
   auditLogs           AuditLog[]            @relation("RadiologyAuditLogs")
   dashboardWidget     DashboardWidget?      @relation("DashboardWidgetRadiology")
   maternity           Maternity?            @relation("MaternityRadiology", fields: [maternityId], references: [id])
-  maternityId         Int?
+  medicalRecord       MedicalRecord?        @relation("MedicalRecordRadiology", fields: [radiologyId], references: [id])
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
@@ -57,7 +57,7 @@ model RadiologyTest {
   uuid                String                @unique @default(uuid())
   testNumber          String                @unique
   patientId           Int
-  patient             Patient               @relation(fields: [patientId], references: [id])
+  patient             Patient               @relation("PatientRadiologyTests", fields: [patientId], references: [id])
   radiologyId         Int?
   radiology           Radiology?            @relation(fields: [radiologyId], references: [id])
   doctorId            Int?
@@ -65,7 +65,7 @@ model RadiologyTest {
   radiologistId       Int?
   radiologist         User?                 @relation("Radiologist", fields: [radiologistId], references: [id])
   appointmentId       Int?
-  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  appointment         Appointment?          @relation("AppointmentRadiologyTests", fields: [appointmentId], references: [id])
   admissionId         Int?
   admission           Admission?            @relation(fields: [admissionId], references: [id])
   clinicalRecordId    Int?
