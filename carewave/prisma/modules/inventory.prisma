@@ -33,7 +33,7 @@ model Inventory {
   expiryDate            DateTime?           // Expiry date for perishable items
   purchaseDate          DateTime?           // Date of purchase
   supplierId            Int?                // Link to supplier
-  supplier              Supplier?           @relation(fields: [supplierId], references: [id])
+  supplier              InventorySupplier?           @relation(fields: [supplierId], references: [id])
   departmentId          Int?                // Link to department using the item
   department            Department?         @relation(fields: [departmentId], references: [id])
   clinicalSettingId     Int?                // Link to clinical setting
