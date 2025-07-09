@@ -100,7 +100,7 @@ model UtilityMaintenance {
   performedById       Int?                  // User or technician who performed maintenance
   performedBy         User?                 @relation("MaintenancePerformedBy", fields: [performedById], references: [id])
   cost                Float?                // Cost of maintenance
-  status              String                @default(PENDING) // PENDING, COMPLETED, FAILED
+  status              String                @default("PENDING") // PENDING, COMPLETED, FAILED
   downtimeDuration    Int?                  // Downtime in minutes
   procurementId       Int?                  // Link to procurement for parts
   procurement         Procurement?          @relation(fields: [procurementId], references: [id])
