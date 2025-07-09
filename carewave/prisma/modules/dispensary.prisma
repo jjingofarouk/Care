@@ -36,7 +36,7 @@ model Prescription {
   clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
   pharmacyId          Int?                  // Link to pharmacy
   pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
-  status              PrescriptionStatus    @default("PENDING")
+  status              PrescriptionStatus    @default(PENDING)
   prescriptionDate    DateTime              @default(now())
   expiryDate          DateTime?             // Prescription expiry date
   notes               String?               // Additional notes
@@ -100,7 +100,7 @@ model DispensingRecord {
   batchNumber         String?               // Batch number of medication
   expiryDate          DateTime?             // Expiry date of dispensed medication
   notes               String?               // Additional dispensing notes
-  status              String                @default("DISPENSED") // DISPENSED, PARTIALLY_DISPENSED, RETURNED
+  status              String                @default(DISPENSED) // DISPENSED, PARTIALLY_DISPENSED, RETURNED
   createdById         Int?                  // User who created record
   createdBy           User?                 @relation("DispensingRecordCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?                  // User who last updated
