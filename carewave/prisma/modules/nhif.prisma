@@ -1,0 +1,80 @@
+// nhif.prisma
+enum NhifClaimStatus {
+  PENDING
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PARTIALLY_APPROVED
+  PAID
+  DENIED
+  UNDER_REVIEW
+}
+
+enum NhifClaimType {
+  INPATIENT
+  OUTPATIENT
+  PHARMACY
+  SURGICAL
+  MATERNITY
+  DIAGNOSTIC
+}
+
+model NhifClaim {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  claimNumber         String                @unique // Unique NHIF claim ID (e.g., "NHIF-2025-001")
+  patientId           Int                   // Link to patient
+  patient             Patient               @relation(fields: [patientId], references: [id])
+  nhifNumber          String                // Patient's NHIF membership number
+  invoiceId           Int?                  // Link to invoice
+  invoice             Invoice?              @relation(fields: [invoiceId], references: [id])
+  appointmentId       Int?                  // Link to appointment
+  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  admissionId         Int?                  // Link to admission
+  admission           Admission?            @relation(fields: [admissionId], references: [id])
+  clinicalRecordId    Int?                  // Link to clinical record
+  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  medicalRecordId     Int?                  // Link to medical record
+  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  laboratoryId        Int?                  // Link to lab tests
+  laboratory          Laboratory?           @relation(fields: [laboratoryId], references: [id])
+  radiologyId         Int?                  // Link to radiology tests
+  radiology           Radiology?            @relation(fields: [radiologyId], references: [id])
+  pharmacyId          Int?                  // Link to pharmacy prescriptions
+  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  operationTheatreId  Int?                  // Link to surgical procedures
+  operationTheatre    OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
+  maternityId         Int?                  // Link to maternity services
+  maternity           Maternity?            @relation(fields: [maternityId], references: [id])
+  vaccinationId       Int?                  // Link to vaccinations
+  vaccination         Vaccination?          @relation(fields: [vaccinationId], references: [id])
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  claimType           NhifClaimType         // Type of NHIF claim
+  status              NhifClaimStatus       @default("PENDING")
+  submittedDate       DateTime?             // Date claim was submitted to NHIF
+  approvedDate        DateTime?             // Date claim was approved
+  totalAmount         Float                 // Total claim amount
+  approvedAmount      Float?                // Amount approved by NHIF
+  rejectionReason     String?               // Reason for rejection, if applicable
+  documents           String?               // JSON or file paths for attached documents
+  preAuthorizationCode String?              // NHIF pre-authorization code
+  treatmentCode       String?               // NHIF-specific treatment code
+  diagnosisCodes      String?               // JSON or text for ICD-10 codes
+  notes               String?               // Additional notes
+  transactionId       Int?                  // Link to accounting transaction
+  transaction         Transaction?          @relation("TransactionNhifClaims", fields: [transactionId], references: [id])
+  billingId           Int?                  // Link to billing
+  billing             Billing?              @relation(fields: [billingId], references: [id])
+  referralId          Int?                  // Link to referral
+  referral            Referral?             @relation(fields: [referralId], references: [id])
+  createdById         Int?                  // User who created the claim
+  createdBy           User?                 @relation("NhifClaimCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("NhifClaimUpdatedBy", fields: [updatedById], references: [id])
+  reviewedById        Int?                  // User who reviewed the claim
+  reviewedBy          User?                 @relation("NhifClaimReviewedBy", fields: [reviewedById], references: [id])
+  auditLogs           AuditLog[]            @relation("NhifClaimAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
