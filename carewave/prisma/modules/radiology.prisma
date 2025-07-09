@@ -1,0 +1,123 @@
+// radiology.prisma
+enum RadiologyTestStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  PENDING_REPORT
+  REPORTED
+}
+
+enum RadiologyTestType {
+  XRAY
+  CT
+  MRI
+  ULTRASOUND
+  MAMMOGRAPHY
+  FLUOROSCOPY
+  NUCLEAR_MEDICINE
+  PET_SCAN
+}
+
+enum RadiologyEquipmentStatus {
+  AVAILABLE
+  IN_USE
+  UNDER_MAINTENANCE
+  OUT_OF_SERVICE
+}
+
+model RadiologyTest {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  testNumber          String                @unique // Unique test ID (e.g., "RAD-2025-001")
+  patientId           Int                   // Link to patient
+  patient             Patient               @relation(fields: [patientId], references: [id])
+  doctorId            Int?                  // Link to requesting doctor
+  doctor              Doctor?               @relation("RadiologyDoctor", fields: [doctorId], references: [id])
+  radiologistId       Int?                  // Link to radiologist
+  radiologist         User?                 @relation("Radiologist", fields: [radiologistId], references: [id])
+  appointmentId       Int?                  // Link to appointment
+  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  admissionId         Int?                  // Link to admission
+  admission           Admission?            @relation(fields: [admissionId], references: [id])
+  clinicalRecordId    Int?                  // Link to clinical record
+  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  medicalRecordId     Int?                  // Link to medical record
+  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  type                RadiologyTestType     // Type of radiology test
+  status              RadiologyTestStatus   @default("SCHEDULED")
+  testDate            DateTime              @default(now()) // Date of test
+  scheduledDate       DateTime?             // Scheduled test date
+  completedDate       DateTime?             // Date test was completed
+  reportDate          DateTime?             // Date report was generated
+  equipmentId         Int?                  // Link to equipment used
+  equipment           RadiologyEquipment?   @relation(fields: [equipmentId], references: [id])
+  billingId           Int?                  // Link to billing
+  billing             Billing?              @relation(fields: [billingId], references: [id])
+  claimId             Int?                  // Link to insurance claim
+  claim               Claim?                @relation(fields: [claimId], references: [id])
+  nhifClaimId         Int?                  // Link to NHIF claim
+  nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
+  testCode            String?               // e.g., CPT or ICD-10 code
+  indications         String?               // Reason for test
+  findings            String?               // Radiology findings
+  report              String?               // Full radiology report
+  images              String?               // JSON or file paths for DICOM images
+  contrastUsed        Boolean               @default(false) // Whether contrast was used
+  contrastType        String?               // Type of contrast (e.g., "Iodine-based")
+  radiationDose       Float?                // Radiation dose in mSv
+  notes               String?               // Additional notes
+  priority            String?               // e.g., "URGENT", "ROUTINE"
+  createdById         Int?                  // User who created the test
+  createdBy           User?                 @relation("RadiologyTestCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("RadiologyTestUpdatedBy", fields: [updatedById], references: [id])
+  reportedById        Int?                  // User who generated the report
+  reportedBy          User?                 @relation("RadiologyTestReportedBy", fields: [reportedById], references: [id])
+  auditLogs           AuditLog[]            @relation("RadiologyTestAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model RadiologyEquipment {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // e.g., "GE MRI Scanner"
+  equipmentId         String                @unique // Unique equipment ID (e.g., "RAD-EQ-001")
+  type                RadiologyTestType     // Type of equipment (XRAY, MRI, etc.)
+  status              RadiologyEquipmentStatus @default("AVAILABLE")
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  location            String?               // e.g., "Radiology Suite A"
+  manufacturer        String?               // e.g., "Siemens"
+  model               String?               // e.g., "Magnetom Skyra"
+  serialNumber        String?               @unique // Equipment serial number
+  purchaseDate        DateTime?             // Date of purchase
+  warrantyExpires     DateTime?             // Warranty expiration date
+  lastMaintenance     DateTime?             // Last maintenance date
+  maintenanceSchedule String?               // JSON or text for maintenance schedule
+  calibrationDate     DateTime?             // Last calibration date
+  calibrationDetails  String?               // Calibration details
+  radiationSafetyCheck DateTime?            // Last radiation safety check
+  cost                Float?                // Purchase or lease cost
+  fixedAssetId        Int?                  // Link to fixed assets
+  fixedAsset          FixedAsset?           @relation(fields: [fixedAssetId], references: [id])
+  procurementId       Int?                  // Link to procurement
+  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
+  radiologyTests      RadiologyTest[]       // Tests performed using this equipment
+  notes               String?               // Additional notes
+  documents           String?               // JSON or file paths for equipment documents
+  createdById         Int?                  // User who created equipment record
+  createdBy           User?                 @relation("EquipmentCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("EquipmentUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("RadiologyEquipmentAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
