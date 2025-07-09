@@ -22,12 +22,6 @@ enum ClaimType {
   REHABILITATION
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
 
 model Claim {
   id                    Int                 @id @default(autoincrement())
