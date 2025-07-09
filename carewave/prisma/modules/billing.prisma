@@ -1,27 +1,84 @@
+// billing.prisma
+enum InvoiceStatus {
+  PENDING
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  MOBILE_PAYMENT
+  INSURANCE
+  BANK_TRANSFER
+  CHECK
+}
+
 model Invoice {
-  id                Int               @id @default(autoincrement())
-  prescriptionId    Int               @unique
-  prescription      Prescription      @relation(fields: [prescriptionId], references: [id])
-  totalAmount       Float
-  status            String            @default("PENDING") // PENDING, PAID, REFUNDED
-  paymentMethod     String?
-  transactionId     Int?
-  transaction       Transaction?      @relation("TransactionInvoices", fields: [transactionId], references: [id])
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  dispensingRecords DispensingRecord[]
-  refunds           Refund[]
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  patientId         Int                 // Link to patient
+  patient           Patient             @relation(fields: [patientId], references: [id])
+  prescriptionId    Int?                // Link to prescription (optional, as not all invoices are prescription-based)
+  prescription      Prescription?       @relation(fields: [prescriptionId], references: [id])
+  appointmentId     Int?                // Link to appointment for service charges
+  appointment       Appointment?        @relation(fields: [appointmentId], references: [id])
+  admissionId       Int?                // Link to admission for inpatient charges
+  admission         Admission?          @relation(fields: [admissionId], references: [id])
+  laboratoryId      Int?                // Link to lab tests
+  laboratory        Laboratory?         @relation(fields: [laboratoryId], references: [id])
+  radiologyId       Int?                // Link to radiology tests
+  radiology         Radiology?          @relation(fields: [radiologyId], references: [id])
+  pharmacyId        Int?                // Link to pharmacy for medication charges
+  pharmacy          Pharmacy?           @relation(fields: [pharmacyId], references: [id])
+  totalAmount       Float               // Total invoice amount
+  taxAmount         Float?              // Tax component
+  discountAmount    Float?              // Discount applied
+  status            InvoiceStatus       @default("PENDING")
+  paymentMethod     PaymentMethod?      // Method of payment
+  transactionId     Int?                // Link to accounting transaction
+  transaction       Transaction?        @relation("TransactionInvoices", fields: [transactionId], references: [id])
+  claimId           Int?                // Link to insurance claim
+  claim             Claim?              @relation(fields: [claimId], references: [id])
+  nhifClaimId       Int?                // Link to NHIF claim
+  nhifClaim         NhifClaim?          @relation(fields: [nhifClaimId], references: [id])
+  departmentId      Int?                // Link to department for cost allocation
+  department        Department?         @relation(fields: [departmentId], references: [id])
+  invoiceNumber     String              @unique // Unique invoice identifier (e.g., "INV-2025-001")
+  dueDate           DateTime?           // Payment due date
+  issuedDate        DateTime            @default(now()) // Date invoice was issued
+  dispensingRecords DispensingRecord[]  // Link to dispensing records for pharmacy
+  refunds           Refund[]            // Refunds associated with this invoice
+  createdById       Int?                // User who created the invoice
+  createdBy         User?               @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
+  updatedById       Int?                // User who last updated
+  updatedBy         User?               @relation("InvoiceUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs         AuditLog[]          @relation("InvoiceAuditLogs")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 }
 
 model Refund {
-  id            Int       @id @default(autoincrement())
-  invoiceId     Int
-  invoice       Invoice   @relation(fields: [invoiceId], references: [id])
-  reason        String
-  amount        Float
-  refundDate    DateTime  @default(now())
-  processedById Int
-  processedBy   User      @relation("ProcessedBy", fields: [processedById], references: [id])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  invoiceId         Int
+  invoice           Invoice             @relation(fields: [invoiceId], references: [id])
+  reason            String              // Reason for refund (e.g., "Overpayment")
+  amount            Float               // Refund amount
+  refundDate        DateTime            @default(now())
+  transactionId     Int?                // Link to refund transaction in accounting
+  transaction       Transaction?        @relation(fields: [transactionId], references: [id])
+  processedById     Int                 // User who processed the refund
+  processedBy       User                @relation("ProcessedBy", fields: [processedById], references: [id])
+  approvedById      Int?                // User who approved the refund
+  approvedBy        User?               @relation("RefundApprovedBy", fields: [approvedById], references: [id])
+  status            String              @default("PENDING") // PENDING, APPROVED, REJECTED, COMPLETED
+  notes             String?             // Additional notes for refund
+  auditLogs         AuditLog[]          @relation("RefundAuditLogs")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 }
