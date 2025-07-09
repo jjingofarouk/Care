@@ -16,12 +16,7 @@ enum LabTestType {
   OTHER
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
+
 
 model Laboratory {
   id                    Int                 @id @default(autoincrement())
