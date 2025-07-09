@@ -1,4 +1,3 @@
-// dashboard.prisma
 enum DashboardWidgetType {
   CHART
   TABLE
@@ -17,21 +16,21 @@ enum DashboardAccessLevel {
 model Dashboard {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  name                String                // e.g., "Admin Overview Dashboard"
-  description         String?               // Description of dashboard purpose
-  accessLevel         DashboardAccessLevel  @default(PRIVATE) // PUBLIC, ROLE_BASED, PRIVATE
-  role                String?               // Role for ROLE_BASED access (e.g., "ADMIN", "DOCTOR")
-  userId              Int?                  // Link to user for private dashboards
+  name                String
+  description         String?
+  accessLevel         DashboardAccessLevel  @default(PRIVATE)
+  role                String?
+  userId              Int?                  @unique
   user                User?                 @relation("DashboardOwner", fields: [userId], references: [id])
-  departmentId        Int?                  // Link to department
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  widgets             DashboardWidget[]     // Widgets included in the dashboard
-  layout              String?               // JSON for widget layout configuration
-  isDefault           Boolean               @default(false) // Default dashboard for role/user
-  filters             String?               // JSON for default filters (e.g., date range, department)
-  createdById         Int?                  // User who created the dashboard
+  departmentId        Int?
+  department          Department?           @relation("DepartmentDashboards", fields: [departmentId], references: [id])
+  widgets             DashboardWidget[]     @relation("DashboardWidgets")
+  layout              String?
+  isDefault           Boolean               @default(false)
+  filters             String?
+  createdById         Int?                  @unique
   createdBy           User?                 @relation("DashboardCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?                  @unique
   updatedBy           User?                 @relation("DashboardUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("DashboardAuditLogs")
   createdAt           DateTime              @default(now())
@@ -41,44 +40,44 @@ model Dashboard {
 model DashboardWidget {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  dashboardId         Int                   // Link to dashboard
-  dashboard           Dashboard             @relation(fields: [dashboardId], references: [id])
-  type                DashboardWidgetType   // CHART, TABLE, METRIC, etc.
-  title               String                // Widget title (e.g., "Patient Admissions")
-  dataSource          String?               // Source of data (e.g., "appointments", "billing")
-  configuration       String?               // JSON for widget config (e.g., chart type, columns)
-  appointmentId       Int?                  // Link to appointment data
-  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
-  admissionId         Int?                  // Link to admission data
-  admission           Admission?            @relation(fields: [admissionId], references: [id])
-  billingId           Int?                  // Link to billing data
-  billing             Billing?              @relation(fields: [billingId], references: [id])
-  laboratoryId        Int?                  // Link to lab data
-  laboratory          Laboratory?           @relation(fields: [laboratoryId], references: [id])
-  radiologyId         Int?                  // Link to radiology data
-  radiology           Radiology?            @relation(fields: [radiologyId], references: [id])
-  pharmacyId          Int?                  // Link to pharmacy data
-  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
-  operationTheatreId  Int?                  // Link to operation theatre data
-  operationTheatre    OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
-  queueId             Int?                  // Link to queue data
-  queue               Queue?                @relation(fields: [queueId], references: [id])
-  inventoryId         Int?                  // Link to inventory data
-  inventory           Inventory?            @relation(fields: [inventoryId], references: [id])
-  claimId             Int?                  // Link to claim data
-  claim               Claim?                @relation(fields: [claimId], references: [id])
-  nhifClaimId         Int?                  // Link to NHIF claim data
-  nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
-  medicalRecordId     Int?                  // Link to medical record data
-  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
-  positionX           Int                   // X position in dashboard grid
-  positionY           Int                   // Y position in dashboard grid
-  width               Int                   // Widget width in grid units
-  height              Int                   // Widget height in grid units
-  refreshInterval     Int?                  // Auto-refresh interval in seconds
-  createdById         Int?                  // User who created the widget
+  dashboardId         Int
+  dashboard           Dashboard             @relation("DashboardWidgets", fields: [dashboardId], references: [id])
+  type                DashboardWidgetType
+  title               String
+  dataSource          String?
+  configuration       String?
+  appointmentId       Int?                  @unique
+  appointment         Appointment?          @relation("DashboardWidgetAppointments", fields: [appointmentId], references: [id])
+  admissionId         Int?                  @unique
+  admission           Admission?            @relation("DashboardWidgetAdmissions", fields: [admissionId], references: [id])
+  billingId           Int?                  @unique
+  billing             Billing?              @relation("DashboardWidgetBilling", fields: [billingId], references: [id])
+  laboratoryId        Int?                  @unique
+  laboratory          Laboratory?           @relation("DashboardWidgetLaboratory", fields: [laboratoryId], references: [id])
+  radiologyId         Int?                  @unique
+  radiology           Radiology?            @relation("DashboardWidgetRadiology", fields: [radiologyId], references: [id])
+  pharmacyId          Int?                  @unique
+  pharmacy            Pharmacy?             @relation("DashboardWidgetPharmacy", fields: [pharmacyId], references: [id])
+  operationTheatreId  Int?                  @unique
+  operationTheatre    OperationTheatre?     @relation("DashboardWidgetOperationTheatre", fields: [operationTheatreId], references: [id])
+  queueId             Int?                  @unique
+  queue               Queue?                @relation("DashboardWidgetQueue", fields: [queueId], references: [id])
+  inventoryId         Int?                  @unique
+  inventory           Inventory?            @relation("DashboardWidgetInventory", fields: [inventoryId], references: [id])
+  claimId             Int?                  @unique
+  claim               Claim?                @relation("DashboardWidgetClaims", fields: [claimId], references: [id])
+  nhifClaimId         Int?                  @unique
+  nhifClaim           NhifClaim?            @relation("DashboardWidgetNhifClaims", fields: [nhifClaimId], references: [id])
+  medicalRecordId     Int?                  @unique
+  medicalRecord       MedicalRecord?        @relation("DashboardWidgetMedicalRecords", fields: [medicalRecordId], references: [id])
+  positionX           Int
+  positionY           Int
+  width               Int
+  height              Int
+  refreshInterval     Int?
+  createdById         Int?                  @unique
   createdBy           User?                 @relation("WidgetCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?                  @unique
   updatedBy           User?                 @relation("WidgetUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("DashboardWidgetAuditLogs")
   createdAt           DateTime              @default(now())
