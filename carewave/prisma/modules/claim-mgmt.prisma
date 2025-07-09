@@ -1,0 +1,63 @@
+// claim-mgmt.prisma
+enum ClaimStatus {
+  PENDING
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PARTIALLY_APPROVED
+  PAID
+  DENIED
+}
+
+enum ClaimType {
+  INPATIENT
+  OUTPATIENT
+  PHARMACY
+  LABORATORY
+  RADIOLOGY
+  SURGICAL
+}
+
+model Claim {
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  patientId         Int                 // Link to patient
+  patient           Patient             @relation(fields: [patientId], references: [id])
+  invoiceId         Int?                // Link to invoice
+  invoice           Invoice?            @relation(fields: [invoiceId], references: [id])
+  appointmentId     Int?                // Link to appointment
+  appointment       Appointment?        @relation(fields: [appointmentId], references: [id])
+  admissionId       Int?                // Link to admission
+  admission         Admission?          @relation(fields: [admissionId], references: [id])
+  pharmacyId        Int?                // Link to pharmacy for medication claims
+  pharmacy          Pharmacy?           @relation(fields: [pharmacyId], references: [id])
+  laboratoryId      Int?                // Link to lab tests
+  laboratory        Laboratory?         @relation(fields: [laboratoryId], references: [id])
+  radiologyId       Int?                // Link to radiology tests
+  radiology         Radiology?          @relation(fields: [radiologyId], references: [id])
+  operationTheatreId Int?               // Link to surgical procedures
+  operationTheatre  OperationTheatre?   @relation(fields: [operationTheatreId], references: [id])
+  nhifClaimId       Int?                // Link to NHIF claim
+  nhifClaim         NhifClaim?          @relation(fields: [nhifClaimId], references: [id])
+  transactionId     Int?                // Link to accounting transaction
+  transaction       Transaction?        @relation("TransactionClaims", fields: [transactionId], references: [id])
+  claimNumber       String              @unique // Unique claim identifier (e.g., "CLM-2025-001")
+  claimType         ClaimType           // Type of claim
+  status            ClaimStatus         @default("PENDING")
+  submittedDate     DateTime?           // Date claim was submitted to insurer
+  approvedDate      DateTime?           // Date claim was approved
+  totalAmount       Float               // Total claim amount
+  approvedAmount    Float?              // Amount approved by insurer
+  rejectionReason   String?             // Reason for rejection, if applicable
+  insuranceProvider String?             // Name of insurance provider
+  policyNumber      String?             // Patient's insurance policy number
+  documents         String?             // JSON or file path for attached documents
+  notes             String?             // Additional notes for claim
+  createdById       Int?                // User who created the claim
+  createdBy         User?               @relation("ClaimCreatedBy", fields: [createdById], references: [id])
+  approvedById      Int?                // User who approved the claim internally
+  approvedBy        User?               @relation("ClaimApprovedBy", fields: [approvedById], references: [id])
+  auditLogs         AuditLog[]          @relation("ClaimAuditLogs")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
