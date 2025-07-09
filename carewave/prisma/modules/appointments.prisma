@@ -1,32 +1,83 @@
+// appointments.prisma
+enum AppointmentStatus {
+  SCHEDULED
+  CHECKED_IN
+  CHECKED_OUT
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentType {
+  REGULAR
+  WALK_IN
+  EMERGENCY
+  TELECONSULTATION
+  FOLLOW_UP
+}
+
 model Appointment {
-  id            Int           @id @default(autoincrement())
-  patientId     Int
-  patient       Patient       @relation("PatientAppointments", fields: [patientId], references: [id])
-  doctorId      Int
-  doctor        Doctor        @relation("DoctorAppointments", fields: [doctorId], references: [id])
-  departmentId  Int?
-  department    Department?   @relation(fields: [departmentId], references: [id])
-  bookedById    Int?
-  bookedBy      User?         @relation("BookedBy", fields: [bookedById], references: [id])
-  date          DateTime
-  status        String        @default("SCHEDULED") // SCHEDULED, CHECKED_IN, CHECKED_OUT, COMPLETED, CANCELLED, NO_SHOW
-  type          String        @default("REGULAR") // REGULAR, WALK_IN, EMERGENCY
-  reason        String
-  notes         String?
-  checkInTime   DateTime?
-  checkOutTime  DateTime?
-  reminderSent  Boolean       @default(false)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  queue         Queue?
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  patientId         Int
+  patient           Patient             @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctorId          Int?
+  doctor            Doctor?             @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  departmentId      Int?
+  department        Department?         @relation(fields: [departmentId], references: [id])
+  bookedById        Int?
+  bookedBy          User?               @relation("BookedBy", fields: [bookedById], references: [id])
+  date              DateTime
+  status            AppointmentStatus   @default("SCHEDULED")
+  type              AppointmentType     @default("REGULAR")
+  reason            String              // Reason for visit (e.g., "Chest pain")
+  notes             String?             // Additional notes
+  checkInTime       DateTime?           // Time patient checked in
+  checkOutTime      DateTime?           // Time patient checked out
+  reminderSent      Boolean             @default(false)
+  reminderDate      DateTime?           // Date reminder was sent
+  medicalRecordId   Int?                // Link to medical record
+  medicalRecord     MedicalRecord?      @relation(fields: [medicalRecordId], references: [id])
+  billingId         Int?                // Link to billing for appointment charges
+  billing           Billing?            @relation(fields: [billingId], references: [id])
+  queueId           Int?                @unique
+  queue             Queue?              @relation(fields: [queueId], references: [id])
+  admissionId       Int?                // Link to admission for inpatient appointments
+  admission         Admission?          @relation(fields: [admissionId], references: [id])
+  dischargeId       Int?                // Link to discharge for follow-up appointments
+  discharge         Discharge?          @relation(fields: [dischargeId], references: [id])
+  laboratoryId      Int?                // Link to lab tests ordered during appointment
+  laboratory        Laboratory?         @relation(fields: [laboratoryId], references: [id])
+  radiologyId       Int?                // Link to radiology tests ordered
+  radiology         Radiology?          @relation(fields: [radiologyId], references: [id])
+  pharmacyId        Int?                // Link to pharmacy for prescriptions
+  pharmacy          Pharmacy?           @relation(fields: [pharmacyId], references: [id])
+  operationTheatreId Int?               // Link to operation theatre for surgical bookings
+  operationTheatre  OperationTheatre?   @relation(fields: [operationTheatreId], references: [id])
+  createdById       Int?                // User who created the appointment
+  createdBy         User?               @relation("AppointmentCreatedBy", fields: [createdById], references: [id])
+  updatedById       Int?                // User who last updated
+  updatedBy         User?               @relation("AppointmentUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs         AuditLog[]          @relation("AppointmentAuditLogs")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 }
 
 model Queue {
-  id            Int           @id @default(autoincrement())
-  appointmentId Int           @unique
-  appointment   Appointment   @relation(fields: [appointmentId], references: [id])
-  queueNumber   Int
-  status        String        @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique @default(uuid())
+  appointmentId     Int?                @unique
+  appointment       Appointment?        @relation(fields: [appointmentId], references: [id])
+  queueNumber       Int                 // Sequential number in queue
+  status            String              @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED, SKIPPED
+  priority          TriagePriority?     // Link to triage priority (EMERGENCY, URGENT, NON_URGENT)
+  departmentId      Int?                // Link to department queue
+  department       蕾            Department?         @relation(fields: [departmentId], references: [id])
+  estimatedWaitTime  Int?                // Estimated wait time in minutes
+  calledAt           DateTime?           // Time patient was called
+  createdById       Int?                // User who created queue entry
+  createdBy         User?               @relation(fields: [createdById], references: [id])
+  updatedAt         DateTime            @updatedAt
+  auditLogs         AuditLog[]          @relation("QueueAuditLogs")
+  createdAt         DateTime            @default(now())
 }
