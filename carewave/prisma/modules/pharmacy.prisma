@@ -1,47 +1,144 @@
+// pharmacy.prisma
+enum MedicationStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+  DISCONTINUED
+  RECALLED
+}
+
+enum MedicationCategory {
+  ANTIBIOTIC
+  ANALGESIC
+  ANTIHYPERTENSIVE
+  ANTIDIABETIC
+  NARCOTIC
+  VACCINE
+  OTHER
+}
+
+enum DrugInteractionSeverity {
+  LOW
+  MODERATE
+  HIGH
+  CRITICAL
+}
+
 model Medication {
-  id                Int                @id @default(autoincrement())
-  name              String
-  genericName       String?
-  category          String
-  batchNumber       String
-  barcode           String?            @unique
-  rfid              String?            @unique
-  stockQuantity     Int
-  minStockThreshold Int                @default(10)
-  price             Float
-  expiryDate        DateTime
-  supplierId        Int?
-  supplier          Supplier?          @relation(fields: [supplierId], references: [id])
-  formulary         Formulary?         @relation(fields: [formularyId], references: [id])
-  formularyId       Int?
-  narcotic          Boolean            @default(false)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  prescriptions     PrescriptionItem[]
-  dispensingRecords DispensingRecord[]
-  stockAdjustments  StockAdjustment[]
-  purchaseOrders    PurchaseOrderItem[]
-  drugInteractions1 DrugInteraction[]  @relation("Medication1")
-  drugInteractions2 DrugInteraction[]  @relation("Medication2")
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // Brand name (e.g., "Panadol")
+  genericName         String?               // Generic name (e.g., "Paracetamol")
+  category            MedicationCategory     // Category of medication
+  status              MedicationStatus      @default("ACTIVE")
+  batchNumber         String                // Batch number for tracking
+  barcode             String?               @unique // Barcode for inventory scanning
+  rfid                String?               @unique // RFID for advanced tracking
+  stockQuantity       Int                   // Current stock level
+  minStockThreshold   Int                   @default(10) // Minimum stock before alert
+  maxStockThreshold   Int?                  // Maximum stock capacity
+  price               Float                 // Unit price
+  costPrice           Float?                // Cost price from supplier
+  expiryDate          DateTime              // Expiry date of batch
+  manufactureDate     DateTime?             // Manufacture date
+  supplierId          Int?                  // Link to supplier
+  supplier            Supplier?             @relation(fields: [supplierId], references: [id])
+  formularyId         Int?                  // Link to formulary
+  formulary           Formulary?            @relation(fields: [formularyId], references: [id])
+  narcotic            Boolean               @default(false) // Narcotic classification
+  controlledSubstance Boolean               @default(false) // Controlled substance flag
+  storageConditions   String?               // e.g., "Store at 15-25°C"
+  dosageForm          String?               // e.g., "Tablet", "Injection", "Syrup"
+  strength            String?               // e.g., "500mg"
+  packSize            String?               // e.g., "10 tablets per strip"
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  pharmacyId          Int?                  // Link to pharmacy
+  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  procurementId       Int?                  // Link to procurement for restocking
+  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
+  inventoryId         Int?                  // Link to inventory
+  inventory           Inventory?            @relation(fields: [inventoryId], references: [id])
+  prescriptions       PrescriptionItem[]    // Prescription items
+  dispensingRecords   DispensingRecord[]    // Dispensing records
+  stockAdjustments    StockAdjustment[]     // Stock adjustment records
+  purchaseOrderItems  PurchaseOrderItem[]   // Purchase order items
+  drugInteractions1   DrugInteraction[]     @relation("Medication1")
+  drugInteractions2   DrugInteraction[]     @relation("Medication2")
+  adverseReactions    AdverseReaction[]     // Adverse reactions linked to medication
+  storageLocation     String?               // e.g., "Shelf A-12"
+  lotNumber           String?               // Lot number for tracking
+  documents           String?               // JSON or file paths for documentation
+  createdById         Int?                  // User who created medication record
+  createdBy           User?                 @relation("MedicationCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("MedicationUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("MedicationAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
 
 model Formulary {
-  id            Int           @id @default(autoincrement())
-  name          String
-  description   String?
-  medications   Medication[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // e.g., "Hospital Formulary 2025"
+  description         String?               // Formulary description
+  status              String                @default("ACTIVE") // ACTIVE, INACTIVE, DRAFT
+  medications         Medication[]          // Medications in formulary
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  restrictions        String?               // JSON or text for usage restrictions
+  version             String?               // e.g., "v1.0"
+  effectiveDate       DateTime              @default(now()) // Start date of formulary
+  expiryDate          DateTime?             // End date of formulary
+  createdById         Int?                  // User who created formulary
+  createdBy           User?                 @relation("FormularyCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("FormularyUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("FormularyAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
 
 model DrugInteraction {
-  id            Int           @id @default(autoincrement())
-  medicationId1 Int
-  medication1   Medication    @relation("Medication1", fields: [medicationId1], references: [id])
-  medicationId2 Int
-  medication2   Medication    @relation("Medication2", fields: [medicationId2], references: [id])
-  interaction   String
-  severity      String        // LOW, MODERATE, HIGH
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  medicationId1       Int                   // First medication
+  medication1         Medication            @relation("Medication1", fields: [medicationId1], references: [id])
+  medicationId2       Int                   // Second medication
+  medication2         Medication            @relation("Medication2", fields: [medicationId2], references: [id])
+  interaction         String                // Description of interaction
+  severity            DrugInteractionSeverity // LOW, MODERATE, HIGH, CRITICAL
+  recommendation      String?               // e.g., "Avoid co-administration"
+  createdById         Int?                  // User who added interaction
+  createdBy           User?                 @relation("InteractionCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("InteractionUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("DrugInteractionAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model AdverseReaction {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  medicationId        Int                   // Link to medication
+  medication          Medication            @relation(fields: [medicationId], references: [id])
+  patientId           Int?                  // Link to patient
+  patient             Patient?              @relation(fields: [patientId], references: [id])
+  reaction            String                // Description of adverse reaction
+  severity            String                // e.g., "MILD", "MODERATE", "SEVERE"
+  reportedDate        DateTime              @default(now())
+  medicalRecordId     Int?                  // Link to medical record
+  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  clinicalRecordId    Int?                  // Link to clinical record
+  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  notes               String?               // Additional notes
+  createdById         Int?                  // User who reported reaction
+  createdBy           User?                 @relation("AdverseReactionCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("AdverseReactionUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("AdverseReactionAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
