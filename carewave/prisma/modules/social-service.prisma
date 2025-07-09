@@ -1,0 +1,94 @@
+// social-service.prisma
+enum SocialServiceCaseStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+  PENDING
+  REFERRED
+}
+
+enum SocialServiceType {
+  COUNSELING
+  FINANCIAL_AID
+  HOUSING_ASSISTANCE
+  LEGAL_AID
+  PSYCHOSOCIAL_SUPPORT
+  CHILD_PROTECTION
+  ELDER_CARE
+}
+
+enum SocialServicePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model SocialServiceCase {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  caseNumber          String                @unique // Unique case ID (e.g., "SSC-2025-001")
+  patientId           Int?                  // Link to patient
+  patient             Patient?              @relation(fields: [patientId], references: [id])
+  socialWorkerId      Int?                  // Link to social worker
+  socialWorker        User?                 @relation("SocialWorker", fields: [socialWorkerId], references: [id])
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  type                SocialServiceType     // Type of social service
+  status              SocialServiceCaseStatus @default("OPEN")
+  priority            SocialServicePriority @default("MEDIUM")
+  openDate            DateTime              @default(now()) // Case open date
+  closeDate           DateTime?             // Case close date
+  description         String?               // Case description
+  assessment          String?               // Initial assessment details
+  interventionPlan    String?               // Plan for intervention
+  progressNotes       String?               // Ongoing case notes
+  referralId          Int?                  // Link to referral
+  referral            Referral?             @relation(fields: [referralId], references: [id])
+  medicalRecordId     Int?                  // Link to medical record
+  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  billingId           Int?                  // Link to billing for services
+  billing             Billing?              @relation(fields: [billingId], references: [id])
+  claimId             Int?                  // Link to insurance claim
+  claim               Claim?                @relation(fields: [claimId], references: [id])
+  nhifClaimId         Int?                  // Link to NHIF claim
+  nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
+  externalAgencyId    Int?                  // Link to external agency
+  externalAgency      ExternalAgency?       @relation(fields: [externalAgencyId], references: [id])
+  documents           String?               // JSON or file paths for case documents
+  followUpSchedule    String?               // JSON or text for follow-up schedule
+  outcome             String?               // Case outcome summary
+  createdById         Int?                  // User who created the case
+  createdBy           User?                 @relation("CaseCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("CaseUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("SocialServiceCaseAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model ExternalAgency {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // Agency name (e.g., "Child Welfare Services")
+  contactName         String?               // Primary contact person
+  contactPhone        String?               // Contact phone number
+  email               String?               @unique // Agency email
+  address             String?               // Physical address
+  servicesProvided    String?               // JSON or text for services offered
+  status              String                @default("ACTIVE") // ACTIVE, INACTIVE
+  contractStartDate   DateTime?             // Start date of partnership
+  contractEndDate     DateTime?             // End date of partnership
+  notes               String?               // Additional notes
+  documents           String?               // JSON or file paths for agency documents
+  socialServiceCases  SocialServiceCase[]   // Cases referred to this agency
+  createdById         Int?                  // User who created agency record
+  createdBy           User?                 @relation("AgencyCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("AgencyUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("ExternalAgencyAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
