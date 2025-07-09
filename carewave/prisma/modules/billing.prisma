@@ -1,3 +1,4 @@
+// billing.prisma
 enum InvoiceStatus {
   PENDING
   PAID
@@ -8,8 +9,6 @@ enum InvoiceStatus {
   VOID
   DISPUTED
 }
-
-
 
 enum BillingItemType {
   SERVICE
@@ -38,6 +37,47 @@ enum PaymentStatus {
   REVERSED
 }
 
+enum ServiceType {
+  CONSULTATION
+  PROCEDURE
+  DIAGNOSTIC
+  THERAPY
+  SURGERY
+  OTHER
+}
+
+enum ServiceStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Service {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // e.g., "Cardiology Consultation", "Appendectomy"
+  description         String?               // Service description
+  type                ServiceType           // Type of service
+  status              ServiceStatus         @default(ACTIVE) // Service availability status
+  departmentId        Int?                  // Link to department providing the service
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  basePrice           Float                 // Standard price for the service
+  taxCategoryId       Int?                  // Link to tax category
+  taxCategory         TaxCategory?          @relation(fields: [taxCategoryId], references: [id])
+  duration            Int?                  // Expected duration in minutes (optional)
+  billingItems        BillingItem[]         @relation // Link to billing items
+  billing             Billing[]             @relation("BillingServices") // Link to billing records
+  createdById         Int?                  // User who created the service
+  createdBy           User?                 @relation("ServiceCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("ServiceUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("ServiceAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
 model Billing {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
@@ -45,6 +85,8 @@ model Billing {
   patient               Patient?            @relation(fields: [patientId], references: [id])
   appointmentId         Int?                // Link to appointment
   appointment           Appointment?        @relation(fields: [appointmentId], references: [id])
+  serviceId           Int?                // Link to specific service
+  service             Service?            @relation("BillingServices", fields: [serviceId], references: [id])
   totalAmount           Float               // Total billing amount
   taxAmount             Float?              @default(0.0)
   discountAmount        Float?              @default(0.0)
@@ -56,7 +98,7 @@ model Billing {
   createdById           Int?                // User who created the billing record
   createdBy             User?               @relation("BillingCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?                // User who last updated
-  updatedBy             User?               @relation("BillingUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?               @relation("BillingUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("BillingAuditLogs")
   notifications         BillingNotification[] @relation("BillingNotifications")
   createdAt             DateTime            @default(now())
@@ -248,4 +290,15 @@ model BillingNotification {
   message               String?             // Notification content
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
+}
+
+model TaxCategory {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // e.g., "VAT", "Exempt"
+  rate                Float                 // Tax rate (e.g., 0.16 for 16%)
+  billingItems        BillingItem[]         @relation
+  services            Service[]             @relation
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
