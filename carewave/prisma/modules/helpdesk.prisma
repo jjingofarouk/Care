@@ -23,45 +23,43 @@ enum TicketCategory {
   OTHER
 }
 
-
-
 model Helpdesk {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  ticketNumber          String              @unique // e.g., "HD-2025-001"
-  title                 String              // Brief summary of issue
-  description           String              // Detailed description of issue
-  category              TicketCategory      // Type of issue
+  ticketNumber          String              @unique
+  title                 String
+  description           String
+  category              TicketCategory
   priority              TicketPriority      @default(MEDIUM)
   status                TicketStatus        @default(OPEN)
-  reportedById          Int?                // User who reported the issue
+  reportedById          Int?                @unique
   reportedBy            User?               @relation("ReportedBy", fields: [reportedById], references: [id])
-  assignedToId          Int?                // User assigned to resolve the issue
+  assignedToId          Int?                @unique
   assignedTo            User?               @relation("AssignedTo", fields: [assignedToId], references: [id])
-  doctorId              Int?                // Link to doctor if related
+  doctorId              Int?                @unique
   doctor                Doctor?             @relation("DoctorHelpdeskTickets", fields: [doctorId], references: [id])
-  departmentId          Int?                // Link to department
-  department            Department?         @relation(fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                // Link to clinical setting
-  clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
-  patientId             Int?                // Link to patient if related
-  patient               Patient?            @relation(fields: [patientId], references: [id])
-  admissionId           Int?                // Link to admission if related
-  admission             Admission?          @relation(fields: [admissionId], references: [id])
-  appointmentId         Int?                // Link to appointment if related
-  appointment           Appointment?        @relation(fields: [appointmentId], references: [id])
-  invoiceId             Int?                // Link to invoice if billing-related
-  invoice               Invoice?            @relation(fields: [invoiceId], references: [id])
-  fixedAssetId          Int?                // Link to fixed asset if related
-  fixedAsset            FixedAsset?         @relation(fields: [fixedAssetId], references: [id])
+  departmentId          Int?
+  department            Department?         @relation("DepartmentHelpdeskTickets", fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                @unique
+  clinicalSetting       ClinicalSetting?    @relation("HelpdeskClinicalSettings", fields: [clinicalSettingId], references: [id])
+  patientId             Int?                @unique
+  patient               Patient?            @relation("PatientHelpdeskTickets", fields: [patientId], references: [id])
+  admissionId           Int?                @unique
+  admission             Admission?          @relation("HelpdeskAdmissions", fields: [admissionId], references: [id])
+  appointmentId         Int?                @unique
+  appointment           Appointment?        @relation("HelpdeskAppointments", fields: [appointmentId], references: [id])
+  invoiceId             Int?                @unique
+  invoice               Invoice?            @relation("HelpdeskInvoices", fields: [invoiceId], references: [id])
+  fixedAssetId          Int?                @unique
+  fixedAsset            FixedAsset?         @relation("HelpdeskFixedAssets", fields: [fixedAssetId], references: [id])
   createdDate           DateTime            @default(now())
-  resolvedDate          DateTime?           // Date issue was resolved
-  dueDate               DateTime?           // Expected resolution date
-  resolutionNotes       String?             // Notes on resolution
-  escalationReason      String?             // Reason for escalation, if applicable
-  createdById           Int?                // User who created the ticket
+  resolvedDate          DateTime?
+  dueDate               DateTime?
+  resolutionNotes       String?
+  escalationReason      String?
+  createdById           Int?                @unique
   createdBy             User?               @relation("HelpdeskCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("HelpdeskUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("HelpdeskAuditLogs")
   ticketComments        TicketComment[]     @relation("TicketComments")
@@ -76,9 +74,9 @@ model TicketComment {
   uuid                  String              @unique @default(uuid())
   helpdeskId            Int
   helpdesk              Helpdesk            @relation("TicketComments", fields: [helpdeskId], references: [id])
-  comment               String              // Comment text
-  createdById           Int?                // User who added the comment
-  createdBy             User?               @relation(fields: [createdById], references: [id])
+  comment               String
+  createdById           Int?                @unique
+  createdBy             User?               @relation("TicketCommentCreatedBy", fields: [createdById], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   auditLogs             AuditLog[]          @relation("TicketCommentAuditLogs")
@@ -89,11 +87,11 @@ model TicketAttachment {
   uuid                  String              @unique @default(uuid())
   helpdeskId            Int
   helpdesk              Helpdesk            @relation("TicketAttachments", fields: [helpdeskId], references: [id])
-  filePath              String              // Path to stored attachment
-  fileName              String              // Original file name
-  fileType              String              // e.g., "PDF", "Image"
-  uploadedById          Int?                // User who uploaded the attachment
-  uploadedBy            User?               @relation(fields: [uploadedById], references: [id])
+  filePath              String
+  fileName              String
+  fileType              String
+  uploadedById          Int?                @unique
+  uploadedBy            User?               @relation("TicketAttachmentUploadedBy", fields: [uploadedById], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   auditLogs             AuditLog[]          @relation("TicketAttachmentAuditLogs")
@@ -104,12 +102,12 @@ model TicketNotification {
   uuid                  String              @unique @default(uuid())
   helpdeskId            Int
   helpdesk              Helpdesk            @relation("TicketNotifications", fields: [helpdeskId], references: [id])
-  notificationType      String              // e.g., "SMS", "Email", "App Push"
+  notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?                // User receiving notification
-  recipient             User?               @relation(fields: [recipientId], references: [id])
-  message               String?             // Notification content
+  recipientId           Int?                @unique
+  recipient             User?               @relation("TicketNotificationRecipient", fields: [recipientId], references: [id])
+  message               String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
