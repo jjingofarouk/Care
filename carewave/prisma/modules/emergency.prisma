@@ -7,12 +7,7 @@ enum EmergencyStatus {
   CANCELLED
 }
 
-enum TriagePriority {
-  IMMEDIATE
-  URGENT
-  SEMI_URGENT
-  NON_URGENT
-}
+
 
 model Emergency {
   id                    Int                 @id @default(autoincrement())
