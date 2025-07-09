@@ -14,39 +14,37 @@ enum InventoryType {
   OTHER
 }
 
-
-
 model Inventory {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  itemCode              String              @unique // e.g., "INV-001"
-  name                  String              // Item name (e.g., "Paracetamol 500mg")
-  description           String?             // Detailed description of item
-  type                  InventoryType       // Type of inventory item
+  itemCode              String              @unique
+  name                  String
+  description           String?
+  type                  InventoryType
   status                InventoryStatus     @default(IN_STOCK)
-  quantity              Int                 // Current quantity in stock
-  minimumStockLevel     Int?                // Minimum stock threshold for alerts
-  maximumStockLevel     Int?                // Maximum stock level for reordering
-  unitPrice             Float?              // Cost per unit
-  totalValue            Float?              @default(0.0) // Total value of stock (quantity * unitPrice)
-  batchNumber           String?             // Batch number for tracking
-  expiryDate            DateTime?           // Expiry date for perishable items
-  purchaseDate          DateTime?           // Date of purchase
-  supplierId            Int?                // Link to supplier
-  supplier              InventorySupplier?           @relation(fields: [supplierId], references: [id])
-  departmentId          Int?                // Link to department using the item
-  department            Department?         @relation(fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                // Link to clinical setting
-  clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
-  pharmacyId            Int?                // Link to pharmacy for medication items
-  pharmacy              Pharmacy?           @relation(fields: [pharmacyId], references: [id])
-  storageLocation       String?             // Physical storage location (e.g., "Shelf A-12")
-  reorderPoint          Int?                // Quantity at which to reorder
-  reorderQuantity       Int?                // Quantity to order when reordering
-  lastRestockedDate     DateTime?           // Last restock date
-  createdById           Int?                // User who created the inventory record
+  quantity              Int
+  minimumStockLevel     Int?
+  maximumStockLevel     Int?
+  unitPrice             Float?
+  totalValue            Float?              @default(0.0)
+  batchNumber           String?
+  expiryDate            DateTime?
+  purchaseDate          DateTime?
+  supplierId            Int?                @unique
+  supplier              InventorySupplier?  @relation("InventorySupplier", fields: [supplierId], references: [id])
+  departmentId          Int?                @unique
+  department            Department?         @relation("DepartmentInventory", fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                @unique
+  clinicalSetting       ClinicalSetting?    @relation("ClinicalSettingInventory", fields: [clinicalSettingId], references: [id])
+  pharmacyId            Int?                @unique
+  pharmacy              Pharmacy?           @relation("PharmacyInventory", fields: [pharmacyId], references: [id])
+  storageLocation       String?
+  reorderPoint          Int?
+  reorderQuantity       Int?
+  lastRestockedDate     DateTime?
+  createdById           Int?                @unique
   createdBy             User?               @relation("InventoryCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("InventoryUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("InventoryAuditLogs")
   inventoryTransactions InventoryTransaction[] @relation("InventoryTransactions")
@@ -66,11 +64,11 @@ model InventoryTransaction {
   reason                String?
   referenceId           Int?
   referenceType         String?
-  performedById         Int?
+  performedById         Int?                @unique
   performedBy           User?               @relation("InventoryTransactionPerformedBy", fields: [performedById], references: [id])
-  createdById           Int?
+  createdById           Int?                @unique
   createdBy             User?               @relation("InventoryTransactionCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("InventoryTransactionUpdatedBy", fields: [updatedById], references: [id])
   notes                 String?
   auditLogs             AuditLog[]          @relation("InventoryTransactionAuditLogs")
@@ -83,12 +81,12 @@ model InventoryNotification {
   uuid                  String              @unique @default(uuid())
   inventoryId           Int
   inventory             Inventory           @relation("InventoryNotifications", fields: [inventoryId], references: [id])
-  notificationType      String              // e.g., "SMS", "Email", "App Push"
+  notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?                // User receiving notification
-  recipient             User?               @relation(fields: [recipientId], references: [id])
-  message               String?             // Notification content (e.g., "Low stock alert for Paracetamol")
+  recipientId           Int?                @unique
+  recipient             User?               @relation("InventoryNotificationRecipient", fields: [recipientId], references: [id])
+  message               String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
@@ -100,11 +98,11 @@ model InventorySupplier {
   contactDetails        String?
   address               String?
   supplierCode          String?             @unique
-  createdById           Int?
+  createdById           Int?                @unique
   createdBy             User?               @relation("InventorySupplierCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("InventorySupplierUpdatedBy", fields: [updatedById], references: [id])
-  inventory             Inventory[]         @relation
+  inventory             Inventory[]         @relation("InventorySupplier")
   auditLogs             AuditLog[]          @relation("SupplierAuditLogs")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
