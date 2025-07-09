@@ -1,3 +1,4 @@
+// dynamic-reports.prisma
 enum ReportStatus {
   DRAFT
   GENERATED
@@ -34,9 +35,33 @@ enum ScheduleFrequency {
   ANNUALLY
 }
 
+model Report {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  name                  String              // e.g., "Department Summary Report"
+  description           String?             // General report description
+  type                  ReportType          // Type of report
+  status                ReportStatus        @default(DRAFT) // General status
+  departmentId          Int?                // Link to department
+  department            Department?         @relation(fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                // Link to clinical setting
+  clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
+  dynamicReportId       Int?                // Link to specific dynamic report
+  dynamicReport         DynamicReport?      @relation(fields: [dynamicReportId], references: [id])
+  createdById           Int?                // User who created the report
+  createdBy             User?               @relation("ReportGeneralCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                // User who last updated
+  updatedBy             User?               @relation("ReportGeneralUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]          @relation("ReportAuditLogs")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
 model DynamicReport {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
+  reportId              Int?                // Link to parent report
+  report                Report?             @relation(fields: [reportId], references: [id])
   name                  String              // e.g., "Monthly Patient Admissions"
   description           String?             // Report description
   type                  ReportType          // Type of report
