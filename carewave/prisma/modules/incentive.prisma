@@ -15,12 +15,6 @@ enum IncentiveType {
   OTHER
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
 
 model Incentive {
   id                    Int                 @id @default(autoincrement())
