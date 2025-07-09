@@ -1,10 +1,52 @@
-// modules/departments.prisma
+// departments.prisma
+enum DepartmentStatus {
+  ACTIVE
+  INACTIVE
+  UNDER_MAINTENANCE
+}
+
 model Department {
-  id            Int           @id @default(autoincrement())
-  name          String        @unique
-  description   String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  doctors       Doctor[]
-  appointments  Appointment[]
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                @unique // e.g., "Cardiology"
+  description         String?               // Detailed description of department
+  status              DepartmentStatus      @default("ACTIVE")
+  location            String?               // Physical location (e.g., "Building A, Floor 2")
+  headId              Int?                  // Head of department (User)
+  head                User?                 @relation("DepartmentHead", fields: [headId], references: [id])
+  phoneNumber         String?               // Department contact number
+  email               String?               // Department email
+  operatingHours      String?               // JSON or text for operating hours (e.g., {"mon": "08:00-17:00"})
+  capacity            Int?                  // Max patient capacity
+  doctors             Doctor[]              // Doctors assigned to department
+  appointments        Appointment[]         // Appointments for this department
+  admissions          Admission[]           // Admissions linked to department
+  wards               Ward[]                // Wards managed by department
+  clinicalRecords     ClinicalRecord[]      // Clinical records associated with department
+  clinicalSettings    ClinicalSetting[]     // Clinical settings for department
+  cssdRequisitions    CSSDRequisition[]     // CSSD requisitions from department
+  inventoryItems      Inventory[]           // Inventory items managed by department
+  procurements        Procurement[]         // Procurement requests from department
+  costCenters         CostCenter[]          // Cost centers linked to department
+  budgets             Budget[]              // Budgets allocated to department
+  transactions        Transaction[]         // Transactions linked to department
+  invoices            Invoice[]             // Invoices associated with department
+  claims              Claim[]               // Insurance claims linked to department
+  nhifClaims          NhifClaim[]           // NHIF claims linked to department
+  laboratoryTests     Laboratory[]          // Lab tests ordered by department
+  radiologyTests      Radiology[]           // Radiology tests ordered by department
+  pharmacyRecords     Pharmacy[]            // Pharmacy records linked to department
+  operationTheatres   OperationTheatre[]    // Operation theatres managed by department
+  nursingRecords      Nursing[]             // Nursing records linked to department
+  maternityRecords    Maternity[]           // Maternity records linked to department
+  vaccinationRecords  Vaccination[]         // Vaccination records linked to department
+  reports             Report[]              // Reports generated for department
+  helpdeskTickets     Helpdesk[]            // Helpdesk tickets raised by department
+  createdById         Int?                  // User who created the department
+  createdBy           User?                 @relation("DepartmentCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("DepartmentAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
