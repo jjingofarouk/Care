@@ -14,12 +14,7 @@ enum InventoryType {
   OTHER
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
+
 
 model Inventory {
   id                    Int                 @id @default(autoincrement())
