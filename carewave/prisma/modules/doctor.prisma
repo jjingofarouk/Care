@@ -22,12 +22,6 @@ enum QualificationType {
   DIPLOMA
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
 
 model Doctor {
   id                    Int                   @id @default(autoincrement())
