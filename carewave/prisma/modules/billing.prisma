@@ -291,23 +291,25 @@ model InvoiceDocument {
   auditLogs             AuditLog[]          @relation("InvoiceDocumentAuditLogs")
 }
 
+
 model BillingNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  invoiceId             Int?                @unique
-  invoice               Invoice?            @relation("InvoiceNotifications", fields: [invoiceId], references: [id])
-  Comments              Int?                @unique
-  refund                Refund?             @relation("RefundNotifications", fields: [refundId], references: [id])
-  paymentId             Int?                @unique
-  payment               Payment?            @relation("PaymentNotifications", fields: [paymentId], references: [id])
-  paymentPlanId         Int?                @unique
-  paymentPlan           PaymentPlan?        @relation("PaymentPlanNotifications", fields: [paymentPlanId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?                @unique
-  recipient             User?               @relation("BillingNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  id              Int                 @id @default(autoincrement())
+  uuid            String              @unique @default(uuid())
+  invoiceId       Int?                @unique
+  invoice         Invoice?            @relation("InvoiceNotifications", fields: [invoiceId], references: [id])
+  Comments        Int?                @unique
+  refundId        Int?                // Add this line
+  refund          Refund?             @relation("RefundNotifications", fields: [refundId], references: [id])
+  paymentId       Int?                @unique
+  payment         Payment?            @relation("PaymentNotifications", fields: [paymentId], references: [id])
+  paymentPlanId   Int?                @unique
+  paymentPlan     PaymentPlan?        @relation("PaymentPlanNotifications", fields: [paymentPlanId], references: [id])
+  notificationType String
+  status          NotificationStatus  @default(PENDING)
+  sentAt          DateTime?
+  recipientId     Int?                @unique
+  recipient       User?               @relation("BillingNotificationRecipient", fields: [recipientId], references: [id])
+  message         String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
 }
