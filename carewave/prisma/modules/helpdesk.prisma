@@ -23,12 +23,7 @@ enum TicketCategory {
   OTHER
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
+
 
 model Helpdesk {
   id                    Int                 @id @default(autoincrement())
