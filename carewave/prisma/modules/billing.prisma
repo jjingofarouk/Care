@@ -292,13 +292,3 @@ model BillingNotification {
   updatedAt             DateTime            @updatedAt
 }
 
-model TaxCategory {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String                // e.g., "VAT", "Exempt"
-  rate                Float                 // Tax rate (e.g., 0.16 for 16%)
-  billingItems        BillingItem[]         @relation
-  services            Service[]             @relation
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
