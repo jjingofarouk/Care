@@ -1,0 +1,121 @@
+// nursing.prisma
+enum NursingCareType {
+  ROUTINE
+  CRITICAL
+  POST_OPERATIVE
+  MATERNITY
+  PEDIATRIC
+  GERIATRIC
+}
+
+enum NursingCareStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  ON_HOLD
+}
+
+enum NursingTaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  MISSED
+}
+
+model NursingCare {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  patientId           Int                   // Link to patient
+  patient             Patient               @relation(fields: [patientId], references: [id])
+  nurseId             Int?                  // Link to nurse (User)
+  nurse               User?                 @relation("NurseAssigned", fields: [nurseId], references: [id])
+  admissionId         Int?                  // Link to admission
+  admission           Admission?            @relation(fields: [admissionId], references: [id])
+  clinicalRecordId    Int?                  // Link to clinical record
+  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  medicalRecordId     Int?                  // Link to medical record
+  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  wardId              Int?                  // Link to ward
+  ward                Ward?                 @relation(fields: [wardId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  type                NursingCareType       // Type of nursing care
+  status              NursingCareStatus     @default("PENDING")
+  carePlan            String?               // JSON or text for care plan details
+  vitals              String?               // JSON or text for vital signs (e.g., {"bp": "120/80", "pulse": 72})
+  medicationsAdministered String?           // JSON or text for medications given
+  nursingNotes        String?               // Ongoing nursing notes
+  startDate           DateTime              @default(now())
+  endDate             DateTime?             // End date of care
+  shiftId             Int?                  // Link to nurse shift
+  shift               NursingShift?         @relation(fields: [shiftId], references: [id])
+  prescriptionId      Int?                  // Link to prescription
+  prescription        Prescription?         @relation(fields: [prescriptionId], references: [id])
+  pharmacyId          Int?                  // Link to pharmacy for medication administration
+  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  billingId           Int?                  // Link to billing for nursing services
+  billing             Billing?              @relation(fields: [billingId], references: [id])
+  tasks               NursingTask[]         // Nursing tasks associated with this care
+  documents           String?               // JSON or file paths for attached documents
+  createdById         Int?                  // User who created the record
+  createdBy           User?                 @relation("NursingCareCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("NursingCareUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("NursingCareAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model NursingTask {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  nursingCareId       Int                   // Link to nursing care
+  nursingCare         NursingCare           @relation(fields: [nursingCareId], references: [id])
+  nurseId             Int?                  // Link to assigned nurse
+  nurse               User?                 @relation("TaskAssignedNurse", fields: [nurseId], references: [id])
+  taskType            String                // e.g., "Medication Administration", "Wound Care"
+  description         String?               // Task details
+  status              NursingTaskStatus     @default("PENDING")
+  scheduledTime       DateTime?             // Scheduled time for task
+  completedTime       DateTime?             // Time task was completed
+  priority            String?               // e.g., "HIGH", "MEDIUM", "LOW"
+  notes               String?               // Additional notes
+  prescriptionId      Int?                  // Link to prescription for medication tasks
+  prescription        Prescription?         @relation(fields: [prescriptionId], references: [id])
+  shiftId             Int?                  // Link to nurse shift
+  shift               NursingShift?         @relation(fields: [shiftId], references: [id])
+  createdById         Int?                  // User who created the task
+  createdBy           User?                 @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("TaskUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("NursingTaskAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model NursingShift {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  nurseId             Int?                  // Link to nurse
+  nurse               User?                 @relation("ShiftNurse", fields: [nurseId], references: [id])
+  wardId              Int?                  // Link to ward
+  ward                Ward?                 @relation(fields: [wardId], references: [id])
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  startTime           DateTime              // Shift start time
+  endTime             DateTime              // Shift end time
+  status              String                @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED
+  notes               String?               // Shift notes
+  nursingCares        NursingCare[]         // Nursing care assignments during shift
+  nursingTasks        NursingTask[]         // Tasks assigned during shift
+  createdById         Int?                  // User who created the shift
+  createdBy           User?                 @relation("ShiftCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("ShiftUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("NursingShiftAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
