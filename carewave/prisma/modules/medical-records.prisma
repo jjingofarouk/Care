@@ -37,7 +37,7 @@ model MedicalRecord {
   clinicalSettingId    Int?                  // Link to clinical setting
   clinicalSetting      ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
   type                 MedicalRecordType     // Type of record
-  status               MedicalRecordStatus   @default("DRAFT")
+  status               MedicalRecordStatus   @default(DRAFT)
   diagnosis            String?               // Primary diagnosis
   presentingComplaint  String?               // Chief complaint
   familyHistory        String?               // Family medical history
