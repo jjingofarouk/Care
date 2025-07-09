@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import Header from './Header';
-import './tailwind.css';
 
 export default function RootLayout({ children }) {
   return (
@@ -19,6 +18,7 @@ export default function RootLayout({ children }) {
             sx={{ 
               flex: 1, 
               m: 0,
+              pt: { xs: '64px', sm: '80px', lg: '96px' },
               maxWidth: '100%', 
               boxSizing: 'border-box',
               overflowX: 'hidden'
