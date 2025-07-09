@@ -65,18 +65,18 @@ model HomeCareVisit {
   uuid                  String              @unique @default(uuid())
   homeCareId            Int
   homeCare              HomeCare            @relation("HomeCareVisits", fields: [homeCareId], references: [id])
-  visitDate             DateTime            // Date and time of visit
-  caregiverId           Int?                // User performing the visit
-  caregiver             User?               @relation(fields: [caregiverId], references: [id])
-  status                String              @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
-  visitNotes            String?             // Notes from the visit
-  vitals                String?             // JSON for vital signs (e.g., {"bp": "120/80", "pulse": 72})
-  clinicalRecordId      Int?                // Link to clinical record
+  visitDate             DateTime
+  caregiverId           Int?
+  caregiver             User?               @relation("HomeCareVisitCaregiver", fields: [caregiverId], references: [id])
+  status                String              @default("SCHEDULED")
+  visitNotes            String?
+  vitals                String?
+  clinicalRecordId      Int?
   clinicalRecord        ClinicalRecord?     @relation(fields: [clinicalRecordId], references: [id])
-  createdById           Int?                // User who created the visit record
-  createdBy             User?               @relation(fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
-  updatedBy             User?               @relation(fields: [updatedById], references: [id])
+  createdById           Int?
+  createdBy             User?               @relation("HomeCareVisitCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?
+  updatedBy             User?               @relation("HomeCareVisitUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("HomeCareVisitAuditLogs")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
