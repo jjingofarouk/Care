@@ -10,7 +10,7 @@ model Department {
   uuid                String                @unique @default(uuid())
   name                String                @unique // e.g., "Cardiology"
   description         String?               // Detailed description of department
-  status              DepartmentStatus      @default("ACTIVE")
+  status              DepartmentStatus      @default(ACTIVE)
   location            String?               // Physical location (e.g., "Building A, Floor 2")
   headId              Int?                  // Head of department (User)
   head                User?                 @relation("DepartmentHead", fields: [headId], references: [id])
