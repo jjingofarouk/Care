@@ -257,9 +257,9 @@ model CostAllocation {
   allocationDate    DateTime
   description       String?
   createdById       Int?
-  createdBy         User?               @relation(fields: [createdById], references: [id])
+  createdBy         User?               @relation("CostAllocationCreatedBy", fields: [createdById], references: [id])
   approvedById      Int?
-  approvedBy        User?               @relation(fields: [approvedById], references: [id])
+  approvedBy        User?               @relation("CostAllocationApprovedBy", fields: [approvedById], references: [id])
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   auditLogs         AuditLog[]          @relation("CostAllocationAuditLogs")
@@ -271,7 +271,7 @@ model Payroll {
   employeeId        Int
   employee          User                @relation("PayrollEmployee", fields: [employeeId], references: [id])
   transactionId     Int?
-  transaction       Transaction?         @relation("TransactionPayrolls", fields: [transactionId], references: [id])
+  transaction       Transaction?        @relation("TransactionPayrolls", fields: [transactionId], references: [id])
   grossAmount       Float
   netAmount         Float
   deductions        Float               @default(0.0)
@@ -279,7 +279,7 @@ model Payroll {
   payPeriodStart    DateTime
   payPeriodEnd      DateTime
   paymentDate       DateTime
-  status            TransactionStatus    @default(PENDING)
+  status            TransactionStatus   @default(PENDING)
   paymentMethod     PaymentMethod
   departmentId      Int?
   department        Department?         @relation(fields: [departmentId], references: [id])
