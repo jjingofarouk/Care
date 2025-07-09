@@ -21,12 +21,7 @@ enum AppointmentType {
   SPECIALIST_CONSULT
 }
 
-enum TriagePriority {
-  EMERGENCY
-  URGENT
-  NON_URGENT
-  CRITICAL
-}
+
 
 
 model Appointment {
