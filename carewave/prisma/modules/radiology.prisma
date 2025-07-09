@@ -46,7 +46,9 @@ model Radiology {
   radiologyTests      RadiologyTest[]
   auditLogs           AuditLog[]            @relation("RadiologyAuditLogs")
   dashboardWidget     DashboardWidget?      @relation("DashboardWidgetRadiology")
+  maternityId         Int?
   maternity           Maternity?            @relation("MaternityRadiology", fields: [maternityId], references: [id])
+  radiologyId         Int?
   medicalRecord       MedicalRecord?        @relation("MedicalRecordRadiology", fields: [radiologyId], references: [id])
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
