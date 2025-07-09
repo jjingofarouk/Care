@@ -1,68 +1,148 @@
-// clinical-settings.prisma
 enum ClinicalSettingType {
   GENERAL
   SPECIALTY
   EMERGENCY
   OUTPATIENT
   INPATIENT
+  ICU
+  PEDIATRIC
+  MATERNITY
 }
 
 enum ConfigurationStatus {
   ACTIVE
   INACTIVE
   DRAFT
+  ARCHIVED
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+  RESERVED
+  UNDER_CLEANING
 }
 
 model ClinicalSetting {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String                // e.g., "Cardiology Clinic Settings"
-  type                ClinicalSettingType   // Type of clinical setting
-  status              ConfigurationStatus   @default("DRAFT")
-  departmentId        Int?                  // Link to department
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  protocols           String?               // JSON or text for clinical protocols (e.g., treatment guidelines)
-  defaultRoomId       Int?                  // Default room for this setting
-  defaultRoom         Room?                 @relation(fields: [defaultRoomId], references: [id])
-  equipmentList       String?               // JSON or text for required equipment
-  staffRoles          String?               // JSON or text for required staff roles (e.g., ["DOCTOR", "NURSE"])
-  appointmentDuration  Int?                  // Default duration for appointments (in minutes)
-  maxPatientsPerSlot  Int?                  // Max patients per appointment slot
-  operatingHours      String?               // JSON or text for operating hours (e.g., {"mon": "08:00-17:00"})
-  billingRules        String?               // JSON or text for billing rules specific to this setting
-  laboratoryId        Int?                  // Link to default laboratory for tests
-  laboratory          Laboratory?           @relation(fields: [laboratoryId], references: [id])
-  radiologyId         Int?                  // Link to default radiology for imaging
-  radiology           Radiology?            @relation(fields: [radiologyId], references: [id])
-  pharmacyId          Int?                  // Link to default pharmacy for prescriptions
-  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
-  operationTheatreId  Int?                  // Link to default operation theatre
-  operationTheatre    OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
-  nursingId           Int?                  // Link to nursing protocols
-  nursing             Nursing?              @relation(fields: [nursingId], references: [id])
-  cssdId              Int?                  // Link to CSSD for sterilization protocols
-  cssd                Cssd?                 @relation(fields: [cssdId], references: [id])
-  createdById         Int?                  // User who created the setting
-  createdBy           User?                 @relation("ClinicalSettingCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
-  updatedBy           User?                 @relation("ClinicalSettingUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("ClinicalSettingAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  name                  String                // e.g., "Cardiology Clinic Settings"
+  code                  String?               @unique // e.g., "CS-CARDIO-001"
+  type                  ClinicalSettingType
+  status                ConfigurationStatus   @default(DRAFT)
+  departmentId          Int?                  // Link to department
+  department            Department?           @relation(fields: [departmentId], references: [id])
+  protocols             String?               // JSON for clinical protocols (e.g., treatment guidelines)
+  defaultRoomId         Int?                  // Default room for this setting
+  defaultRoom           Room?                 @relation(fields: [defaultRoomId], references: [id])
+  equipmentList         String?               // JSON for required equipment
+  staffRoles            String?               // JSON for required staff roles (e.g., ["DOCTOR", "NURSE"])
+  appointmentDuration   Int?                  // Default duration for appointments (in minutes)
+  maxPatientsPerSlot    Int?                  // Max patients per appointment slot
+  operatingHours        String?               // JSON for operating hours (e.g., {"mon": "08:00-17:00"})
+  billingRules          String?               // JSON for billing rules specific to this setting
+  laboratoryId          Int?                  // Link to default laboratory
+  laboratory            Laboratory?           @relation(fields: [laboratoryId], references: [id])
+  radiologyId           Int?                  // Link to default radiology
+  radiology             Radiology?            @relation(fields: [radiologyId], references: [id])
+  pharmacyId            Int?                  // Link to default pharmacy
+  pharmacy              Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  operationTheatreId    Int?                  // Link to default operation theatre
+  operationTheatre      OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
+  nursingId             Int?                  // Link to nursing protocols
+  nursing               Nursing?              @relation(fields: [nursingId], references: [id])
+  cssdId                Int?                  // Link to CSSD for sterilization protocols
+  cssd                  Cssd?                 @relation(fields: [cssdId], references: [id])
+  wardId                Int?                  // Link to ward for inpatient settings
+  ward                  Ward?                 @relation(fields: [wardId], references: [id])
+  triageProtocols       String?               // JSON for triage protocols
+  emergencyProtocols    String?               // JSON for emergency handling protocols
+  patientFlowRules      String?               // JSON for patient flow and queue management rules
+  documentationTemplates String?              // JSON for default documentation templates
+  createdById           Int?                  // User who created the setting
+  createdBy             User?                 @relation("ClinicalSettingCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                  // User who last updated
+  updatedBy             User?                 @relation("ClinicalSettingUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("ClinicalSettingAuditLogs")
+  clinicalSettingDocuments ClinicalSettingDocument[] @relation("ClinicalSettingDocuments")
+  clinicalSettingNotifications ClinicalSettingNotification[] @relation("ClinicalSettingNotifications")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
 }
 
 model Room {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  roomNumber          String                @unique // e.g., "R-101"
-  name                String?               // e.g., "Consultation Room 1"
-  departmentId        Int?                  // Link to department
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  clinicalSettingId   Int?                  // Link to clinical setting
-  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  status              String                @default("AVAILABLE") // AVAILABLE, OCCUPIED, MAINTENANCE
-  capacity            Int?                  // Max capacity (e.g., number of patients)
-  equipment           String?               // JSON or text for equipment in room
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  roomNumber            String                @unique // e.g., "R-101"
+  name                  String?               // e.g., "Consultation Room 1"
+  departmentId          Int?                  // Link to department
+  department            Department?           @relation(fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                  // Link to clinical setting
+  clinicalSetting       ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  status                RoomStatus            @default(AVAILABLE)
+  capacity              Int?                  // Max capacity (e.g., number of patients)
+  roomType              String?               // e.g., "Consultation", "Procedure", "Examination"
+  equipment             String?               // JSON for equipment in room
+  location              String?               // e.g., "Building A, Floor 2"
+  lastCleaned           DateTime?             // Last cleaning timestamp
+  maintenanceNotes      String?               // Notes for maintenance issues
+  createdById           Int?                  // User who created room
+  createdBy             User?                 @relation(fields: [createdById], references: [id])
+  updatedById           Int?                  // User who last updated
+  updatedBy             User?                 @relation(fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("RoomAuditLogs")
+  roomSchedules         RoomSchedule[]        @relation("RoomSchedules")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model RoomSchedule {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  roomId                Int
+  room                  Room                @relation("RoomSchedules", fields: [roomId], references: [id])
+  startTime             DateTime
+  endTime               DateTime
+  appointmentId         Int?                  // Link to appointment
+  appointment           Appointment?          @relation(fields: [appointmentId], references: [id])
+  status                String                @default("AVAILABLE") // AVAILABLE, BOOKED, MAINTENANCE
+  notes                 String?               // Additional notes for schedule
+  createdById           Int?                  // User who created schedule
+  createdBy             User?                 @relation(fields: [createdById], references: [id])
+  updatedById           Int?                  // User who last updated
+  updatedBy             User?                 @relation(fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("RoomScheduleAuditLogs")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model ClinicalSettingDocument {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  clinicalSettingId     Int
+  clinicalSetting       ClinicalSetting       @relation("ClinicalSettingDocuments", fields: [clinicalSettingId], references: [id])
+  documentType          String               // e.g., "Protocol Document", "Guideline"
+  filePath              String               // Path to stored document
+  description           String?              // Description of document
+  uploadedById          Int?                 // User who uploaded document
+  uploadedBy            User?                @relation(fields: [uploadedById], references: [id])
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  auditLogs             AuditLog[]           @relation("ClinicalSettingDocumentAuditLogs")
+}
+
+model ClinicalSettingNotification {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  clinicalSettingId     Int
+  clinicalSetting       ClinicalSetting       @relation("ClinicalSettingNotifications", fields: [clinicalSettingId], references: [id])
+  notificationType      String               // e.g., "SMS", "Email", "App Push"
+  status                String               @default("PENDING") // PENDING, SENT, FAILED, READ
+  sentAt                DateTime?
+  recipientId           Int?                 // User receiving notification
+  recipient             User?                @relation(fields: [recipientId], references: [id])
+  message               String?              // Notification content
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 }
