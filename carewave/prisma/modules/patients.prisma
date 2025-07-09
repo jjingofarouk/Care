@@ -1,8 +1,14 @@
-// patients.prisma
 enum Gender {
   MALE
   FEMALE
   OTHER
+}
+
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+  DECEASED
+  TRANSFERRED
 }
 
 enum BloodType {
@@ -16,70 +22,54 @@ enum BloodType {
   O_NEGATIVE
 }
 
-enum PatientStatus {
-  ACTIVE
-  INACTIVE
-  DECEASED
-  TRANSFERRED
-}
-
 model Patient {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
-  patientId             String                @unique // Unique patient identifier (e.g., "PAT-2025-001")
-  userId                Int?                  // Link to user account for patient portal access
+  userId                Int?                  @unique
   user                  User?                 @relation("PatientUser", fields: [userId], references: [id])
-  name                  String?               // Full name
-  email                 String?               @unique // Patient email
-  dateOfBirth           DateTime?             // Date of birth
-  gender                Gender?               // MALE, FEMALE, OTHER
-  phone                 String?               // Primary contact number
-  address               String?               // Physical address
-  emergencyContact      String?               // Emergency contact name
-  emergencyContactPhone String?               // Emergency contact phone
-  insuranceProvider     String?               // e.g., "NHIF", "Aetna"
-  insurancePolicy       String?               // Insurance policy number
-  nhifNumber            String?               @unique // NHIF membership number
-  bloodType             BloodType?            // Blood type
-  allergies             String?               // JSON or text for allergies
-  medicalHistory        String?               // JSON or text for medical history
-  presentingComplaint   String?               // Current chief complaint
-  familyHistory         String?               // Family medical history
-  socialHistory         String?               // Social history (e.g., smoking, alcohol)
-  pastMedicalHistory    String?               // Past medical history
-  medications           String?               // Current medications
+  patientNumber         String                @unique
+  firstName             String
+  lastName              String
+  dateOfBirth           DateTime?
+  gender                Gender?
+  bloodType             BloodType?
+  phone                 String?
+  email                 String?               @unique
+  address               String?
+  emergencyContact      String?
+  emergencyContactPhone String?
   status                PatientStatus         @default(ACTIVE)
-  registrationDate      DateTime              @default(now()) // Date of registration
-  lastVisitDate        DateTime?             // Date of last visit
-  preferredDoctorId    Int?                  // Link to preferred doctor
-  preferredDoctor      Doctor?               @relation("PreferredDoctor", fields: [preferredDoctorId], references: [id])
-  departmentId          Int?                  // Link to primary department
-  department           Department?           @relation(fields: [departmentId], references: [id])
-  admissions           Admission[]           // Admissions for patient
-  discharges           Discharge[]           @relation("DischargedPatient")
-  transactions         Transaction[]         @relation("PatientTransactions")
-  appointments         Appointment[]         @relation("PatientAppointments")
-  prescriptions        Prescription[]        @relation("Prescriptions")
-  medicalRecords       MedicalRecord[]       @relation("PatientMedicalRecords")
-  laboratoryTests      Laboratory[]          // Lab tests for patient
-  radiologyTests       Radiology[]           // Radiology tests for patient
-  pharmacyRecords      Pharmacy[]            // Pharmacy records for patient
-  operationProcedures  SurgicalProcedure[]   // Surgical procedures for patient
-  nursingCare          NursingCare[]         // Nursing care records
-  maternityRecords     Maternity[]           // Maternity records
-  vaccinationRecords   Vaccination[]         // Vaccination records
-  claims               Claim[]               // Insurance claims
-  nhifClaims           NhifClaim[]           // NHIF claims
-  referrals            Referral[]            // Referrals involving patient
-  helpdeskTickets      Helpdesk[]            // Helpdesk tickets raised by patient
-  billingRecords       Billing[]             // Billing records for patient
-  documents            String?               // JSON or file paths for patient documents
-  consentForms         String?               // JSON or text for signed consent forms
-  createdById          Int?                  // User who created patient record
-  createdBy            User?                 @relation("PatientCreatedBy", fields: [createdById], references: [id])
-  updatedById          Int?                  // User who last updated
-  updatedBy            User?                 @relation("PatientUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs            AuditLog[]            @relation("PatientAuditLogs")
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
+  nhifNumber            String?               @unique
+  insuranceId           Int?
+  insurance             Insurance?            @relation("PatientInsurance", fields: [insuranceId], references: [id])
+  departmentId          Int?
+  department            Department?           @relation("DepartmentPatients", fields: [departmentId], references: [id])
+  clinicalSettingId     Int?
+  clinicalSetting       ClinicalSetting?      @relation("PatientClinicalSettings", fields: [clinicalSettingId], references: [id])
+  appointments          Appointment[]         @relation("PatientAppointments")
+  admissions            Admission[]           @relation("PatientAdmissions")
+  discharges            Discharge[]           @relation("PatientDischarges")
+  invoices              Invoice[]             @relation("PatientInvoices")
+  transactions          Transaction[]         @relation("PatientTransactions")
+  claims                Claim[]               @relation("PatientClaims")
+  nhifClaims            NhifClaim[]           @relation("PatientNhifClaims")
+  medicalRecords        MedicalRecord[]       @relation("PatientMedicalRecords")
+  prescriptions         Prescription[]        @relation("PatientPrescriptions")
+  laboratoryTests       Laboratory[]          @relation("PatientLaboratoryTests")
+  radiologyTests        Radiology[]           @relation("PatientRadiologyTests")
+  radiologyTestRecords  RadiologyTest[]       @relation("PatientRadiologyTests")
+  pharmacyRecords       Pharmacy[]            @relation("PatientPharmacyRecords")
+  maternityRecords      Maternity[]           @relation("PatientMaternityRecords")
+  vaccinationRecords    Vaccination[]         @relation("PatientVaccinationRecords")
+  socialServiceCases    SocialServiceCase[]   @relation("PatientSocialServiceCases")
+  helpdeskTickets       Helpdesk[]            @relation("PatientHelpdeskTickets")
+  billingRecords        Billing[]             @relation("PatientBilling")
+  recurringAppointments RecurringAppointment[] @relation("PatientRecurringAppointments")
+  createdById           Int?
+  createdBy             User?                 @relation("PatientCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?
+  updatedBy             User?                 @relation("PatientUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("PatientAuditLogs")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
 }
