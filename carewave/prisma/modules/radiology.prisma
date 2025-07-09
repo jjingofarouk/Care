@@ -1,4 +1,3 @@
-// radiology.prisma
 enum RadiologyTestStatus {
   SCHEDULED
   IN_PROGRESS
@@ -29,23 +28,25 @@ enum RadiologyEquipmentStatus {
 model Radiology {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  patientId           Int?                  // Link to patient
+  patientId           Int?
   patient             Patient?              @relation(fields: [patientId], references: [id])
-  appointmentId       Int?                  // Link to appointment
+  appointmentId       Int?
   appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
-  emergencyId         Int?                  // Link to emergency
+  emergencyId         Int?
   emergency           Emergency?            @relation(fields: [emergencyId], references: [id])
-  invoiceId           Int?                  // Link to invoice
+  invoiceId           Int?
   invoice             Invoice?              @relation(fields: [invoiceId], references: [id])
-  departmentId        Int?                  // Link to department
+  departmentId        Int?
   department          Department?           @relation(fields: [departmentId], references: [id])
-  status              RadiologyTestStatus   @default(SCHEDULED) // Reusing existing enum
-  createdById         Int?                  // User who created the record
+  status              RadiologyTestStatus   @default(SCHEDULED)
+  createdById         Int?
   createdBy           User?                 @relation("RadiologyCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("RadiologyUpdatedBy", fields: [updatedById], references: [id])
-  radiologyTests      RadiologyTest[]       // Link to specific tests
+  radiologyTests      RadiologyTest[]
   auditLogs           AuditLog[]            @relation("RadiologyAuditLogs")
+  dashboardWidget     DashboardWidget?      @relation("DashboardWidgetRadiology")
+  maternity           Maternity?            @relation(fields: [radiologyId], references: [id])
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
@@ -56,7 +57,7 @@ model RadiologyTest {
   testNumber          String                @unique
   patientId           Int
   patient             Patient               @relation(fields: [patientId], references: [id])
-  radiologyId         Int?                  // Link to parent Radiology record
+  radiologyId         Int?
   radiology           Radiology?            @relation(fields: [radiologyId], references: [id])
   doctorId            Int?
   doctor              Doctor?               @relation("RadiologyDoctor", fields: [doctorId], references: [id])
@@ -136,7 +137,7 @@ model RadiologyEquipment {
   fixedAsset          FixedAsset?           @relation(fields: [fixedAssetId], references: [id])
   procurementId       Int?
   procurement         Procurement?          @relation(fields: [procurementId], references: [id])
-  radiologyTests      RadiologyTest[]       // Tests performed using this equipment
+  radiologyTests      RadiologyTest[]
   notes               String?
   documents           String?
   createdById         Int?
