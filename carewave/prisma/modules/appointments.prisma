@@ -104,20 +104,6 @@ model AppointmentNotification {
   updatedAt           DateTime            @updatedAt
 }
 
-model QueueNotification {
-  id                  Int                 @id @default(autoincrement())
-  uuid                String              @unique @default(uuid())
-  queueId             Int
-  queue               Queue               @relation("QueueNotifications", fields: [queueId], references: [id])
-  notificationType    String              // e.g., "SMS", "Email", "App Push"
-  status              NotificationStatus  @default(PENDING)
-  sentAt              DateTime?
-  recipientId         Int?                // User or patient receiving notification
-  recipient           User?               @relation(fields: [recipientId], references: [id])
-  message             String?             // Notification content
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-}
 
 model AppointmentDocument {
   id                  Int                 @id @default(autoincrement())
