@@ -166,9 +166,9 @@ model Transfer {
   admissionId          Int
   admission            Admission           @relation("AdmissionTransfers", fields: [admissionId], references: [id])
   fromWardId           Int?
-  fromWard             Ward?               @relation("WardTransfers", fields: [fromWardId], references: [id])
+  fromWard             Ward?               @relation("FromWardTransfers", fields: [fromWardId], references: [id])
   toWardId             Int?
-  toWard               Ward?               @relation("WardTransfers", fields: [toWardId], references: [id])
+  toWard               Ward?               @relation("ToWardTransfers", fields: [toWardId], references: [id])
   fromBedId            Int?
   fromBed              Bed?                @relation(fields: [fromBedId], references: [id])
   toBedId              Int?
@@ -177,9 +177,9 @@ model Transfer {
   reason               String?             // Reason for transfer
   notes                String?             // Additional notes
   createdById          Int?                // User who initiated transfer
-  createdBy            User?               @relation(fields: [createdById], references: [id])
+  createdBy            User?               @relation("CreatedByUser", fields: [createdById], references: [id])
   approvedById         Int?                // User who approved transfer
-  approvedBy           User?               @relation(fields: [approvedById], references: [id])
+  approvedBy           User?               @relation("ApprovedByUser", fields: [approvedById], references: [id])
   auditLogs            AuditLog[]          @relation("TransferAuditLogs")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
