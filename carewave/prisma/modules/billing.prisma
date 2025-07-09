@@ -48,12 +48,6 @@ enum PaymentStatus {
   REVERSED
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
 
 model Invoice {
   id                    Int                 @id @default(autoincrement())
