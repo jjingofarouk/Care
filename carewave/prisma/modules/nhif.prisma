@@ -51,7 +51,7 @@ model NhifClaim {
   departmentId        Int?                  // Link to department
   department          Department?           @relation(fields: [departmentId], references: [id])
   claimType           NhifClaimType         // Type of NHIF claim
-  status              NhifClaimStatus       @default("PENDING")
+  status              NhifClaimStatus       @default(PENDING)
   submittedDate       DateTime?             // Date claim was submitted to NHIF
   approvedDate        DateTime?             // Date claim was approved
   totalAmount         Float                 // Total claim amount
