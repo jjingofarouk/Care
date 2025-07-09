@@ -1,4 +1,3 @@
-// dynamic-reports.prisma
 enum ReportStatus {
   DRAFT
   GENERATED
@@ -38,19 +37,19 @@ enum ScheduleFrequency {
 model Report {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  name                  String              // e.g., "Department Summary Report"
-  description           String?             // General report description
-  type                  ReportType          // Type of report
-  status                ReportStatus        @default(DRAFT) // General status
-  departmentId          Int?                // Link to department
-  department            Department?         @relation(fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                // Link to clinical setting
-  clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
-  dynamicReportId       Int?                // Link to specific dynamic report
-  dynamicReport         DynamicReport?      @relation(fields: [dynamicReportId], references: [id])
-  createdById           Int?                // User who created the report
+  name                  String
+  description           String?
+  type                  ReportType
+  status                ReportStatus        @default(DRAFT)
+  departmentId          Int?
+  department            Department?         @relation("DepartmentReports", fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                @unique
+  clinicalSetting       ClinicalSetting?    @relation("ReportClinicalSettings", fields: [clinicalSettingId], references: [id])
+  dynamicReportId       Int?                @unique
+  dynamicReport         DynamicReport?      @relation("ReportDynamicReports")
+  createdById           Int?                @unique
   createdBy             User?               @relation("ReportGeneralCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("ReportGeneralUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("ReportAuditLogs")
   createdAt             DateTime            @default(now())
@@ -60,31 +59,31 @@ model Report {
 model DynamicReport {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  reportId              Int?                // Link to parent report
-  report                Report?             @relation(fields: [reportId], references: [id])
-  name                  String              // e.g., "Monthly Patient Admissions"
-  description           String?             // Report description
-  type                  ReportType          // Type of report
+  reportId              Int?                @unique
+  report                Report?             @relation("ReportDynamicReports", fields: [reportId], references: [id])
+  name                  String
+  description           String?
+  type                  ReportType
   status                ReportStatus        @default(DRAFT)
-  format                ReportFormat        // Output format
-  query                 String              // SQL or query string for report data
-  parameters            String?             // JSON for report parameters (e.g., date range, department)
-  departmentId          Int?                // Link to department
-  department            Department?         @relation(fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                // Link to clinical setting
-  clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
-  createdById           Int?                // User who created the report
+  format                ReportFormat
+  query                 String
+  parameters            String?
+  departmentId          Int?
+  department            Department?         @relation("DepartmentDynamicReports", fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                @unique
+  clinicalSetting       ClinicalSetting?    @relation("DynamicReportClinicalSettings", fields: [clinicalSettingId], references: [id])
+  createdById           Int?                @unique
   createdBy             User?               @relation("ReportCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("ReportUpdatedBy", fields: [updatedById], references: [id])
-  scheduled             Boolean             @default(false) // Is report scheduled?
-  scheduleFrequency     ScheduleFrequency?  // Frequency for scheduled reports
-  scheduleStartDate     DateTime?           // Start date for scheduled reports
-  scheduleEndDate       DateTime?           // End date for recurring schedule
-  lastGenerated         DateTime?           // Last time report was generated
-  outputPath            String?             // Path to generated report file
-  reportTemplateId      Int?                // Link to report template
-  reportTemplate        ReportTemplate?     @relation(fields: [reportTemplateId], references: [id])
+  scheduled             Boolean             @default(false)
+  scheduleFrequency     ScheduleFrequency?
+  scheduleStartDate     DateTime?
+  scheduleEndDate       DateTime?
+  lastGenerated         DateTime?
+  outputPath            String?
+  reportTemplateId      Int?                @unique
+  reportTemplate        ReportTemplate?     @relation("DynamicReportTemplates", fields: [reportTemplateId], references: [id])
   notifications         ReportNotification[] @relation("ReportNotifications")
   auditLogs             AuditLog[]          @relation("DynamicReportAuditLogs")
   createdAt             DateTime            @default(now())
@@ -94,16 +93,16 @@ model DynamicReport {
 model ReportTemplate {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
-  name                  String              // e.g., "Patient Summary Template"
-  description           String?             // Template description
-  type                  ReportType          // Type of report template
-  templateContent       String              // JSON or HTML for template structure
-  defaultParameters     String?             // JSON for default parameters
-  createdById           Int?                // User who created the template
+  name                  String
+  description           String?
+  type                  ReportType
+  templateContent       String
+  defaultParameters     String?
+  createdById           Int?                @unique
   createdBy             User?               @relation("TemplateCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                // User who last updated
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("TemplateUpdatedBy", fields: [updatedById], references: [id])
-  reports               DynamicReport[]     @relation
+  reports               DynamicReport[]     @relation("DynamicReportTemplates")
   auditLogs             AuditLog[]          @relation("ReportTemplateAuditLogs")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -114,12 +113,12 @@ model ReportNotification {
   uuid                  String              @unique @default(uuid())
   reportId              Int
   report                DynamicReport       @relation("ReportNotifications", fields: [reportId], references: [id])
-  notificationType      String              // e.g., "SMS", "Email", "App Push"
-  status                String              @default("PENDING") // PENDING, SENT, FAILED, READ
+  notificationType      String
+  status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?                // User receiving notification
-  recipient             User?               @relation(fields: [recipientId], references: [id])
-  message               String?             // Notification content
+  recipientId           Int?                @unique
+  recipient             User?               @relation("ReportNotificationRecipient", fields: [recipientId], references: [id])
+  message               String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
