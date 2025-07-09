@@ -1,86 +1,68 @@
-// medical-records.prisma
 enum MedicalRecordStatus {
   DRAFT
-  ACTIVE
+  FINALIZED
   ARCHIVED
-  PENDING_REVIEW
-  COMPLETED
-}
-
-enum MedicalRecordType {
-  CONSULTATION
-  HOSPITALIZATION
-  SURGICAL
-  DIAGNOSTIC
-  FOLLOW_UP
-  EMERGENCY
+  UNDER_REVIEW
+  AMENDED
 }
 
 model MedicalRecord {
-  id                   Int                   @id @default(autoincrement())
-  uuid                 String                @unique @default(uuid())
-  recordId             String                @unique // Unique identifier (e.g., "MR-2025-001")
-  patientId            Int                   // Link to patient
-  patient              Patient               @relation("PatientMedicalRecords", fields: [patientId], references: [id])
-  doctorId             Int?                  // Link to primary doctor
-  doctor               Doctor?               @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
-  appointmentId        Int?                  // Link to appointment
-  appointment          Appointment?          @relation(fields: [appointmentId], references: [id])
-  admissionId          Int?                  // Link to admission
-  admission            Admission?            @relation(fields: [admissionId], references: [id])
-  dischargeId          Int?                  // Link to discharge
-  discharge            Discharge?            @relation(fields: [dischargeId], references: [id])
-  clinicalRecordId     Int?                  // Link to clinical record
-  clinicalRecord       ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
-  departmentId         Int?                  // Link to department
-  department           Department?           @relation(fields: [departmentId], references: [id])
-  clinicalSettingId    Int?                  // Link to clinical setting
-  clinicalSetting      ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  type                 MedicalRecordType     // Type of record
-  status               MedicalRecordStatus   @default(DRAFT)
-  diagnosis            String?               // Primary diagnosis
-  presentingComplaint  String?               // Chief complaint
-  familyHistory        String?               // Family medical history
-  socialHistory        String?               // Social history (e.g., smoking, alcohol)
-  pastMedicalHistory   String?               // Past medical history
-  allergies            String?               // Known allergies
-  medications          String?               // Current medications
-  vitals               String?               // JSON or text for vitals (e.g., {"bp": "120/80", "pulse": 72})
-  labResults           String?               // JSON or text for lab results summary
-  radiologyResults     String?               // JSON or text for radiology results summary
-  treatmentPlan        String?               // Treatment plan details
-  progressNotes        String?               // Ongoing clinical notes
-  documents            String?               // JSON or file paths for attached documents (e.g., PDFs, images)
-  date                 DateTime              // Date of record creation/update
-  laboratoryId         Int?                  // Link to lab tests
-  laboratory           Laboratory?           @relation(fields: [laboratoryId], references: [id])
-  radiologyId          Int?                  // Link to radiology tests
-  radiology            Radiology?            @relation(fields: [radiologyId], references: [id])
-  pharmacyId           Int?                  // Link to prescriptions
-  pharmacy             Pharmacy?             @relation(fields: [pharmacyId], references: [id])
-  operationTheatreId   Int?                  // Link to surgical procedures
-  operationTheatre     OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
-  nursingId            Int?                  // Link to nursing care
-  nursing              Nursing?              @relation(fields: [nursingId], references: [id])
-  maternityId          Int?                  // Link to maternity care
-  maternity            Maternity?            @relation(fields: [maternityId], references: [id])
-  vaccinationId        Int?                  // Link to vaccinations
-  vaccination          Vaccination?          @relation(fields: [vaccinationId], references: [id])
-  billingId            Int?                  // Link to billing for services
-  billing              Billing?              @relation(fields: [billingId], references: [id])
-  claimId              Int?                  // Link to insurance claim
-  claim                Claim?                @relation(fields: [claimId], references: [id])
-  nhifClaimId          Int?                  // Link to NHIF claim
-  nhifClaim            NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
-  icd10Codes           String?               // JSON or text for ICD-10 diagnosis codes
-  confidentialityLevel  String?               // e.g., "STANDARD", "RESTRICTED"
-  createdById          Int?                  // User who created the record
-  createdBy            User?                 @relation("MedicalRecordCreatedBy", fields: [createdById], references: [id])
-  updatedById          Int?                  // User who last updated
-  updatedBy            User?                 @relation("MedicalRecordUpdatedBy", fields: [updatedById], references: [id])
-  reviewedById         Int?                  // User who reviewed the record
-  reviewedBy           User?                 @relation("MedicalRecordReviewedBy", fields: [reviewedById], references: [id])
-  auditLogs            AuditLog[]            @relation("MedicalRecordAuditLogs")
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  patientId             Int
+  patient               Patient               @relation("PatientMedicalRecords", fields: [patientId], references: [id])
+  doctorId              Int?
+  doctor                Doctor?               @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
+  appointmentId         Int?
+  appointment           Appointment?          @relation("AppointmentMedicalRecord", fields: [appointmentId], references: [id])
+  admissionId           Int?
+  admission             Admission?            @relation("MedicalRecordAdmissions", fields: [admissionId], references: [id])
+  clinicalRecordId      Int?
+  clinicalRecord        ClinicalRecord?       @relation("MedicalRecordClinicalRecords", fields: [clinicalRecordId], references: [id])
+  departmentId          Int?
+  department            Department?           @relation("DepartmentMedicalRecords", fields: [departmentId], references: [id])
+  clinicalSettingId     Int?
+  clinicalSetting       ClinicalSetting?      @relation("MedicalRecordClinicalSettings", fields: [clinicalSettingId], references: [id])
+  status                MedicalRecordStatus   @default(DRAFT)
+  diagnosis             String?
+  treatmentPlan         String?
+  notes                 String?
+  createdById           Int?
+  createdBy             User?                 @relation("MedicalRecordCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?
+  updatedBy             User?                 @relation("MedicalRecordUpdatedBy", fields: [updatedById], references: [id])
+  reviewedById          Int?
+  reviewedBy            User?                 @relation("MedicalRecordReviewedBy", fields: [reviewedById], references: [id])
+  prescriptions         Prescription[]        @relation("PrescriptionMedicalRecords")
+  laboratoryTests       Laboratory[]          @relation("MedicalRecordLaboratoryTests")
+  radiologyTests        Radiology[]           @relation("MedicalRecordRadiology")
+  radiologyTestRecords  RadiologyTest[]       @relation("MedicalRecordRadiologyTests")
+  maternity             Maternity?            @relation("MedicalRecordMaternity")
+  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetMedicalRecords")
+  auditLogs             AuditLog[]            @relation("MedicalRecordAuditLogs")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model ClinicalRecord {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  patientId             Int
+  patient               Patient               @relation("PatientClinicalRecords", fields: [patientId], references: [id])
+  doctorId              Int?
+  doctor                Doctor?               @relation("DoctorClinicalRecords", fields: [doctorId], references: [id])
+  departmentId          Int?
+  department            Department?           @relation("DepartmentClinicalRecords", fields: [departmentId], references: [id])
+  clinicalSettingId     Int?
+  clinicalSetting       ClinicalSetting?      @relation("ClinicalRecordClinicalSettings", fields: [clinicalSettingId], references: [id])
+  vitalSigns            String?
+  symptoms              String?
+  diagnosis             String?
+  treatment             String?
+  medicalRecord         MedicalRecord?        @relation("MedicalRecordClinicalRecords")
+  prescriptions         Prescription[]        @relation("PrescriptionClinicalRecords")
+  radiologyTests        RadiologyTest[]       @relation("ClinicalRecordRadiologyTests")
+  maternity             Maternity?            @relation("MaternityClinicalRecords")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
 }
