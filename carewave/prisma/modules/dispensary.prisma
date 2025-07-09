@@ -1,59 +1,138 @@
+// dispensary.prisma
+enum PrescriptionStatus {
+  PENDING
+  DISPENSED
+  PARTIALLY_DISPENSED
+  CANCELLED
+  ON_HOLD
+  EXPIRED
+}
+
+enum PatientType {
+  INPATIENT
+  OUTPATIENT
+}
+
+enum StockAdjustmentType {
+  INCREASE
+  DECREASE
+  DAMAGED
+  EXPIRED
+  TRANSFER
+}
+
 model Prescription {
-  id                Int                @id @default(autoincrement())
-  patientId         Int
-  patient           Patient            @relation("Prescriptions", fields: [patientId], references: [id])
-  doctorId          Int
-  doctor            Doctor             @relation("Prescriptions", fields: [doctorId], references: [id])
-  status            String             @default("PENDING") // PENDING, DISPENSED, CANCELLED
-  prescriptionDate  DateTime           @default(now())
-  notes             String?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  items             PrescriptionItem[]
-  dispensingRecords DispensingRecord[]
-  invoice           Invoice?
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  patientId           Int                   // Link to patient
+  patient             Patient               @relation("Prescriptions", fields: [patientId], references: [id])
+  doctorId            Int                   // Link to prescribing doctor
+  doctor              Doctor                @relation("Prescriptions", fields: [doctorId], references: [id])
+  appointmentId       Int?                  // Link to appointment
+  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  admissionId         Int?                  // Link to admission for inpatient prescriptions
+  admission           Admission?            @relation(fields: [admissionId], references: [id])
+  clinicalRecordId    Int?                  // Link to clinical record
+  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  pharmacyId          Int?                  // Link to pharmacy
+  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  status              PrescriptionStatus    @default("PENDING")
+  prescriptionDate    DateTime              @default(now())
+  expiryDate          DateTime?             // Prescription expiry date
+  notes               String?               // Additional notes
+  priority            String?               // e.g., "URGENT", "ROUTINE"
+  items               PrescriptionItem[]    // Medications in prescription
+  dispensingRecords   DispensingRecord[]    // Dispensing records
+  invoiceId           Int?                  // Link to invoice
+  invoice             Invoice?              @relation(fields: [invoiceId], references: [id])
+  claimId             Int?                  // Link to insurance claim
+  claim               Claim?                @relation(fields: [claimId], references: [id])
+  nhifClaimId         Int?                  // Link to NHIF claim
+  nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
+  createdById         Int?                  // User who created prescription
+  createdBy           User?                 @relation("PrescriptionCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("PrescriptionUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("PrescriptionAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
 
 model PrescriptionItem {
-  id            Int           @id @default(autoincrement())
-  prescriptionId Int
-  prescription  Prescription  @relation(fields: [prescriptionId], references: [id])
-  medicationId  Int
-  medication    Medication    @relation(fields: [medicationId], references: [id])
-  dosage        String
-  quantity      Int
-  frequency     String
-  duration      String
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  prescriptionId      Int                   // Link to prescription
+  prescription        Prescription          @relation(fields: [prescriptionId], references: [id])
+  medicationId        Int                   // Link to medication
+  medication          Medication            @relation(fields: [medicationId], references: [id])
+  dosage              String                // e.g., "500mg"
+  quantity            Int                   // Quantity prescribed
+  frequency           String                // e.g., "Twice daily"
+  duration            String                // e.g., "7 days"
+  route               String?               // e.g., "Oral", "IV"
+  instructions        String?               // Special instructions (e.g., "Take with food")
+  refillCount         Int?                  @default(0) // Number of allowed refills
+  createdById         Int?                  // User who added item
+  createdBy           User?                 @relation("PrescriptionItemCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("PrescriptionItemUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("PrescriptionItemAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
 
 model DispensingRecord {
-  id                Int           @id @default(autoincrement())
-  prescriptionId    Int
-  prescription      Prescription  @relation(fields: [prescriptionId], references: [id])
-  medicationId      Int
-  medication        Medication    @relation(fields: [medicationId], references: [id])
-  patientType       String        // INPATIENT, OUTPATIENT
-  quantity          Int
-  dispensedDate     DateTime      @default(now())
-  dispensedById     Int
-  dispensedBy       User          @relation("DispensedBy", fields: [dispensedById], references: [id])
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  invoiceId         Int?
-  invoice           Invoice?      @relation(fields: [invoiceId], references: [id])
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  prescriptionId      Int                   // Link to prescription
+  prescription        Prescription          @relation(fields: [prescriptionId], references: [id])
+  medicationId        Int                   // Link to medication
+  medication          Medication            @relation(fields: [medicationId], references: [id])
+  patientType         PatientType           // INPATIENT, OUTPATIENT
+  quantity            Int                   // Quantity dispensed
+  dispensedDate       DateTime              @default(now())
+  dispensedById       Int                   // User who dispensed
+  dispensedBy         User                  @relation("DispensedBy", fields: [dispensedById], references: [id])
+  pharmacyId          Int?                  // Link to pharmacy
+  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  invoiceId           Int?                  // Link to invoice
+  invoice             Invoice?              @relation(fields: [invoiceId], references: [id])
+  batchNumber         String?               // Batch number of medication
+  expiryDate          DateTime?             // Expiry date of dispensed medication
+  notes               String?               // Additional dispensing notes
+  status              String                @default("DISPENSED") // DISPENSED, PARTIALLY_DISPENSED, RETURNED
+  createdById         Int?                  // User who created record
+  createdBy           User?                 @relation("DispensingRecordCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("DispensingRecordUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("DispensingRecordAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
 
 model StockAdjustment {
-  id            Int           @id @default(autoincrement())
-  medicationId  Int
-  medication    Medication    @relation(fields: [medicationId], references: [id])
-  quantity      Int
-  reason        String
-  adjustedById  Int
-  adjustedBy    User          @relation("AdjustedBy", fields: [adjustedById], references: [id])
-  adjustmentDate DateTime     @default(now())
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  medicationId        Int                   // Link to medication
+  medication          Medication            @relation(fields: [medicationId], references: [id])
+  pharmacyId          Int?                  // Link to pharmacy
+  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  quantity            Int                   // Quantity adjusted
+  adjustmentType      StockAdjustmentType   // INCREASE, DECREASE, DAMAGED, EXPIRED, TRANSFER
+  reason              String                // Reason for adjustment
+  adjustedById        Int                   // User who made adjustment
+  adjustedBy          User                  @relation("AdjustedBy", fields: [adjustedById], references: [id])
+  approvedById        Int?                  // User who approved adjustment
+  approvedBy          User?                 @relation("AdjustmentApprovedBy", fields: [approvedById], references: [id])
+  adjustmentDate      DateTime              @default(now())
+  batchNumber         String?               // Batch number of adjusted stock
+  expiryDate          DateTime?             // Expiry date of adjusted stock
+  procurementId       Int?                  // Link to procurement for restocking
+  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
+  inventoryId         Int?                  // Link to inventory
+  inventory           Inventory?            @relation(fields: [inventoryId], references: [id])
+  notes               String?               // Additional notes
+  auditLogs           AuditLog[]            @relation("StockAdjustmentAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
