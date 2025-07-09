@@ -19,7 +19,7 @@ model Dashboard {
   uuid                String                @unique @default(uuid())
   name                String                // e.g., "Admin Overview Dashboard"
   description         String?               // Description of dashboard purpose
-  accessLevel         DashboardAccessLevel  @default("PRIVATE") // PUBLIC, ROLE_BASED, PRIVATE
+  accessLevel         DashboardAccessLevel  @default(PRIVATE) // PUBLIC, ROLE_BASED, PRIVATE
   role                String?               // Role for ROLE_BASED access (e.g., "ADMIN", "DOCTOR")
   userId              Int?                  // Link to user for private dashboards
   user                User?                 @relation("DashboardOwner", fields: [userId], references: [id])
