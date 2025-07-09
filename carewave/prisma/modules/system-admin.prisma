@@ -32,25 +32,25 @@ enum SystemLogType {
 model User {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
-  email                 String                @unique // User email
-  name                  String                // Full name
-  password              String                // Hashed password
-  role                  UserRole              @default(PATIENT) // User role
-  status                String                @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
-  departmentId          Int?                  // Link to department
+  email                 String                @unique
+  name                  String
+  password              String
+  role                  UserRole              @default(PATIENT)
+  status                String                @default("ACTIVE")
+  departmentId          Int?
   department            Department?           @relation(fields: [departmentId], references: [id])
-  phone                 String?               // Contact number
-  address               String?               // Physical address
-  profileImage          String?               // Path to profile image
-  lastLogin             DateTime?             // Last login timestamp
-  loginAttempts         Int                   @default(0) // Failed login attempts
-  accountLocked         Boolean               @default(false) // Account lock status
-  permissions           String?               // JSON or text for specific permissions
-  createdById           Int?                  // User who created this user
+  phone                 String?
+  address               String?
+  profileImage          String?
+  lastLogin             DateTime?
+  loginAttempts         Int                   @default(0)
+  accountLocked         Boolean               @default(false)
+  permissions           String?
+  createdById           Int?
   createdBy             User?                 @relation("UserCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                  // User who last updated
+  updatedById           Int?
   updatedBy             User?                 @relation("UserUpdatedBy", fields: [updatedById], references: [id])
-  payrolls              Payroll[]             // Payroll records for staff
+  payrolls              Payroll[]
   cssdLogs              CSSDLog[]             @relation("LoggedBy")
   cssdRequisitions      CSSDRequisition[]     @relation("RequisitionRequestedBy")
   appointments          Appointment[]         @relation("BookedBy")
@@ -67,6 +67,7 @@ model User {
   auditLogs             AuditLog[]            @relation("PerformedBy")
   patientRecords        Patient[]             @relation("PatientUser")
   doctorRecords         Doctor[]              @relation("DoctorUser")
+  dashboards            Dashboard[]           @relation("UserDashboard")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
