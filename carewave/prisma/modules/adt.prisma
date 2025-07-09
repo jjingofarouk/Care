@@ -1,16 +1,33 @@
-// adt.prisma
 enum AdmissionStatus {
   PENDING
   ADMITTED
   DISCHARGED
   CANCELLED
   ON_HOLD
+  TRANSFERRED
+  AWAITING_BED
 }
 
 enum TriagePriority {
   EMERGENCY
   URGENT
   NON_URGENT
+  CRITICAL
+}
+
+enum BedStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+  RESERVED
+  UNDER_CLEANING
+}
+
+enum DischargeType {
+  ROUTINE
+  AGAINST_MEDICAL_ADVICE
+  TRANSFER
+  DECEASED
 }
 
 model Admission {
@@ -22,16 +39,17 @@ model Admission {
   doctor               Doctor?             @relation("DoctorAdmissions", fields: [doctorId], references: [id])
   wardId               Int?
   ward                 Ward?               @relation(fields: [wardId], references: [id])
-  bedId                Int?                // Link to specific bed
+  bedId                Int?
   bed                  Bed?                @relation(fields: [bedId], references: [id])
   admissionDate        DateTime            @default(now())
   scheduledDate        DateTime?           // For planned admissions
   preAdmissionNotes    String?             // Notes before admission
   presentingComplaints String?             // Patient's chief complaints
   relayedInfo          String?             // Information from referring facility
-  triagePriority       TriagePriority?     // EMERGENCY, URGENT, NON_URGENT
+  triagePriority       TriagePriority?     // EMERGENCY, URGENT, NON_URGENT, CRITICAL
   triageNotes          String?             // Notes from triage
-  status               AdmissionStatus     @default("PENDING")
+  triageDate           DateTime?           // Date of triage
+  status               AdmissionStatus     @default(PENDING)
   dischargeDate        DateTime?           // Date of discharge
   dischargeNotes       String?             // Notes at discharge
   emergencyId          Int?                // Link to emergency case
@@ -42,11 +60,20 @@ model Admission {
   medicalRecord        MedicalRecord?      @relation(fields: [medicalRecordId], references: [id])
   queueId              Int?                // Link to queue management
   queue                Queue?              @relation(fields: [queueId], references: [id])
+  departmentId         Int?                // Link to department
+  department           Department?         @relation(fields: [departmentId], references: [id])
+  admissionType        String?             // e.g., "Inpatient", "Outpatient", "Daycare"
+  referralId           Int?                // Link to referral
+  referral             Referral?           @relation(fields: [referralId], references: [id])
+  insuranceId          Int?                // Link to insurance details
+  insurance            Insurance?          @relation(fields: [insuranceId], references: [id])
   createdById          Int?                // User who created admission
   createdBy            User?               @relation("AdmissionCreatedBy", fields: [createdById], references: [id])
   updatedById          Int?                // User who last updated
   updatedBy            User?               @relation("AdmissionUpdatedBy", fields: [updatedById], references: [id])
   auditLogs            AuditLog[]          @relation("AdmissionAuditLogs")
+  transfers            Transfer[]          @relation("AdmissionTransfers")
+  discharge            Discharge?          @relation("AdmissionDischarge")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
 }
@@ -58,9 +85,10 @@ model Discharge {
   patient              Patient             @relation("DischargedPatient", fields: [patientId], references: [id])
   doctorId             Int
   doctor               Doctor              @relation("DischargingDoctor", fields: [doctorId], references: [id])
-  admissionId          Int?                // Link to admission
-  admission            Admission?          @relation(fields: [admissionId], references: [id])
+  admissionId          Int?                @unique
+  admission            Admission?          @relation("AdmissionDischarge", fields: [admissionId], references: [id])
   dischargeDate        DateTime            @default(now())
+  dischargeType        DischargeType       // ROUTINE, AGAINST_MEDICAL_ADVICE, TRANSFER, DECEASED
   dischargeNotes       String?             // Clinical notes at discharge
   followUpInstructions String?             // Post-discharge care instructions
   medications          String?             // Prescribed medications
@@ -72,6 +100,8 @@ model Discharge {
   medicalRecord        MedicalRecord?      @relation(fields: [medicalRecordId], references: [id])
   appointmentId        Int?                // Link to follow-up appointment
   appointment          Appointment?        @relation(fields: [appointmentId], references: [id])
+  socialServiceId      Int?                // Link to social services for post-discharge support
+  socialService        SocialService?      @relation(fields: [socialServiceId], references: [id])
   createdById          Int?                // User who created discharge
   createdBy            User?               @relation("DischargeCreatedBy", fields: [createdById], references: [id])
   approvedById         Int?                // User who approved discharge
@@ -93,10 +123,15 @@ model Ward {
   location             String?             // e.g., "Building A, Floor 3"
   nurseInChargeId      Int?                // Nurse responsible for ward
   nurseInCharge        User?               @relation("WardNurseInCharge", fields: [nurseInChargeId], references: [id])
+  wardType             String?             // e.g., "ICU", "General", "Pediatric"
+  capacityStatus       String?             // e.g., "Full", "Available", "Overcapacity"
   beds                 Bed[]               // Beds in the ward
   admissions           Admission[]         // Admissions to this ward
+  transfers            Transfer[]          @relation("WardTransfers")
   createdById          Int?                // User who created ward
   createdBy            User?               @relation("WardCreatedBy", fields: [createdById], references: [id])
+  updatedById          Int?                // User who last updated
+  updatedBy            User?               @relation("WardUpdatedBy", fields: [updatedById], references: [id])
   auditLogs            AuditLog[]          @relation("WardAuditLogs")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
@@ -106,11 +141,46 @@ model Bed {
   id                   Int                 @id @default(autoincrement())
   uuid                 String              @unique @default(uuid())
   bedNumber            String              @unique // e.g., "B-101"
-  wardId               Int                 // Link to ward
+  wardId               Int
   ward                 Ward                @relation(fields: [wardId], references: [id])
-  status               String              @default("AVAILABLE") // AVAILABLE, OCCUPIED, MAINTENANCE
+  status               BedStatus           @default(AVAILABLE)
+  bedType              String?             // e.g., "Standard", "ICU", "Pediatric"
   admissionId          Int?                // Link to admission
   admission            Admission?          @relation(fields: [admissionId], references: [id])
+  lastCleaned          DateTime?           // Last cleaning timestamp
+  maintenanceNotes     String?             // Notes for maintenance issues
+  createdById          Int?                // User who created bed
+  createdBy            User?               @relation(fields: [createdById], references: [id])
+  updatedById          Int?                // User who last updated
+  updatedBy            User?               @relation(fields: [updatedById], references: [id])
+  auditLogs            AuditLog[]          @relation("BedAuditLogs")
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+}
+
+model Transfer {
+  id                   Int                 @id @default(autoincrement())
+  uuid                 String              @unique @default(uuid())
+  patientId            Int
+  patient              Patient             @relation(fields: [patientId], references: [id])
+  admissionId          Int
+  admission            Admission           @relation("AdmissionTransfers", fields: [admissionId], references: [id])
+  fromWardId           Int?
+  fromWard             Ward?               @relation("WardTransfers", fields: [fromWardId], references: [id])
+  toWardId             Int?
+  toWard               Ward?               @relation("WardTransfers", fields: [toWardId], references: [id])
+  fromBedId            Int?
+  fromBed              Bed?                @relation(fields: [fromBedId], references: [id])
+  toBedId              Int?
+  toBed                Bed?                @relation(fields: [toBedId], references: [id])
+  transferDate         DateTime            @default(now())
+  reason               String?             // Reason for transfer
+  notes                String?             // Additional notes
+  createdById          Int?                // User who initiated transfer
+  createdBy            User?               @relation(fields: [createdById], references: [id])
+  approvedById         Int?                // User who approved transfer
+  approvedBy           User?               @relation(fields: [approvedById], references: [id])
+  auditLogs            AuditLog[]          @relation("TransferAuditLogs")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
 }
