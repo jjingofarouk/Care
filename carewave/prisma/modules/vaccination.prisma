@@ -1,0 +1,112 @@
+// vaccination.prisma
+enum VaccinationStatus {
+  SCHEDULED
+  ADMINISTERED
+  CANCELLED
+  MISSED
+  PENDING
+}
+
+enum VaccineType {
+  COVID_19
+  INFLUENZA
+  MMR
+  HEPATITIS_B
+  TETANUS
+  POLIO
+  HPV
+  PNEUMOCOCCAL
+  OTHER
+}
+
+enum VaccinationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Vaccination {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  vaccinationNumber   String                @unique // Unique vaccination ID (e.g., "VAC-2025-001")
+  patientId           Int                   // Link to patient
+  patient             Patient               @relation(fields: [patientId], references: [id])
+  doctorId            Int?                  // Link to administering doctor
+  doctor              Doctor?               @relation("VaccinationDoctor", fields: [doctorId], references: [id])
+  nurseId             Int?                  // Link to administering nurse
+  nurse               User?                 @relation("VaccinationNurse", fields: [nurseId], references: [id])
+  appointmentId       Int?                  // Link to appointment
+  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  medicalRecordId     Int?                  // Link to medical record
+  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  clinicalRecordId    Int?                  // Link to clinical record
+  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  vaccineId           Int?                  // Link to vaccine (medication)
+  vaccine             Medication?           @relation(fields: [vaccineId], references: [id])
+  type                VaccineType           // Type of vaccine
+  status              VaccinationStatus     @default("SCHEDULED")
+  scheduledDate       DateTime?             // Scheduled vaccination date
+  administeredDate    DateTime?             // Actual administration date
+  batchNumber         String?               // Vaccine batch number
+  expiryDate          DateTime?             // Vaccine expiry date
+  doseNumber          Int?                  // e.g., 1 for first dose, 2 for second
+  totalDoses          Int?                  // Total doses required
+  administrationRoute  String?               // e.g., "Intramuscular", "Subcutaneous"
+  administrationSite  String?               // e.g., "Left Arm"
+  lotNumber           String?               // Lot number for tracking
+  manufacturer        String?               // Vaccine manufacturer
+  adverseReactions    String?               // JSON or text for adverse reactions
+  notes               String?               // Additional notes
+  priority            VaccinationPriority?  // Priority level
+  billingId           Int?                  // Link to billing
+  billing             Billing?              @relation(fields: [billingId], references: [id])
+  claimId             Int?                  // Link to insurance claim
+  claim               Claim?                @relation(fields: [claimId], references: [id])
+  nhifClaimId         Int?                  // Link to NHIF claim
+  nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
+  pharmacyId          Int?                  // Link to pharmacy for vaccine supply
+  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  inventoryId         Int?                  // Link to inventory
+  inventory           Inventory?            @relation(fields: [inventoryId], references: [id])
+  documents           String?               // JSON or file paths for vaccination documents
+  createdById         Int?                  // User who created the record
+  createdBy           User?                 @relation("VaccinationCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("VaccinationUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("VaccinationAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model VaccinationCampaign {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // e.g., "Annual Flu Vaccination Drive"
+  description         String?               // Campaign description
+  startDate           DateTime              @default(now())
+  endDate             DateTime?             // Campaign end date
+  vaccineType         VaccineType           // Targeted vaccine type
+  targetPopulation    String?               // e.g., "Children under 5", "Healthcare Workers"
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  status              String                @default("ACTIVE") // ACTIVE, INACTIVE, COMPLETED
+  targetCount         Int?                  // Target number of vaccinations
+  actualCount         Int?                  // Actual number of vaccinations
+  budget              Float?                // Campaign budget
+  actualCost          Float?                // Actual cost incurred
+  notes               String?               // Additional notes
+  documents           String?               // JSON or file paths for campaign documents
+  vaccinations        Vaccination[]         // Vaccinations linked to campaign
+  createdById         Int?                  // User who created the campaign
+  createdBy           User?                 @relation("CampaignCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("CampaignUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("VaccinationCampaignAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
