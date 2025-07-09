@@ -1,0 +1,116 @@
+// utilities.prisma
+enum UtilityType {
+  ELECTRICITY
+  WATER
+  GAS
+  INTERNET
+  WASTE_DISPOSAL
+  HVAC_MAINTENANCE
+  MEDICAL_GAS
+}
+
+enum UtilityStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  DISRUPTED
+}
+
+enum BillingCycle {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
+model Utility {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // e.g., "Main Hospital Electricity"
+  type                UtilityType           // Type of utility
+  status              UtilityStatus         @default("ACTIVE")
+  departmentId        Int?                  // Link to department
+  department          Department?           @relation(fields: [departmentId], references: [id])
+  location            String?               // e.g., "Building A, Main Grid"
+  providerId          Int?                  // Link to utility provider
+  provider            UtilityProvider?      @relation(fields: [providerId], references: [id])
+  meterNumber         String?               @unique // Unique meter or account number
+  capacity            Float?                // e.g., 500 kW for electricity
+  unitOfMeasure       String?               // e.g., "kWh", "Cubic Meters"
+  billingCycle        BillingCycle?         // Billing frequency
+  lastReading         Float?                // Last meter reading
+  lastReadingDate     DateTime?             // Date of last reading
+  currentReading      Float?                // Current meter reading
+  currentReadingDate  DateTime?             // Date of current reading
+  consumption         Float?                // Calculated consumption
+  costPerUnit         Float?                // Cost per unit (e.g., $0.15/kWh)
+  totalCost           Float?                // Total cost for period
+  contractStartDate   DateTime?             // Start date of contract
+  contractEndDate     DateTime?             // End date of contract
+  maintenanceSchedule String?               // JSON or text for maintenance schedule
+  lastMaintenance     DateTime?             // Date of last maintenance
+  notes               String?               // Additional notes
+  documents           String?               // JSON or file paths for utility documents
+  transactionId       Int?                  // Link to accounting transaction
+  transaction         Transaction?          @relation(fields: [transactionId], references: [id])
+  billingId           Int?                  // Link to billing
+  billing             Billing?              @relation(fields: [billingId], references: [id])
+  createdById         Int?                  // User who created utility record
+  createdBy           User?                 @relation("UtilityCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("UtilityUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("UtilityAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model UtilityProvider {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  name                String                // e.g., "National Power Company"
+  contactName         String?               // Primary contact person
+  contactPhone        String?               // Contact phone number
+  email               String?               @unique // Provider email
+  address             String?               // Physical address
+  website             String?               // Provider website
+  accountNumber       String?               // Account number with provider
+  paymentTerms        String?               // e.g., "Net 30"
+  contractDetails     String?               // JSON or text for contract terms
+  status              String                @default("ACTIVE") // ACTIVE, INACTIVE
+  utilities           Utility[]             // Utilities provided by this provider
+  documents           String?               // JSON or file paths for provider documents
+  createdById         Int?                  // User who created provider record
+  createdBy           User?                 @relation("ProviderCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("ProviderUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("UtilityProviderAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model UtilityMaintenance {
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @unique @default(uuid())
+  utilityId           Int                   // Link to utility
+  utility             Utility               @relation(fields: [utilityId], references: [id])
+  maintenanceDate     DateTime              @default(now())
+  maintenanceType     String                // e.g., "Routine", "Emergency"
+  description         String?               // Maintenance details
+  performedById       Int?                  // User or technician who performed maintenance
+  performedBy         User?                 @relation("MaintenancePerformedBy", fields: [performedById], references: [id])
+  cost                Float?                // Cost of maintenance
+  status              String                @default("PENDING") // PENDING, COMPLETED, FAILED
+  downtimeDuration    Int?                  // Downtime in minutes
+  procurementId       Int?                  // Link to procurement for parts
+  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
+  documents           String?               // JSON or file paths for maintenance documents
+  notes               String?               // Additional notes
+  createdById         Int?                  // User who created maintenance record
+  createdBy           User?                 @relation("MaintenanceCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                  // User who last updated
+  updatedBy           User?                 @relation("MaintenanceUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           AuditLog[]            @relation("UtilityMaintenanceAuditLogs")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
