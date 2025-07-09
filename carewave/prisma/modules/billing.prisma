@@ -9,17 +9,7 @@ enum InvoiceStatus {
   DISPUTED
 }
 
-enum PaymentMethod {
-  CASH
-  CREDIT_CARD
-  DEBIT_CARD
-  MOBILE_PAYMENT
-  INSURANCE
-  BANK_TRANSFER
-  CHECK
-  DIGITAL_WALLET
-  CRYPTO
-}
+
 
 enum BillingItemType {
   SERVICE
