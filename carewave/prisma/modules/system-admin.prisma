@@ -38,7 +38,7 @@ model User {
   role                  UserRole              @default(PATIENT)
   status                String                @default("ACTIVE")
   departmentId          Int?
-  department            Department?           @relation(fields: [departmentId], references: [id])
+  department            Department?           @relation("UserDepartment", fields: [departmentId], references: [id])
   phone                 String?
   address               String?
   profileImage          String?
@@ -50,6 +50,8 @@ model User {
   createdBy             User?                 @relation("UserCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
   updatedBy             User?                 @relation("UserUpdatedBy", fields: [updatedById], references: [id])
+  createdUsers          User[]                @relation("UserCreatedBy")
+  updatedUsers          User[]                @relation("UserUpdatedBy")
   payrolls              Payroll[]
   cssdLogs              CSSDLog[]             @relation("LoggedBy")
   cssdRequisitions      CSSDRequisition[]     @relation("RequisitionRequestedBy")
@@ -67,7 +69,12 @@ model User {
   auditLogs             AuditLog[]            @relation("PerformedBy")
   patientRecords        Patient[]             @relation("PatientUser")
   doctorRecords         Doctor[]              @relation("DoctorUser")
-  dashboards            Dashboard[]           @relation("UserDashboard")
+  dashboardsOwned       Dashboard[]           @relation("DashboardOwner")
+  dashboardsCreated     Dashboard[]           @relation("DashboardCreatedBy")
+  dashboardsUpdated     Dashboard[]           @relation("DashboardUpdatedBy")
+  departmentsHeaded     Department[]          @relation("DepartmentHead")
+  createdDepartments    Department[]          @relation("DepartmentCreatedBy")
+  updatedDepartments    Department[]          @relation("DepartmentUpdatedBy")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
