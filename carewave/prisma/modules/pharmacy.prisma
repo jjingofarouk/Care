@@ -43,7 +43,7 @@ model Pharmacy {
   prescription        Prescription?         @relation(fields: [prescriptionId], references: [id])
   departmentId        Int?                  // Link to department
   department          Department?           @relation(fields: [departmentId], references: [id])
-  status              String                @default(PENDING) // e.g., PENDING, DISPENSED
+  status              String                @default("PENDING") // e.g., PENDING, DISPENSED
   medicationDetails   String?               // JSON or text for dispensed medications
   createdById         Int?                  // User who created the record
   createdBy           User?                 @relation("PharmacyCreatedBy", fields: [createdById], references: [id])
