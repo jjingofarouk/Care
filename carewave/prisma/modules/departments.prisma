@@ -1,11 +1,8 @@
-// departments.prisma
 enum DepartmentStatus {
   ACTIVE
   INACTIVE
   UNDER_MAINTENANCE
 }
-
-// schema.prisma (Department model only)
 
 model Department {
   id                  Int                   @id @default(autoincrement())
@@ -49,6 +46,8 @@ model Department {
   updatedById         Int?                  @unique
   updatedBy           User?                 @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("DepartmentAuditLogs")
+  incentives          Incentive[]           @relation("DepartmentIncentives")
+  users               User[]                @relation("UserDepartment")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
