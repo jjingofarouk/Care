@@ -196,7 +196,8 @@ model BankStatement {
   bankAccount       BankAccount?        @relation(fields: [bankAccountId], references: [id])
   reconciliations   Reconciliation[]
   createdAt         DateTime            @default(now())
-  updatedAt         DateTime           ожалуй
+  updatedAt         DateTime            @updatedAt
+}
 
 model BankAccount {
   id                Int                 @id @default(autoincrement())
