@@ -21,22 +21,33 @@ enum AppointmentType {
   SPECIALIST_CONSULT
 }
 
+enum TriagePriority {
+  EMERGENCY
+  URGENT
+  NON_URGENT
+  CRITICAL
+}
 
-
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  DELIVERED
+}
 
 model Appointment {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
   patientId             Int
   patient               Patient             @relation("PatientAppointments", fields: [patientId], references: [id])
-  doctorId              Int?
+  doctorId              Int?                @unique
   doctor                Doctor?             @relation("DoctorAppointments", fields: [doctorId], references: [id])
   departmentId          Int?
-  department            Department?         @relation(fields: [departmentId], references: [id])
-  bookedById            Int?
-  bookedBy              User?               @relation("BookedBy", fields: [bookedById], references: [id])
+  department            Department?         @relation("DepartmentAppointments", fields: [departmentId], references: [id])
+  bookedById            Int?                @unique
+  bookedBy              User?               @relation("AppointmentBookedBy", fields: [bookedById], references: [id])
   date                  DateTime
-  endDate               DateTime?           // For appointments with duration
+  endDate               DateTime?
   status                AppointmentStatus   @default(SCHEDULED)
   type                  AppointmentType     @default(REGULAR)
   reason                String
@@ -45,99 +56,95 @@ model Appointment {
   checkOutTime          DateTime?
   reminderSent          Boolean             @default(false)
   reminderDate          DateTime?
-  medicalRecordId       Int?
-  medicalRecord         MedicalRecord?      @relation(fields: [medicalRecordId], references: [id])
-  billingId             Int?
-  billing               Billing?            @relation(fields: [billingId], references: [id])
+  medicalRecordId       Int?                @unique
+  medicalRecord         MedicalRecord?      @relation("AppointmentMedicalRecord", fields: [medicalRecordId], references: [id])
+  billingId             Int?                @unique
+  billing               Billing?            @relation("AppointmentBilling", fields: [billingId], references: [id])
   queueId               Int?                @unique
-  queue                 Queue?              @relation(fields: [queueId], references: [id])
-  admissionId           Int?
-  admission             Admission?          @relation(fields: [admissionId], references: [id])
-  dischargeId           Int?
-  discharge             Discharge?          @relation(fields: [dischargeId], references: [id])
-  laboratoryId          Int?
-  laboratory            Laboratory?         @relation(fields: [laboratoryId], references: [id])
-  radiologyId           Int?
-  radiology             Radiology?          @relation(fields: [radiologyId], references: [id])
-  pharmacyId            Int?
-  pharmacy              Pharmacy?           @relation(fields: [pharmacyId], references: [id])
-  operationTheatreId    Int?
-  operationTheatre      OperationTheatre?   @relation(fields: [operationTheatreId], references: [id])
-  createdById           Int?
+  queue                 Queue?              @relation("AppointmentQueue", fields: [queueId], references: [id])
+  admissionId           Int?                @unique
+  admission             Admission?          @relation("AppointmentAdmission", fields: [admissionId], references: [id])
+  dischargeId           Int?                @unique
+  discharge             Discharge?          @relation("AppointmentDischarge", fields: [dischargeId], references: [id])
+  laboratoryId          Int?                @unique
+  laboratory            Laboratory?         @relation("AppointmentLaboratory", fields: [laboratoryId], references: [id])
+  radiologyId           Int?                @unique
+  radiology             Radiology?          @relation("AppointmentRadiology", fields: [radiologyId], references: [id])
+  pharmacyId            Int?                @unique
+  pharmacy              Pharmacy?           @relation("AppointmentPharmacy", fields: [pharmacyId], references: [id])
+  operationTheatreId    Int?                @unique
+  operationTheatre      OperationTheatre?   @relation("AppointmentOperationTheatre", fields: [operationTheatreId], references: [id])
+  createdById           Int?                @unique
   createdBy             User?               @relation("AppointmentCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("AppointmentUpdatedBy", fields: [updatedById], references: [id])
-  insuranceId           Int?                // Link to insurance for coverage verification
-  insurance             Insurance?          @relation(fields: [insuranceId], references: [id])
-  referralId            Int?                // Link to referral for specialist appointments
-  referral              Referral?           @relation(fields: [referralId], references: [id])
-  location              String?             // Physical or virtual location (e.g., "Room 101", "Zoom Link")
-  teleconsultationLink  String?             // Link for teleconsultation
-  duration              Int?                // Duration in minutes
-  cancellationReason    String?             // Reason for cancellation
-  cancellationDate      DateTime?           // Date of cancellation
-  rescheduleCount       Int                 @default(0) // Track reschedule attempts
-  priority              TriagePriority?     // Priority for emergency cases
+  insuranceId           Int?                @unique
+  insurance             Insurance?          @relation("AppointmentInsurance", fields: [insuranceId], references: [id])
+  referralId            Int?                @unique
+  referral              Referral?           @relation("AppointmentReferral", fields: [referralId], references: [id])
+  location              String?
+  teleconsultationLink  String?
+  duration              Int?
+  cancellationReason    String?
+  cancellationDate      DateTime?
+  rescheduleCount       Int                 @default(0)
+  priority              TriagePriority?
   notifications         AppointmentNotification[] @relation("AppointmentNotifications")
   auditLogs             AuditLog[]          @relation("AppointmentAuditLogs")
   appointmentDocuments  AppointmentDocument[] @relation("AppointmentDocuments")
-  recurringAppointmentId Int?               // Link to recurring appointment series
-  recurringAppointment   RecurringAppointment? @relation(fields: [recurringAppointmentId], references: [id])
+  recurringAppointmentId Int?               @unique
+  recurringAppointment   RecurringAppointment? @relation("RecurringAppointmentAppointments", fields: [recurringAppointmentId], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
-
-
 
 model AppointmentNotification {
   id                  Int                 @id @default(autoincrement())
   uuid                String              @unique @default(uuid())
   appointmentId       Int
   appointment         Appointment         @relation("AppointmentNotifications", fields: [appointmentId], references: [id])
-  notificationType    String              // e.g., "SMS", "Email", "App Push"
+  notificationType    String
   status              NotificationStatus  @default(PENDING)
   sentAt              DateTime?
-  recipientId         Int?                // User or patient receiving notification
-  recipient           User?               @relation(fields: [recipientId], references: [id])
-  message             String?             // Notification content
+  recipientId         Int?                @unique
+  recipient           User?               @relation("NotificationRecipient", fields: [recipientId], references: [id])
+  message             String?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 }
-
 
 model AppointmentDocument {
   id                  Int                 @id @default(autoincrement())
   uuid                String              @unique @default(uuid())
   appointmentId       Int
   appointment         Appointment         @relation("AppointmentDocuments", fields: [appointmentId], references: [id])
-  documentType        String              // e.g., "Consent Form", "Referral Letter"
-  filePath            String              // Path to stored document
-  uploadedById        Int?                // User who uploaded document
-  uploadedBy          User?               @relation(fields: [uploadedById], references: [id])
+  documentType        String
+  filePath            String
+  uploadedById        Int?                @unique
+  uploadedBy          User?               @relation("DocumentUploadedBy", fields: [uploadedById], references: [id])
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   auditLogs           AuditLog[]          @relation("AppointmentDocumentAuditLogs")
 }
 
-
 model RecurringAppointment {
   id                  Int                 @id @default(autoincrement())
   uuid                String              @unique @default(uuid())
   patientId           Int
-  patient             Patient             @relation(fields: [patientId], references: [id])
-  doctorId            Int?
-  doctor              Doctor?             @relation(fields: [doctorId], references: [id])
+  patient             Patient             @relation("PatientRecurringAppointments", fields: [patientId], references: [id])
+  doctorId            Int?                @unique
+  doctor              Doctor?             @relation("DoctorRecurringAppointments", fields: [doctorId], references: [id])
   departmentId        Int?
-  department          Department?         @relation(fields: [departmentId], references: [id])
-  frequency           String              // e.g., "Weekly", "Monthly"
+  department          Department?         @relation("DepartmentRecurringAppointments", fields: [departmentId], references: [id])
+  frequency           String
   startDate           DateTime
   endDate             DateTime?
-  occurrences         Int?                // Number of occurrences
+  occurrences         Int?
   appointments        Appointment[]       @relation("RecurringAppointmentAppointments")
-  createdById         Int?                // User who created recurring appointment
-  createdBy           User?               @relation("CreatedByUser", fields: [createdById], references: [id])
-  updatedById         Int?                // User who last updated
-  updatedBy           User?               @relation("UpdatedByUser", fields: [updatedById], references: [id])
+  createdById         Int?                @unique
+  createdBy           User?               @relation("RecurringAppointmentCreatedBy", fields: [createdById], references: [id])
+  updatedById         Int?                @unique
+  updatedBy           User?               @relation("RecurringAppointmentUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]          @relation("RecurringAppointmentAuditLogs")
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
