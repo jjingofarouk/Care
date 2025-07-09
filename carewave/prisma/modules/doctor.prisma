@@ -22,31 +22,30 @@ enum QualificationType {
   DIPLOMA
 }
 
-
 model Doctor {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
-  doctorId              String                @unique // e.g., "DOC-001"
-  userId                Int?                  // Link to user account
+  doctorId              String                @unique
+  userId                Int?                  @unique
   user                  User?                 @relation("DoctorUser", fields: [userId], references: [id])
-  firstName             String                // Doctor's first name
-  lastName              String                // Doctor's last name
-  email                 String?               @unique // Professional email
-  phone                 String?               // Contact number
-  specialty             String                // e.g., "Cardiology", "Neurology"
-  licenseNumber         String                @unique // Medical license number
-  office                String?               // e.g., "Room 203, Building A"
-  departmentId          Int?                  // Link to department
-  department            Department?           @relation(fields: [departmentId], references: [id])
+  firstName             String
+  lastName              String
+  email                 String?               @unique
+  phone                 String?
+  specialty             String
+  licenseNumber         String                @unique
+  office                String?
+  departmentId          Int?
+  department            Department?           @relation("DepartmentDoctors", fields: [departmentId], references: [id])
   status                DoctorStatus          @default(ACTIVE)
-  hireDate              DateTime?             // Date of hiring
-  biography             String?               // Professional bio
-  qualifications        String?               // JSON for qualifications (e.g., [{"type": "DEGREE", "name": "MD"}])
-  profileImage          String?               // Path to profile image
-  consultationFee       Float?                // Standard consultation fee
-  maxPatientsPerSlot    Int?                  // Max patients per appointment slot
-  clinicalSettingId     Int?                  // Link to clinical setting
-  clinicalSetting       ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  hireDate              DateTime?
+  biography             String?
+  qualifications        String?
+  profileImage          String?
+  consultationFee       Float?
+  maxPatientsPerSlot    Int?
+  clinicalSettingId     Int?                  @unique
+  clinicalSetting       ClinicalSetting?      @relation("DoctorClinicalSettings", fields: [clinicalSettingId], references: [id])
   admissions            Admission[]           @relation("DoctorAdmissions")
   discharges            Discharge[]           @relation("DischargingDoctor")
   appointments          Appointment[]         @relation("DoctorAppointments")
@@ -62,9 +61,10 @@ model Doctor {
   helpdeskTickets       Helpdesk[]            @relation("DoctorHelpdeskTickets")
   doctorQualifications  DoctorQualification[] @relation("DoctorQualifications")
   doctorNotifications   DoctorNotification[]  @relation("DoctorNotifications")
-  createdById           Int?                  // User who created doctor record
+  recurringAppointments  RecurringAppointment[] @relation("DoctorRecurringAppointments")
+  createdById           Int?                  @unique
   createdBy             User?                 @relation("DoctorCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                  // User who last updated
+  updatedById           Int?                  @unique
   updatedBy             User?                 @relation("DoctorUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorAuditLogs")
   createdAt             DateTime              @default(now())
@@ -79,42 +79,43 @@ model DoctorAvailability {
   startTime             DateTime
   endTime               DateTime
   status                AvailabilityStatus    @default(AVAILABLE)
-  location              String?               // e.g., "Clinic A", "Teleconsultation"
-  departmentId          Int?                  // Link to department
-  department            Department?           @relation(fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                  // Link to clinical setting
-  clinicalSetting       ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  appointmentId         Int?                  // Link to appointment (if booked)
-  appointment           Appointment?          @relation(fields: [appointmentId], references: [id])
-  operationTheatreId    Int?                  // Link to operation theatre for surgical slots
-  operationTheatre      OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
-  notes                 String?               // Notes for availability
+  location              String?
+  departmentId          Int?
+  department            Department?           @relation("DepartmentDoctorAvailability", fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                  @unique
+  clinicalSetting       ClinicalSetting?      @relation("DoctorAvailabilityClinicalSettings", fields: [clinicalSettingId], references: [id])
+  appointmentId         Int?                  @unique
+  appointment           Appointment?          @relation("DoctorAvailabilityAppointments", fields: [appointmentId], references: [id])
+  operationTheatreId    Int?                  @unique
+  operationTheatre      OperationTheatre?     @relation("DoctorAvailabilityOperationTheatres", fields: [operationTheatreId], references: [id])
+  notes                 String?
   isRecurring           Boolean               @default(false)
-  recurrenceRule        String?               // JSON for recurrence (e.g., {"frequency": "WEEKLY", "days": ["MON"]})
-  recurrenceEndDate     DateTime?             // End date for recurring schedule
-  createdById           Int?                  // User who created availability
-  createdBy             User?                 @relation("CreatedByUser", fields: [createdById], references: [id])
-  updatedById           Int?                  // User who last updated
-  updatedBy             User?                 @relation("UpdatedByUser", fields: [updatedById], references: [id])
+  recurrenceRule        String?
+  recurrenceEndDate     DateTime?
+  createdById           Int?                  @unique
+  createdBy             User?                 @relation("DoctorAvailabilityCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                  @unique
+  updatedBy             User?                 @relation("DoctorAvailabilityUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorAvailabilityAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
+
 model DoctorQualification {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
   doctorId              Int
   doctor                Doctor                @relation("DoctorQualifications", fields: [doctorId], references: [id])
   qualificationType     QualificationType
-  qualificationName     String                // e.g., "MD", "Board Certification in Cardiology"
-  institution           String?               // Issuing institution
-  issueDate             DateTime?             // Date qualification was issued
-  expiryDate            DateTime?             // Expiry date (if applicable, e.g., for licenses)
-  documentPath          String?               // Path to stored qualification document
-  createdById           Int?                  // User who added qualification
-  createdBy             User?                 @relation("CreatedByUser", fields: [createdById], references: [id])
-  updatedById           Int?                  // User who last updated
-  updatedBy             User?                 @relation("UpdatedByUser", fields: [updatedById], references: [id])
+  qualificationName     String
+  institution           String?
+  issueDate             DateTime?
+  expiryDate            DateTime?
+  documentPath          String?
+  createdById           Int?                  @unique
+  createdBy             User?                 @relation("DoctorQualificationCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                  @unique
+  updatedBy             User?                 @relation("DoctorQualificationUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorQualificationAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
@@ -125,12 +126,12 @@ model DoctorNotification {
   uuid                  String                @unique @default(uuid())
   doctorId              Int
   doctor                Doctor                @relation("DoctorNotifications", fields: [doctorId], references: [id])
-  notificationType      String                // e.g., "SMS", "Email", "App Push"
+  notificationType      String
   status                NotificationStatus    @default(PENDING)
   sentAt                DateTime?
-  message               String?               // Notification content
-  recipientId           Int?                  // User or doctor receiving notification
-  recipient             User?                 @relation(fields: [recipientId], references: [id])
+  message               String?
+  recipientId           Int?                  @unique
+  recipient             User?                 @relation("DoctorNotificationRecipient", fields: [recipientId], references: [id])
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
