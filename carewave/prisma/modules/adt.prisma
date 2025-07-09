@@ -22,7 +22,6 @@ enum DischargeType {
   TRANSFER
   DECEASED
 }
-
 model Admission {
   id                   Int                 @id @default(autoincrement())
   uuid                 String              @unique @default(uuid())
@@ -67,10 +66,10 @@ model Admission {
   auditLogs            AuditLog[]          @relation("AdmissionAuditLogs")
   transfers            Transfer[]          @relation("AdmissionTransfers")
   discharge            Discharge?          @relation("AdmissionDischarge")
+  dashboardWidget      DashboardWidget?     @relation("DashboardWidgetAdmissions")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
 }
-
 model Discharge {
   id                   Int                 @id @default(autoincrement())
   uuid                 String              @unique @default(uuid())
