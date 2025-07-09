@@ -88,6 +88,7 @@ model Appointment {
   appointmentDocuments  AppointmentDocument[] @relation("AppointmentDocuments")
   recurringAppointmentId Int?               @unique
   recurringAppointment   RecurringAppointment? @relation("RecurringAppointmentAppointments", fields: [recurringAppointmentId], references: [id])
+  dashboardWidget        DashboardWidget?     @relation("DashboardWidgetAppointments")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
