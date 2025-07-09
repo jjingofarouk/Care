@@ -12,12 +12,7 @@ enum DeliveryType {
   ASSISTED
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  DELIVERED
-}
+
 
 model Maternity {
   id                    Int                 @id @default(autoincrement())
