@@ -26,7 +26,7 @@ model Pharmacy {
   patientId             Int?
   patient               Patient?              @relation("PatientPharmacyRecords", fields: [patientId], references: [id])
   appointmentId         Int?                  @unique
-  appointment           Appointment?          @relation("AppointmentPharmacy", fields: [appointmentId], references: [id])
+  appointment           Appointment?          @relation("AppointmentPharmacy")
   admissionId           Int?
   admission             Admission?            @relation("PharmacyAdmissions", fields: [admissionId], references: [id])
   prescriptionId        Int?
@@ -43,7 +43,7 @@ model Pharmacy {
   updatedById           Int?
   updatedBy             User?                 @relation("PharmacyUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("PharmacyAuditLogs")
-  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetPharmacy")
+  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetPharmacy", fields: [pharmacyId], references: [id])
   maternityId           Int?
   maternity             Maternity?            @relation("MaternityPharmacy", fields: [maternityId], references: [id])
   homeCares             HomeCare[]            @relation("HomeCarePharmacy")
@@ -128,7 +128,7 @@ model Prescription {
   auditLogs             AuditLog[]            @relation("PrescriptionAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
-  prescriptionItems     PrescriptionItem[]    @relation("PrescriptionItems")
+  prescription_ITEMS    PrescriptionItem[]    @relation("PrescriptionItems")
   nursingCares          NursingCare[]         @relation("NursingCarePrescription")
   nursingTasks          NursingTask[]         @relation("NursingTaskPrescription")
 }
