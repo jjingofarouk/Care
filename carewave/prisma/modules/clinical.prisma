@@ -24,15 +24,15 @@ model ClinicalRecord {
   uuid                  String              @unique @default(uuid())
   patientId             Int
   patient               Patient             @relation("PatientClinicalRecords", fields: [patientId], references: [id])
-  doctorId              Int?                @unique
+  doctorId              Int?
   doctor                Doctor?             @relation("DoctorClinicalRecords", fields: [doctorId], references: [id])
-  appointmentId         Int?                @unique
+  appointmentId         Int?
   appointment           Appointment?        @relation("ClinicalRecordAppointments", fields: [appointmentId], references: [id])
-  admissionId           Int?                @unique
+  admissionId           Int?
   admission             Admission?          @relation("ClinicalRecordAdmissions", fields: [admissionId], references: [id])
-  medicalRecordId       Int?                @unique
+  medicalRecordId       Int?
   medicalRecord         MedicalRecord?      @relation("ClinicalRecordMedicalRecords", fields: [medicalRecordId], references: [id])
-  clinicalSettingId     Int?                @unique
+  clinicalSettingId     Int?
   clinicalSetting       ClinicalSetting?    @relation("ClinicalRecordClinicalSettings", fields: [clinicalSettingId], references: [id])
   departmentId          Int?
   department            Department?         @relation("DepartmentClinicalRecords", fields: [departmentId], references: [id])
@@ -45,32 +45,34 @@ model ClinicalRecord {
   vitals                String?
   allergies              String?
   immunizationHistory    String?
-  laboratoryId          Int?                @unique
+  laboratoryId          Int?
   laboratory            Laboratory?         @relation("ClinicalRecordLaboratory", fields: [laboratoryId], references: [id])
-  radiologyId           Int?                @unique
+  radiologyId           Int?
   radiology             Radiology?          @relation("ClinicalRecordRadiology", fields: [radiologyId], references: [id])
-  pharmacyId            Int?                @unique
+  pharmacyId            Int?
   pharmacy              Pharmacy?           @relation("ClinicalRecordPharmacy", fields: [pharmacyId], references: [id])
-  operationTheatreId    Int?                @unique
+  operationTheatreId    Int?
   operationTheatre      OperationTheatre?   @relation("ClinicalRecordOperationTheatre", fields: [operationTheatreId], references: [id])
-  nursingId             Int?                @unique
+  nursingId             Int?
   nursing               Nursing?            @relation("ClinicalRecordNursing", fields: [nursingId], references: [id])
-  billingId             Int?                @unique
+  billingId             Int?
   billing               Billing?            @relation("ClinicalRecordBilling", fields: [billingId], references: [id])
-  claimId               Int?                @unique
+  claimId               Int?
   claim                 Claim?              @relation("ClinicalRecordClaims", fields: [claimId], references: [id])
   encounterDate         DateTime?
   location              String?
   clinicalNotes         String?
-  createdById           Int?                @unique
+  createdById           Int?
   createdBy             User?               @relation("ClinicalRecordCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
+  updatedById           Int?
   updatedBy             User?               @relation("ClinicalRecordUpdatedBy", fields: [updatedById], references: [id])
-  reviewedById          Int?                @unique
+  reviewedById          Int?
   reviewedBy            User?               @relation("ClinicalRecordReviewedBy", fields: [reviewedById], references: [id])
   auditLogs             AuditLog[]          @relation("ClinicalRecordAuditLogs")
   clinicalDocuments     ClinicalDocument[]  @relation("ClinicalRecordDocuments")
   clinicalNotifications ClinicalNotification[] @relation("ClinicalRecordNotifications")
+  homeCareVisits        HomeCareVisit[]     @relation("HomeCareVisitClinicalRecords")
+  nhifClaims            NhifClaim[]         @relation("NhifClaimClinicalRecords")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
@@ -83,7 +85,7 @@ model ClinicalDocument {
   documentType          String
   filePath              String
   description           String?
-  uploadedById          Int?                @unique
+  uploadedById          Int?
   uploadedBy            User?               @relation("ClinicalDocumentUploadedBy", fields: [uploadedById], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -98,7 +100,7 @@ model ClinicalNotification {
   notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?                @unique
+  recipientId           Int?
   recipient             User?               @relation("ClinicalNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
   createdAt             DateTime            @default(now())
