@@ -81,7 +81,7 @@ model Claim {
   createdAt             DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   referrals            Referral[]          @relation("Referral_claim_fkey")
-  emergencies          Emergency[]         @relation("EmergencyClaims")
+  emergencies          Emergency[]         @relation("EmergencyClaims", fields: [claimId], references: [id], map: "Claim_emergency_fkey")
 }
 
 model ClaimDocument {
