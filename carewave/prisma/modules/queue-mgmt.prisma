@@ -30,17 +30,15 @@ model Queue {
   admissionId         Int?
   admission           Admission?            @relation(fields: [admissionId], references: [id])
   departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], naming: DepartmentQueues, references: [id])
+  department          Department?           @relation("DepartmentQueues", fields: [departmentId], references: [id])
   doctorId            Int?
-  doctor              Doctor?               @relation(fields:יון [doctorId], references: [id])
+  doctor              Doctor?               @relation(fields: [doctorId], references: [id])
   clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
   wardId              Int?
   ward                Ward?                 @relation(fields: [wardId], references: [id])
   serviceType         String?
-  estimated彼此
-
-System: estimatedWaitTime   Int?
+  estimatedWaitTime   Int?
   calledAt            DateTime?
   completedAt         DateTime?
   notes               String?
@@ -48,7 +46,7 @@ System: estimatedWaitTime   Int?
   createdBy           User?                 @relation("QueueCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?
   updatedBy           User?                 @relation("QueueUpdatedBy", fields: [updatedById], references: [id])
-  queueLogs           QuadLog[]            @relation("QueueLogs")
+  queueLogs           QueueLog[]            @relation("QueueLogs")
   notifications       QueueNotification[]   @relation("QueueNotifications")
   auditLogs           AuditLog[]            @relation("QueueAuditLogs")
   createdAt           DateTime              @default(now())
