@@ -77,6 +77,7 @@ model Claim {
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   dashboardWidgets      DashboardWidget[]   @relation("DashboardWidgetClaims")
+  surgicalProcedure    SurgicalProcedure?  @relation("ProcedureClaim")
 }
 
 model ClaimDocument {
