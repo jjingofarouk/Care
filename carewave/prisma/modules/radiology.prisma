@@ -33,8 +33,8 @@ model Radiology {
   appointmentId       Int?                  @unique
   appointment         Appointment?          @relation("AppointmentRadiology")
   emergencyId         Int?                  @unique
-  emergency           Emergency?            @relation("EmergencyRadiology")
-  invoiceId           Int?
+  emergency           Emergency?            @relation("EmergencyRadiology", fields: [emergencyId], references: [id])
+  invoiceId           Int?                  @unique
   invoice             Invoice?              @relation("InvoiceRadiology", fields: [invoiceId], references: [id])
   departmentId        Int?
   department          Department?           @relation("DepartmentRadiologyTests", fields: [departmentId], references: [id])
@@ -48,7 +48,7 @@ model Radiology {
   radiologyTests      RadiologyTest[]       @relation("RadiologyTests")
   auditLogs           AuditLog[]            @relation("RadiologyAuditLogs")
   dashboardWidget     DashboardWidget?      @relation("DashboardWidgetRadiology")
-  maternityId         Int?
+  maternityId         Int?                  @unique
   maternity           Maternity?            @relation("MaternityRadiology", fields: [maternityId], references: [id])
   medicalRecordId     Int?
   medicalRecord       MedicalRecord?        @relation("MedicalRecordRadiology", fields: [medicalRecordId], references: [id])
@@ -94,9 +94,9 @@ model RadiologyTest {
   equipment           RadiologyEquipment?   @relation("RadiologyTestEquipment", fields: [equipmentId], references: [id])
   billingId           Int?
   billing             Billing?              @relation("RadiologyTestBilling", fields: [billingId], references: [id])
-  claimId             Int?
+  claimId             Int?                  @unique
   claim               Claim?                @relation("RadiologyTestClaim", fields: [claimId], references: [id])
-  nhifClaimId         Int?
+  nhifClaimId         Int?                  @unique
   nhifClaim           NhifClaim?            @relation("RadiologyTestNhifClaim", fields: [nhifClaimId], references: [id])
   testCode            String?
   indications         String?
