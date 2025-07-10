@@ -13,8 +13,8 @@ model MedicalRecord {
   patient               Patient               @relation("PatientMedicalRecords", fields: [patientId], references: [id])
   doctorId              Int?
   doctor                Doctor?               @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
-  appointmentId         Int?
-  appointment           Appointment?          @relation("AppointmentMedicalRecord", fields: [appointmentId], references: [id])
+  appointmentId         Int?                  @unique
+  appointment           Appointment?          @relation("AppointmentMedicalRecord")
   admissionId           Int?
   admission             Admission?            @relation("MedicalRecordAdmissions", fields: [admissionId], references: [id])
   clinicalRecordId      Int?
@@ -43,4 +43,3 @@ model MedicalRecord {
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
-
