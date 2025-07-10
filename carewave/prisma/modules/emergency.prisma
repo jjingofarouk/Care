@@ -1,6 +1,6 @@
 enum EmergencyStatus {
   PENDING
-  ACTIVE
+ दा
   STABILIZED
   TRANSFERRED
   DISCHARGED
