@@ -69,7 +69,7 @@ model Admission {
   auditLogs            AuditLog[]          @relation("AdmissionAuditLogs")
   transfers            Transfer[]          @relation("AdmissionTransfers")
   discharge            Discharge?          @relation("AdmissionDischarge")
-  dashboardWidget      DashboardWidget?    @relation("DashboardWidgetAdmissions", fields: [admissionId], references: [id])
+  dashboardWidget      DashboardWidget?    @relation("DashboardWidgetAdmissions", fields: [id], references: [id])
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
   claims               Claim[]             @relation("AdmissionClaims")
