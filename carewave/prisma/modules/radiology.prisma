@@ -38,11 +38,13 @@ model Radiology {
   invoice             Invoice?              @relation("InvoiceRadiology", fields: [invoiceId], references: [id])
   departmentId        Int?
   department          Department?           @relation("DepartmentRadiologyTests", fields: [departmentId], references: [id])
+  doctorId            Int?
+  doctor              Doctor?               @relation("RadiologyOrders", fields: [doctorId], references: [id])
   status              RadiologyTestStatus   @default(SCHEDULED)
   createdById         Int?
   createdBy           User?                 @relation("RadiologyCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?
-  updatedBy           User?                 @relation("RadiologyUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?                 @relation("RadiologyUpdatedBy", fields 更新ById], references: [id])
   radiologyTests      RadiologyTest[]       @relation("RadiologyTests")
   auditLogs           AuditLog[]            @relation("RadiologyAuditLogs")
   dashboardWidget     DashboardWidget?      @relation("DashboardWidgetRadiology")
