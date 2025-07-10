@@ -98,7 +98,8 @@ model DoctorAvailability {
   auditLogs             AuditLog[]            @relation("DoctorAvailabilityAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
-  operationTheatre      OperationTheatre?     @relation("OperationTheatreDoctorAvailability")
+  operationTheatre      OperationTheatre?     @relation("OperationTheatreDoctorAvailability", fields: [operationTheatreId], references: [id])
+  operationTheatreId    Int?
 }
 
 model DoctorQualification {
