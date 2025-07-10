@@ -52,12 +52,7 @@ enum ServiceStatus {
   SUSPENDED
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
+
 
 model Service {
   id                  Int                   @id @default(autoincrement())
