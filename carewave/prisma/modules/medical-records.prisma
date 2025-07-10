@@ -1,3 +1,5 @@
+// prisma/medicalrecord.prisma
+
 enum MedicalRecordStatus {
   DRAFT
   FINALIZED
@@ -42,4 +44,6 @@ model MedicalRecord {
   auditLogs             AuditLog[]            @relation("MedicalRecordAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
+  discharges            Discharge[]           @relation("DischargeMedicalRecord")
+  socialServiceCases    SocialServiceCase[]   @relation("SocialServiceCaseMedicalRecords")
 }
