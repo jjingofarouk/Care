@@ -199,6 +199,14 @@ model User {
   queueUpdated          Queue[]               @relation("QueueUpdatedBy")
   queueLogActionBy      QueueLog[]            @relation("QueueLogActionBy")
   queueNotificationRecipient QueueNotification[] @relation("QueueNotificationRecipient")
+  queueConfigCreated    QueueConfiguration[]  @relation("QueueConfigCreatedBy")
+  queueConfigUpdated    QueueConfiguration[]  @relation("QueueConfigUpdatedBy")
+  clinicalSettingCreated ClinicalSetting[]    @relation("ClinicalSettingCreatedBy")
+  clinicalSettingUpdated ClinicalSetting[]    @relation("ClinicalSettingUpdatedBy")
+  clinicalRecordCreated ClinicalRecord[]     @relation("ClinicalRecordCreatedBy")
+  clinicalRecordUpdated ClinicalRecord[]     @relation("ClinicalRecordUpdatedBy")
+  clinicalRecordReviewed ClinicalRecord[]    @relation("ClinicalRecordReviewedBy")
+  clinicalDocumentUploaded ClinicalDocument[] @relation("ClinicalDocumentUploadedBy")
 }
 
 model SystemConfiguration {
