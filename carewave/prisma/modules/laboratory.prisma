@@ -25,7 +25,7 @@ model Laboratory {
   doctorId              Int?
   doctor                Doctor?             @relation("LaboratoryOrders", fields: [doctorId], references: [id])
   appointmentId         Int?                @unique
-  appointment           Appointment?        @relation("AppointmentLaboratory", fields: [appointmentId], references: [id])
+  appointment           Appointment?        @relation("AppointmentLaboratory")
   admissionId           Int?
   admission             Admission?          @relation("AdmissionLaboratoryTests", fields: [admissionId], references: [id])
   clinicalRecordId      Int?
