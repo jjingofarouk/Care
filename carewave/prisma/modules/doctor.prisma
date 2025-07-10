@@ -1,4 +1,3 @@
-// prisma/doctor.prisma
 enum DoctorStatus {
   ACTIVE
   INACTIVE
@@ -118,7 +117,7 @@ model DoctorQualification {
   createdById           Int?
   createdBy             User?                 @relation("DoctorQualificationCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
-  updatedBy             User?               @relation("DoctorQualificationUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy             User?                 @relation("DoctorQualificationUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorQualificationAuditLogs")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime              @updatedAt
@@ -138,4 +137,3 @@ model DoctorNotification {
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
-
