@@ -19,6 +19,22 @@ enum MaritalStatus {
   SEPARATED
 }
 
+model Insurance {
+  id                    Int                 @id @default(autoincrement())
+  uuid                  String              @unique @default(uuid())
+  providerName          String
+  providerCode          String?             @unique
+  contactDetails        String?
+  claims                Claim[]             @relation("ClaimInsurance")
+  patients              Patient[]           @relation("PatientInsurances")
+  admissions            Admission[]         @relation("AdmissionInsurance")
+  appointments          Appointment[]       @relation("AppointmentInsurance")
+  invoices              Invoice[]           @relation("InvoiceInsurance")
+  createdAt             DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  auditLogs             AuditLog[]          @relation("InsuranceAuditLogs")
+}
+
 model Patient {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
