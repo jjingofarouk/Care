@@ -5,7 +5,6 @@ enum NotificationStatus {
   READ
 }
 
-
 enum UserRole {
   ADMIN
   DOCTOR
@@ -56,7 +55,7 @@ model User {
   createdById           Int?
   createdBy             User?                 @relation("UserCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
-  updatedBy             User?                 @relation("UserUpdatedBy", fields: [createdById], references: [id])
+  updatedBy             User?                 @relation("UserUpdatedBy", fields: [updatedById], references: [id])
   createdUsers          User[]                @relation("UserCreatedBy")
   updatedUsers          User[]                @relation("UserUpdatedBy")
   payrolls              Payroll[]             @relation("PayrollEmployee")
@@ -152,6 +151,11 @@ model User {
   maternityUpdated      Maternity[]           @relation("MaternityUpdatedBy")
   maternityDocumentUploaded MaternityDocument[] @relation("MaternityDocumentUploadedBy")
   maternityNotificationRecipient MaternityNotification[] @relation("MaternityNotificationRecipient")
+  vaccinationsCreated   Vaccination[]         @relation("VaccinationCreatedBy")
+  vaccinationsUpdated   Vaccination[]         @relation("VaccinationUpdatedBy")
+  vaccinationsNurse      Vaccination[]         @relation("VaccinationNurse")
+  campaignsCreated      VaccinationCampaign[] @relation("CampaignCreatedBy")
+  campaignsUpdated      VaccinationCampaign[] @relation("CampaignUpdatedBy")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
@@ -253,6 +257,8 @@ model AuditLog {
   pharmacy            Pharmacy?             @relation("PharmacyAuditLogs", fields: [entityId], references: [id])
   maternity           Maternity?            @relation("MaternityAuditLogs", fields: [entityId], references: [id])
   maternityDocument   MaternityDocument?    @relation("MaternityDocumentAuditLogs", fields: [entityId], references: [id])
+  vaccination         Vaccination?          @relation("VaccinationAuditLogs", fields: [entityId], references: [id])
+  vaccinationCampaign VaccinationCampaign?  @relation("VaccinationCampaignAuditLogs", fields: [entityId], references: [id])
   details             String?
   createdAt           DateTime              @default(now())
 }
