@@ -60,4 +60,5 @@ model Department {
   queues              Queue[]               @relation("DepartmentQueues")
   queueConfigurations QueueConfiguration[]  @relation("DepartmentQueueConfigurations")
   surgicalProcedures  SurgicalProcedure[]   @relation("DepartmentSurgicalProcedures")
+  patients            Patient[]             @relation("DepartmentPatients")
 }
