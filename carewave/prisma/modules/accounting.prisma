@@ -102,6 +102,9 @@ model Transaction {
   payrolls          Payroll[]           @relation("TransactionPayrolls")
   refunds           Refund[]            @relation("RefundTransaction")
   payments          Payment[]           @relation("PaymentTransaction")
+  homeCares         HomeCare[]          @relation("HomeCareTransactions")
+  admissions        Admission[]         @relation("TransactionAdmissions")
+  socialServiceCases SocialServiceCase[] @relation("TransactionSocialServiceCases")
 }
 
 model CostCenter {
@@ -201,7 +204,7 @@ model BankStatement {
   reconciliations   Reconciliation[]    @relation("ReconciliationBankStatement")
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("BankAccountAuditLogs")
+  auditLogs         AuditLog[]          @relation("BankStatementAuditLogs")
 }
 
 model BankAccount {
