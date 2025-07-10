@@ -68,10 +68,10 @@ model EmergencyDocument {
   filePath              String
   description           String?
   uploadedById          Int?                @unique
-  uploadedBy            User?               @relation("EmergencyDocumentUploadedBy")
+  uploadedBy            User?               @relation("EmergencyDocumentUploadedBy", fields: [uploadedById], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("EmergencyDocumentAuditLogs", fields: [id], references: [entityId])
+  auditLogs             AuditLog[]          @relation("EmergencyDocumentAuditLogs")
 }
 
 model EmergencyNotification {
