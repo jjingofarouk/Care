@@ -51,6 +51,7 @@ model Inventory {
   inventoryNotifications InventoryNotification[] @relation("InventoryNotifications")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
+  dashboardWidgets      DashboardWidget[]   @relation("DashboardWidgetInventory")
 }
 
 model InventoryTransaction {
