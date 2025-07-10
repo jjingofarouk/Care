@@ -32,8 +32,8 @@ model Radiology {
   patient             Patient?              @relation("PatientRadiology", fields: [patientId], references: [id])
   appointmentId       Int?                  @unique
   appointment         Appointment?          @relation("AppointmentRadiology")
-  emergencyId         Int?
-  emergency           Emergency?            @relation("RadiologyEmergency", fields: [emergencyId], references: [id])
+  emergencyId         Int?                  @unique
+  emergency           Emergency?            @relation("EmergencyRadiology")
   invoiceId           Int?
   invoice             Invoice?              @relation("InvoiceRadiology", fields: [invoiceId], references: [id])
   departmentId        Int?
@@ -79,7 +79,7 @@ model RadiologyTest {
   clinicalRecordId    Int?
   clinicalRecord      ClinicalRecord?       @relation("ClinicalRecordRadiologyTests", fields: [clinicalRecordId], references: [id])
   medicalRecordId     Int?
-  medicalRecord       MedicalRecord?        @relation("RadiologyTestMedicalRecord", fields: [medicalRecordId], references: [id])
+  medicalRecord       MedicalRecord?        @relation("MedicalRecordRadiologyTests", fields: [medicalRecordId], references: [id])
   departmentId        Int?
   department          Department?           @relation("DepartmentRadiologyTest", fields: [departmentId], references: [id])
   clinicalSettingId   Int?
