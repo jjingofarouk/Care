@@ -1,3 +1,4 @@
+// prisma/doctor.prisma
 enum DoctorStatus {
   ACTIVE
   INACTIVE
@@ -21,7 +22,6 @@ enum QualificationType {
   LICENSE
   DIPLOMA
 }
-
 
 model Doctor {
   id                    Int                   @id @default(autoincrement())
@@ -67,7 +67,7 @@ model Doctor {
   createdById           Int?
   createdBy             User?                 @relation("DoctorCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
-  updatedBy             User?               @relation("DoctorUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy             User?                 @relation("DoctorUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorAuditLogs")
   queues                Queue[]               @relation("QueueDoctor")
   surgicalProcedures    SurgicalProcedure[]   @relation("Surgeon")
@@ -76,6 +76,7 @@ model Doctor {
   verifications         Verification[]        @relation("DoctorVerification")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
+  emergencies           Emergency[]           @relation("DoctorEmergencies")
 }
 
 model DoctorAvailability {
@@ -94,7 +95,7 @@ model DoctorAvailability {
   createdById           Int?
   createdBy             User?                 @relation("DoctorAvailabilityCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
-  updatedBy             User?               @relation("DoctorAvailabilityUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy             User?                 @relation("DoctorAvailabilityUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorAvailabilityAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
@@ -115,12 +116,12 @@ model DoctorQualification {
   verificationStatus    String?               @default("PENDING")
   documentPath          String?
   createdById           Int?
-  createdBy             User?               @relation("DoctorQualificationCreatedBy", fields: [createdById], references: [id])
+  createdBy             User?                 @relation("DoctorQualificationCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
-  updatedBy           User?               @relation("DoctorQualificationUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("DoctorQualificationAuditLogs")
+  updatedBy             User?               @relation("DoctorQualificationUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("DoctorQualificationAuditLogs")
   createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  updatedAt             DateTime              @updatedAt
 }
 
 model DoctorNotification {
@@ -132,8 +133,17 @@ model DoctorNotification {
   status                NotificationStatus    @default(PENDING)
   sentAt                DateTime?
   recipientId           Int?
-  recipient             User?               @relation("DoctorNotificationRecipient", fields: [recipientId], references: [id])
+  recipient             User?                 @relation("DoctorNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model Radiology {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  doctorId              Int?
+  doctor                Doctor?               @relation("RadiologyOrders", fields: [doctorId], references: [id])
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
 }
