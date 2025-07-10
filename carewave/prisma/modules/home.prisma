@@ -20,13 +20,13 @@ model HomeCare {
   uuid                  String              @unique @default(uuid())
   patientId             Int
   patient               Patient             @relation("PatientHomeCare", fields: [patientId], references: [id])
-  doctorId              Int?                @unique
+  doctorId              Int?
   doctor                Doctor?             @relation("DoctorHomeCare", fields: [doctorId], references: [id])
-  nurseId               Int?                @unique
+  nurseId               Int?
   nurse                 User?               @relation("NurseHomeCare", fields: [nurseId], references: [id])
   departmentId          Int?
   department            Department?         @relation("DepartmentHomeCare", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                @unique
+  clinicalSettingId     Int?
   clinicalSetting       ClinicalSetting?    @relation("HomeCareClinicalSettings", fields: [clinicalSettingId], references: [id])
   serviceType           HomeCareServiceType
   status                HomeCareStatus      @default(SCHEDULED)
@@ -36,21 +36,21 @@ model HomeCare {
   address               String
   carePlan              String?
   notes                 String?
-  billingId             Int?                @unique
+  billingId             Int?
   billing               Billing?            @relation("HomeCareBilling", fields: [billingId], references: [id])
-  claimId               Int?                @unique
+  claimId               Int?
   claim                 Claim?              @relation("HomeCareClaims", fields: [claimId], references: [id])
-  pharmacyId            Int?                @unique
+  pharmacyId            Int?
   pharmacy              Pharmacy?           @relation("HomeCarePharmacy", fields: [pharmacyId], references: [id])
-  laboratoryId          Int?                @unique
+  laboratoryId          Int?
   laboratory            Laboratory?         @relation("HomeCareLaboratory", fields: [laboratoryId], references: [id])
-  radiologyId           Int?                @unique
+  radiologyId           Int?
   radiology             Radiology?          @relation("HomeCareRadiology", fields: [radiologyId], references: [id])
-  appointmentId         Int?                @unique
+  appointmentId         Int?
   appointment           Appointment?        @relation("HomeCareAppointments", fields: [appointmentId], references: [id])
-  createdById           Int?                @unique
+  createdById           Int?
   createdBy             User?               @relation("HomeCareCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
+  updatedById           Int?
   updatedBy             User?               @relation("HomeCareUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("HomeCareAuditLogs")
   homeCareVisits        HomeCareVisit[]     @relation("HomeCareVisits")
@@ -65,16 +65,16 @@ model HomeCareVisit {
   homeCareId            Int
   homeCare              HomeCare            @relation("HomeCareVisits", fields: [homeCareId], references: [id])
   visitDate             DateTime
-  caregiverId           Int?                @unique
+  caregiverId           Int?
   caregiver             User?               @relation("HomeCareVisitCaregiver", fields: [caregiverId], references: [id])
   status                String              @default("SCHEDULED")
   visitNotes            String?
   vitals                String?
-  clinicalRecordId      Int?                @unique
+  clinicalRecordId      Int?
   clinicalRecord        ClinicalRecord?     @relation("HomeCareVisitClinicalRecords", fields: [clinicalRecordId], references: [id])
-  createdById           Int?                @unique
+  createdById           Int?
   createdBy             User?               @relation("HomeCareVisitCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
+  updatedById           Int?
   updatedBy             User?               @relation("HomeCareVisitUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("HomeCareVisitAuditLogs")
   createdAt             DateTime            @default(now())
@@ -89,7 +89,7 @@ model HomeCareNotification {
   notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?                @unique
+  recipientId           Int?
   recipient             User?               @relation("HomeCareNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
   createdAt             DateTime            @default(now())
