@@ -34,6 +34,7 @@ model Department {
   nhifClaims            NhifClaim[]           @relation("DepartmentNhifClaims")
   laboratoryTests       Laboratory[]          @relation("DepartmentLaboratoryTests")
   radiologyTests        Radiology[]           @relation("DepartmentRadiologyTests")
+  radiologyTestRecords  RadiologyTest[]       @relation("DepartmentRadiologyTest")
   pharmacyRecords       Pharmacy[]            @relation("DepartmentPharmacyRecords")
   operationTheatres     OperationTheatre[]    @relation("DepartmentOperationTheatres")
   nursingRecords        Nursing[]             @relation("DepartmentNursingRecords")
@@ -55,13 +56,17 @@ model Department {
   generalLedgers        GeneralLedger[]       @relation("GeneralLedgerDepartment")
   doctorAvailability    DoctorAvailability[]  @relation("DepartmentDoctorAvailability")
   recurringAppointments RecurringAppointment[] @relation("DepartmentRecurringAppointments")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+  homeCares             HomeCare[]            @relation("DepartmentHomeCare")
+  socialServices        SocialService[]       @relation("DepartmentSocialServices")
+  socialServiceCases    SocialServiceCase[]   @relation("DepartmentSocialServiceCases")
+  radiologyEquipment    RadiologyEquipment[]  @relation("DepartmentRadiologyEquipment")
+  rooms                 Room[]                @relation("DepartmentRooms")
   queues                Queue[]               @relation("DepartmentQueues")
   queueConfigurations   QueueConfiguration[]  @relation("DepartmentQueueConfigurations")
   surgicalProcedures    SurgicalProcedure[]   @relation("DepartmentSurgicalProcedures")
   utilities             Utility[]             @relation("DepartmentUtilities")
   nursingCares          NursingCare[]         @relation("DepartmentNursingCares")
   nursingShifts         NursingShift[]        @relation("DepartmentNursingShifts")
-  radiologyEquipment    RadiologyEquipment[]  @relation("DepartmentRadiologyEquipment")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
 }
