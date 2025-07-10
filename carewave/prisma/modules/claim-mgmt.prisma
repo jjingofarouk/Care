@@ -1,3 +1,4 @@
+// claim.prisma
 enum ClaimStatus {
   PENDING
   SUBMITTED
@@ -22,28 +23,30 @@ enum ClaimType {
   REHABILITATION
 }
 
+
+
 model Claim {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
   patientId             Int
   patient               Patient             @relation("PatientClaims", fields: [patientId], references: [id])
-  invoiceId             Int?                @unique
+  invoiceId             Int?
   invoice               Invoice?            @relation("InvoiceClaims", fields: [invoiceId], references: [id])
-  appointmentId         Int?                @unique
+  appointmentId         Int?
   appointment           Appointment?        @relation("ClaimAppointments", fields: [appointmentId], references: [id])
-  admissionId           Int?                @unique
+  admissionId           Int?
   admission             Admission?          @relation("AdmissionClaims", fields: [admissionId], references: [id])
-  pharmacyId            Int?                @unique
+  pharmacyId            Int?
   pharmacy              Pharmacy?           @relation("ClaimPharmacy", fields: [pharmacyId], references: [id])
-  laboratoryId          Int?                @unique
+  laboratoryId          Int?
   laboratory            Laboratory?         @relation("ClaimLaboratory", fields: [laboratoryId], references: [id])
-  radiologyId           Int?                @unique
+  radiologyId           Int?
   radiology             Radiology?          @relation("ClaimRadiology", fields: [radiologyId], references: [id])
-  operationTheatreId    Int?                @unique
+  operationTheatreId    Int?
   operationTheatre      OperationTheatre?   @relation("ClaimOperationTheatre", fields: [operationTheatreId], references: [id])
-  nhifClaimId           Int?                @unique
+  nhifClaimId           Int?
   nhifClaim             NhifClaim?          @relation("ClaimNhifClaims", fields: [nhifClaimId], references: [id])
-  transactionId         Int?                @unique
+  transactionId         Int?
   transaction           Transaction?        @relation("TransactionClaims", fields: [transactionId], references: [id])
   claimNumber           String              @unique
   claimType             ClaimType
@@ -57,17 +60,17 @@ model Claim {
   rejectionReason       String?
   appealReason          String?
   appealDate            DateTime?
-  insuranceId           Int?                @unique
+  insuranceId           Int?
   insurance             Insurance?          @relation("ClaimInsurance", fields: [insuranceId], references: [id])
   insuranceProvider     String?
   policyNumber          String?
   preAuthorizationCode  String?
   claimNotes            String?
-  createdById           Int?                @unique
+  createdById           Int?
   createdBy             User?               @relation("ClaimCreatedBy", fields: [createdById], references: [id])
-  approvedById          Int?                @unique
+  approvedById          Int?
   approvedBy            User?               @relation("ClaimApprovedBy", fields: [approvedById], references: [id])
-  updatedById           Int?                @unique
+  updatedById           Int?
   updatedBy             User?               @relation("ClaimUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("ClaimAuditLogs")
   claimDocuments        ClaimDocument[]     @relation("ClaimDocuments")
@@ -77,8 +80,9 @@ model Claim {
   dashboardWidgets      DashboardWidget[]   @relation("DashboardWidgetClaims")
   surgicalProcedure     SurgicalProcedure?  @relation("ProcedureClaim")
   homeCares             HomeCare[]          @relation("HomeCareClaims")
+  vaccinations          Vaccination[]       @relation("VaccinationClaim")
   createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  updatedAt           DateTime            @updatedAt
 }
 
 model ClaimDocument {
@@ -88,11 +92,11 @@ model ClaimDocument {
   claim                 Claim               @relation("ClaimDocuments", fields: [claimId], references: [id])
   documentType          String
   filePath              String
-  uploadedById          Int?                @unique
+  uploadedById          Int?
   uploadedBy            User?               @relation("ClaimDocumentUploadedBy", fields: [uploadedById], references: [id])
   description           String?
   createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  updatedAt           DateTime            @updatedAt
   auditLogs             AuditLog[]          @relation("ClaimDocumentAuditLogs")
 }
 
@@ -104,11 +108,11 @@ model ClaimNotification {
   notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?                @unique
+  recipientId           Int?
   recipient             User?               @relation("ClaimNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
   createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  updatedAt           DateTime            @updatedAt
 }
 
 model ClaimAdjustment {
@@ -119,15 +123,16 @@ model ClaimAdjustment {
   adjustmentAmount      Float
   adjustmentReason      String
   adjustmentDate        DateTime            @default(now())
-  createdById           Int?                @unique
+  createdById           Int?
   createdBy             User?               @relation("ClaimAdjustmentCreatedBy", fields: [createdById], references: [id])
-  approvedById          Int?                @unique
+  approvedById          Int?
   approvedBy            User?               @relation("ClaimAdjustmentApprovedBy", fields: [approvedById], references: [id])
   notes                 String?
   auditLogs             AuditLog[]          @relation("ClaimAdjustmentAuditLogs")
   createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  updatedAt           DateTime            @updatedAt
 }
+
 
 model Insurance {
   id                    Int                 @id @default(autoincrement())
@@ -141,6 +146,6 @@ model Insurance {
   appointments          Appointment[]       @relation("AppointmentInsurance")
   invoices              Invoice[]           @relation("InvoiceInsurance")
   createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  updatedAt           DateTime            @updatedAt
   auditLogs             AuditLog[]          @relation("InsuranceAuditLogs")
 }
