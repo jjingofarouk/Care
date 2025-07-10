@@ -31,9 +31,9 @@ model Radiology {
   patientId           Int?
   patient             Patient?              @relation("PatientRadiology", fields: [patientId], references: [id])
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("AppointmentRadiology")
+  appointment         Appointment?          @relation("AppointmentRadiology", fields: [appointmentId], references: [id], map: "Radiology_appointment_fkey")
   emergencyId         Int?                  @unique
-  emergency           Emergency?            @relation("EmergencyRadiology")
+  emergency           Emergency?            @relation("EmergencyRadiology", fields: [emergencyId], references: [id], map: "Radiology_emergency_fkey")
   invoiceId           Int?                  @unique
   invoice             Invoice?              @relation("InvoiceRadiology", fields: [invoiceId], references: [id])
   departmentId        Int?
