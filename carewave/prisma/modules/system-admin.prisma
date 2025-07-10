@@ -156,6 +156,13 @@ model User {
   vaccinationsNurse      Vaccination[]         @relation("VaccinationNurse")
   campaignsCreated      VaccinationCampaign[] @relation("CampaignCreatedBy")
   campaignsUpdated      VaccinationCampaign[] @relation("CampaignUpdatedBy")
+  homeCareNurse         HomeCare[]            @relation("NurseHomeCare")
+  homeCareCreated       HomeCare[]            @relation("HomeCareCreatedBy")
+  homeCareUpdated       HomeCare[]            @relation("HomeCareUpdatedBy")
+  homeCareVisitCaregiver HomeCareVisit[]      @relation("HomeCareVisitCaregiver")
+  homeCareVisitCreated  HomeCareVisit[]       @relation("HomeCareVisitCreatedBy")
+  homeCareVisitUpdated  HomeCareVisit[]       @relation("HomeCareVisitUpdatedBy")
+  homeCareNotificationRecipient HomeCareNotification[] @relation("HomeCareNotificationRecipient")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
@@ -259,6 +266,8 @@ model AuditLog {
   maternityDocument   MaternityDocument?    @relation("MaternityDocumentAuditLogs", fields: [entityId], references: [id])
   vaccination         Vaccination?          @relation("VaccinationAuditLogs", fields: [entityId], references: [id])
   vaccinationCampaign VaccinationCampaign?  @relation("VaccinationCampaignAuditLogs", fields: [entityId], references: [id])
+  homeCare            HomeCare?             @relation("HomeCareAuditLogs", fields: [entityId], references: [id])
+  homeCareVisit       HomeCareVisit?        @relation("HomeCareVisitAuditLogs", fields: [entityId], references: [id])
   details             String?
   createdAt           DateTime              @default(now())
 }
