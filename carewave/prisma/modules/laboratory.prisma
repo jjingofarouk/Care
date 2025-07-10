@@ -29,11 +29,11 @@ model Laboratory {
   admissionId           Int?
   admission             Admission?          @relation("AdmissionLaboratoryTests", fields: [admissionId], references: [id])
   clinicalRecordId      Int?
-  clinicalRecord        ClinicalRecord?     @relation(fields: [clinicalRecordId], references: [id])
+  clinicalRecord        ClinicalRecord?     @relation("ClinicalRecordLaboratory", fields: [clinicalRecordId], references: [id])
   departmentId          Int?
   department            Department?         @relation("DepartmentLaboratoryTests", fields: [departmentId], references: [id])
   clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
+  clinicalSetting       ClinicalSetting?    @relation("LaboratoryClinicalSettings", fields: [clinicalSettingId], references: [id])
   testType              LabTestType
   status                LabTestStatus       @default(ORDERED)
   testName              String
@@ -61,6 +61,8 @@ model Laboratory {
   labDocuments          LabDocument[]       @relation("LaboratoryDocuments")
   labNotifications      LabNotification[]   @relation("LaboratoryNotifications")
   dashboardWidget       DashboardWidget?    @relation("DashboardWidgetLaboratory")
+  homeCares             HomeCare[]          @relation("HomeCareLaboratory")
+  nhifClaims            NhifClaim[]         @relation("NhifClaimLaboratory")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
@@ -74,7 +76,7 @@ model LabDocument {
   filePath              String
   description           String?
   uploadedById          Int?
-  uploadedBy            User?               @relation(fields: [uploadedById], references: [id])
+  uploadedBy            User?               @relation("LabDocumentUploadedBy", fields: [uploadedById], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   auditLogs             AuditLog[]          @relation("LabDocumentAuditLogs")
@@ -89,7 +91,7 @@ model LabNotification {
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
   recipientId           Int?
-  recipient             User?               @relation(fields: [recipientId], references: [id])
+  recipient             User?               @relation("LabNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
