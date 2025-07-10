@@ -1,3 +1,4 @@
+schema.prisma
 enum InvoiceStatus {
   PENDING
   PAID
@@ -51,8 +52,6 @@ enum ServiceStatus {
   SUSPENDED
 }
 
-
-
 model Service {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
@@ -105,8 +104,9 @@ model Billing {
   admissions            Admission[]         @relation("AdmissionBilling")
   discharges            Discharge[]         @relation("DischargeBilling")
   dashboardWidget       DashboardWidget?     @relation("DashboardWidgetBilling")
+  homeCare              HomeCare[]          @relation("HomeCareBilling")
   createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  updatedAt           DateTime            @updatedAt
 }
 
 model Invoice {
@@ -161,8 +161,9 @@ model Invoice {
   paymentPlans          PaymentPlan[]       @relation("InvoicePaymentPlans")
   invoiceDocuments      InvoiceDocument[]   @relation("InvoiceDocuments")
   notifications         BillingNotification[] @relation("InvoiceNotifications")
+  payments              Payment[]           @relation("PaymentInvoices")
   createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  updatedAt           DateTime            @updatedAt
 }
 
 model BillingItem {
