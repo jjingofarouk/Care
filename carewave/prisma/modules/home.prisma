@@ -1,4 +1,5 @@
-// homecare.prisma
+// prisma/homecare.prisma
+
 enum HomeCareStatus {
   SCHEDULED
   IN_PROGRESS
@@ -68,6 +69,7 @@ model HomeCare {
   transactions          Transaction[]       @relation("HomeCareTransactions")
   createdAt             DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
+  admissions            Admission[]         @relation("HomeCareAdmissions")
 }
 
 model HomeCareVisit {
