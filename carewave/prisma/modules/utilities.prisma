@@ -103,7 +103,7 @@ model UtilityMaintenance {
   status              String                @default("PENDING")
   downtimeDuration    Int?
   procurementId       Int?
-  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
+  procurement         Procurement?          @relation("ProcurementUtilityMaintenance", fields: [procurementId], references: [id])
   documents           String?
   notes               String?
   createdById         Int?
