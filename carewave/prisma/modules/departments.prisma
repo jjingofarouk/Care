@@ -5,61 +5,63 @@ enum DepartmentStatus {
 }
 
 model Department {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String                @unique
-  description         String?
-  status              DepartmentStatus      @default(ACTIVE)
-  location            String?
-  headId              Int?
-  head                User?                 @relation("DepartmentHead", fields: [headId], references: [id])
-  phoneNumber         String?
-  email               String?
-  operatingHours      String?
-  capacity            Int?
-  doctors             Doctor[]              @relation("DepartmentDoctors")
-  appointments        Appointment[]         @relation("DepartmentAppointments")
-  admissions          Admission[]           @relation("DepartmentAdmissions")
-  wards               Ward[]                @relation("DepartmentWards")
-  clinicalRecords     ClinicalRecord[]      @relation("DepartmentClinicalRecords")
-  clinicalSettings    ClinicalSetting[]     @relation("DepartmentClinicalSettings")
-  cssdRequisitions    CSSDRequisition[]     @relation("DepartmentCSSDRequisitions")
-  inventoryItems      Inventory[]           @relation("DepartmentInventory")
-  procurements        Procurement[]         @relation("DepartmentProcurements")
-  costCenters         CostCenter[]          @relation("DepartmentCostCenters")
-  budgets             Budget[]              @relation("DepartmentBudgets")
-  transactions        Transaction[]         @relation("DepartmentTransactions")
-  invoices            Invoice[]             @relation("DepartmentInvoices")
-  claims              Claim[]               @relation("DepartmentClaims")
-  nhifClaims          NhifClaim[]           @relation("DepartmentNhifClaims")
-  laboratoryTests     Laboratory[]          @relation("DepartmentLaboratoryTests")
-  radiologyTests      Radiology[]           @relation("DepartmentRadiologyTests")
-  pharmacyRecords     Pharmacy[]            @relation("DepartmentPharmacyRecords")
-  operationTheatres   OperationTheatre[]    @relation("DepartmentOperationTheatres")
-  nursingRecords      Nursing[]             @relation("DepartmentNursingRecords")
-  maternityRecords    Maternity[]           @relation("DepartmentMaternityRecords")
-  vaccinationRecords  Vaccination[]         @relation("DepartmentVaccinationRecords")
-  vaccinationCampaigns VaccinationCampaign[] @relation("VaccinationCampaignDepartment")
-  reports             Report[]              @relation("DepartmentReports")
-  helpdeskTickets     Helpdesk[]            @relation("DepartmentHelpdeskTickets")
-  createdById         Int?
-  createdBy           User?                 @relation("DepartmentCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("DepartmentAuditLogs")
-  incentives          Incentive[]           @relation("DepartmentIncentives")
-  users               User[]                @relation("UserDepartment")
-  dashboards          Dashboard[]           @relation("DepartmentDashboards")
-  services            Service[]             @relation("DepartmentServices")
-  payrolls            Payroll[]             @relation("PayrollDepartment")
-  bankAccounts        BankAccount[]         @relation("BankAccountDepartment")
-  generalLedgers      GeneralLedger[]       @relation("GeneralLedgerDepartment")
-  doctorAvailability  DoctorAvailability[]  @relation("DepartmentDoctorAvailability")
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  name                  String                @unique
+  description           String?
+  status                DepartmentStatus      @default(ACTIVE)
+  location              String?
+  headId                Int?
+  head                  User?                 @relation("DepartmentHead", fields: [headId], references: [id])
+  phoneNumber           String?
+  email                 String?
+  operatingHours        String?
+  capacity              Int?
+  doctors               Doctor[]              @relation("DepartmentDoctors")
+  appointments          Appointment[]         @relation("DepartmentAppointments")
+  admissions            Admission[]           @relation("DepartmentAdmissions")
+  wards                 Ward[]                @relation("DepartmentWards")
+  clinicalRecords       ClinicalRecord[]      @relation("DepartmentClinicalRecords")
+  clinicalSettings      ClinicalSetting[]     @relation("DepartmentClinicalSettings")
+  cssdRequisitions      CSSDRequisition[]     @relation("DepartmentCSSDRequisitions")
+  inventoryItems        Inventory[]           @relation("DepartmentInventory")
+  procurements          Procurement[]         @relation("DepartmentProcurements")
+  costCenters           CostCenter[]          @relation("DepartmentCostCenters")
+  budgets               Budget[]              @relation("DepartmentBudgets")
+  transactions          Transaction[]         @relation("DepartmentTransactions")
+  invoices              Invoice[]             @relation("DepartmentInvoices")
+  claims                Claim[]               @relation("DepartmentClaims")
+  nhifClaims            NhifClaim[]           @relation("DepartmentNhifClaims")
+  laboratoryTests       Laboratory[]          @relation("DepartmentLaboratoryTests")
+  radiologyTests        Radiology[]           @relation("DepartmentRadiologyTests")
+  pharmacyRecords       Pharmacy[]            @relation("DepartmentPharmacyRecords")
+  operationTheatres     OperationTheatre[]    @relation("DepartmentOperationTheatres")
+  nursingRecords        Nursing[]             @relation("DepartmentNursingRecords")
+  maternityRecords      Maternity[]           @relation("DepartmentMaternityRecords")
+  vaccinationRecords    Vaccination[]         @relation("DepartmentVaccinationRecords")
+  reports               Report[]              @relation("DepartmentReports")
+  helpdeskTickets       Helpdesk[]            @relation("DepartmentHelpdeskTickets")
+  createdById           Int?
+  createdBy             User?                 @relation("DepartmentCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?
+  updatedBy             User?                 @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("DepartmentAuditLogs")
+  incentives            Incentive[]           @relation("DepartmentIncentives")
+  users                 User[]                @relation("UserDepartment")
+  dashboards            Dashboard[]           @relation("DepartmentDashboards")
+  services              Service[]             @relation("DepartmentServices")
+  payrolls              Payroll[]             @relation("PayrollDepartment")
+  bankAccounts          BankAccount[]         @relation("BankAccountDepartment")
+  generalLedgers        GeneralLedger[]       @relation("GeneralLedgerDepartment")
+  doctorAvailability    DoctorAvailability[]  @relation("DepartmentDoctorAvailability")
   recurringAppointments RecurringAppointment[] @relation("DepartmentRecurringAppointments")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  queues              Queue[]               @relation("DepartmentQueues")
-  queueConfigurations QueueConfiguration[]  @relation("DepartmentQueueConfigurations")
-  surgicalProcedures  SurgicalProcedure[]   @relation("DepartmentSurgicalProcedures")
-  patients            Patient[]             @relation("DepartmentPatients")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  queues                Queue[]               @relation("DepartmentQueues")
+  queueConfigurations   QueueConfiguration[]  @relation("DepartmentQueueConfigurations")
+  surgicalProcedures    SurgicalProcedure[]   @relation("DepartmentSurgicalProcedures")
+  utilities             Utility[]             @relation("DepartmentUtilities")
+  nursingCares          NursingCare[]         @relation("DepartmentNursingCares")
+  nursingShifts         NursingShift[]        @relation("DepartmentNursingShifts")
+  radiologyEquipment    RadiologyEquipment[]  @relation("DepartmentRadiologyEquipment")
 }
