@@ -44,7 +44,11 @@ model Pharmacy {
   updatedBy             User?                 @relation("PharmacyUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("PharmacyAuditLogs")
   dashboardWidget       DashboardWidget?      @relation("DashboardWidgetPharmacy")
-  maternity             Maternity?            @relation("MaternityPharmacy")
+  maternityId           Int?
+  maternity             Maternity?            @relation("MaternityPharmacy", fields: [maternityId], references: [id])
+  homeCares             HomeCare[]            @relation("HomeCarePharmacy")
+  nhifClaims            NhifClaim[]           @relation("NhifClaimPharmacy")
+  clinicalRecords       ClinicalRecord[]      @relation("ClinicalRecordPharmacy")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
@@ -70,7 +74,8 @@ model Medication {
   prescriptions         Prescription[]        @relation("MedicationPrescriptions")
   dispensingRecords     DispensingRecord[]    @relation("MedicationDispensingRecords")
   adverseReactions      AdverseReaction[]     @relation("MedicationAdverseReactions")
-  drugInteractions      DrugInteraction[]     @relation("MedicationDrugInteractions")
+  drugInteractions1     DrugInteraction[]     @relation("DrugInteractionMedication1")
+  drugInteractions2     DrugInteraction[]     @relation("DrugInteractionMedication2")
   formulary             Formulary[]           @relation("MedicationFormulary")
   billingItems          BillingItem[]         @relation("BillingItemMedication")
   createdById           Int?
@@ -119,8 +124,6 @@ model Prescription {
   updatedAt             DateTime              @updatedAt
 }
 
-
-
 model Formulary {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
@@ -139,21 +142,21 @@ model Formulary {
 }
 
 model DrugInteraction {
-  id            Int         @id @default(autoincrement())
-  uuid          String      @unique @default(uuid())
-  medicationId1 Int
-  medication1   Medication  @relation("DrugInteractionMedication1", fields: [medicationId1], references: [id])
-  medicationId2 Int
-  medication2   Medication  @relation("DrugInteractionMedication2", fields: [medicationId2], references: [id])
-  description   String
-  severity      String
-  createdById   Int?
-  createdBy     User?       @relation("InteractionCreatedBy", fields: [createdById], references: [id])
-  updatedById   Int?
-  updatedBy     User?       @relation("InteractionUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs     AuditLog[]  @relation("DrugInteractionAuditLogs")
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  medicationId1         Int
+  medication1           Medication            @relation("DrugInteractionMedication1", fields: [medicationId1], references: [id])
+  medicationId2         Int
+  medication2           Medication            @relation("DrugInteractionMedication2", fields: [medicationId2], references: [id])
+  description           String
+  severity              String
+  createdById           Int?
+  createdBy             User?                 @relation("InteractionCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?
+  updatedBy             User?                 @relation("InteractionUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("DrugInteractionAuditLogs")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
 }
 
 model AdverseReaction {
