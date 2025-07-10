@@ -57,4 +57,5 @@ model Department {
   recurringAppointments RecurringAppointment[] @relation("DepartmentRecurringAppointments")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
+  queues              Queue[]               @relation("DepartmentQueues")
 }
