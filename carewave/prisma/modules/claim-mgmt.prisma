@@ -36,11 +36,11 @@ model Claim {
   pharmacyId            Int?
   pharmacy              Pharmacy?           @relation("ClaimPharmacy", fields: [pharmacyId], references: [id])
   laboratoryId          Int?
-  laboratory            Laboratory?         @relation("ClaimLaboratory", fields: [laboratoryId], references: [id])
+  laboratory            Laboratory?         @relation("ClaimLaboratory")
   radiologyId           Int?
   radiology             Radiology?          @relation("ClaimRadiology", fields: [radiologyId], references: [id])
   operationTheatreId    Int?
-  operationTheatre      OperationTheatre?   @relation("ClaimOperationTheatre", fields: [operationTheatreId], references: [id])
+  operationTheatre      OperationTheatre?   @relation("ClaimOperationTheatre")
   nhifClaimId           Int?
   nhifClaim             NhifClaim?          @relation("ClaimNhifClaims", fields: [nhifClaimId], references: [id])
   transactionId         Int?
@@ -80,8 +80,9 @@ model Claim {
   vaccinations          Vaccination[]       @relation("VaccinationClaim")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
-  referrals             Referral[]          @relation("Referral_claim_fkey", fields: [id], references: [id], map: "Claim_referral_fkey")
-  emergencies           Emergency[]         @relation("EmergencyClaims", fields: [id], references: [id], map: "Claim_emergency_fkey")
+  referrals             Referral[]          @relation("ReferralClaims")
+  emergencies           Emergency[]         @relation("EmergencyClaims")
+  clinicalRecords       ClinicalRecord[]    @relation("ClinicalRecordClaims")
 }
 
 model ClaimDocument {
