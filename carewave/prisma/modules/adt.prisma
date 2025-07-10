@@ -23,14 +23,7 @@ enum DischargeType {
   DECEASED
 }
 
-enum EmergencyStatus {
-  PENDING
-  ACTIVE
-  STABILIZED
-  TRANSFERRED
-  DISCHARGED
-  CANCELLED
-}
+
 
 model Admission {
   id                   Int                 @id @default(autoincrement())
