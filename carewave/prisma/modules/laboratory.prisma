@@ -28,8 +28,8 @@ model Laboratory {
   appointment           Appointment?        @relation("AppointmentLaboratory")
   admissionId           Int?
   admission             Admission?          @relation("AdmissionLaboratoryTests", fields: [admissionId], references: [id])
-  clinicalRecordId      Int?
-  clinicalRecord        ClinicalRecord?     @relation("ClinicalRecordLaboratory", fields: [clinicalRecordId], references: [id])
+  clinicalRecordId      Int?                @unique
+  clinicalRecord        ClinicalRecord?     @relation("ClinicalRecordLaboratory")
   departmentId          Int?
   department            Department?         @relation("DepartmentLaboratoryTests", fields: [departmentId], references: [id])
   clinicalSettingId     Int?
@@ -53,9 +53,9 @@ model Laboratory {
   reviewedById          Int?
   reviewedBy            User?               @relation("ReviewedBy", fields: [reviewedById], references: [id])
   notes                 String?
-  createdById           Int?
+  createdById           Int?                @unique
   createdBy             User?               @relation("LaboratoryCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("LaboratoryUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]          @relation("LaboratoryAuditLogs")
   labDocuments          LabDocument[]       @relation("LaboratoryDocuments")
@@ -76,7 +76,7 @@ model LabDocument {
   documentType          String
   filePath              String
   description           String?
-  uploadedById          Int?
+  uploadedById          Int?                @unique
   uploadedBy            User?               @relation("LabDocumentUploadedBy", fields: [uploadedById], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -91,7 +91,7 @@ model LabNotification {
   notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?
+  recipientId           Int?                @unique
   recipient             User?               @relation("LabNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
   createdAt             DateTime            @default(now())
