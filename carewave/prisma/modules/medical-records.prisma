@@ -1,5 +1,3 @@
-// prisma/medicalrecord.prisma
-
 enum MedicalRecordStatus {
   DRAFT
   FINALIZED
@@ -18,7 +16,7 @@ model MedicalRecord {
   appointmentId         Int?                  @unique
   appointment           Appointment?          @relation("AppointmentMedicalRecord")
   admissionId           Int?                  @unique
-  admission             Admission?            @relation("MedicalRecordAdmissions")
+  admission             Admission?            @relation("AdmissionMedicalRecord")
   clinicalRecordId      Int?
   clinicalRecord        ClinicalRecord?       @relation("MedicalRecordClinicalRecords", fields: [clinicalRecordId], references: [id])
   departmentId          Int?
@@ -40,7 +38,7 @@ model MedicalRecord {
   radiologyTests        Radiology[]           @relation("MedicalRecordRadiology")
   radiologyTestRecords  RadiologyTest[]       @relation("MedicalRecordRadiologyTests")
   maternity             Maternity?            @relation("MedicalRecordMaternity")
-  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetMedicalRecords")
+  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetMedicalRecords", fields: [medicalRecordId], references: [id])
   auditLogs             AuditLog[]            @relation("MedicalRecordAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
