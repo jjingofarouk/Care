@@ -38,7 +38,7 @@ model MedicalRecord {
   radiologyTests        Radiology[]           @relation("MedicalRecordRadiology")
   radiologyTestRecords  RadiologyTest[]       @relation("MedicalRecordRadiologyTests")
   maternity             Maternity?            @relation("MedicalRecordMaternity")
-  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetMedicalRecords", fields: [medicalRecordId], references: [id])
+  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetMedicalRecords", fields: [id], references: [id])
   auditLogs             AuditLog[]            @relation("MedicalRecordAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
