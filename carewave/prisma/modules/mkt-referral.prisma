@@ -61,7 +61,7 @@ model Referral {
   refereeId           Int?
   referee             User?                 @relation("Referee", fields: [refereeId], references: [id], map: "Referral_referee_fkey")
   patientId           Int?
-  patient             Patient?              @relation(fields: [patientId], references: [id], map: "Referral_patient_fkey")
+  patient             Patient?              @relation("PatientReferrals", fields: [patientId], references: [id], map: "Referral_patient_fkey")
   doctorId            Int?
   doctor              Doctor?               @relation(fields: [doctorId], references: [id], map: "Referral_doctor_fkey")
   departmentId        Int?
@@ -70,7 +70,7 @@ model Referral {
   referralDate        DateTime              @default(now())
   completionDate      DateTime?
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("AppointmentReferral")
+  appointment         Appointment?          @relation("AppointmentReferral", fields: [appointmentId], references: [id], map: "Referral_appointment_fkey")
   medicalRecordId     Int?
   medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id], map: "Referral_medicalRecord_fkey")
   claimId             Int?
