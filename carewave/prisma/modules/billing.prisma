@@ -1,4 +1,3 @@
-// schema.prisma
 enum InvoiceStatus {
   PENDING
   PAID
@@ -51,8 +50,6 @@ enum ServiceStatus {
   INACTIVE
   SUSPENDED
 }
-
-
 
 model Service {
   id                  Int                   @id @default(autoincrement())
@@ -167,6 +164,7 @@ model Invoice {
   notifications         BillingNotification[] @relation("InvoiceNotifications")
   payments              Payment[]           @relation("PaymentInvoices")
   nhifClaims            NhifClaim[]         @relation("NhifClaimInvoice")
+  patients              Patient[]           @relation("PatientInsurances")
   createdAt             DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 }
