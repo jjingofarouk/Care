@@ -26,11 +26,11 @@ model ClinicalRecord {
   patient               Patient             @relation("PatientClinicalRecords", fields: [patientId], references: [id])
   doctorId              Int?
   doctor                Doctor?             @relation("DoctorClinicalRecords", fields: [doctorId], references: [id])
-  appointmentId         Int?
+  appointmentId         Int?                @unique
   appointment           Appointment?        @relation("ClinicalRecordAppointments", fields: [appointmentId], references: [id])
-  admissionId           Int?
+  admissionId           Int?                @unique
   admission             Admission?          @relation("ClinicalRecordAdmissions", fields: [admissionId], references: [id])
-  medicalRecordId       Int?
+  medicalRecordId       Int?                @unique
   medicalRecord         MedicalRecord?      @relation("ClinicalRecordMedicalRecords", fields: [medicalRecordId], references: [id])
   clinicalSettingId     Int?
   clinicalSetting       ClinicalSetting?    @relation("ClinicalRecordClinicalSettings", fields: [clinicalSettingId], references: [id])
@@ -45,13 +45,13 @@ model ClinicalRecord {
   vitals                String?
   allergies              String?
   immunizationHistory    String?
-  laboratoryId          Int?
-  laboratory            Laboratory?         @relation("ClinicalRecordLaboratory", fields: [laboratoryId], references: [id])
+  laboratoryId          Int?                @unique
+  laboratory            Laboratory?         @relation("ClinicalRecordLaboratory")
   radiologyId           Int?
   radiology             Radiology?          @relation("ClinicalRecordRadiology", fields: [radiologyId], references: [id])
   pharmacyId            Int?
   pharmacy              Pharmacy?           @relation("ClinicalRecordPharmacy", fields: [pharmacyId], references: [id])
-  operationTheatreId    Int?
+  operationTheatreId    Int?                @unique
   operationTheatre      OperationTheatre?   @relation("ClinicalRecordOperationTheatre", fields: [operationTheatreId], references: [id])
   nursingId             Int?
   nursing               Nursing?            @relation("ClinicalRecordNursing", fields: [nursingId], references: [id])
@@ -62,9 +62,9 @@ model ClinicalRecord {
   encounterDate         DateTime?
   location              String?
   clinicalNotes         String?
-  createdById           Int?
+  createdById           Int?                @unique
   createdBy             User?               @relation("ClinicalRecordCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
+  updatedById           Int?                @unique
   updatedBy             User?               @relation("ClinicalRecordUpdatedBy", fields: [updatedById], references: [id])
   reviewedById          Int?
   reviewedBy            User?               @relation("ClinicalRecordReviewedBy", fields: [reviewedById], references: [id])
@@ -85,7 +85,7 @@ model ClinicalDocument {
   documentType          String
   filePath              String
   description           String?
-  uploadedById          Int?
+  uploadedById          Int?                @unique
   uploadedBy            User?               @relation("ClinicalDocumentUploadedBy", fields: [uploadedById], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -100,7 +100,7 @@ model ClinicalNotification {
   notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?
+  recipientId           Int?                @unique
   recipient             User?               @relation("ClinicalNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
   createdAt             DateTime            @default(now())
