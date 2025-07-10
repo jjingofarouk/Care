@@ -29,7 +29,7 @@ model OperationTheatre {
   theatreNumber       String                @unique
   status              OperationTheatreStatus @default(AVAILABLE)
   departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
+  department          Department?           @relation("DepartmentOperationTheatres", fields: [departmentId], references: [id])
   clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
   location            String?
@@ -54,21 +54,21 @@ model SurgicalProcedure {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
   patientId           Int
-  patient             Patient               @relation(fields: [patientId], references: [id])
+  patient             Patient               @relation("PatientSurgicalProcedures", fields: [patientId], references: [id])
   doctorId            Int?
   doctor              Doctor?               @relation("Surgeon", fields: [doctorId], references: [id])
   operationTheatreId  Int
   operationTheatre    OperationTheatre      @relation("OperationTheatreProcedures", fields: [operationTheatreId], references: [id])
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  appointment         Appointment?          @relation("ProcedureAppointment", fields: [appointmentId], references: [id])
   admissionId         Int?
-  admission           Admission?            @relation(fields: [admissionId], references: [id])
+  admission           Admission?            @relation("ProcedureAdmission", fields: [admissionId], references: [id])
   clinicalRecordId    Int?
   clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
   medicalRecordId     Int?
-  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  medicalRecord       MedicalRecord?        @relation("ProcedureMedicalRecord", fields: [medicalRecordId], references: [id])
   departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
+  department          Department?           @relation("DepartmentSurgicalProcedures", fields: [departmentId], references: [id])
   clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
   type                ProcedureType
@@ -85,15 +85,15 @@ model SurgicalProcedure {
   cssdRequisitionId   Int?
   cssdRequisition     CSSDRequisition?      @relation(fields: [cssdRequisitionId], references: [id])
   pharmacyId          Int?
-  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  pharmacy            Pharmacy?             @relation("ProcedurePharmacy", fields: [pharmacyId], references: [id])
   nursingId           Int?
-  nursing             Nursing?              @relation(fields: [nursingId], references: [id])
+  nursing             Nursing?              @relation("ProcedureNursing", fields: [nursingId], references: [id])
   billingId           Int?
-  billing             Billing?              @relation(fields: [billingId], references: [id])
+  billing             Billing?              @relation("ProcedureBilling", fields: [billingId], references: [id])
   claimId             Int?
-  claim               Claim?                @relation(fields: [claimId], references: [id])
+  claim               Claim?                @relation("ProcedureClaim", fields: [claimId], references: [id])
   nhifClaimId         Int?
-  nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
+  nhifClaim           NhifClaim?            @relation("ProcedureNhifClaim", fields: [nhifClaimId], references: [id])
   staffAssignments    SurgicalStaff[]       @relation("ProcedureStaffAssignments")
   documents           String?
   createdById         Int?
