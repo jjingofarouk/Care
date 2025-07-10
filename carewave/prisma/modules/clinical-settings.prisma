@@ -83,7 +83,7 @@ model ClinicalSetting {
   cssdRecords           CSSDRecord[]          @relation("ClinicalSettingCSSDRecords")
   cssdRequisitions      CSSDRequisition[]     @relation("ClinicalSettingCSSDRequisitions")
   nursingCares          NursingCare[]         @relation("NursingCareClinicalSettings")
-  queues               Queue[]               @relation("QueueClinicalSettings")
+  queues                Queue[]               @relation("QueueClinicalSettings")
 }
 
 model Room {
