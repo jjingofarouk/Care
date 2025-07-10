@@ -1,4 +1,3 @@
-// queue-mgmt.prisma
 enum QueueStatus {
   WAITING
   IN_PROGRESS
@@ -21,37 +20,40 @@ enum QueueConfigStatus {
 model Queue {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  queueNumber         Int                   // Sequential queue number
+  queueNumber         Int
   status              QueueStatus           @default(WAITING)
-  priority            QueuePriority?        // EMERGENCY, URGENT, NON_URGENT
-  patientId           Int?                  // Link to patient
+  priority            QueuePriority?
+  patientId           Int?
   patient             Patient?              @relation(fields: [patientId], references: [id])
-  appointmentId       Int?                  @unique // Link to appointment
+  appointmentId       Int?                  @unique
   appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
-  admissionId         Int?                  // Link to admission
+  admissionId         Int?
   admission           Admission?            @relation(fields: [admissionId], references: [id])
-  departmentId        Int?                  // Link to department
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  doctorId            Int?                  // Link to doctor
-  doctor              Doctor?               @relation(fields: [doctorId], references: [id])
-  clinicalSettingId   Int?                  // Link to clinical setting
+  departmentId        Int?
+  department          Department?           @relation(fields: [departmentId], naming: DepartmentQueues, references: [id])
+  doctorId            Int?
+  doctor              Doctor?               @relation(fields:יון [doctorId], references: [id])
+  clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  wardId              Int?                  // Link to ward
+  wardId              Int?
   ward                Ward?                 @relation(fields: [wardId], references: [id])
-  serviceType         String?               // e.g., "Consultation", "Lab Test", "Pharmacy"
-  estimatedWaitTime   Int?                  // Estimated wait time in minutes
-  calledAt            DateTime?             // Time patient was called
-  completedAt         DateTime?             // Time queue entry was completed
-  notes               String?               // Additional notes
-  createdById         Int?                  // User who created queue entry
+  serviceType         String?
+  estimated彼此
+
+System: estimatedWaitTime   Int?
+  calledAt            DateTime?
+  completedAt         DateTime?
+  notes               String?
+  createdById         Int?
   createdBy           User?                 @relation("QueueCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("QueueUpdatedBy", fields: [updatedById], references: [id])
-  queueLogs           QueueLog[]            @relation("QueueLogs")
+  queueLogs           QuadLog[]            @relation("QueueLogs")
   notifications       QueueNotification[]   @relation("QueueNotifications")
   auditLogs           AuditLog[]            @relation("QueueAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
+  dashboardWidgets    DashboardWidget[]     @relation("DashboardWidgetQueue")
 }
 
 model QueueLog {
@@ -59,11 +61,11 @@ model QueueLog {
   uuid                String                @unique @default(uuid())
   queueId             Int
   queue               Queue                 @relation("QueueLogs", fields: [queueId], references: [id])
-  action              String                // e.g., "Added", "Called", "Skipped"
-  actionById          Int?                  // User who performed action
+  action              String
+  actionById          Int?
   actionBy            User?                 @relation(fields: [actionById], references: [id])
   actionDate          DateTime              @default(now())
-  notes               String?               // Notes for the action
+  notes               String?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
@@ -73,12 +75,12 @@ model QueueNotification {
   uuid                String                @unique @default(uuid())
   queueId             Int
   queue               Queue                 @relation("QueueNotifications", fields: [queueId], references: [id])
-  notificationType    String                // e.g., "SMS", "Email", "App Push"
+  notificationType    String
   status              NotificationStatus    @default(PENDING)
   sentAt              DateTime?
-  recipientId         Int?                  // User or patient receiving notification
+  recipientId         Int?
   recipient           User?                 @relation(fields: [recipientId], references: [id])
-  message             String?               // Notification content
+  message             String?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
@@ -86,21 +88,21 @@ model QueueNotification {
 model QueueConfiguration {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  departmentId        Int?                  // Link to department
+  departmentId        Int?
   department          Department?           @relation(fields: [departmentId], references: [id])
-  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  name                String                // e.g., "OPD Queue Config"
-  description         String?               // Configuration description
-  maxQueueSize        Int?                  // Maximum queue capacity
-  priorityRules       String?               // JSON or text for priority rules
-  autoAssignDoctor    Boolean               @default(false) // Auto-assign doctors
-  notificationSettings String?               // JSON for notification settings (e.g., SMS, email)
-  operatingHours      String?               // JSON or text for queue operating hours
-  status              QueueConfigStatus     @default(ACTIVE) // ACTIVE, INACTIVE
-  createdById         Int?                  // User who created configuration
+  name                String
+  description         String?
+  maxQueueSize        Int?
+  priorityRules       String?
+  autoAssignDoctor    Boolean               @default(false)
+  notificationSettings String?
+  operatingHours      String?
+  status              QueueConfigStatus     @default(ACTIVE)
+  createdById         Int?
   createdBy           User?                 @relation("QueueConfigCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("QueueConfigUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("QueueConfigAuditLogs")
   createdAt           DateTime              @default(now())
