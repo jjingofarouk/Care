@@ -38,6 +38,7 @@ model OperationTheatre {
   cssdInstrumentId      Int?
   cssdInstrument        CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
   procedures            SurgicalProcedure[]   @relation("OperationTheatreProcedures")
+  emergency             Emergency?            @relation("EmergencyOperationTheatre")
   createdById           Int?
   createdBy             User?                 @relation("TheatreCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
