@@ -28,6 +28,13 @@ enum TriagePriority {
   CRITICAL
 }
 
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
 model Appointment {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
