@@ -54,6 +54,7 @@ model Queue {
   dashboardWidgets    DashboardWidget[]     @relation("DashboardWidgetQueue")
 }
 
+
 model QueueLog {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
@@ -61,7 +62,7 @@ model QueueLog {
   queue               Queue                 @relation("QueueLogs", fields: [queueId], references: [id])
   action              String
   actionById          Int?                  @unique
-  actionBy            User?                 @relation("QueueLogActionBy", fields: [actionById], references: [id])
+  actionBy            User?                 @relation("QueueLogActionBy")
   actionDate          DateTime              @default(now())
   notes               String?
   createdAt           DateTime              @default(now())
@@ -77,10 +78,10 @@ model QueueNotification {
   status              NotificationStatus    @default(PENDING)
   sentAt              DateTime?
   recipientId         Int?                  @unique
-  recipient           User?                 @relation("QueueNotificationRecipient", fields: [recipientId], references: [id])
+  recipient           User?                 @relation("QueueNotificationRecipient")
   message             String?
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 }
 
 model QueueConfiguration {
