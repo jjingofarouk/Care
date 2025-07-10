@@ -166,7 +166,7 @@ model Invoice {
   invoiceDocuments      InvoiceDocument[]   @relation("InvoiceDocuments")
   notifications         BillingNotification[] @relation("InvoiceNotifications")
   payments              Payment[]           @relation("PaymentInvoices")
-  nhifClaims            NhifClaim[]         @relation("NhifClaimInvoices")
+  nhifClaims            NhifClaim[]         @relation("NhifClaimInvoice")
   createdAt             DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 }
