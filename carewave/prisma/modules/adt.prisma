@@ -76,6 +76,10 @@ model Admission {
   radiologyTests       RadiologyTest[]     @relation("AdmissionRadiologyTests")
   nursingCares         NursingCare[]       @relation("AdmissionNursingCare")
   nursingRecords       Nursing[]           @relation("AdmissionNursing")
+  homeCares            HomeCare[]          @relation("HomeCareAdmissions")
+  nhifClaims           NhifClaim[]         @relation("NhifClaimAdmissions")
+  transactions         Transaction[]       @relation("TransactionAdmissions")
+  prescriptions        Prescription[]      @relation("PrescriptionAdmissions")
 }
 
 model Discharge {
@@ -109,6 +113,7 @@ model Discharge {
   auditLogs            AuditLog[]          @relation("DischargeAuditLogs")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+  socialServices       SocialService[]     @relation("SocialServiceDischarges")
 }
 
 model Ward {
@@ -139,6 +144,7 @@ model Ward {
   queues               Queue[]             @relation("WardQueue")
   nursingCares         NursingCare[]       @relation("WardNursingCare")
   nursingShifts        NursingShift[]      @relation("WardNursingShifts")
+  clinicalSettings     ClinicalSetting[]   @relation("ClinicalSettingWard")
 }
 
 model Bed {
