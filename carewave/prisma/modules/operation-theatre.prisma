@@ -31,7 +31,7 @@ model OperationTheatre {
   departmentId          Int?
   department            Department?           @relation("DepartmentOperationTheatres", fields: [departmentId], references: [id])
   clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?      @relation("ClinicalSettingOperationTheatre", fields: [clinicalSettingId], references: [id])
+  clinicalSetting       ClinicalSetting?      @relation("ClinicalSettingOperationTheatre")
   location              String?
   capacity              Int?
   equipmentList         String?
@@ -42,7 +42,7 @@ model OperationTheatre {
   createdById           Int?
   createdBy             User?                 @relation("TheatreCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
-  updatedBy             User?                 @relation("TheatreUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy             User?               @relation("TheatreUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("OperationTheatreAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
@@ -52,6 +52,7 @@ model OperationTheatre {
   doctors               Doctor[]              @relation("DoctorOperationTheatres")
   maternityRecords      Maternity[]           @relation("MaternityOperationTheatre")
   appointments          Appointment[]         @relation("AppointmentOperationTheatre")
+  clinicalRecords       ClinicalRecord[]      @relation("ClinicalRecordOperationTheatre")
 }
 
 model SurgicalProcedure {
