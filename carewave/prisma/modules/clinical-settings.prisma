@@ -77,6 +77,12 @@ model ClinicalSetting {
   laboratoryTests       Laboratory[]          @relation("LaboratoryClinicalSettings")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
+  emergencies           Emergency[]           @relation("EmergencyClinicalSettings")
+  doctors               Doctor[]              @relation("DoctorClinicalSettings")
+  cssdInstruments       CSSDInstrument[]      @relation("ClinicalSettingCSSDInstruments")
+  cssdRecords           CSSDRecord[]          @relation("ClinicalSettingCSSDRecords")
+  cssdRequisitions      CSSDRequisition[]     @relation("ClinicalSettingCSSDRequisitions")
+  nursingCares          NursingCare[]         @relation("NursingCareClinicalSettings")
 }
 
 model Room {
