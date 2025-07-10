@@ -1,4 +1,3 @@
-// department.prisma
 enum DepartmentStatus {
   ACTIVE
   INACTIVE
@@ -46,7 +45,7 @@ model Department {
   createdById           Int?
   createdBy             User?                 @relation("DepartmentCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
-  updatedBy             User?               @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy             User?                 @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DepartmentAuditLogs")
   incentives            Incentive[]           @relation("DepartmentIncentives")
   users                 User[]                @relation("UserDepartment")
@@ -71,6 +70,10 @@ model Department {
   vaccinationCampaigns  VaccinationCampaign[] @relation("VaccinationCampaignDepartment")
   verifications         Verification[]        @relation("DepartmentVerification")
   verificationConfigs   VerificationConfiguration[] @relation("DepartmentVerificationConfig")
+  emergencies           Emergency[]           @relation("DepartmentEmergencies")
+  referrals             Referral[]            @relation("Referral_department_fkey")
+  referralPrograms      ReferralProgram[]     @relation("ReferralProgram_department_fkey")
+  medicalRecords        MedicalRecord[]       @relation("DepartmentMedicalRecords")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
