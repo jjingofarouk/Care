@@ -22,6 +22,7 @@ enum DischargeType {
   TRANSFER
   DECEASED
 }
+
 model Admission {
   id                   Int                 @id @default(autoincrement())
   uuid                 String              @unique @default(uuid())
@@ -66,10 +67,17 @@ model Admission {
   auditLogs            AuditLog[]          @relation("AdmissionAuditLogs")
   transfers            Transfer[]          @relation("AdmissionTransfers")
   discharge            Discharge?          @relation("AdmissionDischarge")
-  dashboardWidget      DashboardWidget?     @relation("DashboardWidgetAdmissions")
+  dashboardWidget      DashboardWidget?    @relation("DashboardWidgetAdmissions")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+  claims               Claim[]             @relation("AdmissionClaims")
+  surgicalProcedures   SurgicalProcedure[] @relation("ProcedureAdmission")
+  laboratoryTests      Laboratory[]        @relation("AdmissionLaboratoryTests")
+  radiologyTests       RadiologyTest[]     @relation("AdmissionRadiologyTests")
+  nursingCares         NursingCare[]       @relation("AdmissionNursingCare")
+  nursingRecords       Nursing[]           @relation("AdmissionNursing")
 }
+
 model Discharge {
   id                   Int                 @id @default(autoincrement())
   uuid                 String              @unique @default(uuid())
@@ -128,6 +136,9 @@ model Ward {
   auditLogs            AuditLog[]          @relation("WardAuditLogs")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+  queues               Queue[]             @relation("WardQueue")
+  nursingCares         NursingCare[]       @relation("WardNursingCare")
+  nursingShifts        NursingShift[]      @relation("WardNursingShifts")
 }
 
 model Bed {
