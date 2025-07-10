@@ -11,68 +11,61 @@ enum PatientStatus {
   TRANSFERRED
 }
 
-enum BloodType {
-  A_POSITIVE
-  A_NEGATIVE
-  B_POSITIVE
-  B_NEGATIVE
-  AB_POSITIVE
-  AB_NEGATIVE
-  O_POSITIVE
-  O_NEGATIVE
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
 }
 
 model Patient {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
-  userId                Int?                  @unique
-  user                  User?                 @relation("PatientUser", fields: [userId], references: [id])
-  patientNumber         String                @unique
   firstName             String
   lastName              String
-  dateOfBirth           DateTime?
-  gender                Gender?
-  bloodType             BloodType?
-  phone                 String?
-  email                 String?               @unique
-  address               String?
-  emergencyContact      String?
-  emergencyContactPhone String?
+  middleName            String?
+  dateOfBirth           DateTime
+  gender                Gender
   status                PatientStatus         @default(ACTIVE)
-  nhifNumber            String?               @unique
-  insuranceId           Int?
-  insurance             Insurance?            @relation("PatientInsurance", fields: [insuranceId], references: [id])
-  departmentId          Int?
-  department            Department?           @relation("DepartmentPatients", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?      @relation("PatientClinicalSettings", fields: [clinicalSettingId], references: [id])
-  appointments          Appointment[]         @relation("PatientAppointments")
-  admissions            Admission[]           @relation("PatientAdmissions")
-  discharges            Discharge[]           @relation("PatientDischarges")
-  invoices              Invoice[]             @relation("PatientInvoices")
-  transactions          Transaction[]         @relation("PatientTransactions")
-  claims                Claim[]               @relation("PatientClaims")
-  nhifClaims            NhifClaim[]           @relation("PatientNhifClaims")
-  medicalRecords        MedicalRecord[]       @relation("PatientMedicalRecords")
-  prescriptions         Prescription[]        @relation("PatientPrescriptions")
-  laboratoryTests       Laboratory[]          @relation("PatientLaboratoryTests")
-  radiologyTests        Radiology[]           @relation("PatientRadiologyTests")
-  radiologyTestRecords  RadiologyTest[]       @relation("PatientRadiologyTestRecords")
-  pharmacyRecords       Pharmacy[]            @relation("PatientPharmacyRecords")
-  maternityRecords      Maternity[]           @relation("PatientMaternityRecords")
-  vaccinations          Vaccination[]         @relation("PatientVaccinationRecords")
-  socialServices        SocialService[]       @relation("PatientSocialServices")
-  socialServiceCases    SocialServiceCase[]   @relation("PatientSocialServiceCases")
-  homeCares             HomeCare[]            @relation("PatientHomeCare")
-  clinicalRecords       ClinicalRecord[]      @relation("PatientClinicalRecords")
-  helpdeskTickets       Helpdesk[]            @relation("PatientHelpdeskTickets")
-  billingRecords        Billing[]             @relation("PatientBilling")
-  recurringAppointments RecurringAppointment[] @relation("PatientRecurringAppointments")
-  createdById           Int?
+  address               String?
+  phoneNumber           String?
+  email                 String?               @unique
+  nationalId            String?               @unique
+  passportNumber        String?               @unique
+  maritalStatus         MaritalStatus?
+  occupation            String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  bloodGroup            String?
+  allergies             String?
+  medicalHistory        String?
+  createdById           Int?                  @unique
   createdBy             User?                 @relation("PatientCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
+  updatedById           Int?                  @unique
   updatedBy             User?                 @relation("PatientUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("PatientAuditLogs")
+  clinicalRecords       ClinicalRecord[]      @relation("PatientClinicalRecords")
+  medicalRecords        MedicalRecord[]       @relation("PatientMedicalRecords")
+  appointments          Appointment[]         @relation("PatientAppointments")
+  admissions            Admission[]           @relation("PatientAdmissions")
+  transfers             Transfer[]            @relation("PatientTransfers")
+  discharges            Discharge[]           @relation("DischargedPatient")
+  invoices              Invoice[]             @relation("PatientInvoices")
+  transactions          Transaction[]         @relation("PatientTransactions")
+  billing               Billing[]             @relation("PatientBilling")
+  claims                Claim[]               @relation("PatientClaims")
+  nhifClaims            NhifClaim[]           @relation("PatientNhifClaims")
+  prescriptions         Prescription[]        @relation("PatientPrescriptions")
+  adverseReactions      AdverseReaction[]     @relation("PatientAdverseReactions")
+  pharmacyRecords       Pharmacy[]            @relation("PatientPharmacyRecords")
+  laboratoryTests       Laboratory[]          @relation("PatientLaboratoryTests")
+  radiologyTests        RadiologyTest[]       @relation("PatientRadiologyTests")
+  homeCares             HomeCare[]            @relation("PatientHomeCare")
+  socialServices        SocialService[]       @relation("PatientSocialServices")
+  socialServiceCases    SocialServiceCase[]   @relation("PatientSocialServiceCases")
+  insurances            Insurance[]           @relation("PatientInsurances")
+  clinicalSettings      ClinicalSetting[]     @relation("PatientClinicalSettings")
   createdAt             DateTime              @default(now())
-  updatedAt             DateTime            @updatedAt
+  updatedAt             DateTime              @updatedAt
 }
