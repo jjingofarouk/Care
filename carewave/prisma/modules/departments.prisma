@@ -58,4 +58,6 @@ model Department {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   queues              Queue[]               @relation("DepartmentQueues")
+  queueConfigurations QueueConfiguration[]  @relation("DepartmentQueueConfigurations")
+  surgicalProcedures  SurgicalProcedure[]   @relation("DepartmentSurgicalProcedures")
 }
