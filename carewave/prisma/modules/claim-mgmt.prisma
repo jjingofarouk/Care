@@ -1,4 +1,3 @@
-// claim.prisma
 enum ClaimStatus {
   PENDING
   SUBMITTED
@@ -22,8 +21,6 @@ enum ClaimType {
   EMERGENCY
   REHABILITATION
 }
-
-
 
 model Claim {
   id                    Int                 @id @default(autoincrement())
@@ -133,7 +130,6 @@ model ClaimAdjustment {
   updatedAt           DateTime            @updatedAt
 }
 
-
 model Insurance {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
@@ -141,7 +137,7 @@ model Insurance {
   providerCode          String?             @unique
   contactDetails        String?
   claims                Claim[]             @relation("ClaimInsurance")
-  patients              Patient[]           @relation("PatientInsurance")
+  patients              Patient[]           @relation("PatientInsurances")
   admissions            Admission[]         @relation("AdmissionInsurance")
   appointments          Appointment[]       @relation("AppointmentInsurance")
   invoices              Invoice[]           @relation("InvoiceInsurance")
