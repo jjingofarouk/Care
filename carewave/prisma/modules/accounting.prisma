@@ -251,7 +251,7 @@ model TaxCategory {
   rate              Float
   description       String?
   transactions      Transaction[]       @relation("TransactionTaxCategory")
-  billingItems      manual BillingItem[]       @relation("BillingItemTaxCategory")
+  billingItems      BillingItem[]       @relation("BillingItemTaxCategory")
   services          Service[]           @relation("ServiceTaxCategory")
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
