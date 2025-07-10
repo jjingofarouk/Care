@@ -46,7 +46,7 @@ model ClinicalRecord {
   allergies              String?
   immunizationHistory    String?
   laboratoryId          Int?                @unique
-  laboratory            Laboratory?         @relation("ClinicalRecordLaboratory")
+  laboratory            Laboratory?         @relation("ClinicalRecordLaboratory", fields: [laboratoryId], references: [id])
   radiologyId           Int?
   radiology             Radiology?          @relation("ClinicalRecordRadiology", fields: [radiologyId], references: [id])
   pharmacyId            Int?
@@ -62,9 +62,9 @@ model ClinicalRecord {
   encounterDate         DateTime?
   location              String?
   clinicalNotes         String?
-  createdById           Int?                @unique
+  createdById           Int?
   createdBy             User?               @relation("ClinicalRecordCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
+  updatedById           Int?
   updatedBy             User?               @relation("ClinicalRecordUpdatedBy", fields: [updatedById], references: [id])
   reviewedById          Int?
   reviewedBy            User?               @relation("ClinicalRecordReviewedBy", fields: [reviewedById], references: [id])
@@ -73,6 +73,7 @@ model ClinicalRecord {
   clinicalNotifications ClinicalNotification[] @relation("ClinicalRecordNotifications")
   homeCareVisits        HomeCareVisit[]     @relation("HomeCareVisitClinicalRecords")
   nhifClaims            NhifClaim[]         @relation("NhifClaimClinicalRecords")
+  radiologyTests        RadiologyTest[]     @relation("ClinicalRecordRadiologyTests")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
@@ -85,7 +86,7 @@ model ClinicalDocument {
   documentType          String
   filePath              String
   description           String?
-  uploadedById          Int?                @unique
+  uploadedById          Int?
   uploadedBy            User?               @relation("ClinicalDocumentUploadedBy", fields: [uploadedById], references: [id])
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -100,7 +101,7 @@ model ClinicalNotification {
   notificationType      String
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
-  recipientId           Int?                @unique
+  recipientId           Int?
   recipient             User?               @relation("ClinicalNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
   createdAt             DateTime            @default(now())
