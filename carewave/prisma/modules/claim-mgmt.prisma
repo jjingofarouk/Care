@@ -22,8 +22,6 @@ enum ClaimType {
   REHABILITATION
 }
 
-
-
 model Claim {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
@@ -78,6 +76,7 @@ model Claim {
   department            Department[]        @relation("DepartmentClaims")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
+  dashboardWidgets      DashboardWidget[]   @relation("DashboardWidgetClaims")
 }
 
 model ClaimDocument {
