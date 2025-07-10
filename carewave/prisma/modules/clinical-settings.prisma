@@ -35,7 +35,7 @@ model ClinicalSetting {
   department            Department?           @relation("DepartmentClinicalSettings", fields: [departmentId], references: [id])
   protocols             String?
   defaultRoomId         Int?                  @unique
-  defaultRoom           Room?                 @relation("ClinicalSettingDefaultRoom", fields: [defaultRoomId], references: [id])
+  defaultRoom           Room?                 @relation("ClinicalSettingDefaultRoom")
   equipmentList         String?
   staffRoles            String?
   appointmentDuration   Int?
@@ -43,19 +43,19 @@ model ClinicalSetting {
   operatingHours        String?
   billingRules          String?
   laboratoryId          Int?                  @unique
-  laboratory            Laboratory?           @relation("ClinicalSettingLaboratory", fields: [laboratoryId], references: [id])
+  laboratory            Laboratory?           @relation("ClinicalSettingLaboratory")
   radiologyId           Int?                  @unique
-  radiology             Radiology?            @relation("ClinicalSettingRadiology", fields: [radiologyId], references: [id])
+  radiology             Radiology?            @relation("ClinicalSettingRadiology")
   pharmacyId            Int?                  @unique
-  pharmacy              Pharmacy?             @relation("ClinicalSettingPharmacy", fields: [pharmacyId], references: [id])
+  pharmacy              Pharmacy?             @relation("ClinicalSettingPharmacy")
   operationTheatreId    Int?                  @unique
-  operationTheatre      OperationTheatre?     @relation("ClinicalSettingOperationTheatre", fields: [operationTheatreId], references: [id])
+  operationTheatre      OperationTheatre?     @relation("ClinicalSettingOperationTheatre")
   nursingId             Int?                  @unique
-  nursing               Nursing?              @relation("ClinicalSettingNursing", fields: [nursingId], references: [id])
+  nursing               Nursing?              @relation("ClinicalSettingNursing")
   cssdId                Int?                  @unique
-  cssd                  Cssd?                 @relation("ClinicalSettingCssd", fields: [cssdId], references: [id])
+  cssd                  Cssd?                 @relation("ClinicalSettingCssd")
   wardId                Int?                  @unique
-  ward                  Ward?                 @relation("ClinicalSettingWard", fields: [wardId], references: [id])
+  ward                  Ward?                 @relation("ClinicalSettingWard")
   triageProtocols       String?
   emergencyProtocols    String?
   patientFlowRules      String?
