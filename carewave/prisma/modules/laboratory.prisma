@@ -29,7 +29,7 @@ model Laboratory {
   admissionId           Int?
   admission             Admission?          @relation("AdmissionLaboratoryTests", fields: [admissionId], references: [id])
   clinicalRecordId      Int?                @unique
-  clinicalRecord        ClinicalRecord?     @relation("ClinicalRecordLaboratory", fields: [clinicalRecordId], references: [id])
+  clinicalRecord        ClinicalRecord?     @relation("ClinicalRecordLaboratory")
   departmentId          Int?
   department            Department?         @relation("DepartmentLaboratoryTests", fields: [departmentId], references: [id])
   clinicalSettingId     Int?
