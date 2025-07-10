@@ -26,9 +26,9 @@ model Queue {
   patientId           Int?
   patient             Patient?              @relation("PatientQueue", fields: [patientId], references: [id])
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("AppointmentQueue", fields: [appointmentId], references: [id])
-  admissionId         Int?
-  admission           Admission?            @relation("AdmissionQueue", fields: [admissionId], references: [id])
+  appointment         Appointment?          @relation("AppointmentQueue")
+  admissionId         Int?                  @unique
+  admission           Admission?            @relation("AdmissionQueue")
   departmentId        Int?
   department          Department?           @relation("DepartmentQueues", fields: [departmentId], references: [id])
   doctorId            Int?
