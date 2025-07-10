@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+
 enum AdmissionStatus {
   PENDING
   ADMITTED
@@ -33,7 +35,7 @@ model Admission {
   wardId               Int?
   ward                 Ward?               @relation("WardAdmissions", fields: [wardId], references: [id])
   bedId                Int?                @unique
-  bed                  Bed?                @relation("BedAdmission", fields: [bedId], references: [id])
+  bed                  Bed?                @relation("BedAdmission")
   admissionDate        DateTime            @default(now())
   scheduledDate        DateTime?
   preAdmissionNotes    String?
@@ -158,7 +160,7 @@ model Bed {
   status               BedStatus           @default(AVAILABLE)
   bedType              String?
   admissionId          Int?                @unique
-  admission            Admission?          @relation("BedAdmission")
+  admission            Admission?          @relation("BedAdmission", fields: [admissionId], references: [id])
   lastCleaned          DateTime?
   maintenanceNotes     String?
   createdById          Int?                @unique
