@@ -74,10 +74,11 @@ model Claim {
   claimNotifications    ClaimNotification[] @relation("ClaimNotifications")
   claimAdjustments      ClaimAdjustment[]   @relation("ClaimAdjustments")
   department            Department[]        @relation("DepartmentClaims")
+  dashboardWidgets      DashboardWidget[]   @relation("DashboardWidgetClaims")
+  surgicalProcedure     SurgicalProcedure?  @relation("ProcedureClaim")
+  homeCares             HomeCare[]          @relation("HomeCareClaims")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
-  dashboardWidgets      DashboardWidget[]   @relation("DashboardWidgetClaims")
-  surgicalProcedure    SurgicalProcedure?  @relation("ProcedureClaim")
 }
 
 model ClaimDocument {
