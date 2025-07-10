@@ -23,32 +23,32 @@ model NhifClaim {
   uuid                String                @unique @default(uuid())
   claimNumber         String                @unique
   patientId           Int
-  patient             Patient               @relation(fields: [patientId], references: [id])
+  patient             Patient               @relation("PatientNhifClaims", fields: [patientId], references: [id])
   nhifNumber          String
   invoiceId           Int?
-  invoice             Invoice?              @relation(fields: [invoiceId], references: [id])
+  invoice             Invoice?              @relation("NhifClaimInvoices", fields: [invoiceId], references: [id])
   appointmentId       Int?
-  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  appointment         Appointment?          @relation("NhifClaimAppointments", fields: [appointmentId], references: [id])
   admissionId         Int?
-  admission           Admission?            @relation(fields: [admissionId], references: [id])
+  admission           Admission?            @relation("NhifClaimAdmissions", fields: [admissionId], references: [id])
   clinicalRecordId    Int?
-  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  clinicalRecord      ClinicalRecord?       @relation("NhifClaimClinicalRecords", fields: [clinicalRecordId], references: [id])
   medicalRecordId     Int?
-  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  medicalRecord       MedicalRecord?        @relation("NhifClaimMedicalRecords", fields: [medicalRecordId], references: [id])
   laboratoryId        Int?
-  laboratory          Laboratory?           @relation(fields: [laboratoryId], references: [id])
+  laboratory          Laboratory?           @relation("NhifClaimLaboratory", fields: [laboratoryId], references: [id])
   radiologyId         Int?
-  radiology           Radiology?            @relation(fields: [radiologyId], references: [id])
+  radiology           Radiology?            @relation("NhifClaimRadiology", fields: [radiologyId], references: [id])
   pharmacyId          Int?
-  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  pharmacy            Pharmacy?             @relation("NhifClaimPharmacy", fields: [pharmacyId], references: [id])
   operationTheatreId  Int?
-  operationTheatre    OperationTheatre?     @relation(fields: [operationTheatreId], references: [id])
+  operationTheatre    OperationTheatre?     @relation("NhifClaimOperationTheatre", fields: [operationTheatreId], references: [id])
   maternityId         Int?
-  maternity           Maternity?            @relation(fields: [maternityId], references: [id])
+  maternity           Maternity?            @relation("NhifClaimMaternity", fields: [maternityId], references: [id])
   vaccinationId       Int?
-  vaccination         Vaccination?          @relation(fields: [vaccinationId], references: [id])
+  vaccination         Vaccination?          @relation("NhifClaimVaccination", fields: [vaccinationId], references: [id])
   departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
+  department          Department?           @relation("NhifClaimDepartment", fields: [departmentId], references: [id])
   claimType           NhifClaimType
   status              NhifClaimStatus       @default(PENDING)
   submittedDate       DateTime?
@@ -64,9 +64,10 @@ model NhifClaim {
   transactionId       Int?
   transaction         Transaction?          @relation("TransactionNhifClaims", fields: [transactionId], references: [id])
   billingId           Int?
-  billing             Billing?              @relation(fields: [billingId], references: [id])
+  billing             Billing?              @relation("NhifClaimBilling", fields: [billingId], references: [id])
   referralId          Int?
-  referral            Referral?             @relation(fields: [referralId], references: [id])
+  referral            Referral?             @relation("NhifClaimReferrals", fields: [referralId], references: [id])
+  socialServiceCases  SocialServiceCase[]   @relation("SocialServiceCaseNhifClaims")
   createdById         Int?
   createdBy           User?                 @relation("NhifClaimCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?
