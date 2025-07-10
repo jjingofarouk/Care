@@ -106,8 +106,8 @@ model Billing {
   vaccinations          Vaccination[]       @relation("VaccinationBilling")
   nhifClaims            NhifClaim[]         @relation("NhifClaimBilling")
   createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  emergencies          Emergency[]         @relation("EmergencyBilling", fields: [billingId], references: [id], map: "Billing_emergency_fkey")
+  updatedAt             DateTime            @updatedAt
+  emergencies           Emergency[]         @relation("EmergencyBilling", fields: [billingId], references: [id], map: "Billing_emergency_fkey")
 }
 
 model Invoice {
