@@ -36,7 +36,9 @@ model OperationTheatre {
   capacity            Int?
   equipmentList       String?
   cssdInstrumentId    Int?
-  cssdInstrument      CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
+  cssdInstrument      CSSDInstrument?       @relation(fields
+
+: [cssdInstrumentId], references: [id])
   procedures          SurgicalProcedure[]   @relation("OperationTheatreProcedures")
   createdById         Int?
   createdBy           User?                 @relation("TheatreCreatedBy", fields: [createdById], references: [id])
@@ -48,6 +50,8 @@ model OperationTheatre {
   dashboardWidgets    DashboardWidget[]     @relation("DashboardWidgetOperationTheatre")
   claims              Claim[]               @relation("ClaimOperationTheatre")
   doctorAvailability  DoctorAvailability[]  @relation("OperationTheatreDoctorAvailability")
+  doctors             Doctor[]              @relation("DoctorOperationTheatres")
+  maternityRecords    Maternity[]           @relation("MaternityOperationTheatre")
 }
 
 model SurgicalProcedure {
