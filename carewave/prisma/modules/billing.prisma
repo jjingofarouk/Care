@@ -1,3 +1,4 @@
+// schema.prisma
 enum InvoiceStatus {
   PENDING
   PAID
@@ -49,6 +50,13 @@ enum ServiceStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
 }
 
 model Service {
@@ -105,6 +113,7 @@ model Billing {
   dashboardWidget       DashboardWidget?     @relation("DashboardWidgetBilling")
   homeCare              HomeCare[]          @relation("HomeCareBilling")
   vaccinations          Vaccination[]       @relation("VaccinationBilling")
+  nhifClaims            NhifClaim[]         @relation("NhifClaimBilling")
   createdAt             DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 }
@@ -138,7 +147,7 @@ model Invoice {
   claimId               Int?
   claim                 Claim?              @relation("InvoiceClaims", fields: [claimId], references: [id])
   nhifClaimId           Int?
-  nhifClaim             NhifClaim?          @relation("InvoiceNhifClaims", fields: [nhifClaimId], references: [id])
+  nhifClaim             NhifClaim?          @relation("NhifClaimInvoices", fields: [nhifClaimId], references: [id])
   departmentId          Int?
   department            Department?         @relation("DepartmentInvoices", fields: [departmentId], references: [id])
   invoiceNumber         String              @unique
@@ -162,6 +171,7 @@ model Invoice {
   invoiceDocuments      InvoiceDocument[]   @relation("InvoiceDocuments")
   notifications         BillingNotification[] @relation("InvoiceNotifications")
   payments              Payment[]           @relation("PaymentInvoices")
+  nhifClaims            NhifClaim[]         @relation("NhifClaimInvoices")
   createdAt             DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 }
