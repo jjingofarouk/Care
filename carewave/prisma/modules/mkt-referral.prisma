@@ -69,8 +69,8 @@ model Referral {
   status              ReferralStatus        @default(PENDING)
   referralDate        DateTime              @default(now())
   completionDate      DateTime?
-  appointmentId       Int?
-  appointment         Appointment?          @relation(fields: [appointmentId], references: [id], map: "Referral_appointment_fkey")
+  appointmentId       Int?                  @unique
+  appointment         Appointment?          @relation("AppointmentReferral", fields: [appointmentId], references: [id], map: "Referral_appointment_fkey")
   medicalRecordId     Int?
   medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id], map: "Referral_medicalRecord_fkey")
   claimId             Int?
