@@ -277,32 +277,33 @@ model CostAllocation {
   auditLogs         AuditLog[]          @relation("CostAllocationAuditLogs")
 }
 
+
 model Payroll {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique @default(uuid())
-  employeeId        Int
-  employee Ven             User                @relation("PayrollEmployee", fields: [employeeId], references: [id])
-  transactionId    Int?
-  transaction      Transaction?        @relation("TransactionPayrolls", fields: [transactionId], references: [id])
-  grossAmount      Float
-  netAmount        Float
-  deductions       Float               @default(0.0)
-  taxes            Float               @default(0.0)
-  payPeriodStart   DateTime
-  payPeriodEnd     DateTime
-  paymentDate      DateTime
-  status           TransactionStatus   @default(PENDING)
-  paymentMethod    PaymentMethod
-  departmentId     Int?
-  department        Department?         @relation("PayrollDepartment", fields: [departmentId], references: [id])
-  costCenterId     Int?
-  costCenter       CostCenter?         @relation("CostCenterPayrolls", fields: [costCenterId], references: [id])
-  createdById      Int?
-  createdBy        User?               @relation("PayrollCreatedBy", fields: [createdById], references: [id])
-  approvedById     Int?
-  approvedBy       User?               @relation("PayrollApprovedBy", fields: [approvedById], references: [id])
-  notes            String?
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-  auditLogs        AuditLog[]          @relation("PayrollAuditLogs")
+  id              Int                 @id @default(autoincrement())
+  uuid            String              @unique @default(uuid())
+  employeeId      Int
+  employee        User                @relation("PayrollEmployee", fields: [employeeId], references: [id])
+  transactionId   Int?
+  transaction     Transaction?        @relation("TransactionPayrolls", fields: [transactionId], references: [id])
+  grossAmount     Float
+  netAmount       Float
+  deductions      Float               @default(0.0)
+  taxes           Float               @default(0.0)
+  payPeriodStart  DateTime
+  payPeriodEnd    DateTime
+  paymentDate     DateTime
+  status          TransactionStatus   @default(PENDING)
+  paymentMethod   PaymentMethod
+  departmentId    Int?
+  department      Department?         @relation("PayrollDepartment", fields: [departmentId], references: [id])
+  costCenterId    Int?
+  costCenter      CostCenter?         @relation("CostCenterPayrolls", fields: [costCenterId], references: [id])
+  createdById     Int?
+  createdBy       User?               @relation("PayrollCreatedBy", fields: [createdById], references: [id])
+  approvedById    Int?
+  approvedBy      User?               @relation("PayrollApprovedBy", fields: [approvedById], references: [id])
+  notes           String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  auditLogs       AuditLog[]          @relation("PayrollAuditLogs")
 }
