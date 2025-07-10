@@ -23,18 +23,18 @@ model Queue {
   queueNumber         Int
   status              QueueStatus           @default(WAITING)
   priority            QueuePriority?
-  patientId           Int?
+  patientId           Int?                  @unique
   patient             Patient?              @relation("PatientQueue", fields: [patientId], references: [id])
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("AppointmentQueue")
+  appointment         Appointment?          @relation("AppointmentQueue", fields: [appointmentId], references: [id])
   admissionId         Int?                  @unique
-  admission           Admission?            @relation("AdmissionQueue")
+  admission           Admission?            @relation("AdmissionQueue", fields: [admissionId], references: [id])
   departmentId        Int?
   department          Department?           @relation("DepartmentQueues", fields: [departmentId], references: [id])
   doctorId            Int?
   doctor              Doctor?               @relation("QueueDoctor", fields: [doctorId], references: [id])
-  clinicalSettingId   Int?
-  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  clinicalSettingId   Int?                  @unique
+  clinicalSetting     ClinicalSetting?      @relation("QueueClinicalSettings", fields: [clinicalSettingId], references: [id])
   wardId              Int?
   ward                Ward?                 @relation("WardQueue", fields: [wardId], references: [id])
   serviceType         String?
@@ -42,9 +42,9 @@ model Queue {
   calledAt            DateTime?
   completedAt         DateTime?
   notes               String?
-  createdById         Int?
+  createdById         Int?                  @unique
   createdBy           User?                 @relation("QueueCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
+  updatedById         Int?                  @unique
   updatedBy           User?                 @relation("QueueUpdatedBy", fields: [updatedById], references: [id])
   queueLogs           QueueLog[]            @relation("QueueLogs")
   notifications       QueueNotification[]   @relation("QueueNotifications")
@@ -60,8 +60,8 @@ model QueueLog {
   queueId             Int
   queue               Queue                 @relation("QueueLogs", fields: [queueId], references: [id])
   action              String
-  actionById          Int?
-  actionBy            User?                 @relation(fields: [actionById], references: [id])
+  actionById          Int?                  @unique
+  actionBy            User?                 @relation("QueueLogActionBy", fields: [actionById], references: [id])
   actionDate          DateTime              @default(now())
   notes               String?
   createdAt           DateTime              @default(now())
@@ -76,8 +76,8 @@ model QueueNotification {
   notificationType    String
   status              NotificationStatus    @default(PENDING)
   sentAt              DateTime?
-  recipientId         Int?
-  recipient           User?                 @relation(fields: [recipientId], references: [id])
+  recipientId         Int?                  @unique
+  recipient           User?                 @relation("QueueNotificationRecipient", fields: [recipientId], references: [id])
   message             String?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
@@ -88,8 +88,8 @@ model QueueConfiguration {
   uuid                String                @unique @default(uuid())
   departmentId        Int?
   department          Department?           @relation("DepartmentQueueConfigurations", fields: [departmentId], references: [id])
-  clinicalSettingId    Int?
-  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  clinicalSettingId   Int?                  @unique
+  clinicalSetting     ClinicalSetting?      @relation("QueueConfigClinicalSettings", fields: [clinicalSettingId], references: [id])
   name                String
   description         String?
   maxQueueSize        Int?
@@ -98,9 +98,9 @@ model QueueConfiguration {
   notificationSettings String?
   operatingHours      String?
   status              QueueConfigStatus     @default(ACTIVE)
-  createdById         Int?
+  createdById         Int?                  @unique
   createdBy           User?                 @relation("QueueConfigCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
+  updatedById         Int?                  @unique
   updatedBy           User?                 @relation("QueueConfigUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("QueueConfigAuditLogs")
   createdAt           DateTime              @default(now())
