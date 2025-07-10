@@ -70,7 +70,7 @@ model Referral {
   referralDate        DateTime              @default(now())
   completionDate      DateTime?
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("AppointmentReferral", fields: [appointmentId], references: [id], map: "Referral_appointment_fkey")
+  appointment         Appointment?          @relation("AppointmentReferral")
   medicalRecordId     Int?
   medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id], map: "Referral_medicalRecord_fkey")
   claimId             Int?
