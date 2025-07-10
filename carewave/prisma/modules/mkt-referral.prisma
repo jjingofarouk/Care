@@ -1,4 +1,3 @@
-// marketing-referral.prisma
 enum ReferralType {
   PATIENT_TO_PATIENT
   DOCTOR_TO_DOCTOR
@@ -26,27 +25,27 @@ enum RewardType {
 model ReferralProgram {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  name                String                // e.g., "Patient Referral Incentive Program"
-  description         String?               // Program description
-  type                ReferralType          // PATIENT_TO_PATIENT, DOCTOR_TO_DOCTOR, etc.
-  status              String                @default("ACTIVE") // ACTIVE, INACTIVE, DRAFT
+  name                String
+  description         String?
+  type                ReferralType
+  status              String                @default("ACTIVE")
   startDate           DateTime              @default(now())
-  endDate             DateTime?             // Optional end date for program
-  departmentId        Int?                  // Link to department
+  endDate             DateTime?
+  departmentId        Int?
   department          Department?           @relation(fields: [departmentId], references: [id])
-  targetAudience      String?               // e.g., "Patients", "Primary Care Physicians"
-  rewardType          RewardType?           // Type of reward offered
-  rewardValue         Float?                // Value of reward (e.g., $50 gift card)
-  rewardDescription    String?               // Details of reward
-  eligibilityCriteria  String?               // JSON or text for eligibility (e.g., {"min_visits": 1})
-  maxReferrals        Int?                  // Max referrals per participant
-  termsConditions     String?               // Terms and conditions of program
-  createdById         Int?                  // User who created the program
+  targetAudience      String?
+  rewardType          RewardType?
+  rewardValue         Float?
+  rewardDescription    String?
+  eligibilityCriteria  String?
+  maxReferrals        Int?
+  termsConditions     String?
+  createdById         Int?
   createdBy           User?                 @relation("ReferralProgramCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("ReferralProgramUpdatedBy", fields: [updatedById], references: [id])
-  referrals           Referral[]            // Referrals under this program
-  campaigns           MarketingCampaign[]   // Marketing campaigns linked to program
+  referrals           Referral[]
+  campaigns           MarketingCampaign[]
   auditLogs           AuditLog[]            @relation("ReferralProgramAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
@@ -55,39 +54,39 @@ model ReferralProgram {
 model Referral {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  referralProgramId   Int                   // Link to referral program
+  referralProgramId   Int
   referralProgram     ReferralProgram       @relation(fields: [referralProgramId], references: [id])
-  referrerId          Int?                  // User or patient who made the referral
+  referrerId          Int?
   referrer            User?                 @relation("Referrer", fields: [referrerId], references: [id])
-  refereeId           Int?                  // User or patient being referred
+  refereeId           Int?
   referee             User?                 @relation("Referee", fields: [refereeId], references: [id])
-  patientId           Int?                  // Link to patient (if applicable)
+  patientId           Int?
   patient             Patient?              @relation(fields: [patientId], references: [id])
-  doctorId            Int?                  // Link to doctor (for doctor-to-doctor referrals)
+  doctorId            Int?
   doctor              Doctor?               @relation(fields: [doctorId], references: [id])
-  departmentId        Int?                  // Link to target department
+  departmentId        Int?
   department          Department?           @relation(fields: [departmentId], references: [id])
   status              ReferralStatus        @default(PENDING)
   referralDate        DateTime              @default(now())
-  completionDate      DateTime?             // Date referral was completed
-  appointmentId       Int?                  // Link to appointment created from referral
+  completionDate      DateTime?
+  appointmentId       Int?
   appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
-  medicalRecordId     Int?                  // Link to medical record
+  medicalRecordId     Int?
   medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
-  claimId             Int?                  // Link to insurance claim
+  claimId             Int?
   claim               Claim?                @relation(fields: [claimId], references: [id])
-  nhifClaimId         Int?                  // Link to NHIF claim
+  nhifClaimId         Int?
   nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
-  rewardId            Int?                  // Link to reward issued
+  rewardId            Int?
   reward              ReferralReward?       @relation(fields: [rewardId], references: [id])
-  notes               String?               // Additional notes
-  referralCode        String?               @unique // Unique code for tracking
-  source              String?               // Source of referral (e.g., "Email", "Social Media")
-  campaignId          Int?                  // Link to marketing campaign
+  notes              String?
+  referralCode        String?               @unique
+  source              String?
+  campaignId          Int?
   campaign            MarketingCampaign?    @relation(fields: [campaignId], references: [id])
-  createdById         Int?                  // User who created referral
+  createdById         Int?
   createdBy           User?                 @relation("ReferralCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("ReferralUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("ReferralAuditLogs")
   createdAt           DateTime              @default(now())
@@ -97,22 +96,22 @@ model Referral {
 model ReferralReward {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  referralId          Int                   // Link to referral
+  referralId          Int
   referral            Referral              @relation(fields: [referralId], references: [id])
-  rewardType          RewardType            // DISCOUNT, GIFT_CARD, etc.
-  rewardValue         Float                 // Value of reward
+  rewardType          RewardType
+  rewardValue         Float
   issuedDate          DateTime              @default(now())
-  expiryDate          DateTime?             // Expiry date of reward
-  redeemedDate        DateTime?             // Date reward was redeemed
-  redeemedById        Int?                  // User who redeemed reward
+  expiryDate          DateTime?
+  redeemedDate        DateTime?
+  redeemedById        Int?
   redeemedBy          User?                 @relation("RewardRedeemedBy", fields: [redeemedById], references: [id])
-  status              String                @default("PENDING") // PENDING, ISSUED, REDEEMED, EXPIRED
-  transactionId       Int?                  // Link to accounting transaction
-  transaction         Transaction?          @relation(fields: [transactionId], references: [id])
-  notes               String?               // Notes about reward
-  createdById         Int?                  // User who issued reward
+  status              String                @default("PENDING")
+  transactionId       Int?
+  transaction         Transaction?          @relation("TransactionReferralRewards", fields: [transactionId], references: [id])
+  notes               String?
+  createdById         Int?
   createdBy           User?                 @relation("RewardCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("RewardUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("ReferralRewardAuditLogs")
   createdAt           DateTime              @default(now())
@@ -122,22 +121,24 @@ model ReferralReward {
 model MarketingCampaign {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  name                String                // e.g., "Spring Referral Drive"
-  description         String?               // Campaign description
-  referralProgramId   Int?                  // Link to referral program
+  name                String
+  description         String?
+  referralProgramId   Int?
   referralProgram     ReferralProgram?      @relation(fields: [referralProgramId], references: [id])
   startDate           DateTime              @default(now())
-  endDate             DateTime?             // Optional end date
-  targetAudience      String?               // e.g., "General Practitioners", "Patients"
-  channel             String?               // e.g., "Email", "Social Media", "Direct Mail"
-  budget              Float?                // Campaign budget
-  actualCost          Float?                // Actual cost incurred
-  kpis                String?               // JSON or text for key performance indicators
-  status              String                @default("DRAFT") // DRAFT, ACTIVE, COMPLETED, CANCELLED
-  referrals           Referral[]            // Referrals generated by campaign
-  createdById         Int?                  // User who created campaign
+  endDate             DateTime?
+  targetAudience      String?
+  channel             String?
+  budget              Float?
+  actualCost          Float?
+  k各地
+
+System: kpis                String?               // JSON or text for key performance indicators
+  status              String                @default("DRAFT")
+  referrals           Referral[]
+  createdById         Int?
   createdBy           User?                 @relation("CampaignCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("CampaignUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("MarketingCampaignAuditLogs")
   createdAt           DateTime              @default(now())
