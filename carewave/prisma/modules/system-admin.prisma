@@ -272,6 +272,7 @@ model AuditLog {
   homeCareVisit       HomeCareVisit?        @relation("HomeCareVisitAuditLogs", fields: [entityId], references: [id], map: "AuditLog_homeCareVisit_fkey")
   verification        Verification?         @relation("VerificationAuditLogs", fields: [entityId], references: [id], map: "AuditLog_verification_fkey")
   verificationConfiguration VerificationConfiguration? @relation("VerificationConfigAuditLogs", fields: [entityId], references: [id], map: "AuditLog_verificationConfig_fkey")
+  referralReward      ReferralReward?       @relation("ReferralRewardAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referralReward_fkey")
   details             String?
   createdAt           DateTime              @default(now())
 }
