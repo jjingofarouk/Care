@@ -81,6 +81,7 @@ model Vaccination {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   vaccinationCampaign  VaccinationCampaign?  @relation("CampaignVaccinations")
+  vaccinationRecords  Doctor[]              @relation("DoctorVaccinationRecords")
 }
 
 model VaccinationCampaign {
