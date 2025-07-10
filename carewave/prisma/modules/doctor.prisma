@@ -90,7 +90,8 @@ model DoctorAvailability {
   status                AvailabilityStatus    @default(AVAILABLE)
   location              String?
   notes                 String?
-  appointment           Appointment?          @relation("DoctorAvailabilityAppointments")
+  appointment           Appointment?          @relation("DoctorAvailabilityAppointments", fields: [appointmentId], references: [id])
+  appointmentId         Int?                  @unique
   createdById           Int?
   createdBy             User?                 @relation("DoctorAvailabilityCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
@@ -120,7 +121,7 @@ model DoctorQualification {
   updatedById           Int?
   updatedBy             User?                 @relation("DoctorQualificationUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DoctorQualificationAuditLogs")
-  createdAt             DateTime            @default(now())
+  createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
 
