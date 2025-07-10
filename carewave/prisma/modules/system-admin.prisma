@@ -1,5 +1,3 @@
-
-
 enum UserRole {
   ADMIN
   DOCTOR
@@ -39,7 +37,7 @@ model User {
   role                  UserRole              @default(PATIENT)
   status                String                @default("ACTIVE")
   departmentId          Int?
-  department            Department?           @relation("UserDepartment", fields: [departmentId], references: [id])
+  department            Department?           @relation("UserDepartment", fields: [departmentId], references: [id], map: "User_department_fkey")
   phone                 String?
   address               String?
   profileImage          String?
@@ -48,9 +46,9 @@ model User {
   accountLocked         Boolean               @default(false)
   permissions           String?
   createdById           Int?
-  createdBy             User?                 @relation("UserCreatedBy", fields: [createdById], references: [id])
+  createdBy             User?                 @relation("UserCreatedBy", fields: [createdById], references: [id], map: "User_createdBy_fkey")
   updatedById           Int?
-  updatedBy             User?                 @relation("UserUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy             User?                 @relation("UserUpdatedBy", fields: [updatedById], references: [id], map: "User_updatedBy_fkey")
   createdUsers          User[]                @relation("UserCreatedBy")
   updatedUsers          User[]                @relation("UserUpdatedBy")
   payrolls              Payroll[]             @relation("PayrollEmployee")
@@ -164,6 +162,17 @@ model User {
   verifiedBy            Verification[]        @relation("VerifiedBy")
   verificationConfigCreated VerificationConfiguration[] @relation("ConfigCreatedBy")
   verificationConfigUpdated VerificationConfiguration[] @relation("ConfigUpdatedBy")
+  referralProgramsCreated ReferralProgram[]   @relation("ReferralProgramCreatedBy")
+  referralProgramsUpdated ReferralProgram[]   @relation("ReferralProgramUpdatedBy")
+  referralsAsReferrer   Referral[]            @relation("Referrer")
+  referralsAsReferee    Referral[]            @relation("Referee")
+  referralsCreated      Referral[]            @relation("ReferralCreatedBy")
+  referralsUpdated      Referral[]            @relation("ReferralUpdatedBy")
+  referralRewardsRedeemed ReferralReward[]    @relation("RewardRedeemedBy")
+  referralRewardsCreated ReferralReward[]     @relation("RewardCreatedBy")
+  referralRewardsUpdated ReferralReward[]     @relation("RewardUpdatedBy")
+  marketingCampaignsCreated MarketingCampaign[] @relation("CampaignCreatedBy")
+  marketingCampaignsUpdated MarketingCampaign[] @relation("CampaignUpdatedBy")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
@@ -177,9 +186,9 @@ model SystemConfiguration {
   category            String?
   status              String                @default("ACTIVE")
   createdById         Int?
-  createdBy           User?                 @relation("ConfigCreatedBy", fields: [createdById], references: [id])
+  createdBy           User?                 @relation("ConfigCreatedBy", fields: [createdById], references: [id], map: "SystemConfiguration_createdBy_fkey")
   updatedById         Int?
-  updatedBy           User?                 @relation("ConfigUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?                 @relation("ConfigUpdatedBy", fields: [updatedById], references: [id], map: "SystemConfiguration_updatedBy_fkey")
   auditLogs           AuditLog[]            @relation("SystemConfigAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
@@ -189,7 +198,7 @@ model SystemLog {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
   userId              Int?
-  user                User?                 @relation("LoggedBy", fields: [userId], references: [id])
+  user                User?                 @relation("LoggedBy", fields: [userId], references: [id], map: "SystemLog_user_fkey")
   type                SystemLogType
   description         String
   ipAddress           String?
@@ -209,14 +218,13 @@ model RolePermission {
   permissionLevel     PermissionLevel
   description         String?
   createdById         Int?
-  createdBy           User?                 @relation("PermissionCreatedBy", fields: [createdById], references: [id])
+  createdBy           User?                 @relation("PermissionCreatedBy", fields: [createdById], references: [id], map: "RolePermission_createdBy_fkey")
   updatedById         Int?
-  updatedBy           User?                 @relation("PermissionUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?                 @relation("PermissionUpdatedBy", fields: [updatedById], references: [id], map: "RolePermission_updatedBy_fkey")
   auditLogs           AuditLog[]            @relation("RolePermissionAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
-
 
 model AuditLog {
   id                  Int                   @id @default(autoincrement())
@@ -273,6 +281,8 @@ model AuditLog {
   verification        Verification?         @relation("VerificationAuditLogs", fields: [entityId], references: [id], map: "AuditLog_verification_fkey")
   verificationConfiguration VerificationConfiguration? @relation("VerificationConfigAuditLogs", fields: [entityId], references: [id], map: "AuditLog_verificationConfig_fkey")
   referralReward      ReferralReward?       @relation("ReferralRewardAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referralReward_fkey")
+  referralProgram     ReferralProgram?      @relation("ReferralProgramAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referralProgram_fkey")
+  referral            Referral?             @relation("ReferralAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referral_fkey")
   details             String?
   createdAt           DateTime              @default(now())
 }
