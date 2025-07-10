@@ -53,8 +53,8 @@ model Patient {
   discharges            Discharge[]           @relation("DischargedPatient")
   invoices              Invoice[]             @relation("PatientInvoices")
   transactions          Transaction[]         @relation("PatientTransactions")
-  billing               Billing[]             @relation("PatientBilling", fields: [patientId], references: [id], map: "Patient_billing_fkey")
-  claims                Claim[]               @relation("PatientClaims", fields: [patientId], references: [id], map: "Patient_claims_fkey")
+  billing               Billing[]             @relation("PatientBilling", fields: [id], references: [id], map: "Patient_billing_fkey")
+  claims                Claim[]               @relation("PatientClaims", fields: [id], references: [id], map: "Patient_claims_fkey")
   nhifClaims            NhifClaim[]           @relation("PatientNhifClaims")
   prescriptions         Prescription[]        @relation("PatientPrescriptions")
   adverseReactions      AdverseReaction[]     @relation("PatientAdverseReactions")
@@ -71,5 +71,5 @@ model Patient {
   recurringAppointments  RecurringAppointment[] @relation("PatientRecurringAppointments")
   emergencies           Emergency[]           @relation("PatientEmergencies")
   queues               Queue[]               @relation("PatientQueue")
-  referrals            Referral[]            @relation("PatientReferrals", fields: [patientId], references: [id], map: "Patient_referrals_fkey")
+  referrals            Referral[]            @relation("PatientReferrals", fields: [id], references: [id], map: "Patient_referrals_fkey")
 }
