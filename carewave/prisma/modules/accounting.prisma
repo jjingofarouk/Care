@@ -196,18 +196,18 @@ model Reconciliation {
 }
 
 model BankStatement {
-  id                Int                 @id @dom(autoincrement())
-  uuid              String              @unique @default(uuid())
-  statementDate     DateTime
-  referenceNumber   String              @unique
-  amount            Float
-  currency          String              @default("USD")
-  bankAccountId     Int?
-  bankAccount       BankAccount?        @relation("BankStatementBankAccount", fields: [bankAccountId], references: [id])
-  reconciliations   Reconciliation[]    @relation("ReconciliationBankStatement")
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("BankStatementAuditLogs")
+  id               Int                  @id @default(autoincrement())
+  uuid             String               @unique @default(uuid())
+  statementDate    DateTime
+  referenceNumber  String               @unique
+  amount           Float
+  currency         String               @default("USD")
+  bankAccountId    Int?
+  bankAccount      BankAccount?         @relation("BankStatementBankAccount", fields: [bankAccountId], references: [id])
+  reconciliations  Reconciliation[]     @relation("ReconciliationBankStatement")
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  auditLogs        AuditLog[]           @relation("BankStatementAuditLogs")
 }
 
 model BankAccount {
