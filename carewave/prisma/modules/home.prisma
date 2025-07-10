@@ -1,4 +1,3 @@
-
 enum HomeCareStatus {
   SCHEDULED
   IN_PROGRESS
@@ -15,6 +14,7 @@ enum HomeCareServiceType {
   PALLIATIVE_CARE
   OTHER
 }
+
 
 model HomeCare {
   id                    Int                 @id @default(autoincrement())
