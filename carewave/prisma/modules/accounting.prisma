@@ -1,3 +1,5 @@
+// prisma/transactions.prisma
+
 enum TransactionType {
   INCOME
   EXPENSE
@@ -107,6 +109,7 @@ model Transaction {
   purchaseOrders    PurchaseOrder[]     @relation("TransactionPurchaseOrders")
   referralRewards   ReferralReward[]    @relation("TransactionReferralRewards")
   utilities         Utility[]           @relation("UtilityTransaction")
+  admissions        Admission[]         @relation("TransactionAdmissions")
 }
 
 model CostCenter {
@@ -242,6 +245,7 @@ model GeneralLedger {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   auditLogs         AuditLog[]          @relation("GeneralLedgerAuditLogs")
+  transactions      Transaction[]       @relation("TransactionGeneralLedger")
 }
 
 model TaxCategory {
@@ -276,7 +280,6 @@ model CostAllocation {
   updatedAt         DateTime            @updatedAt
   auditLogs         AuditLog[]          @relation("CostAllocationAuditLogs")
 }
-
 
 model Payroll {
   id              Int                 @id @default(autoincrement())
