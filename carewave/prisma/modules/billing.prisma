@@ -107,7 +107,7 @@ model Billing {
   nhifClaims            NhifClaim[]         @relation("NhifClaimBilling")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
-  emergencies           Emergency[]         @relation("EmergencyBilling", fields: [billingId], references: [id], map: "Billing_emergency_fkey")
+  emergencies           Emergency[]         @relation("EmergencyBilling", fields: [id], references: [id], map: "Billing_emergency_fkey")
 }
 
 model Invoice {
