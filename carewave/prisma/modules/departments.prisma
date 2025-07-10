@@ -67,6 +67,9 @@ model Department {
   utilities             Utility[]             @relation("DepartmentUtilities")
   nursingCares          NursingCare[]         @relation("DepartmentNursingCares")
   nursingShifts         NursingShift[]        @relation("DepartmentNursingShifts")
+  vaccinationCampaigns  VaccinationCampaign[] @relation("VaccinationCampaignDepartment")
+  verifications         Verification[]        @relation("DepartmentVerification")
+  verificationConfigs   VerificationConfiguration[] @relation("DepartmentVerificationConfig")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
