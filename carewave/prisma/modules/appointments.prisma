@@ -54,20 +54,20 @@ model Appointment {
   billingId             Int?                @unique
   billing               Billing?            @relation("AppointmentBilling", fields: [billingId], references: [id])
   queueId               Int?                @unique
-  queue                 Queue?              @relation("AppointmentQueue")
+  queue                 Queue?              @relation("AppointmentQueue", fields: [queueId], references: [id])
   admissionId           Int?                @unique
-  admission             Admission?          @relation("AppointmentAdmission")
+  admission             Admission?          @relation("AppointmentAdmission", fields: [admissionId], references: [id], map: "Appointment_admission_fkey")
   dischargeId           Int?                @unique
-  discharge             Discharge?          @relation("AppointmentDischarge")
+  discharge             Discharge?          @relation("AppointmentDischarge", fields: [dischargeId], references: [id], map: "Appointment_discharge_fkey")
   laboratoryId          Int?                @unique
-  laboratory            Laboratory?         @relation("AppointmentLaboratory")
+  laboratory            Laboratory?         @relation("AppointmentLaboratory", fields: [laboratoryId], references: [id])
   radiologyId           Int?                @unique
-  radiology             Radiology?          @relation("AppointmentRadiology")
+  radiology             Radiology?          @relation("AppointmentRadiology", fields: [radiologyId], references: [id])
   radiologyTests        RadiologyTest[]     @relation("AppointmentRadiologyTests")
   pharmacyId            Int?                @unique
-  pharmacy              Pharmacy?           @relation("AppointmentPharmacy")
+  pharmacy              Pharmacy?           @relation("AppointmentPharmacy", fields: [pharmacyId], references: [id])
   operationTheatreId    Int?                @unique
-  operationTheatre      OperationTheatre?   @relation("AppointmentOperationTheatre")
+  operationTheatre      OperationTheatre?   @relation("AppointmentOperationTheatre", fields: [operationTheatreId], references: [id], map: "Appointment_operationTheatre_fkey")
   createdById           Int?
   createdBy             User?               @relation("AppointmentCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
@@ -75,7 +75,7 @@ model Appointment {
   insuranceId           Int?
   insurance             Insurance?          @relation("AppointmentInsurance", fields: [insuranceId], references: [id])
   referralId            Int?                @unique
-  referral              Referral?           @relation("AppointmentReferral")
+  referral              Referral?           @relation("AppointmentReferral", fields: [referralId], references: [id])
   location              String?
   teleconsultationLink  String?
   duration              Int?
