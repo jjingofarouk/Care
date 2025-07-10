@@ -24,17 +24,17 @@ model Queue {
   status              QueueStatus           @default(WAITING)
   priority            QueuePriority?
   patientId           Int?                  @unique
-  patient             Patient?              @relation("PatientQueue", fields: [patientId], references: [id])
+  patient             Patient?              @relation("PatientQueue")
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("AppointmentQueue", fields: [appointmentId], references: [id])
+  appointment         Appointment?          @relation("AppointmentQueue")
   admissionId         Int?                  @unique
-  admission           Admission?            @relation("AdmissionQueue", fields: [admissionId], references: [id])
+  admission           Admission?            @relation("AdmissionQueue")
   departmentId        Int?
   department          Department?           @relation("DepartmentQueues", fields: [departmentId], references: [id])
   doctorId            Int?
   doctor              Doctor?               @relation("QueueDoctor", fields: [doctorId], references: [id])
   clinicalSettingId   Int?                  @unique
-  clinicalSetting     ClinicalSetting?      @relation("QueueClinicalSettings", fields: [clinicalSettingId], references: [id])
+  clinicalSetting     ClinicalSetting?      @relation("QueueClinicalSettings")
   wardId              Int?
   ward                Ward?                 @relation("WardQueue", fields: [wardId], references: [id])
   serviceType         String?
