@@ -28,6 +28,7 @@ enum TriagePriority {
   CRITICAL
 }
 
+
 model Appointment {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
@@ -54,7 +55,7 @@ model Appointment {
   billingId             Int?                @unique
   billing               Billing?            @relation("AppointmentBilling", fields: [billingId], references: [id])
   queueId               Int?                @unique
-  queue                 Queue?              @relation("AppointmentQueue", fields: [queueId], references: [id])
+  queue                 Queue?              @relation("AppointmentQueue")
   admissionId           Int?                @unique
   admission             Admission?          @relation("AppointmentAdmission", fields: [admissionId], references: [id], map: "Appointment_admission_fkey")
   dischargeId           Int?                @unique
@@ -62,7 +63,7 @@ model Appointment {
   laboratoryId          Int?                @unique
   laboratory            Laboratory?         @relation("AppointmentLaboratory", fields: [laboratoryId], references: [id])
   radiologyId           Int?                @unique
-  radiology             Radiology?          @relation("AppointmentRadiology", fields: [radiologyId], references: [id])
+  radiology             Radiology?          @relation("AppointmentRadiology")
   radiologyTests        RadiologyTest[]     @relation("AppointmentRadiologyTests")
   pharmacyId            Int?                @unique
   pharmacy              Pharmacy?           @relation("AppointmentPharmacy", fields: [pharmacyId], references: [id])
@@ -75,7 +76,7 @@ model Appointment {
   insuranceId           Int?
   insurance             Insurance?          @relation("AppointmentInsurance", fields: [insuranceId], references: [id])
   referralId            Int?                @unique
-  referral              Referral?           @relation("AppointmentReferral", fields: [referralId], references: [id])
+  referral              Referral?           @relation("AppointmentReferral")
   location              String?
   teleconsultationLink  String?
   duration              Int?
