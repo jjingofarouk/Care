@@ -1,4 +1,3 @@
-// nursing.prisma
 enum NursingCareType {
   ROUTINE
   CRITICAL
@@ -33,78 +32,79 @@ enum NursingStatus {
 model Nursing {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  patientId           Int?                  // Link to patient
-  patient             Patient?              @relation(fields: [patientId], references: [id])
-  doctorId            Int?                  // Link to doctor
+  patientId           Int?
+  patient             Patient?              @relation("PatientNursingRecords", fields: [patientId], references: [id])
+  doctorId            Int?
   doctor              Doctor?               @relation("DoctorNursingRecords", fields: [doctorId], references: [id])
-  departmentId        Int?                  // Link to department
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  clinicalRecordId    Int?                  // Link to clinical record
+  departmentId        Int?
+  department          Department?           @relation("DepartmentNursingRecords", fields: [departmentId], references: [id])
+  clinicalRecordId    Int?
   clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
-  admissionId         Int?                  // Link to admission
-  admission           Admission?            @relation(fields: [admissionId], references: [id])
-  wardId              Int?                  // Link to ward
-  ward                Ward?                 @relation(fields: [wardId], references: [id])
-  clinicalSettingId   Int?                  // Link to clinical setting
+  admissionId         Int?
+  admission           Admission?            @relation("AdmissionNursing", fields: [admissionId], references: [id])
+  wardId              Int?
+  ward                Ward?                 @relation("WardNursing", fields: [wardId], references: [id])
+  clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  status              NursingStatus         @default(PENDING) // Status of nursing service
-  startDate           DateTime              @default(now())   // Start date of nursing service
-  endDate             DateTime?             // End date of nursing service
-  nursingCareId       Int?                  // Link to specific nursing care
-  nursingCare         NursingCare?          @relation(fields: [nursingCareId], references: [id])
-  billingId           Int?                  // Link to billing for nursing services
-  billing             Billing?              @relation(fields: [billingId], references: [id])
-  notes               String?               // General notes
-  createdById         Int?                  // User who created the record
+  status              NursingStatus         @default(PENDING)
+  startDate           DateTime              @default(now())
+  endDate             DateTime?
+  nursingCareId       Int?
+  nursingCare         NursingCare?          @relation("NursingCareRecords", fields: [nursingCareId], references: [id])
+  billingId           Int?
+  billing             Billing?              @relation("NursingBilling", fields: [billingId], references: [id])
+  notes               String?
+  createdById         Int?
   createdBy           User?                 @relation("NursingCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("NursingUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("NursingAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
+  surgicalProcedure   SurgicalProcedure?    @relation("ProcedureNursing")
 }
 
 model NursingCare {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  patientId           Int                   // Link to patient
-  patient             Patient               @relation(fields: [patientId], references: [id])
-  nurseId             Int?                  // Link to nurse (User)
+  patientId           Int
+  patient             Patient               @relation("PatientNursingCare", fields: [patientId], references: [id])
+  nurseId             Int?
   nurse               User?                 @relation("NurseAssigned", fields: [nurseId], references: [id])
-  admissionId         Int?                  // Link to admission
-  admission           Admission?            @relation(fields: [admissionId], references: [id])
-  clinicalRecordId    Int?                  // Link to clinical record
+  admissionId         Int?
+  admission           Admission?            @relation("AdmissionNursingCare", fields: [admissionId], references: [id])
+  clinicalRecordId    Int?
   clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
-  medicalRecordId     Int?                  // Link to medical record
-  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
-  departmentId        Int?                  // Link to department
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  wardId              Int?                  // Link to ward
-  ward                Ward?                 @relation(fields: [wardId], references: [id])
-  clinicalSettingId   Int?                  // Link to clinical setting
+  medicalRecordId     Int?
+  medicalRecord       MedicalRecord?        @relation("NursingCareMedicalRecord", fields: [medicalRecordId], references: [id])
+  departmentId        Int?
+  department          Department?           @relation("DepartmentNursingCares", fields: [departmentId], references: [id])
+  wardId              Int?
+  ward                Ward?                 @relation("WardNursingCare", fields: [wardId], references: [id])
+  clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  type                NursingCareType       // Type of nursing care
+  type                NursingCareType
   status              NursingCareStatus     @default(PENDING)
-  carePlan            String?               // JSON or text for care plan details
-  vitals              String?               // JSON or text for vital signs (e.g., {"bp": "120/80", "pulse": 72})
-  medicationsAdministered String?           // JSON or text for medications given
-  nursingNotes        String?               // Ongoing nursing notes
+  carePlan            String?
+  vitals              String?
+  medicationsAdministered String?
+  nursingNotes        String?
   startDate           DateTime              @default(now())
-  endDate             DateTime?             // End date of care
-  shiftId             Int?                  // Link to nurse shift
-  shift               NursingShift?         @relation(fields: [shiftId], references: [id])
-  prescriptionId      Int?                  // Link to prescription
+  endDate             DateTime?
+  shiftId             Int?
+  shift               NursingShift?         @relation("NursingCareShift", fields: [shiftId], references: [id])
+  prescriptionId      Int?
   prescription        Prescription?         @relation(fields: [prescriptionId], references: [id])
-  pharmacyId          Int?                  // Link to pharmacy for medication administration
-  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
-  billingId           Int?                  // Link to billing for nursing services
-  billing             Billing?              @relation(fields: [billingId], references: [id])
-  nursing             Nursing[]             @relation
-  tasks               NursingTask[]         // Nursing tasks associated with this care
-  documents           String?               // JSON or file paths for attached documents
-  createdById         Int?                  // User who created the record
+  pharmacyId          Int?
+  pharmacy            Pharmacy?             @relation("NursingCarePharmacy", fields: [pharmacyId], references: [id])
+  billingId           Int?
+  billing             Billing?              @relation("NursingCareBilling", fields: [billingId], references: [id])
+  nursing             Nursing[]             @relation("NursingCareRecords")
+  tasks               NursingTask[]         @relation("NursingCareTasks")
+  documents           String?
+  createdById         Int?
   createdBy           User?                 @relation("NursingCareCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("NursingCareUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("NursingCareAuditLogs")
   createdAt           DateTime              @default(now())
@@ -114,24 +114,24 @@ model NursingCare {
 model NursingTask {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  nursingCareId       Int                   // Link to nursing care
-  nursingCare         NursingCare           @relation(fields: [nursingCareId], references: [id])
-  nurseId             Int?                  // Link to assigned nurse
+  nursingCareId       Int
+  nursingCare         NursingCare           @relation("NursingCareTasks", fields: [nursingCareId], references: [id])
+  nurseId             Int?
   nurse               User?                 @relation("TaskAssignedNurse", fields: [nurseId], references: [id])
-  taskType            String                // e.g., "Medication Administration", "Wound Care"
-  description         String?               // Task details
+  taskType            String
+  description         String?
   status              NursingTaskStatus     @default(PENDING)
-  scheduledTime       DateTime?             // Scheduled time for task
-  completedTime       DateTime?             // Time task was completed
-  priority            String?               // e.g., "HIGH", "MEDIUM", "LOW"
-  notes               String?               // Additional notes
-  prescriptionId      Int?                  // Link to prescription for medication tasks
+  scheduledTime       DateTime?
+  completedTime       DateTime?
+  priority            String?
+  notes               String?
+  prescriptionId      Int?
   prescription        Prescription?         @relation(fields: [prescriptionId], references: [id])
-  shiftId             Int?                  // Link to nurse shift
-  shift               NursingShift?         @relation(fields: [shiftId], references: [id])
-  createdById         Int?                  // User who created the task
+  shiftId             Int?
+  shift               NursingShift?         @relation("NursingTaskShift", fields: [shiftId], references: [id])
+  createdById         Int?
   createdBy           User?                 @relation("TaskCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("TaskUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("NursingTaskAuditLogs")
   createdAt           DateTime              @default(now())
@@ -141,21 +141,21 @@ model NursingTask {
 model NursingShift {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  nurseId             Int?                  // Link to nurse
+  nurseId             Int?
   nurse               User?                 @relation("ShiftNurse", fields: [nurseId], references: [id])
-  wardId              Int?                  // Link to ward
-  ward                Ward?                 @relation(fields: [wardId], references: [id])
-  departmentId        Int?                  // Link to department
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  startTime           DateTime              // Shift start time
-  endTime             DateTime              // Shift end time
-  status              String                @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED
-  notes               String?               // Shift notes
-  nursingCares        NursingCare[]         // Nursing care assignments during shift
-  nursingTasks        NursingTask[]         // Tasks assigned during shift
-  createdById         Int?                  // User who created the shift
+  wardId              Int?
+  ward                Ward?                 @relation("WardNursingShifts", fields: [wardId], references: [id])
+  departmentId        Int?
+  department          Department?           @relation("DepartmentNursingShifts", fields: [departmentId], references: [id])
+  startTime           DateTime
+  endTime             DateTime
+  status              String                @default("SCHEDULED")
+  notes               String?
+  nursingCares        NursingCare[]         @relation("NursingCareShift")
+  nursingTasks        NursingTask[]         @relation("NursingTaskShift")
+  createdById         Int?
   createdBy           User?                 @relation("ShiftCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("ShiftUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("NursingShiftAuditLogs")
   createdAt           DateTime              @default(now())
