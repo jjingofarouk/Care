@@ -57,6 +57,7 @@ model HomeCare {
   homeCareNotifications HomeCareNotification[] @relation("HomeCareNotifications")
   nhifClaims            NhifClaim[]         @relation("NhifClaimHomeCare")
   socialServices        SocialService[]     @relation("SocialServiceHomeCare")
+  transactions          Transaction[]       @relation("HomeCareTransactions")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
