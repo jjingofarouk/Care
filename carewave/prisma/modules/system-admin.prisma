@@ -250,7 +250,6 @@ model RolePermission {
   updatedAt           DateTime              @updatedAt
 }
 
-What about this audit_log.prisma
 model AuditLog {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
