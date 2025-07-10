@@ -106,7 +106,7 @@ model RadiologyTest {
   contrastUsed        Boolean               @default(false)
   contrastType        String?
   radiationDose       Float?
-  notes | String?
+  notes               String?
   priority            String?
   createdById         Int?
   createdBy           User?                 @relation("RadiologyTestCreatedBy", fields: [createdById], references: [id])
