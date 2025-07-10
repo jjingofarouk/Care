@@ -1,3 +1,4 @@
+// department.prisma
 enum DepartmentStatus {
   ACTIVE
   INACTIVE
@@ -31,7 +32,7 @@ model Department {
   transactions          Transaction[]         @relation("DepartmentTransactions")
   invoices              Invoice[]             @relation("DepartmentInvoices")
   claims                Claim[]               @relation("DepartmentClaims")
-  nhifClaims            NhifClaim[]           @relation("DepartmentNhifClaims")
+  nhifClaims            NhifClaim[]           @relation("NhifClaimDepartment")
   laboratoryTests       Laboratory[]          @relation("DepartmentLaboratoryTests")
   radiologyTests        Radiology[]           @relation("DepartmentRadiologyTests")
   radiologyTestRecords  RadiologyTest[]       @relation("DepartmentRadiologyTest")
@@ -45,7 +46,7 @@ model Department {
   createdById           Int?
   createdBy             User?                 @relation("DepartmentCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
-  updatedBy             User?                 @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy             User?               @relation("DepartmentUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("DepartmentAuditLogs")
   incentives            Incentive[]           @relation("DepartmentIncentives")
   users                 User[]                @relation("UserDepartment")
