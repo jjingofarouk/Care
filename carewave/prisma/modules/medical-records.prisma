@@ -6,6 +6,7 @@ enum MedicalRecordStatus {
   AMENDED
 }
 
+
 model MedicalRecord {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
@@ -38,7 +39,7 @@ model MedicalRecord {
   radiologyTests        Radiology[]           @relation("MedicalRecordRadiology")
   radiologyTestRecords  RadiologyTest[]       @relation("MedicalRecordRadiologyTests")
   maternity             Maternity?            @relation("MedicalRecordMaternity")
-  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetMedicalRecords", fields: [id], references: [id])
+  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetMedicalRecords")
   auditLogs             AuditLog[]            @relation("MedicalRecordAuditLogs")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
