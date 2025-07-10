@@ -48,18 +48,18 @@ model Admission {
   emergencyId          Int?                @unique
   emergency            Emergency?          @relation("AdmissionEmergency", fields: [emergencyId], references: [id])
   billingId            Int?                @unique
-  billing              Billing?            @relation("AdmissionBilling", fields: [billingId], references: [id])
+  billing              Billing?            @relation("AdmissionBilling")
   medicalRecordId      Int?                @unique
-  medicalRecord        MedicalRecord?      @relation("AdmissionMedicalRecord", fields: [medicalRecordId], references: [id])
+  medicalRecord        MedicalRecord?      @relation("AdmissionMedicalRecord")
   queueId              Int?                @unique
-  queue                Queue?              @relation("AdmissionQueue", fields: [queueId], references: [id])
+  queue                Queue?              @relation("AdmissionQueue")
   departmentId         Int?
   department           Department?         @relation("DepartmentAdmissions", fields: [departmentId], references: [id])
   admissionType        String?
   referralId           Int?                @unique
-  referral             Referral?           @relation("AdmissionReferral", fields: [referralId], references: [id], map: "Admission_referral_fkey")
+  referral             Referral?           @relation("AdmissionReferral")
   insuranceId          Int?                @unique
-  insurance            Insurance?          @relation("AdmissionInsurance", fields: [insuranceId], references: [id])
+  insurance            Insurance?          @relation("AdmissionInsurance")
   createdById          Int?                @unique
   createdBy            User?               @relation("AdmissionCreatedBy", fields: [createdById], references: [id])
   updatedById          Int?                @unique
@@ -81,6 +81,7 @@ model Admission {
   transactions         Transaction[]       @relation("TransactionAdmissions")
   prescriptions        Prescription[]      @relation("PrescriptionAdmissions")
   appointments         Appointment[]       @relation("AppointmentAdmission")
+  clinicalRecords      ClinicalRecord[]    @relation("ClinicalRecordAdmissions")
 }
 
 model Discharge {
