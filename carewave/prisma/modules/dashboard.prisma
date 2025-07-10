@@ -47,7 +47,7 @@ model DashboardWidget {
   dataSource          String?
   configuration       String?
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("DashboardWidgetAppointments", fields: [appointmentId], references: [id])
+  appointment         Appointment?          @relation("DashboardWidgetAppointments")
   admissionId         Int?                  @unique
   admission           Admission?            @relation("DashboardWidgetAdmissions", fields: [admissionId], references: [id])
   billingId           Int?                  @unique
