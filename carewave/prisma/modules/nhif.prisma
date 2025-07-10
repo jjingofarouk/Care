@@ -1,3 +1,4 @@
+// nhifclaim.prisma
 enum NhifClaimStatus {
   PENDING
   SUBMITTED
@@ -68,6 +69,7 @@ model NhifClaim {
   referralId          Int?
   referral            Referral?             @relation("NhifClaimReferrals", fields: [referralId], references: [id])
   socialServiceCases  SocialServiceCase[]   @relation("SocialServiceCaseNhifClaims")
+  homeCares           HomeCare[]            @relation("NhifClaimHomeCare")
   createdById         Int?
   createdBy           User?                 @relation("NhifClaimCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?
