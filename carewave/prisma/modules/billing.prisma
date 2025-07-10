@@ -71,7 +71,7 @@ model Service {
   createdById         Int?
   createdBy           User?                 @relation("ServiceCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?
-  updatedBy           User?                 @relation("ServiceUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?               @relation("ServiceUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("ServiceAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
@@ -82,8 +82,7 @@ model Billing {
   uuid                  String              @unique @default(uuid())
   patientId             Int?
   patient               Patient?            @relation("PatientBilling", fields: [patientId], references: [id])
-  appointmentId         Int?
-  appointment           Appointment?        @relation("AppointmentBilling", fields: [appointmentId], references: [id])
+  appointment           Appointment?        @relation("AppointmentBilling")
   serviceId             Int?
   service               Service?            @relation("BillingServices", fields: [serviceId], references: [id])
   totalAmount           Float
@@ -200,7 +199,7 @@ model Refund {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
   invoiceId             Int
-  invoice               Invoice             @relation("InvoiceRefunds", fields: [invoiceId], references: [id])
+  invoice               Invoice             @relation("InvoiceRefunds", fields: [invoiceId], references: [id------------------------------------------------------------------------
   reason                String
   amount                Float
   refundDate            DateTime            @default(now())
