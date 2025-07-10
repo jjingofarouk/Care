@@ -39,20 +39,20 @@ model Nursing {
   departmentId        Int?
   department          Department?           @relation("DepartmentNursingRecords", fields: [departmentId], references: [id])
   clinicalRecordId    Int?
-  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  clinicalRecord      ClinicalRecord?       @relation("ClinicalRecordNursing")
   admissionId         Int?
-  admission           Admission?            @relation("AdmissionNursing", fields: [admissionId], references: [id])
+  admission           Admission?            @relation("AdmissionNursing")
   wardId              Int?
   ward                Ward?                 @relation("WardNursing", fields: [wardId], references: [id])
   clinicalSettingId   Int?
-  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  clinicalSetting     ClinicalSetting?      @relation("ClinicalSettingNursing")
   status              NursingStatus         @default(PENDING)
   startDate           DateTime              @default(now())
   endDate             DateTime?
   nursingCareId       Int?
   nursingCare         NursingCare?          @relation("NursingCareRecords", fields: [nursingCareId], references: [id])
   billingId           Int?
-  billing             Billing?              @relation("NursingBilling", fields: [billingId], references: [id])
+  billing             Billing?              @relation("NursingBilling")
   notes               String?
   createdById         Int?
   createdBy           User?                 @relation("NursingCreatedBy", fields: [createdById], references: [id])
