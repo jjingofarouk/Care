@@ -191,6 +191,14 @@ model User {
   socialServicesWorker  SocialService[]       @relation("SocialServiceWorker")
   socialServicesCreated SocialService[]       @relation("SocialServiceCreatedBy")
   socialServicesUpdated SocialService[]       @relation("SocialServiceUpdatedBy")
+  emergencyCreated      Emergency[]           @relation("EmergencyCreatedBy")
+  emergencyUpdated      Emergency[]           @relation("EmergencyUpdatedBy")
+  emergencyDocumentUploaded EmergencyDocument[] @relation("EmergencyDocumentUploadedBy")
+  emergencyNotificationRecipient EmergencyNotification[] @relation("EmergencyNotificationRecipient")
+  queueCreated          Queue[]               @relation("QueueCreatedBy")
+  queueUpdated          Queue[]               @relation("QueueUpdatedBy")
+  queueLogActionBy      QueueLog[]            @relation("QueueLogActionBy")
+  queueNotificationRecipient QueueNotification[] @relation("QueueNotificationRecipient")
 }
 
 model SystemConfiguration {
@@ -296,9 +304,8 @@ model AuditLog {
   homeCareVisit       HomeCareVisit?        @relation("HomeCareVisitAuditLogs", fields: [entityId], references: [id], map: "AuditLog_homeCareVisit_fkey")
   verification        Verification?         @relation("VerificationAuditLogs", fields: [entityId], references: [id], map: "AuditLog_verification_fkey")
   verificationConfiguration VerificationConfiguration? @relation("VerificationConfigAuditLogs", fields: [entityId], references: [id], map: "AuditLog_verificationConfig_fkey")
-  referralReward      ReferralReward?       @relation("ReferralRewardAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referralReward_fkey")
-  referralProgram     ReferralProgram?      @relation("ReferralProgramAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referralProgram_fkey")
-  referral            Referral?             @relation("ReferralAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referral_fkey")
+  referralReward      ReferralReward?       @relation("ReferralRewardAuditLogs", fields: [entityId], details             String?
+  createdAt           DateTime              @default(now())
   admission           Admission?            @relation("AdmissionAuditLogs", fields: [entityId], references: [id], map: "AuditLog_admission_fkey")
   discharge           Discharge?            @relation("DischargeAuditLogs", fields: [entityId], references: [id], map: "AuditLog_discharge_fkey")
   ward                Ward?                 @relation("WardAuditLogs", fields: [entityId], references: [id], map: "AuditLog_ward_fkey")
@@ -307,6 +314,7 @@ model AuditLog {
   socialService       SocialService?        @relation("SocialServiceAuditLogs", fields: [entityId], references: [id], map: "AuditLog_socialService_fkey")
   socialServiceCase   SocialServiceCase?    @relation("SocialServiceCaseAuditLogs", fields: [entityId], references: [id], map: "AuditLog_socialServiceCase_fkey")
   externalAgency      ExternalAgency?       @relation("ExternalAgencyAuditLogs", fields: [entityId], references: [id], map: "AuditLog_externalAgency_fkey")
-  details             String?
-  createdAt           DateTime              @default(now())
+  emergency           Emergency?            @relation("EmergencyAuditLogs", fields: [entityId], references: [id], map: "AuditLog_emergency_fkey")
+  emergencyDocument   EmergencyDocument?    @relation("EmergencyDocumentAuditLogs", fields: [entityId], references: [id], map: "AuditLog_emergencyDocument_fkey")
+  queue               Queue?                @relation("QueueAuditLogs", fields: [entityId], references: [id], map: "AuditLog_queue_fkey")
 }
