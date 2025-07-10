@@ -88,9 +88,10 @@ model Appointment {
   appointmentDocuments  AppointmentDocument[] @relation("AppointmentDocuments")
   recurringAppointmentId Int?               @unique
   recurringAppointment   RecurringAppointment? @relation("RecurringAppointmentAppointments", fields: [recurringAppointmentId], references: [id])
-  dashboardWidget        DashboardWidget?     @relation("DashboardWidgetAppointments")
+  dashboardWidget        DashboardWidget?     @relation("DashboardWidgetAppointments", fields: [dashboardWidgetId], references: [id])
   doctorAvailability    DoctorAvailability?   @relation("DoctorAvailabilityAppointments", fields: [doctorAvailabilityId], references: [id])
   doctorAvailabilityId  Int?                @unique
+  dashboardWidgetId     Int?                @unique
   invoice               Invoice?            @relation("AppointmentInvoices")
   homeCares             HomeCare[]          @relation("HomeCareAppointments")
   nhifClaims            NhifClaim[]         @relation("NhifClaimAppointments")
