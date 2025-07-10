@@ -28,7 +28,7 @@ model Admission {
   uuid                 String              @unique @default(uuid())
   patientId            Int
   patient              Patient             @relation("PatientAdmissions", fields: [patientId], references: [id])
-  doctorId             Int?                @unique
+  doctorId             Int?
   doctor               Doctor?             @relation("DoctorAdmissions", fields: [doctorId], references: [id])
   wardId               Int?
   ward                 Ward?               @relation("WardAdmissions", fields: [wardId], references: [id])
@@ -145,6 +145,7 @@ model Ward {
   nursingCares         NursingCare[]       @relation("WardNursingCare")
   nursingShifts        NursingShift[]      @relation("WardNursingShifts")
   clinicalSettings     ClinicalSetting[]   @relation("ClinicalSettingWard")
+  emergencies          Emergency[]         @relation("EmergencyWard")
 }
 
 model Bed {
@@ -168,6 +169,7 @@ model Bed {
   transfersTo          Transfer[]          @relation("ToBedTransfers")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+  emergencies          Emergency[]         @relation("EmergencyBed")
 }
 
 model Transfer {
