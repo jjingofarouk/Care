@@ -91,6 +91,7 @@ model Referral {
   auditLogs           AuditLog[]            @relation("ReferralAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
+  admissions          Admission[]           @relation("AdmissionReferral")
 }
 
 model ReferralReward {
