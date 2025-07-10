@@ -139,11 +139,3 @@ model DoctorNotification {
   updatedAt             DateTime              @updatedAt
 }
 
-model Radiology {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  doctorId              Int?
-  doctor                Doctor?               @relation("RadiologyOrders", fields: [doctorId], references: [id])
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-}
