@@ -55,7 +55,7 @@ model Appointment {
   billingId             Int?                @unique
   billing               Billing?            @relation("AppointmentBilling", fields: [billingId], references: [id])
   queueId               Int?                @unique
-  queue                 Queue?              @relation("AppointmentQueue")
+  queue                 Queue?              @relation("AppointmentQueue", fields: [queueId], references: [id], map: "Appointment_queue_fkey")
   admissionId           Int?                @unique
   admission             Admission?          @relation("AppointmentAdmission", fields: [admissionId], references: [id], map: "Appointment_admission_fkey")
   dischargeId           Int?                @unique
@@ -63,7 +63,7 @@ model Appointment {
   laboratoryId          Int?                @unique
   laboratory            Laboratory?         @relation("AppointmentLaboratory", fields: [laboratoryId], references: [id])
   radiologyId           Int?                @unique
-  radiology             Radiology?          @relation("AppointmentRadiology")
+  radiology             Radiology?          @relation("AppointmentRadiology", fields: [radiologyId], references: [id], map: "Appointment_radiology_fkey")
   radiologyTests        RadiologyTest[]     @relation("AppointmentRadiologyTests")
   pharmacyId            Int?                @unique
   pharmacy              Pharmacy?           @relation("AppointmentPharmacy", fields: [pharmacyId], references: [id])
@@ -76,7 +76,7 @@ model Appointment {
   insuranceId           Int?
   insurance             Insurance?          @relation("AppointmentInsurance", fields: [insuranceId], references: [id])
   referralId            Int?                @unique
-  referral              Referral?           @relation("AppointmentReferral")
+  referral              Referral?           @relation("AppointmentReferral", fields: [referralId], references: [id], map: "Appointment_referral_fkey")
   location              String?
   teleconsultationLink  String?
   duration              Int?
