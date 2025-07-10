@@ -60,7 +60,7 @@ model Patient {
   radiologyTestRecords  RadiologyTest[]       @relation("PatientRadiologyTests")
   pharmacyRecords       Pharmacy[]            @relation("PatientPharmacyRecords")
   maternityRecords      Maternity[]           @relation("PatientMaternityRecords")
-  vaccinationRecords    Vaccination[]         @relation("PatientVaccinationRecords")
+  vaccinations          Vaccination[]         @relation("PatientVaccinationRecords")
   socialServiceCases    SocialServiceCase[]   @relation("PatientSocialServiceCases")
   helpdeskTickets       Helpdesk[]            @relation("PatientHelpdeskTickets")
   billingRecords        Billing[]             @relation("PatientBilling")
