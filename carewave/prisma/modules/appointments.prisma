@@ -49,7 +49,7 @@ model Appointment {
   checkOutTime          DateTime?
   reminderSent          Boolean             @default(false)
   reminderDate          DateTime?
-  medicalRecordId       Int?
+  medicalRecordId       Int?                @unique
   medicalRecord         MedicalRecord?      @relation("AppointmentMedicalRecord", fields: [medicalRecordId], references: [id])
   billingId             Int?
   billing               Billing?            @relation("AppointmentBilling", fields: [billingId], references: [id])
