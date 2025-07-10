@@ -30,15 +30,15 @@ model Emergency {
   laboratoryId          Int?                @unique
   laboratory            Laboratory?         @relation("EmergencyLaboratory", fields: [laboratoryId], references: [id])
   radiologyId           Int?                @unique
-  radiology             Radiology?          @relation("EmergencyRadiology")
+  radiology             Radiology?          @relation("EmergencyRadiology", fields: [radiologyId], references: [id], map: "Emergency_radiology_fkey")
   pharmacyId            Int?                @unique
   pharmacy              Pharmacy?           @relation("EmergencyPharmacy", fields: [pharmacyId], references: [id])
   operationTheatreId    Int?                @unique
   operationTheatre      OperationTheatre?   @relation("EmergencyOperationTheatre", fields: [operationTheatreId], references: [id])
   billingId             Int?                @unique
-  billing               Billing?            @relation("EmergencyBilling")
+  billing               Billing?            @relation("EmergencyBilling", fields: [billingId], references: [id], map: "Emergency_billing_fkey")
   claimId               Int?                @unique
-  claim                 Claim?              @relation("EmergencyClaims")
+  claim                 Claim?              @relation("EmergencyClaims", fields: [claimId], references: [id], map: "Emergency_claim_fkey")
   wardId                Int?                @unique
   ward                  Ward?               @relation("EmergencyWard", fields: [wardId], references: [id])
   bedId                 Int?                @unique
