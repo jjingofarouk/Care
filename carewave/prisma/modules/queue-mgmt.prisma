@@ -24,17 +24,17 @@ model Queue {
   status              QueueStatus           @default(WAITING)
   priority            QueuePriority?
   patientId           Int?                  @unique
-  patient             Patient?              @relation("PatientQueue")
+  patient             Patient?              @relation("PatientQueue", fields: [patientId], references: [id], map: "Queue_patient_fkey")
   appointmentId       Int?                  @unique
   appointment         Appointment?          @relation("AppointmentQueue", fields: [appointmentId], references: [id], map: "Queue_appointment_fkey")
   admissionId         Int?                  @unique
-  admission           Admission?            @relation("AdmissionQueue")
+  admission           Admission?            @relation("AdmissionQueue", fields: [admissionId], references: [id], map: "Queue_admission_fkey")
   departmentId        Int?
   department          Department?           @relation("DepartmentQueues", fields: [departmentId], references: [id])
   doctorId            Int?
   doctor              Doctor?               @relation("QueueDoctor", fields: [doctorId], references: [id])
   clinicalSettingId   Int?                  @unique
-  clinicalSetting     ClinicalSetting?      @relation("QueueClinicalSettings")
+  clinicalSetting     ClinicalSetting?      @relation("QueueClinicalSettings", fields: [clinicalSettingId], references: [id], map: "Queue_clinicalSetting_fkey")
   wardId              Int?
   ward                Ward?                 @relation("WardQueue", fields: [wardId], references: [id])
   serviceType         String?
@@ -49,9 +49,9 @@ model Queue {
   queueLogs           QueueLog[]            @relation("QueueLogs")
   notifications       QueueNotification[]   @relation("QueueNotifications")
   auditLogs           AuditLog[]            @relation("QueueAuditLogs")
+  dashboardWidgets    DashboardWidget[]     @relation("DashboardWidgetQueue")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
-  dashboardWidgets    DashboardWidget[]     @relation("DashboardWidgetQueue")
 }
 
 model QueueLog {
@@ -61,7 +61,7 @@ model QueueLog {
   queue               Queue                 @relation("QueueLogs", fields: [queueId], references: [id])
   action              String
   actionById          Int?                  @unique
-  actionBy            User?                 @relation("QueueLogActionBy")
+  actionBy            User?                 @relation("QueueLogActionBy", fields: [actionById], references: [id])
   actionDate          DateTime              @default(now())
   notes               String?
   createdAt           DateTime              @default(now())
@@ -77,7 +77,7 @@ model QueueNotification {
   status              NotificationStatus    @default(PENDING)
   sentAt              DateTime?
   recipientId         Int?                  @unique
-  recipient           User?                 @relation("QueueNotificationRecipient")
+  recipient           User?                 @relation("QueueNotificationRecipient", fields: [recipientId], references: [id])
   message             String?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
