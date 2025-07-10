@@ -24,19 +24,19 @@ model Queue {
   status              QueueStatus           @default(WAITING)
   priority            QueuePriority?
   patientId           Int?
-  patient             Patient?              @relation(fields: [patientId], references: [id])
+  patient             Patient?              @relation("PatientQueue", fields: [patientId], references: [id])
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  appointment         Appointment?          @relation("QueueAppointment", fields: [appointmentId], references: [id])
   admissionId         Int?
-  admission           Admission?            @relation(fields: [admissionId], references: [id])
+  admission           Admission?            @relation("AdmissionQueue", fields: [admissionId], references: [id])
   departmentId        Int?
   department          Department?           @relation("DepartmentQueues", fields: [departmentId], references: [id])
   doctorId            Int?
-  doctor              Doctor?               @relation(fields: [doctorId], references: [id])
+  doctor              Doctor?               @relation("QueueDoctor", fields: [doctorId], references: [id])
   clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
   wardId              Int?
-  ward                Ward?                 @relation(fields: [wardId], references: [id])
+  ward                Ward?                 @relation("WardQueue", fields: [wardId], references: [id])
   serviceType         String?
   estimatedWaitTime   Int?
   calledAt            DateTime?
@@ -87,7 +87,7 @@ model QueueConfiguration {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
   departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
+  department          Department?           @relation("DepartmentQueueConfigurations", fields: [departmentId], references: [id])
   clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
   name                String
