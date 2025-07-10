@@ -57,11 +57,14 @@ model Patient {
   prescriptions         Prescription[]        @relation("PatientPrescriptions")
   laboratoryTests       Laboratory[]          @relation("PatientLaboratoryTests")
   radiologyTests        Radiology[]           @relation("PatientRadiologyTests")
-  radiologyTestRecords  RadiologyTest[]       @relation("PatientRadiologyTests")
+  radiologyTestRecords  RadiologyTest[]       @relation("PatientRadiologyTestRecords")
   pharmacyRecords       Pharmacy[]            @relation("PatientPharmacyRecords")
   maternityRecords      Maternity[]           @relation("PatientMaternityRecords")
   vaccinations          Vaccination[]         @relation("PatientVaccinationRecords")
+  socialServices        SocialService[]       @relation("PatientSocialServices")
   socialServiceCases    SocialServiceCase[]   @relation("PatientSocialServiceCases")
+  homeCares             HomeCare[]            @relation("PatientHomeCare")
+  clinicalRecords       ClinicalRecord[]      @relation("PatientClinicalRecords")
   helpdeskTickets       Helpdesk[]            @relation("PatientHelpdeskTickets")
   billingRecords        Billing[]             @relation("PatientBilling")
   recurringAppointments RecurringAppointment[] @relation("PatientRecurringAppointments")
@@ -71,5 +74,5 @@ model Patient {
   updatedBy             User?                 @relation("PatientUpdatedBy", fields: [updatedById], references: [id])
   auditLogs             AuditLog[]            @relation("PatientAuditLogs")
   createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+  updatedAt             DateTime            @updatedAt
 }
