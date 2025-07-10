@@ -80,6 +80,7 @@ model Admission {
   nhifClaims           NhifClaim[]         @relation("NhifClaimAdmissions")
   transactions         Transaction[]       @relation("TransactionAdmissions")
   prescriptions        Prescription[]      @relation("PrescriptionAdmissions")
+  appointments         Appointment[]       @relation("AppointmentAdmission")
 }
 
 model Discharge {
@@ -103,7 +104,7 @@ model Discharge {
   medicalRecordId      Int?                @unique
   medicalRecord        MedicalRecord?      @relation("DischargeMedicalRecord", fields: [medicalRecordId], references: [id])
   appointmentId        Int?                @unique
-  appointment          Appointment?        @relation("DischargeAppointment", fields: [appointmentId], references: [id])
+  appointment          Appointment?        @relation("AppointmentDischarge")
   socialServiceId      Int?                @unique
   socialService        SocialService?      @relation("DischargeSocialService", fields: [socialServiceId], references: [id])
   createdById          Int?                @unique
