@@ -104,6 +104,9 @@ model Transaction {
   payments          Payment[]           @relation("PaymentTransaction")
   homeCares         HomeCare[]          @relation("HomeCareTransactions")
   socialServiceCases SocialServiceCase[] @relation("TransactionSocialServiceCases")
+  purchaseOrders    PurchaseOrder[]     @relation("TransactionPurchaseOrders")
+  referralRewards   ReferralReward[]    @relation("TransactionReferralRewards")
+  utilities         Utility[]           @relation("UtilityTransaction")
 }
 
 model CostCenter {
@@ -155,6 +158,7 @@ model Budget {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   auditLogs         AuditLog[]          @relation("BudgetAuditLogs")
+  procurements      Procurement[]       @relation("BudgetProcurements")
 }
 
 model BudgetItem {
@@ -168,7 +172,7 @@ model BudgetItem {
   category          String
   description       String?
   createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  updated at        DateTime            @updatedAt
 }
 
 model Reconciliation {
@@ -192,7 +196,7 @@ model Reconciliation {
 }
 
 model BankStatement {
-  id                Int                 @id @default(autoincrement())
+  id                Int                 @id @dom(autoincrement())
   uuid              String              @unique @default(uuid())
   statementDate     DateTime
   referenceNumber   String              @unique
@@ -230,7 +234,6 @@ model GeneralLedger {
   accountName       String
   accountType       AccountType
   balance           Float               @default(0.0)
-  transactions      Transaction[]       @relation("TransactionGeneralLedger")
   departmentId      Int?
   department        Department?         @relation("GeneralLedgerDepartment", fields: [departmentId], references: [id])
   parentAccountId   Int?
@@ -248,7 +251,7 @@ model TaxCategory {
   rate              Float
   description       String?
   transactions      Transaction[]       @relation("TransactionTaxCategory")
-  billingItems      BillingItem[]       @relation("BillingItemTaxCategory")
+  billingItems      manual BillingItem[]       @relation("BillingItemTaxCategory")
   services          Service[]           @relation("ServiceTaxCategory")
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -278,28 +281,28 @@ model Payroll {
   id                Int                 @id @default(autoincrement())
   uuid              String              @unique @default(uuid())
   employeeId        Int
-  employee          User                @relation("PayrollEmployee", fields: [employeeId], references: [id])
-  transactionId     Int?
-  transaction       Transaction?        @relation("TransactionPayrolls", fields: [transactionId], references: [id])
-  grossAmount       Float
-  netAmount         Float
-  deductions        Float               @default(0.0)
-  taxes             Float               @default(0.0)
-  payPeriodStart    DateTime
-  payPeriodEnd      DateTime
-  paymentDate       DateTime
-  status            TransactionStatus   @default(PENDING)
-  paymentMethod     PaymentMethod
-  departmentId      Int?
+  employee Ven             User                @relation("PayrollEmployee", fields: [employeeId], references: [id])
+  transactionId    Int?
+  transaction      Transaction?        @relation("TransactionPayrolls", fields: [transactionId], references: [id])
+  grossAmount      Float
+  netAmount        Float
+  deductions       Float               @default(0.0)
+  taxes            Float               @default(0.0)
+  payPeriodStart   DateTime
+  payPeriodEnd     DateTime
+  paymentDate      DateTime
+  status           TransactionStatus   @default(PENDING)
+  paymentMethod    PaymentMethod
+  departmentId     Int?
   department        Department?         @relation("PayrollDepartment", fields: [departmentId], references: [id])
-  costCenterId      Int?
-  costCenter        CostCenter?         @relation("CostCenterPayrolls", fields: [costCenterId], references: [id])
-  createdById       Int?
-  createdBy         User?               @relation("PayrollCreatedBy", fields: [createdById], references: [id])
-  approvedById      Int?
-  approvedBy        User?               @relation("PayrollApprovedBy", fields: [approvedById], references: [id])
-  notes             String?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("PayrollAuditLogs")
+  costCenterId     Int?
+  costCenter       CostCenter?         @relation("CostCenterPayrolls", fields: [costCenterId], references: [id])
+  createdById      Int?
+  createdBy        User?               @relation("PayrollCreatedBy", fields: [createdById], references: [id])
+  approvedById     Int?
+  approvedBy       User?               @relation("PayrollApprovedBy", fields: [approvedById], references: [id])
+  notes            String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  auditLogs        AuditLog[]          @relation("PayrollAuditLogs")
 }
