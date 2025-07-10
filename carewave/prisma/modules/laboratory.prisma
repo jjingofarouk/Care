@@ -63,6 +63,7 @@ model Laboratory {
   dashboardWidget       DashboardWidget?    @relation("DashboardWidgetLaboratory")
   homeCares             HomeCare[]          @relation("HomeCareLaboratory")
   nhifClaims            NhifClaim[]         @relation("NhifClaimLaboratory")
+  emergency             Emergency?          @relation("EmergencyLaboratory")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
