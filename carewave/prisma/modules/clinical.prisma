@@ -46,7 +46,7 @@ model ClinicalRecord {
   allergies              String?
   immunizationHistory    String?
   laboratoryId          Int?                @unique
-  laboratory            Laboratory?         @relation("ClinicalRecordLaboratory", fields: [laboratoryId], references: [id])
+  laboratory            Laboratory?         @relation("ClinicalRecordLaboratory")
   radiologyId           Int?
   radiology             Radiology?          @relation("ClinicalRecordRadiology", fields: [radiologyId], references: [id])
   pharmacyId            Int?
