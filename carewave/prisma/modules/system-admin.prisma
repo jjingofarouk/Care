@@ -1,3 +1,5 @@
+// prisma/user.prisma
+
 enum UserRole {
   ADMIN
   DOCTOR
@@ -177,6 +179,18 @@ model User {
   updatedAt             DateTime              @updatedAt
   admissionsCreated     Admission[]           @relation("AdmissionCreatedBy")
   admissionsUpdated     Admission[]           @relation("AdmissionUpdatedBy")
+  dischargesCreated     Discharge[]           @relation("DischargeCreatedBy")
+  dischargesApproved    Discharge[]           @relation("DischargeApprovedBy")
+  wardsNurseInCharge    Ward[]                @relation("WardNurseInCharge")
+  wardsCreated          Ward[]                @relation("WardCreatedBy")
+  wardsUpdated          Ward[]                @relation("WardUpdatedBy")
+  bedsCreated           Bed[]                 @relation("BedCreatedBy")
+  bedsUpdated           Bed[]                 @relation("BedUpdatedBy")
+  transfersCreated      Transfer[]            @relation("TransferCreatedBy")
+  transfersApproved     Transfer[]            @relation("TransferApprovedBy")
+  socialServicesWorker  SocialService[]       @relation("SocialServiceWorker")
+  socialServicesCreated SocialService[]       @relation("SocialServiceCreatedBy")
+  socialServicesUpdated SocialService[]       @relation("SocialServiceUpdatedBy")
 }
 
 model SystemConfiguration {
@@ -286,6 +300,13 @@ model AuditLog {
   referralProgram     ReferralProgram?      @relation("ReferralProgramAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referralProgram_fkey")
   referral            Referral?             @relation("ReferralAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referral_fkey")
   admission           Admission?            @relation("AdmissionAuditLogs", fields: [entityId], references: [id], map: "AuditLog_admission_fkey")
+  discharge           Discharge?            @relation("DischargeAuditLogs", fields: [entityId], references: [id], map: "AuditLog_discharge_fkey")
+  ward                Ward?                 @relation("WardAuditLogs", fields: [entityId], references: [id], map: "AuditLog_ward_fkey")
+  bed                 Bed?                  @relation("BedAuditLogs", fields: [entityId], references: [id], map: "AuditLog_bed_fkey")
+  transfer            Transfer?             @relation("TransferAuditLogs", fields: [entityId], references: [id], map: "AuditLog_transfer_fkey")
+  socialService       SocialService?        @relation("SocialServiceAuditLogs", fields: [entityId], references: [id], map: "AuditLog_socialService_fkey")
+  socialServiceCase   SocialServiceCase?    @relation("SocialServiceCaseAuditLogs", fields: [entityId], references: [id], map: "AuditLog_socialServiceCase_fkey")
+  externalAgency      ExternalAgency?       @relation("ExternalAgencyAuditLogs", fields: [entityId], references: [id], map: "AuditLog_externalAgency_fkey")
   details             String?
   createdAt           DateTime              @default(now())
 }
