@@ -83,7 +83,7 @@ model EmergencyNotification {
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
   recipientId           Int?                @unique
-  recipient             User?               @relation("EmergencyNotificationRecipient")
+  recipient             User?               @relation("EmergencyNotificationRecipient", fields: [recipientId], references: [id])
   message               String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
