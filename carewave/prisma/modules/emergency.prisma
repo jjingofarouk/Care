@@ -7,8 +7,6 @@ enum EmergencyStatus {
   CANCELLED
 }
 
-
-
 model Emergency {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
