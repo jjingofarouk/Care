@@ -23,6 +23,15 @@ enum DischargeType {
   DECEASED
 }
 
+enum EmergencyStatus {
+  PENDING
+  ACTIVE
+  STABILIZED
+  TRANSFERRED
+  DISCHARGED
+  CANCELLED
+}
+
 model Admission {
   id                   Int                 @id @default(autoincrement())
   uuid                 String              @unique @default(uuid())
@@ -67,7 +76,7 @@ model Admission {
   auditLogs            AuditLog[]          @relation("AdmissionAuditLogs")
   transfers            Transfer[]          @relation("AdmissionTransfers")
   discharge            Discharge?          @relation("AdmissionDischarge")
-  dashboardWidget      DashboardWidget?    @relation("DashboardWidgetAdmissions")
+  dashboardWidget      DashboardWidget?    @relation("DashboardWidgetAdmissions", fields: [admissionId], references: [id])
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
   claims               Claim[]             @relation("AdmissionClaims")
@@ -199,3 +208,4 @@ model Transfer {
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
 }
+
