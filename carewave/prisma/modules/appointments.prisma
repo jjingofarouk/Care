@@ -51,7 +51,7 @@ model Appointment {
   reminderDate          DateTime?
   medicalRecordId       Int?                @unique
   medicalRecord         MedicalRecord?      @relation("AppointmentMedicalRecord", fields: [medicalRecordId], references: [id])
-  billingId             Int?
+  billingId             Int?                @unique
   billing               Billing?            @relation("AppointmentBilling", fields: [billingId], references: [id])
   queueId               Int?
   queue                 Queue?              @relation("AppointmentQueue", fields: [queueId], references: [id])
