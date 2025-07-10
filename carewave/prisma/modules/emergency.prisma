@@ -14,7 +14,7 @@ model Emergency {
   doctorId              Int?                @unique
   doctor                Doctor?             @relation("DoctorEmergencies", fields: [doctorId], references: [id])
   admissionId           Int?                @unique
-  admission             Admission?          @relation("AdmissionEmergency", fields: [admissionId], references: [id])
+  admission             Admission?          @relation("AdmissionEmergency")
   departmentId          Int?
   department            Department?         @relation("DepartmentEmergencies", fields: [departmentId], references: [id])
   clinicalSettingId     Int?                @unique
@@ -30,15 +30,15 @@ model Emergency {
   laboratoryId          Int?                @unique
   laboratory            Laboratory?         @relation("EmergencyLaboratory", fields: [laboratoryId], references: [id])
   radiologyId           Int?                @unique
-  radiology             Radiology?          @relation("EmergencyRadiology", fields: [radiologyId], references: [id])
+  radiology             Radiology?          @relation("EmergencyRadiology")
   pharmacyId            Int?                @unique
   pharmacy              Pharmacy?           @relation("EmergencyPharmacy", fields: [pharmacyId], references: [id])
   operationTheatreId    Int?                @unique
   operationTheatre      OperationTheatre?   @relation("EmergencyOperationTheatre", fields: [operationTheatreId], references: [id])
   billingId             Int?                @unique
-  billing               Billing?            @relation("EmergencyBilling", fields: [billingId], references: [id])
+  billing               Billing?            @relation("EmergencyBilling")
   claimId               Int?                @unique
-  claim                 Claim?              @relation("EmergencyClaims", fields: [claimId], references: [id])
+  claim                 Claim?              @relation("EmergencyClaims")
   wardId                Int?                @unique
   ward                  Ward?               @relation("EmergencyWard", fields: [wardId], references: [id])
   bedId                 Int?                @unique
