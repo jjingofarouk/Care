@@ -55,6 +55,8 @@ model HomeCare {
   auditLogs             AuditLog[]          @relation("HomeCareAuditLogs")
   homeCareVisits        HomeCareVisit[]     @relation("HomeCareVisits")
   homeCareNotifications HomeCareNotification[] @relation("HomeCareNotifications")
+  nhifClaims            NhifClaim[]         @relation("NhifClaimHomeCare")
+  socialServices        SocialService[]     @relation("SocialServiceHomeCare")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
