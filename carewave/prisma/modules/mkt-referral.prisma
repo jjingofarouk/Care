@@ -32,7 +32,7 @@ model ReferralProgram {
   startDate           DateTime              @default(now())
   endDate             DateTime?
   departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
+  department          Department?           @relation(fields: [departmentId], references: [id], map: "ReferralProgram_department_fkey")
   targetAudience      String?
   rewardType          RewardType?
   rewardValue         Float?
@@ -41,9 +41,9 @@ model ReferralProgram {
   maxReferrals        Int?
   termsConditions     String?
   createdById         Int?
-  createdBy           User?                 @relation("ReferralProgramCreatedBy", fields: [createdById], references: [id])
+  createdBy           User?                 @relation("ReferralProgramCreatedBy", fields: [createdById], references: [id], map: "ReferralProgram_createdBy_fkey")
   updatedById         Int?
-  updatedBy           User?                 @relation("ReferralProgramUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?                 @relation("ReferralProgramUpdatedBy", fields: [updatedById], references: [id], map: "ReferralProgram_updatedBy_fkey")
   referrals           Referral[]
   campaigns           MarketingCampaign[]
   auditLogs           AuditLog[]            @relation("ReferralProgramAuditLogs")
@@ -55,39 +55,39 @@ model Referral {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
   referralProgramId   Int
-  referralProgram     ReferralProgram       @relation(fields: [referralProgramId], references: [id])
+  referralProgram     ReferralProgram       @relation(fields: [referralProgramId], references: [id], map: "Referral_referralProgram_fkey")
   referrerId          Int?
-  referrer            User?                 @relation("Referrer", fields: [referrerId], references: [id])
+  referrer            User?                 @relation("Referrer", fields: [referrerId], references: [id], map: "Referral_referrer_fkey")
   refereeId           Int?
-  referee             User?                 @relation("Referee", fields: [refereeId], references: [id])
+  referee             User?                 @relation("Referee", fields: [refereeId], references: [id], map: "Referral_referee_fkey")
   patientId           Int?
-  patient             Patient?              @relation(fields: [patientId], references: [id])
+  patient             Patient?              @relation(fields: [patientId], references: [id], map: "Referral_patient_fkey")
   doctorId            Int?
-  doctor              Doctor?               @relation(fields: [doctorId], references: [id])
+  doctor              Doctor?               @relation(fields: [doctorId], references: [id], map: "Referral_doctor_fkey")
   departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
+  department          Department?           @relation(fields: [departmentId], references: [id], map: "Referral_department_fkey")
   status              ReferralStatus        @default(PENDING)
   referralDate        DateTime              @default(now())
   completionDate      DateTime?
   appointmentId       Int?
-  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
+  appointment         Appointment?          @relation(fields: [appointmentId], references: [id], map: "Referral_appointment_fkey")
   medicalRecordId     Int?
-  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id], map: "Referral_medicalRecord_fkey")
   claimId             Int?
-  claim               Claim?                @relation(fields: [claimId], references: [id])
+  claim               Claim?                @relation(fields: [claimId], references: [id], map: "Referral_claim_fkey")
   nhifClaimId         Int?
-  nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
+  nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id], map: "Referral_nhifClaim_fkey")
   rewardId            Int?
-  reward              ReferralReward?       @relation(fields: [rewardId], references: [id])
-  notes              String?
+  reward              ReferralReward?       @relation(fields: [rewardId], references: [id], map: "Referral_reward_fkey")
+  notes               String?
   referralCode        String?               @unique
   source              String?
   campaignId          Int?
-  campaign            MarketingCampaign?    @relation(fields: [campaignId], references: [id])
+  campaign            MarketingCampaign?    @relation(fields: [campaignId], references: [id], map: "Referral_campaign_fkey")
   createdById         Int?
-  createdBy           User?                 @relation("ReferralCreatedBy", fields: [createdById], references: [id])
+  createdBy           User?                 @relation("ReferralCreatedBy", fields: [createdById], references: [id], map: "Referral_createdBy_fkey")
   updatedById         Int?
-  updatedBy           User?                 @relation("ReferralUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?                 @relation("ReferralUpdatedBy", fields: [updatedById], references: [id], map: "Referral_updatedBy_fkey")
   auditLogs           AuditLog[]            @relation("ReferralAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
@@ -117,28 +117,27 @@ model ReferralReward {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
+
 model MarketingCampaign {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
   name                String
   description         String?
   referralProgramId   Int?
-  referralProgram     ReferralProgram?      @relation(fields: [referralProgramId], references: [id])
+  referralProgram     ReferralProgram?      @relation(fields: [referralProgramId], references: [id], map: "MarketingCampaign_referralProgram_fkey")
   startDate           DateTime              @default(now())
   endDate             DateTime?
   targetAudience      String?
   channel             String?
   budget              Float?
   actualCost          Float?
-  k各地
-
-System: kpis                String?               // JSON or text for key performance indicators
+  kpis                String?
   status              String                @default("DRAFT")
   referrals           Referral[]
   createdById         Int?
-  createdBy           User?                 @relation("CampaignCreatedBy", fields: [createdById], references: [id])
+  createdBy           User?                 @relation("CampaignCreatedBy", fields: [createdById], references: [id], map: "MarketingCampaign_createdBy_fkey")
   updatedById         Int?
-  updatedBy           User?                 @relation("CampaignUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?                 @relation("CampaignUpdatedBy", fields: [updatedById], references: [id], map: "MarketingCampaign_updatedBy_fkey")
   auditLogs           AuditLog[]            @relation("MarketingCampaignAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
