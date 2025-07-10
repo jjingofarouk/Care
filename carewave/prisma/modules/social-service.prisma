@@ -1,3 +1,5 @@
+// prisma/socialservice.prisma
+
 enum SocialServiceCaseStatus {
   OPEN
   IN_PROGRESS
@@ -60,6 +62,7 @@ model SocialService {
   updatedAt           DateTime              @updatedAt
   homeCareId          Int?
   homeCare            HomeCare?             @relation("SocialServiceHomeCare", fields: [homeCareId], references: [id])
+  discharges           Discharge[]           @relation("DischargeSocialService")
 }
 
 model SocialServiceCase {
@@ -106,7 +109,7 @@ model SocialServiceCase {
   updatedBy           User?               @relation("CaseUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("SocialServiceCaseAuditLogs")
   createdAt           DateTime              @default(now())
-  updatedAt           DateTime            @updatedAt
+  updatedAt           DateTime              @updatedAt
   transactions        Transaction[]         @relation("TransactionSocialServiceCases")
 }
 
