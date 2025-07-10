@@ -15,7 +15,7 @@ model Emergency {
   doctorId              Int?                @unique
   doctor                Doctor?             @relation("DoctorEmergencies", fields: [doctorId], references: [id])
   admissionId           Int?                @unique
-  admission             Admission?          @relation("EmergencyAdmissions", fields: [admissionId], references: [id])
+  admission             Admission?          @relation("AdmissionEmergency", fields: [admissionId], references: [id])
   departmentId          Int?
   department            Department?         @relation("DepartmentEmergencies", fields: [departmentId], references: [id])
   clinicalSettingId     Int?                @unique
