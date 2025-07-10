@@ -71,5 +71,5 @@ model Patient {
   recurringAppointments  RecurringAppointment[] @relation("PatientRecurringAppointments")
   emergencies           Emergency[]           @relation("PatientEmergencies")
   queues               Queue[]               @relation("PatientQueue")
-  referrals            Referral[]            @relation("Referral_patient_fkey")
+  referrals            Referral[]            @relation("PatientReferrals", fields: [patientId], references: [id], map: "Patient_referrals_fkey")
 }
