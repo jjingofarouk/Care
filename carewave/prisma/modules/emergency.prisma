@@ -58,6 +58,7 @@ model Emergency {
   updatedAt             DateTime            @updatedAt
 }
 
+
 model EmergencyDocument {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
@@ -67,10 +68,10 @@ model EmergencyDocument {
   filePath              String
   description           String?
   uploadedById          Int?                @unique
-  uploadedBy            User?               @relation("EmergencyDocumentUploadedBy", fields: [uploadedById], references: [id])
+  uploadedBy            User?               @relation("EmergencyDocumentUploadedBy")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("EmergencyDocumentAuditLogs")
+  auditLogs             AuditLog[]          @relation("EmergencyDocumentAuditLogs", fields: [id], references: [entityId])
 }
 
 model EmergencyNotification {
@@ -82,7 +83,7 @@ model EmergencyNotification {
   status                NotificationStatus  @default(PENDING)
   sentAt                DateTime?
   recipientId           Int?                @unique
-  recipient             User?               @relation("EmergencyNotificationRecipient", fields: [recipientId], references: [id])
+  recipient             User?               @relation("EmergencyNotificationRecipient")
   message               String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
