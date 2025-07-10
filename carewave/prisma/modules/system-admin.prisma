@@ -175,6 +175,8 @@ model User {
   marketingCampaignsUpdated MarketingCampaign[] @relation("CampaignUpdatedBy")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
+  admissionsCreated     Admission[]           @relation("AdmissionCreatedBy")
+  admissionsUpdated     Admission[]           @relation("AdmissionUpdatedBy")
 }
 
 model SystemConfiguration {
@@ -283,6 +285,7 @@ model AuditLog {
   referralReward      ReferralReward?       @relation("ReferralRewardAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referralReward_fkey")
   referralProgram     ReferralProgram?      @relation("ReferralProgramAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referralProgram_fkey")
   referral            Referral?             @relation("ReferralAuditLogs", fields: [entityId], references: [id], map: "AuditLog_referral_fkey")
+  admission           Admission?            @relation("AdmissionAuditLogs", fields: [entityId], references: [id], map: "AuditLog_admission_fkey")
   details             String?
   createdAt           DateTime              @default(now())
 }
