@@ -103,7 +103,6 @@ model Transaction {
   refunds           Refund[]            @relation("RefundTransaction")
   payments          Payment[]           @relation("PaymentTransaction")
   homeCares         HomeCare[]          @relation("HomeCareTransactions")
-  admissions        Admission[]         @relation("TransactionAdmissions")
   socialServiceCases SocialServiceCase[] @relation("TransactionSocialServiceCases")
 }
 
