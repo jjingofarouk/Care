@@ -23,8 +23,6 @@ enum DischargeType {
   DECEASED
 }
 
-
-
 model Admission {
   id                   Int                 @id @default(autoincrement())
   uuid                 String              @unique @default(uuid())
@@ -59,7 +57,7 @@ model Admission {
   department           Department?         @relation("DepartmentAdmissions", fields: [departmentId], references: [id])
   admissionType        String?
   referralId           Int?                @unique
-  referral             Referral?           @relation("AdmissionReferral", fields: [referralId], references: [id])
+  referral             Referral?           @relation("AdmissionReferral")
   insuranceId          Int?                @unique
   insurance            Insurance?          @relation("AdmissionInsurance", fields: [insuranceId], references: [id])
   createdById          Int?                @unique
@@ -69,7 +67,7 @@ model Admission {
   auditLogs            AuditLog[]          @relation("AdmissionAuditLogs")
   transfers            Transfer[]          @relation("AdmissionTransfers")
   discharge            Discharge?          @relation("AdmissionDischarge")
-  dashboardWidget      DashboardWidget?    @relation("DashboardWidgetAdmissions", fields: [id], references: [id])
+  dashboardWidget      DashboardWidget?    @relation("DashboardWidgetAdmissions")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
   claims               Claim[]             @relation("AdmissionClaims")
