@@ -139,21 +139,21 @@ model Formulary {
 }
 
 model DrugInteraction {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  medicationId1         Int
-  medication1           Medication            @relation("MedicationDrugInteractions", fields: [medicationId1], references: [id])
-  medicationId2         Int
-  medication2           Medication            @relation("MedicationDrugInteractions", fields: [medicationId2], references: [id])
-  description           String
-  severity              String
-  createdById           Int?
-  createdBy             User?                 @relation("InteractionCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("InteractionUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("DrugInteractionAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+  id            Int         @id @default(autoincrement())
+  uuid          String      @unique @default(uuid())
+  medicationId1 Int
+  medication1   Medication  @relation("DrugInteractionMedication1", fields: [medicationId1], references: [id])
+  medicationId2 Int
+  medication2   Medication  @relation("DrugInteractionMedication2", fields: [medicationId2], references: [id])
+  description   String
+  severity      String
+  createdById   Int?
+  createdBy     User?       @relation("InteractionCreatedBy", fields: [createdById], references: [id])
+  updatedById   Int?
+  updatedBy     User?       @relation("InteractionUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs     AuditLog[]  @relation("DrugInteractionAuditLogs")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model AdverseReaction {
