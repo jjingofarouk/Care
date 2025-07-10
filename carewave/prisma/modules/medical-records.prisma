@@ -15,8 +15,8 @@ model MedicalRecord {
   doctor                Doctor?               @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
   appointmentId         Int?                  @unique
   appointment           Appointment?          @relation("AppointmentMedicalRecord")
-  admissionId           Int?
-  admission             Admission?            @relation("MedicalRecordAdmissions", fields: [admissionId], references: [id])
+  admissionId           Int?                  @unique
+  admission             Admission?            @relation("MedicalRecordAdmissions")
   clinicalRecordId      Int?
   clinicalRecord        ClinicalRecord?       @relation("MedicalRecordClinicalRecords", fields: [clinicalRecordId], references: [id])
   departmentId          Int?
