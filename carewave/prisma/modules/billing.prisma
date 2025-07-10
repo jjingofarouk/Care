@@ -196,27 +196,27 @@ model BillingItem {
 }
 
 model Refund {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  invoiceId             Int
-  invoice               Invoice             @relation("InvoiceRefunds", fields: [invoiceId], references: [id------------------------------------------------------------------------
-  reason                String
-  amount                Float
-  refundDate            DateTime            @default(now())
-  transactionId         Int?
-  transaction           Transaction?        @relation("RefundTransaction", fields: [transactionId], references: [id])
-  processedById         Int
-  processedBy           User                @relation("RefundProcessedBy", fields: [processedById], references: [id])
-  approvedById          Int?
-  approvedBy            User?               @relation("RefundApprovedBy", fields: [approvedById], references: [id])
-  status                RefundStatus        @default(PENDING)
-  notes                 String?
-  refundMethod          PaymentMethod?
-  refundReference       String?             @unique
-  auditLogs             AuditLog[]          @relation("RefundAuditLogs")
-  notifications         BillingNotification[] @relation("RefundNotifications")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  id               Int                  @id @default(autoincrement())
+  uuid             String               @unique @default(uuid())
+  invoiceId        Int
+  invoice          Invoice              @relation("InvoiceRefunds", fields: [invoiceId], references: [id])
+  reason           String
+  amount           Float
+  refundDate       DateTime             @default(now())
+  transactionId    Int?
+  transaction      Transaction?         @relation("RefundTransaction", fields: [transactionId], references: [id])
+  processedById    Int
+  processedBy      User                 @relation("RefundProcessedBy", fields: [processedById], references: [id])
+  approvedById     Int?
+  approvedBy       User?                @relation("RefundApprovedBy", fields: [approvedById], references: [id])
+  status           RefundStatus         @default(PENDING)
+  notes            String?
+  refundMethod     PaymentMethod?
+  refundReference  String?              @unique
+  auditLogs        AuditLog[]           @relation("RefundAuditLogs")
+  notifications    BillingNotification[] @relation("RefundNotifications")
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 }
 
 model PaymentPlan {
