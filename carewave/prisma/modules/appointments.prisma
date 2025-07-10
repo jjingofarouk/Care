@@ -28,13 +28,6 @@ enum TriagePriority {
   CRITICAL
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
-
 model Appointment {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
@@ -95,7 +88,7 @@ model Appointment {
   appointmentDocuments  AppointmentDocument[] @relation("AppointmentDocuments")
   recurringAppointmentId Int?               @unique
   recurringAppointment   RecurringAppointment? @relation("RecurringAppointmentAppointments", fields: [recurringAppointmentId], references: [id])
-  dashboardWidget        DashboardWidget?     @relation("DashboardWidgetAppointments", fields: [dashboardWidgetId], references: [id])
+  dashboardWidget        DashboardWidget?     @relation("DashboardWidgetAppointments")
   doctorAvailability    DoctorAvailability?   @relation("DoctorAvailabilityAppointments", fields: [doctorAvailabilityId], references: [id])
   doctorAvailabilityId  Int?                @unique
   dashboardWidgetId     Int?                @unique
