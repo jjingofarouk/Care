@@ -28,7 +28,6 @@ enum TriagePriority {
   CRITICAL
 }
 
-
 model Appointment {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
@@ -92,6 +91,9 @@ model Appointment {
   dashboardWidget        DashboardWidget?     @relation("DashboardWidgetAppointments")
   doctorAvailability    DoctorAvailability?   @relation("DoctorAvailabilityAppointments")
   invoice               Invoice?            @relation("AppointmentInvoices")
+  homeCares             HomeCare[]          @relation("HomeCareAppointments")
+  nhifClaims            NhifClaim[]         @relation("NhifClaimAppointments")
+  prescriptions         Prescription[]      @relation("PrescriptionAppointments")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
