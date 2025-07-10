@@ -1,4 +1,4 @@
-homecare.prisma
+
 enum HomeCareStatus {
   SCHEDULED
   IN_PROGRESS
