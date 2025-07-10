@@ -1,4 +1,3 @@
-// operation-theatre.prisma
 enum OperationTheatreStatus {
   AVAILABLE
   IN_USE
@@ -26,95 +25,98 @@ enum ProcedureType {
 model OperationTheatre {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  name                String                // e.g., "OT-1 Main Theatre"
-  theatreNumber       String                @unique // e.g., "OT-001"
+  name                String
+  theatreNumber       String                @unique
   status              OperationTheatreStatus @default(AVAILABLE)
-  departmentId        Int?                  // Link to department
+  departmentId        Int?
   department          Department?           @relation(fields: [departmentId], references: [id])
-  clinicalSettingId   Int?                  // Link to clinical setting
+  clinicalSettingId   Int?
   clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  location            String?               // e.g., "Building B, Floor 3"
-  capacity            Int?                  // Max capacity (e.g., number of patients or staff)
-  equipmentList       String?               // JSON or text for equipment (e.g., {"ventilator": 1, "monitor": 2})
-  cssdInstrumentId    Int?                  // Link to CSSD instruments
+  location            String?
+  capacity            Int?
+  equipmentList       String?
+  cssdInstrumentId    Int?
   cssdInstrument      CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
-  procedures          SurgicalProcedure[]   // Procedures scheduled in this theatre
-  createdById         Int?                  // User who created the theatre
+  procedures          SurgicalProcedure[]
+  createdById         Int?
   createdBy           User?                 @relation("TheatreCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("TheatreUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("OperationTheatreAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
+  dashboardWidgets    DashboardWidget[]     @relation("DashboardWidgetOperationTheatre")
+  claims              Claim[]               @relation("ClaimOperationTheatre")
+  doctorAvailability  DoctorAvailability[]  @relation("OperationTheatreDoctorAvailability")
 }
 
 model SurgicalProcedure {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  patientId           Int                   // Link to patient
-  patient             Patient               @relation(fields: [patientId], references: [id])
-  doctorId            Int?                  // Link to lead surgeon
-  doctor              Doctor?               @relation("Surgeon", fields: [doctorId], references: [id])
-  operationTheatreId  Int                   // Link to operation theatre
-  operationTheatre    OperationTheatre      @relation(fields: [operationTheatreId], references: [id])
-  appointmentId       Int?                  // Link to appointment
-  appointment         Appointment?          @relation(fields: [appointmentId], references: [id])
-  admissionId         Int?                  // Link to admission
-  admission           Admission?            @relation(fields: [admissionId], references: [id])
-  clinicalRecordId    Int?                  // Link to clinical record
-  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
-  medicalRecordId     Int?                  // Link to medical record
-  medicalRecord       MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
-  departmentId        Int?                  // Link to department
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  clinicalSettingId   Int?                  // Link to clinical setting
-  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  type                ProcedureType         // ELECTIVE, EMERGENCY, etc.
-  status              ProcedureStatus       @default(SCHEDULED)
-  procedureCode       String?               // e.g., ICD-10-PCS code
-  description         String?               // Procedure description
-  startTime           DateTime              // Scheduled start time
-  endTime             DateTime?             // Actual or estimated end time
-  duration            Int?                  // Duration in minutes
-  anesthesiaType      String?               // e.g., "General", "Local"
-  preOpNotes          String?               // Pre-operative notes
-  postOpNotes         String?               // Post-operative notes
-  complications       String?               // JSON or text for complications
-  cssdRequisitionId   Int?                  // Link to CSSD requisition for instruments
-  cssdRequisition     CSSDRequisition?      @relation(fields: [cssdRequisitionId], references: [id])
-  pharmacyId          Int?                  // Link to pharmacy for medications
-  pharmacy            Pharmacy?             @relation(fields: [pharmacyId], references: [id])
-  nursingId           Int?                  // Link to nursing care during procedure
-  nursing             Nursing?              @relation(fields: [nursingId], references: [id])
-  billingId           Int?                  // Link to billing for procedure charges
-  billing             Billing?              @relation(fields: [billingId], references: [id])
-  claimId             Int?                  // Link to insurance claim
-  claim               Claim?                @relation(fields: [claimId], references: [id])
-  nhifClaimId         Int?                  // Link to NHIF claim
-  nhifClaim           NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
-  staffAssignments    SurgicalStaff[]       // Staff assigned to procedure
-  documents           String?               // JSON or file paths for attached documents
-  createdById         Int?                  // User who created the procedure
-  createdBy           User?                 @relation("ProcedureCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
-  updatedBy           User?                 @relation("ProcedureUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("SurgicalProcedureAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  id                  | Int                   @id @default(autoincrement())
+  uuid                | String                @unique @default(uuid())
+  patientId           | Int
+  patient             | Patient               @relation(fields: [patientId], references: [id])
+  doctorId            | Int?
+  doctor              | Doctor?               @relation("Surgeon", fields: [doctorId], references: [id])
+  operationTheatreId  | Int
+  operationTheatre    | OperationTheatre      @relation(fields: [operationTheatreId], references: [id])
+  appointmentId       | Int?
+  appointment         | Appointment?          @relation(fields: [appointmentId], references: [id])
+  admissionId         | Int?
+  admission           | Admission?            @relation(fields: [admissionId], references: [id])
+  clinicalRecordId    | Int?
+  clinicalRecord      | ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
+  medicalRecordId     | Int?
+  medicalRecord       | MedicalRecord?        @relation(fields: [medicalRecordId], references: [id])
+  departmentId        | Int?
+  department          | Department?           @relation(fields: [departmentId], references: [id])
+  clinicalSettingId   | Int?
+  clinicalSetting     | ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
+  type                | ProcedureType
+  status              | ProcedureStatus       @default(SCHEDULED)
+  procedureCode       | String?
+  description         | String?
+  startTime           | DateTime
+  endTime             | DateTime?
+  duration            | Int?
+  anesthesiaType      | String?
+  preOpNotes          | String?
+  postOpNotes         | String?
+  complications       | String?
+  cssdRequisitionId   | Int?
+  cssdRequisition     | CSSDRequisition?      @relation(fields: [cssdRequisitionId], references: [id])
+  pharmacyId          | Int?
+  pharmacy            | Pharmacy?             @relation(fields: [pharmacyId], references: [id])
+  nursingId           | Int?
+  nursing             | Nursing?              @relation(fields: [nursingId], references: [id])
+  billingId           | Int?
+  billing             | Billing?              @relation(fields: [billingId], references: [id])
+  claimId             | Int?
+  claim               | Claim?                @relation(fields: [claimId], references: [id])
+  nhifClaimId         | Int?
+  nhifClaim           | NhifClaim?            @relation(fields: [nhifClaimId], references: [id])
+  staffAssignments    | SurgicalStaff[]
+  documents           | String?
+  createdById         | Int?
+  createdBy           | User?                 @relation("ProcedureCreatedBy", fields: [createdById], references: [id])
+  updatedById         | Int?
+  updatedBy           | User?                 @relation("ProcedureUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs           | AuditLog[]            @relation("SurgicalProcedureAuditLogs")
+  createdAt           | DateTime              @default(now())
+  updatedAt           | DateTime              @updatedAt
 }
 
 model SurgicalStaff {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  procedureId         Int                   // Link to surgical procedure
+  procedureId         Int
   procedure           SurgicalProcedure     @relation(fields: [procedureId], references: [id])
-  staffId             Int                   // Link to staff (User)
+  staffId             Int
   staff               User                  @relation("SurgicalStaff", fields: [staffId], references: [id])
-  role                String                // e.g., "Surgeon", "Anesthetist", "Nurse"
-  notes               String?               // Notes about staff role
-  createdById         Int?                  // User who assigned staff
+  role                String
+  notes               String?
+  createdById         Int?
   createdBy           User?                 @relation("StaffAssignmentCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("StaffAssignmentUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("SurgicalStaffAuditLogs")
   createdAt           DateTime              @default(now())
