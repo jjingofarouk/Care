@@ -39,6 +39,7 @@ model Department {
   nursingRecords      Nursing[]             @relation("DepartmentNursingRecords")
   maternityRecords    Maternity[]           @relation("DepartmentMaternityRecords")
   vaccinationRecords  Vaccination[]         @relation("DepartmentVaccinationRecords")
+  vaccinationCampaigns VaccinationCampaign[] @relation("VaccinationCampaignDepartment")
   reports             Report[]              @relation("DepartmentReports")
   helpdeskTickets     Helpdesk[]            @relation("DepartmentHelpdeskTickets")
   createdById         Int?
