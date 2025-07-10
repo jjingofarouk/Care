@@ -1,4 +1,3 @@
-// procurement.prisma
 enum SupplierStatus {
   ACTIVE
   INACTIVE
@@ -34,68 +33,70 @@ enum ProcurementStatus {
 model Procurement {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  requestNumber       String                @unique // Unique procurement request number (e.g., "PR-2025-001")
-  departmentId        Int?                  // Link to requesting department
+  requestNumber       String                @unique
+  departmentId        Int?
   department          Department?           @relation(fields: [departmentId], references: [id])
-  requesterId         Int?                  // Link to user who created the request
+  requesterId         Int?
   requester           User?                 @relation("ProcurementRequester", fields: [requesterId], references: [id])
-  status              ProcurementStatus     @default(PENDING) // Status of procurement request
-  requestDate         DateTime              @default(now())   // Date of procurement request
-  approvedDate        DateTime?             // Date of approval
-  completionDate      DateTime?             // Date of completion
-  description         String?               // Description of procurement needs
-  budgetId            Int?                  // Link to budget
-  budget              Budget?               @relation(fields: [budgetId], references: [id])
-  purchaseOrderId     Int?                  // Link to associated purchase order
+  status              ProcurementStatus     @default(PENDING)
+  requestDate         DateTime              @default(now())
+  approvedDate        DateTime?
+  completionDate      DateTime?
+  description         String?
+  budgetId            Int?
+  budget              Budget?               @relation("BudgetProcurements", fields: [budgetId], references: [id])
+  purchaseOrderId     Int?
   purchaseOrder       PurchaseOrder?        @relation(fields: [purchaseOrderId], references: [id])
-  medicationId        Int?                  // Link to medication (optional)
+  medicationId        Int?
   medication          Medication?           @relation(fields: [medicationId], references: [id])
-  cssdInstrumentId    Int?                  // Link to CSSD instrument (optional)
+  cssdInstrumentId    Int?
   cssdInstrument      CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
-  inventoryItemId     Int?                  // Link to inventory item (optional)
+  inventoryItemId     Int?
   inventoryItem       Inventory?            @relation(fields: [inventoryItemId], references: [id])
-  billingId           Int?                  // Link to billing for procurement
+  billingId           Int?
   billing             Billing?              @relation(fields: [billingId], references: [id])
-  notes               String?               // Additional notes
-  documents           String?               // JSON or file paths for procurement documents
-  createdById         Int?                  // User who created the record
+  notes               String?
+  documents           String?
+  createdById         Int?
   createdBy           User?                 @relation("ProcurementCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("ProcurementUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("ProcurementAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
+  transactions        Transaction[]         @relation("TransactionProcurement")
+  utilityMaintenances UtilityMaintenance[]  @relation("ProcurementUtilityMaintenance")
 }
 
 model Supplier {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  name                String                // Supplier name (e.g., "MediCorp Supplies")
+  name                String
   status              SupplierStatus        @default(PENDING_APPROVAL)
-  contactName         String?               // Primary contact person
-  contactPhone        String?               // Contact phone number
-  email               String?               @unique // Supplier email
-  address             String?               // Physical address
-  website             String?               // Supplier website
-  taxId               String?               // Tax identification number
-  paymentTerms        String?               // e.g., "Net 30", "COD"
-  creditLimit         Float?                // Credit limit for supplier
-  contractStartDate   DateTime?             // Start date of contract
-  contractEndDate     DateTime?             // End date of contract
-  contractDetails     String?               // JSON or text for contract terms
-  departmentId        Int?                  // Link to department
+  contactName         String?
+  contactPhone        String?
+  email               String?               @unique
+  address             String?
+  website             String?
+  taxId               String?
+  paymentTerms        String?
+  creditLimit         Float?
+  contractStartDate   DateTime?
+  contractEndDate     DateTime?
+  contractDetails       String?
+  departmentId        Int?
   department          Department?           @relation(fields: [departmentId], references: [id])
-  medications         Medication[]          // Medications supplied
-  purchaseOrders      PurchaseOrder[]       // Purchase orders placed with supplier
-  cssdInstruments     CSSDInstrument[]      // CSSD instruments supplied
-  inventoryItems      Inventory[]           // Inventory items supplied
-  performanceRating   Float?                // Supplier performance rating (e.g., 4.5/5)
-  lastReviewDate      DateTime?             // Last supplier review date
-  notes               String?               // Additional notes
-  documents           String?               // JSON or file paths for supplier documents
-  createdById         Int?                  // User who created supplier record
+  medications         Medication[]
+  purchaseOrders      PurchaseOrder[]
+  cssdInstruments     CSSDInstrument[]
+  inventoryItems      Inventory[]
+  performanceRating   Float?
+  lastReviewDate      DateTime?
+  notes               String?
+  documents           String?
+  createdById         Int?
   createdBy           User?                 @relation("SupplierCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("SupplierUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("SupplierAuditLogs")
   createdAt           DateTime              @default(now())
@@ -105,36 +106,36 @@ model Supplier {
 model PurchaseOrder {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  orderNumber         String                @unique // Unique order number (e.g., "PO-2025-001")
-  supplierId          Int                   // Link to supplier
+  orderNumber         String                @unique
+  supplierId          Int
   supplier            Supplier              @relation(fields: [supplierId], references: [id])
-  departmentId        Int?                  // Link to department
+  departmentId        Int?
   department          Department?           @relation(fields: [departmentId], references: [id])
-  procurementId       Int?                  // Link to procurement request
+  procurementId       Int?
   procurement         Procurement?          @relation(fields: [procurementId], references: [id])
   orderDate           DateTime              @default(now())
-  expectedDeliveryDate DateTime?            // Expected delivery date
-  actualDeliveryDate  DateTime?             // Actual delivery date
+  expectedDeliveryDate DateTime?
+  actualDeliveryDate  DateTime?
   status              PurchaseOrderStatus   @default(PENDING)
-  totalAmount         Float                 // Total order amount
-  taxAmount           Float?                // Tax component
-  discountAmount      Float?                // Discount applied
-  shippingCost        Float?                // Shipping cost
-  paymentStatus       String?               // e.g., "PAID", "PENDING", "PARTIAL"
-  transactionId       Int?                  // Link to accounting transaction
-  transaction         Transaction?          @relation(fields: [transactionId], references: [id])
-  inventoryId         Int?                  // Link to inventory
+  totalAmount         Float
+  taxAmount           Float?
+  discountAmount      Float?
+  shippingCost        Float?
+  paymentStatus       String?
+  transactionId       Int?
+  transaction         Transaction?          @relation("TransactionPurchaseOrders", fields: [transactionId], references: [id])
+  inventoryId         Int?
   inventory           Inventory?            @relation(fields: [inventoryId], references: [id])
-  cssdInstrumentId    Int?                  // Link to CSSD instrument
+  cssdInstrumentId    Int?
   cssdInstrument      CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
-  notes               String?               // Additional notes
-  documents           String?               // JSON or file paths for order documents
-  items               PurchaseOrderItem[]   // Items in the purchase order
-  createdById         Int?                  // User who created the order
+  notes               String?
+  documents           String?
+  items               PurchaseOrderItem[]
+  createdById         Int?
   createdBy           User?                 @relation("PurchaseOrderCreatedBy", fields: [createdById], references: [id])
-  approvedById        Int?                  // User who approved the order
+  approvedById        Int?
   approvedBy          User?                 @relation("PurchaseOrderApprovedBy", fields: [approvedById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("PurchaseOrderUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("PurchaseOrderAuditLogs")
   createdAt           DateTime              @default(now())
@@ -144,26 +145,26 @@ model PurchaseOrder {
 model PurchaseOrderItem {
   id                  Int                   @id @default(autoincrement())
   uuid                String                @unique @default(uuid())
-  purchaseOrderId     Int                   // Link to purchase order
+  purchaseOrderId     Int
   purchaseOrder       PurchaseOrder         @relation(fields: [purchaseOrderId], references: [id])
-  medicationId        Int?                  // Link to medication (optional)
+  medicationId        Int?
   medication          Medication?           @relation(fields: [medicationId], references: [id])
-  cssdInstrumentId    Int?                  // Link to CSSD instrument (optional)
+  cssdInstrumentId    Int?
   cssdInstrument      CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
-  inventoryItemId     Int?                  // Link to inventory item (optional)
+  inventoryItemId     Int?
   inventoryItem       Inventory?            @relation(fields: [inventoryItemId], references: [id])
-  quantity            Int                   // Ordered quantity
-  unitPrice           Float                 // Price per unit
-  totalPrice          Float                 // Total price for item
-  batchNumber         String?               // Batch number
-  expiryDate          DateTime?             // Expiry date of item
+  quantity            Int
+  unitPrice           Float
+  totalPrice          Float
+  batchNumber         String?
+  expiryDate          DateTime?
   status              PurchaseOrderItemStatus @default(PENDING)
-  receivedQuantity    Int?                  // Quantity received
-  receivedDate        DateTime?             // Date items were received
-  notes               String?               // Additional notes
-  createdById         Int?                  // User who created the item
+  receivedQuantity    Int?
+  receivedDate        DateTime?
+  notes               String?
+  createdById         Int?
   createdBy           User?                 @relation("PurchaseOrderItemCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  // User who last updated
+  updatedById         Int?
   updatedBy           User?                 @relation("PurchaseOrderItemUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("PurchaseOrderItemAuditLogs")
   createdAt           DateTime              @default(now())
