@@ -47,7 +47,7 @@ model ClinicalSetting {
   radiologyId           Int?                  @unique
   radiology             Radiology?            @relation("ClinicalSettingRadiology", fields: [radiologyId], references: [id])
   pharmacyId            Int?                  @unique
-  pharmacy              Pharmacy?           @relation("ClinicalSettingPharmacy", fields: [pharmacyId], references: [id])
+  pharmacy              Pharmacy?             @relation("ClinicalSettingPharmacy", fields: [pharmacyId], references: [id])
   operationTheatreId    Int?                  @unique
   operationTheatre      OperationTheatre?     @relation("ClinicalSettingOperationTheatre", fields: [operationTheatreId], references: [id])
   nursingId             Int?                  @unique
@@ -68,6 +68,13 @@ model ClinicalSetting {
   clinicalSettingDocuments ClinicalSettingDocument[] @relation("ClinicalSettingDocuments")
   clinicalSettingNotifications ClinicalSettingNotification[] @relation("ClinicalSettingNotifications")
   services              Service[]             @relation("ServiceClinicalSetting")
+  patients              Patient[]             @relation("PatientClinicalSettings")
+  clinicalRecords       ClinicalRecord[]      @relation("ClinicalRecordClinicalSettings")
+  homeCares             HomeCare[]            @relation("HomeCareClinicalSettings")
+  socialServices        SocialService[]       @relation("SocialServiceClinicalSettings")
+  socialServiceCases    SocialServiceCase[]   @relation("SocialServiceCaseClinicalSettings")
+  radiologyTests        RadiologyTest[]       @relation("RadiologyTestClinicalSettings")
+  laboratoryTests       Laboratory[]          @relation("LaboratoryClinicalSettings")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
