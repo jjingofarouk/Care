@@ -19,7 +19,7 @@ model MedicalRecord {
   admissionId           Int?                  @unique
   admission             Admission?            @relation("AdmissionMedicalRecord")
   clinicalRecordId      Int?
-  clinicalRecord        ClinicalRecord?       @relation("MedicalRecordClinicalRecords", fields: [clinicalRecordId], references: [id])
+  clinicalRecord        ClinicalRecord?       @relation("MedicalRecordClinicalRecords")
   departmentId          Int?
   department            Department?           @relation("DepartmentMedicalRecords", fields: [departmentId], references: [id])
   clinicalSettingId     Int?
@@ -31,9 +31,9 @@ model MedicalRecord {
   createdById           Int?
   createdBy             User?                 @relation("MedicalRecordCreatedBy", fields: [createdById], references: [id])
   updatedById           Int?
-  updatedBy             User?                 @relation("MedicalRecordUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy             User?               @relation("MedicalRecordUpdatedBy", fields: [updatedById], references: [id])
   reviewedById          Int?
-  reviewedBy            User?                 @relation("MedicalRecordReviewedBy", fields: [reviewedById], references: [id])
+  reviewedBy            User?               @relation("MedicalRecordReviewedBy", fields: [reviewedById], references: [id])
   prescriptions         Prescription[]        @relation("PrescriptionMedicalRecords")
   laboratoryTests       Laboratory[]          @relation("MedicalRecordLaboratoryTests")
   radiologyTests        Radiology[]           @relation("MedicalRecordRadiology")
@@ -45,4 +45,5 @@ model MedicalRecord {
   updatedAt             DateTime              @updatedAt
   discharges            Discharge[]           @relation("DischargeMedicalRecord")
   socialServiceCases    SocialServiceCase[]   @relation("SocialServiceCaseMedicalRecords")
+  clinicalRecords       ClinicalRecord[]      @relation("ClinicalRecordMedicalRecords")
 }
