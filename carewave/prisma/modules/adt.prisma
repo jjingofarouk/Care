@@ -57,7 +57,7 @@ model Admission {
   department           Department?         @relation("DepartmentAdmissions", fields: [departmentId], references: [id])
   admissionType        String?
   referralId           Int?                @unique
-  referral             Referral?           @relation("AdmissionReferral")
+  referral             Referral?           @relation("AdmissionReferral", fields: [referralId], references: [id], map: "Admission_referral_fkey")
   insuranceId          Int?                @unique
   insurance            Insurance?          @relation("AdmissionInsurance", fields: [insuranceId], references: [id])
   createdById          Int?                @unique
