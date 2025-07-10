@@ -1,9 +1,4 @@
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
+
 
 enum UserRole {
   ADMIN
@@ -163,6 +158,12 @@ model User {
   homeCareVisitCreated  HomeCareVisit[]       @relation("HomeCareVisitCreatedBy")
   homeCareVisitUpdated  HomeCareVisit[]       @relation("HomeCareVisitUpdatedBy")
   homeCareNotificationRecipient HomeCareNotification[] @relation("HomeCareNotificationRecipient")
+  verifications         Verification[]        @relation("VerifiedUser")
+  verificationCreated   Verification[]        @relation("VerificationCreatedBy")
+  verificationUpdated   Verification[]        @relation("VerificationUpdatedBy")
+  verifiedBy            Verification[]        @relation("VerifiedBy")
+  verificationConfigCreated VerificationConfiguration[] @relation("ConfigCreatedBy")
+  verificationConfigUpdated VerificationConfiguration[] @relation("ConfigUpdatedBy")
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 }
@@ -268,6 +269,8 @@ model AuditLog {
   vaccinationCampaign VaccinationCampaign?  @relation("VaccinationCampaignAuditLogs", fields: [entityId], references: [id])
   homeCare            HomeCare?             @relation("HomeCareAuditLogs", fields: [entityId], references: [id])
   homeCareVisit       HomeCareVisit?        @relation("HomeCareVisitAuditLogs", fields: [entityId], references: [id])
+  verification        Verification?         @relation("VerificationAuditLogs", fields: [entityId], references: [id])
+  verificationConfiguration VerificationConfiguration? @relation("VerificationConfigAuditLogs", fields: [entityId], references: [id])
   details             String?
   createdAt           DateTime              @default(now())
 }
