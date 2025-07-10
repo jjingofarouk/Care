@@ -81,7 +81,7 @@ model Billing {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
   patientId             Int?
-  patient               Patient?            @relation("PatientBilling", fields: [patientId], references: [id])
+  patient               Patient?            @relation("PatientBilling")
   appointment           Appointment?        @relation("AppointmentBilling")
   serviceId             Int?
   service               Service?            @relation("BillingServices", fields: [serviceId], references: [id])
@@ -107,7 +107,8 @@ model Billing {
   nhifClaims            NhifClaim[]         @relation("NhifClaimBilling")
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
-  emergencies           Emergency[]         @relation("EmergencyBilling", fields: [id], references: [id], map: "Billing_emergency_fkey")
+  emergencies           Emergency[]         @relation("EmergencyBilling")
+  clinicalRecords       ClinicalRecord[]    @relation("ClinicalRecordBilling")
 }
 
 model Invoice {
