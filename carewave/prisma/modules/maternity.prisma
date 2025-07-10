@@ -15,58 +15,58 @@ enum DeliveryType {
 
 
 model Maternity {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  patientId             Int
-  patient               Patient             @relation("PatientMaternityRecords", fields: [patientId], references: [id])
-  doctorId              Int?
-  doctor                Doctor?             @relation("DoctorMaternityRecords", fields: [doctorId], references: [id])
-  admissionId           Int?
-  admission             Admission?          @relation("AdmissionMaternity", fields: [admissionId], references: [id])
-  departmentId          Int?
-  department            Department?         @relation("DepartmentMaternityRecords", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?    @relation(fields: [clinicalSettingId], references: [id])
-  status                MaternityStatus     @default(PENDING)
-  expectedDeliveryDate  DateTime?
-  deliveryDate          DateTime?
-  deliveryType          DeliveryType?
-  gestationWeeks        Int?
-  prenatalCarePlan      String?
-  complications         String?
-  babyDetails           String?
-  clinicalRecordId      Int?
-  clinicalRecord        ClinicalRecord?     @relation(fields: [clinicalRecordId], references: [id])
-  billingId             Int?
-  billing               Billing?            @relation(fields: [billingId], references: [id])
-  claimId               Int?
-  claim                 Claim?              @relation(fields: [claimId], references: [id])
-  wardId                Int?
-  ward                  Ward?               @relation(fields: [wardId], references: [id])
-  bedId                 Int?
-  bed                   Bed?                @relation(fields: [bedId], references: [id])
-  laboratoryId          Int?
-  laboratory            Laboratory?         @relation(fields: [laboratoryId], references: [id])
-  radiologyId           Int?
-  radiology             Radiology?            @relation("MaternityRadiology", fields: [radiologyId], references: [id])
-  pharmacyId            Int?
-  pharmacy              Pharmacy?           @relation("MaternityPharmacy", fields: [pharmacyId], references: [id])
-  operationTheatreId    Int?
-  operationTheatre      OperationTheatre?   @relation("MaternityOperationTheatre", fields: [operationTheatreId], references: [id])
-  medicalRecord         MedicalRecord?       @relation("MedicalRecordMaternity", fields: [maternityId], references: [id])
-  notes                 String?
-  createdById           Int?
-  createdBy             User?               @relation("MaternityCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("MaternityUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("MaternityAuditLogs")
-  maternityDocuments    MaternityDocument[] @relation("MaternityDocuments")
-  maternityNotifications MaternityNotification[] @relation("MaternityNotifications")
-  dashboardWidget       DashboardWidget?     @relation("DashboardWidgetMaternity")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  id                      Int                     @id @default(autoincrement())
+  uuid                    String                  @unique @default(uuid())
+  patientId               Int
+  patient                 Patient                 @relation("PatientMaternityRecords", fields: [patientId], references: [id])
+  doctorId                Int?
+  doctor                  Doctor?                 @relation("DoctorMaternityRecords", fields: [doctorId], references: [id])
+  admissionId             Int?
+  admission               Admission?              @relation("AdmissionMaternity", fields: [admissionId], references: [id])
+  departmentId            Int?
+  department              Department?             @relation("DepartmentMaternityRecords", fields: [departmentId], references: [id])
+  clinicalSettingId       Int?
+  clinicalSetting         ClinicalSetting?        @relation(fields: [clinicalSettingId], references: [id])
+  status                  MaternityStatus         @default(PENDING)
+  expectedDeliveryDate    DateTime?
+  deliveryDate            DateTime?
+  deliveryType            DeliveryType?
+  gestationWeeks          Int?
+  prenatalCarePlan        String?
+  complications           String?
+  babyDetails             String?
+  clinicalRecordId        Int?
+  clinicalRecord          ClinicalRecord?         @relation(fields: [clinicalRecordId], references: [id])
+  billingId               Int?
+  billing                 Billing?                @relation(fields: [billingId], references: [id])
+  claimId                 Int?
+  claim                   Claim?                  @relation(fields: [claimId], references: [id])
+  wardId                  Int?
+  ward                    Ward?                   @relation(fields: [wardId], references: [id])
+  bedId                   Int?
+  bed                     Bed?                    @relation(fields: [bedId], references: [id])
+  laboratoryId            Int?
+  laboratory              Laboratory?             @relation(fields: [laboratoryId], references: [id])
+  radiologyId             Int?
+  radiology               Radiology?              @relation("MaternityRadiology", fields: [radiologyId], references: [id])
+  pharmacyId              Int?
+  pharmacy                Pharmacy?               @relation("MaternityPharmacy", fields: [pharmacyId], references: [id])
+  operationTheatreId      Int?
+  operationTheatre        OperationTheatre?       @relation("MaternityOperationTheatre", fields: [operationTheatreId], references: [id])
+  medicalRecordId         Int?
+  medicalRecord           MedicalRecord?          @relation("MedicalRecordMaternity", fields: [medicalRecordId], references: [id])
+  notes                   String?
+  createdById             Int?
+  createdBy               User?                   @relation("MaternityCreatedBy", fields: [createdById], references: [id])
+  updatedById             Int?
+  updatedBy               User?                   @relation("MaternityUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs               AuditLog[]              @relation("MaternityAuditLogs")
+  maternityDocuments      MaternityDocument[]     @relation("MaternityDocuments")
+  maternityNotifications  MaternityNotification[] @relation("MaternityNotifications")
+  dashboardWidget         DashboardWidget?        @relation("DashboardWidgetMaternity")
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
 }
-
 model MaternityDocument {
   id                    Int                 @id @default(autoincrement())
   uuid                  String              @unique @default(uuid())
