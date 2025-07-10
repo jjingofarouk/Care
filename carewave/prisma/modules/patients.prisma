@@ -19,7 +19,6 @@ enum MaritalStatus {
   SEPARATED
 }
 
-
 model Patient {
   id                    Int                   @id @default(autoincrement())
   uuid                  String                @unique @default(uuid())
@@ -71,4 +70,6 @@ model Patient {
   updatedAt             DateTime              @updatedAt
   recurringAppointments  RecurringAppointment[] @relation("PatientRecurringAppointments")
   emergencies           Emergency[]           @relation("PatientEmergencies")
+  queues               Queue[]               @relation("PatientQueue")
+  referrals            Referral[]            @relation("Referral_patient_fkey")
 }
