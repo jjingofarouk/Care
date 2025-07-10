@@ -30,7 +30,7 @@ model Radiology {
   uuid                String                @unique @default(uuid())
   patientId           Int?
   patient             Patient?              @relation("PatientRadiology", fields: [patientId], references: [id])
-  appointmentId       Int?
+  appointmentId       Int?                  @unique
   appointment         Appointment?          @relation("AppointmentRadiology", fields: [appointmentId], references: [id])
   emergencyId         Int?
   emergency           Emergency?            @relation("RadiologyEmergency", fields: [emergencyId], references: [id])
@@ -44,7 +44,7 @@ model Radiology {
   createdById         Int?
   createdBy           User?                 @relation("RadiologyCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?
-  updatedBy           User?                 @relation("RadiologyUpdatedBy", fields 更新ById], references: [id])
+  updatedBy           User?                 @relation("RadiologyUpdatedBy", fields: [updatedById], references: [id])
   radiologyTests      RadiologyTest[]       @relation("RadiologyTests")
   auditLogs           AuditLog[]            @relation("RadiologyAuditLogs")
   dashboardWidget     DashboardWidget?      @relation("DashboardWidgetRadiology")
