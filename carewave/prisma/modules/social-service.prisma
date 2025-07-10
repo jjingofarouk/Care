@@ -52,14 +52,14 @@ model SocialService {
   billingId           Int?
   billing             Billing?              @relation("SocialServiceBilling", fields: [billingId], references: [id])
   createdById         Int?
-  createdBy           User?                 @relation("SocialServiceCreatedBy", fields: [createdById], references: [id])
+  createdBy           User?               @relation("SocialServiceCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?
-  updatedBy           User?                 @relation("SocialServiceUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?               @relation("SocialServiceUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("SocialServiceAuditLogs")
-  homeCareId          Int?
-  homeCare            HomeCare?             @relation("SocialServiceHomeCare", fields: [homeCareId], references: [id])
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
+  homeCareId          Int?
+  homeCare            HomeCare?             @relation("SocialServiceHomeCare", fields: [homeCareId], references: [id])
 }
 
 model SocialServiceCase {
@@ -101,12 +101,13 @@ model SocialServiceCase {
   followUpSchedule    String?
   outcome             String?
   createdById         Int?
-  createdBy           User?                 @relation("CaseCreatedBy", fields: [createdById], references: [id])
+  createdBy           User?               @relation("CaseCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?
-  updatedBy           User?                 @relation("CaseUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?               @relation("CaseUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("SocialServiceCaseAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime            @updatedAt
+  transactions        Transaction[]         @relation("TransactionSocialServiceCases")
 }
 
 model ExternalAgency {
@@ -125,9 +126,9 @@ model ExternalAgency {
   documents           String?
   socialServiceCases  SocialServiceCase[]   @relation("SocialServiceCaseExternalAgency")
   createdById         Int?
-  createdBy           User?                 @relation("AgencyCreatedBy", fields: [createdById], references: [id])
+  createdBy           User?               @relation("AgencyCreatedBy", fields: [createdById], references: [id])
   updatedById         Int?
-  updatedBy           User?                 @relation("AgencyUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy           User?               @relation("AgencyUpdatedBy", fields: [updatedById], references: [id])
   auditLogs           AuditLog[]            @relation("ExternalAgencyAuditLogs")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
