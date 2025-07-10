@@ -80,6 +80,8 @@ model Claim {
   vaccinations          Vaccination[]       @relation("VaccinationClaim")
   createdAt             DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
+  referrals            Referral[]          @relation("Referral_claim_fkey")
+  emergencies          Emergency[]         @relation("EmergencyClaims")
 }
 
 model ClaimDocument {
