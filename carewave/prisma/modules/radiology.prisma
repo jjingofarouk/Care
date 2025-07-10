@@ -31,7 +31,7 @@ model Radiology {
   patientId           Int?
   patient             Patient?              @relation("PatientRadiology", fields: [patientId], references: [id])
   appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("AppointmentRadiology", fields: [appointmentId], references: [id])
+  appointment         Appointment?          @relation("AppointmentRadiology")
   emergencyId         Int?
   emergency           Emergency?            @relation("RadiologyEmergency", fields: [emergencyId], references: [id])
   invoiceId           Int?
@@ -106,7 +106,7 @@ model RadiologyTest {
   contrastUsed        Boolean               @default(false)
   contrastType        String?
   radiationDose       Float?
-  notes               String?
+  notes | String?
   priority            String?
   createdById         Int?
   createdBy           User?                 @relation("RadiologyTestCreatedBy", fields: [createdById], references: [id])
