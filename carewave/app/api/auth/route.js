@@ -14,16 +14,16 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    // Handle registration if firstName and lastName present
+    // Registration flow
     if (firstName && lastName) {
       const existingUser = await prisma.userRegistration.findUnique({ where: { email } });
+
       if (existingUser) {
         return NextResponse.json({ error: 'User already exists' }, { status: 400 });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Create userRegistration and related emailVerification in one transaction
       const newUser = await prisma.userRegistration.create({
         data: {
           email,
@@ -39,7 +39,6 @@ export async function POST(request) {
         },
       });
 
-      // Create userLogin separately
       await prisma.userLogin.create({
         data: {
           email,
@@ -47,15 +46,21 @@ export async function POST(request) {
         },
       });
 
-      return NextResponse.json({ message: 'User registered successfully' }, { status: 201 });
+      return NextResponse.json({
+        message: 'User registered successfully',
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+        },
+      }, { status: 201 });
     }
 
-    // Handle login (no firstName and lastName means login flow)
+    // Login flow
     const userLogin = await prisma.userLogin.findUnique({ where: { email } });
 
-    // If no userLogin or password doesn't match
     if (!userLogin || !(await bcrypt.compare(password, userLogin.passwordHash))) {
-      // Log failed attempt (userLoginId null if userLogin not found)
       await prisma.loginAttempt.create({
         data: {
           userLoginId: userLogin?.id || uuidv4(),
@@ -63,10 +68,10 @@ export async function POST(request) {
           success: false,
         },
       });
+
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Log successful login attempt
     await prisma.loginAttempt.create({
       data: {
         userLoginId: userLogin.id,
@@ -75,17 +80,16 @@ export async function POST(request) {
       },
     });
 
-    // Create session token
     const token = jwt.sign({ userId: userLogin.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
     await prisma.session.create({
       data: {
         userLoginId: userLogin.id,
         token,
-        expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
       },
     });
 
-    // Fetch userRegistration details for response
     const userReg = await prisma.userRegistration.findUnique({ where: { email } });
 
     return NextResponse.json({
@@ -97,6 +101,7 @@ export async function POST(request) {
         lastName: userReg?.lastName,
       },
     });
+
   } catch (error) {
     console.error('Auth error:', error);
     return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
