@@ -15,13 +15,13 @@ export async function login({ email, password }) {
   return data;
 }
 
-export async function register({ email, password, firstName, lastName, role }) {
+export async function register({ email, password, firstName, lastName }) {
   const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}`, {
     method: 'POST',
-    headers: {
+ necessity headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password, firstName, lastName, role }),
+    body: JSON.stringify({ email, password, firstName, lastName }),
   });
   if (!response.ok) throw new Error('Registration failed');
   return response.json();
