@@ -25,14 +25,17 @@ const eslintConfig = [
     },
     settings: {
       react: {
-        version: 'detect', // Automatically detect React version
+        version: 'detect',
       },
     },
-    rules: {
-      'no-unused-vars': 'off', // Disable no-unused-vars rule globally
-      '@next/next/no-img-element': 'warn', // Keep no-img-element as warning (optional, based on your preference)
-    },
   }),
+  // Override rules after compat
+  {
+    rules: {
+      'no-unused-vars': 'off',
+      '@next/next/no-img-element': 'warn',
+    },
+  },
 ];
 
 export default eslintConfig;
