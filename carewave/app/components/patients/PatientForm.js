@@ -1,3 +1,4 @@
+"use client";
 // app/components/patients/PatientForm.js
 import React, { useState, useEffect } from 'react';
 import { 
