@@ -1,124 +1,32 @@
-enum ReportStatus {
-  DRAFT
-  GENERATED
-  SCHEDULED
-  FAILED
-  COMPLETED
-  ARCHIVED
+// Represents a custom report defined by users
+model CustomReport {
+  id            String        @id @default(uuid())
+  name          String        @unique
+  description   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  reportFields  ReportField[] @relation("CustomReportFields")
+  reportFilters ReportFilter[] @relation("CustomReportFilters")
 }
 
-enum ReportType {
-  FINANCIAL
-  CLINICAL
-  OPERATIONAL
-  PATIENT
-  INVENTORY
-  COMPLIANCE
-  PERFORMANCE
+// Represents a field in a custom report
+model ReportField {
+  id            String       @id @default(uuid())
+  customReportId String
+  customReport  CustomReport @relation("CustomReportFields", fields: [customReportId], references: [id], onDelete: Cascade)
+  fieldName     String
+  fieldType     String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
-enum ReportFormat {
-  PDF
-  CSV
-  EXCEL
-  JSON
-  HTML
-}
-
-enum ScheduleFrequency {
-  ONCE
-  DAILY
-  WEEKLY
-  MONTHLY
-  QUARTERLY
-  ANNUALLY
-}
-
-model Report {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  name                  String
-  description           String?
-  type                  ReportType
-  status                ReportStatus        @default(DRAFT)
-  departmentId          Int?
-  department            Department?         @relation("DepartmentReports", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                @unique
-  clinicalSetting       ClinicalSetting?    @relation("ReportClinicalSettings", fields: [clinicalSettingId], references: [id])
-  dynamicReportId       Int?                @unique
-  dynamicReport         DynamicReport?      @relation("ReportDynamicReports")
-  createdById           Int?                @unique
-  createdBy             User?               @relation("ReportGeneralCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("ReportGeneralUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("ReportAuditLogs")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-}
-
-model DynamicReport {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  reportId              Int?                @unique
-  report                Report?             @relation("ReportDynamicReports", fields: [reportId], references: [id])
-  name                  String
-  description           String?
-  type                  ReportType
-  status                ReportStatus        @default(DRAFT)
-  format                ReportFormat
-  query                 String
-  parameters            String?
-  departmentId          Int?
-  department            Department?         @relation("DepartmentDynamicReports", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                @unique
-  clinicalSetting       ClinicalSetting?    @relation("DynamicReportClinicalSettings", fields: [clinicalSettingId], references: [id])
-  createdById           Int?                @unique
-  createdBy             User?               @relation("ReportCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("ReportUpdatedBy", fields: [updatedById], references: [id])
-  scheduled             Boolean             @default(false)
-  scheduleFrequency     ScheduleFrequency?
-  scheduleStartDate     DateTime?
-  scheduleEndDate       DateTime?
-  lastGenerated         DateTime?
-  outputPath            String?
-  reportTemplateId      Int?                @unique
-  reportTemplate        ReportTemplate?     @relation("DynamicReportTemplates", fields: [reportTemplateId], references: [id])
-  notifications         ReportNotification[] @relation("ReportNotifications")
-  auditLogs             AuditLog[]          @relation("DynamicReportAuditLogs")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-}
-
-model ReportTemplate {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  name                  String
-  description           String?
-  type                  ReportType
-  templateContent       String
-  defaultParameters     String?
-  createdById           Int?                @unique
-  createdBy             User?               @relation("TemplateCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("TemplateUpdatedBy", fields: [updatedById], references: [id])
-  reports               DynamicReport[]     @relation("DynamicReportTemplates")
-  auditLogs             AuditLog[]          @relation("ReportTemplateAuditLogs")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-}
-
-model ReportNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  reportId              Int
-  report                DynamicReport       @relation("ReportNotifications", fields: [reportId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?                @unique
-  recipient             User?               @relation("ReportNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a filter for a custom report
+model ReportFilter {
+  id            String       @id @default(uuid())
+  customReportId String
+  customReport  CustomReport @relation("CustomReportFilters", fields: [customReportId], references: [id], onDelete: Cascade)
+  filterName    String
+  filterValue   String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
