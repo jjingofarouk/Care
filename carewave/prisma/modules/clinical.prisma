@@ -1,109 +1,51 @@
-enum ClinicalRecordType {
-  CONSULTATION
-  PROCEDURE
-  DIAGNOSIS
-  TREATMENT_PLAN
-  OBSERVATION
-  PROGRESS_NOTE
-  DISCHARGE_SUMMARY
-  ALLERGY
-  IMMUNIZATION
+// Represents a clinical note for a patient
+model ClinicalNote {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientClinicalNotes", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor     @relation("DoctorClinicalNotes", fields: [doctorId], references: [id], onDelete: Restrict)
+  note          String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-enum ClinicalStatus {
-  DRAFT
-  ACTIVE
-  COMPLETED
-  CANCELLED
-  PENDING_REVIEW
-  ARCHIVED
+// Represents a progress note for a patient
+model ProgressNote {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientProgressNotes", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor     @relation("DoctorProgressNotes", fields: [doctorId], references: [id], onDelete: Restrict)
+  note          String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-model ClinicalRecord {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  patientId             Int
-  patient               Patient             @relation("PatientClinicalRecords", fields: [patientId], references: [id])
-  doctorId              Int?
-  doctor                Doctor?             @relation("DoctorClinicalRecords", fields: [doctorId], references: [id])
-  appointmentId         Int?                @unique
-  appointment           Appointment?        @relation("ClinicalRecordAppointments", fields: [appointmentId], references: [id])
-  admissionId           Int?                @unique
-  admission             Admission?          @relation("ClinicalRecordAdmissions", fields: [admissionId], references: [id])
-  medicalRecordId       Int?                @unique
-  medicalRecord         MedicalRecord?      @relation("ClinicalRecordMedicalRecords", fields: [medicalRecordId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?    @relation("ClinicalRecordClinicalSettings", fields: [clinicalSettingId], references: [id])
-  departmentId          Int?
-  department            Department?         @relation("DepartmentClinicalRecords", fields: [departmentId], references: [id])
-  type                  ClinicalRecordType
-  status                ClinicalStatus      @default(DRAFT)
-  diagnosis             String?
-  treatmentPlan         String?
-  procedureDetails      String?
-  observationNotes      String?
-  vitals                String?
-  allergies              String?
-  immunizationHistory    String?
-  laboratoryId          Int?                @unique
-  laboratory            Laboratory?         @relation("ClinicalRecordLaboratory")
-  radiologyId           Int?
-  radiology             Radiology?          @relation("ClinicalRecordRadiology", fields: [radiologyId], references: [id])
-  pharmacyId            Int?
-  pharmacy              Pharmacy?           @relation("ClinicalRecordPharmacy", fields: [pharmacyId], references: [id])
-  operationTheatreId    Int?                @unique
-  operationTheatre      OperationTheatre?   @relation("ClinicalRecordOperationTheatre", fields: [operationTheatreId], references: [id])
-  nursingId             Int?
-  nursing               Nursing?            @relation("ClinicalRecordNursing", fields: [nursingId], references: [id])
-  billingId             Int?
-  billing               Billing?            @relation("ClinicalRecordBilling", fields: [billingId], references: [id])
-  claimId               Int?
-  claim                 Claim?              @relation("ClinicalRecordClaims", fields: [claimId], references: [id])
-  encounterDate         DateTime?
-  location              String?
-  clinicalNotes         String?
-  createdById           Int?
-  createdBy             User?               @relation("ClinicalRecordCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("ClinicalRecordUpdatedBy", fields: [updatedById], references: [id])
-  reviewedById          Int?
-  reviewedBy            User?               @relation("ClinicalRecordReviewedBy", fields: [reviewedById], references: [id])
-  auditLogs             AuditLog[]          @relation("ClinicalRecordAuditLogs")
-  clinicalDocuments     ClinicalDocument[]  @relation("ClinicalRecordDocuments")
-  clinicalNotifications ClinicalNotification[] @relation("ClinicalRecordNotifications")
-  homeCareVisits        HomeCareVisit[]     @relation("HomeCareVisitClinicalRecords")
-  nhifClaims            NhifClaim[]         @relation("NhifClaimClinicalRecords")
-  radiologyTests        RadiologyTest[]     @relation("ClinicalRecordRadiologyTests")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a SOAP note for a patient
+model SOAPNote {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientSOAPNotes", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor     @relation("DoctorSOAPNotes", fields: [doctorId], references: [id], onDelete: Restrict)
+  subjective    String?
+  objective     String?
+  assessment    String?
+  plan          String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-model ClinicalDocument {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  clinicalRecordId      Int
-  clinicalRecord        ClinicalRecord      @relation("ClinicalRecordDocuments", fields: [clinicalRecordId], references: [id])
-  documentType          String
-  filePath              String
-  description           String?
-  uploadedById          Int?
-  uploadedBy            User?               @relation("ClinicalDocumentUploadedBy", fields: [uploadedById], references: [id])
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("ClinicalDocumentAuditLogs")
-}
-
-model ClinicalNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  clinicalRecordId      Int
-  clinicalRecord        ClinicalRecord      @relation("ClinicalRecordNotifications", fields: [clinicalRecordId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?
-  recipient             User?               @relation("ClinicalNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a clinical task assigned to staff
+model ClinicalTask {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientClinicalTasks", fields: [patientId], references: [id], onDelete: Cascade)
+  assignedToId  String
+  assignedToType String
+  description   String
+  status        String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
