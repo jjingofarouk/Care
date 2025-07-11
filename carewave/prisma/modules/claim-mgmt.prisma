@@ -1,150 +1,53 @@
-enum ClaimStatus {
+enum ClaimStatusEnum {
   PENDING
-  SUBMITTED
   APPROVED
   REJECTED
-  PARTIALLY_APPROVED
-  PAID
-  DENIED
-  UNDER_REVIEW
-  APPEALED
+  SUBMITTED
 }
 
-enum ClaimType {
-  INPATIENT
-  OUTPATIENT
-  PHARMACY
-  LABORATORY
-  RADIOLOGY
-  SURGICAL
-  DIAGNOSTIC
-  EMERGENCY
-  REHABILITATION
-}
-
+// Represents an insurance claim
 model Claim {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  patientId             Int
-  patient               Patient             @relation("PatientClaims", fields: [patientId], references: [id])
-  invoiceId             Int?
-  invoice               Invoice?            @relation("InvoiceClaims", fields: [invoiceId], references: [id])
-  appointmentId         Int?
-  appointment           Appointment?        @relation("ClaimAppointments", fields: [appointmentId], references: [id])
-  admissionId           Int?
-  admission             Admission?          @relation("AdmissionClaims", fields: [admissionId], references: [id])
-  pharmacyId            Int?
-  pharmacy              Pharmacy?           @relation("ClaimPharmacy", fields: [pharmacyId], references: [id])
-  laboratoryId          Int?
-  laboratory            Laboratory?         @relation("ClaimLaboratory")
-  radiologyId           Int?
-  radiology             Radiology?          @relation("ClaimRadiology", fields: [radiologyId], references: [id])
-  operationTheatreId    Int?
-  operationTheatre      OperationTheatre?   @relation("ClaimOperationTheatre")
-  nhifClaimId           Int?
-  nhifClaim             NhifClaim?          @relation("ClaimNhifClaims", fields: [nhifClaimId], references: [id])
-  transactionId         Int?
-  transaction           Transaction?        @relation("TransactionClaims", fields: [transactionId], references: [id])
-  claimNumber           String              @unique
-  claimType             ClaimType
-  status                ClaimStatus         @default(PENDING)
-  submittedDate         DateTime?
-  approvedDate          DateTime?
-  paidDate              DateTime?
-  totalAmount           Float
-  approvedAmount        Float?              @default(0.0)
-  patientResponsibility Float?              @default(0.0)
-  rejectionReason       String?
-  appealReason          String?
-  appealDate            DateTime?
-  insuranceId           Int?
-  insurance             Insurance?          @relation("ClaimInsurance", fields: [insuranceId], references: [id])
-  insuranceProvider     String?
-  policyNumber          String?
-  preAuthorizationCode  String?
-  claimNotes            String?
-  createdById           Int?
-  createdBy             User?               @relation("ClaimCreatedBy", fields: [createdById], references: [id])
-  approvedById          Int?
-  approvedBy            User?               @relation("ClaimApprovedBy", fields: [approvedById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("ClaimUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("ClaimAuditLogs")
-  claimDocuments        ClaimDocument[]     @relation("ClaimDocuments")
-  claimNotifications    ClaimNotification[] @relation("ClaimNotifications")
-  claimAdjustments      ClaimAdjustment[]   @relation("ClaimAdjustments")
-  department            Department[]        @relation("DepartmentClaims")
-  dashboardWidgets      DashboardWidget[]   @relation("DashboardWidgetClaims")
-  surgicalProcedure     SurgicalProcedure?  @relation("ProcedureClaim")
-  homeCares             HomeCare[]          @relation("HomeCareClaims")
-  vaccinations          Vaccination[]       @relation("VaccinationClaim")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  referrals             Referral[]          @relation("ReferralClaims")
-  emergencies           Emergency[]         @relation("EmergencyClaims")
-  clinicalRecords       ClinicalRecord[]    @relation("ClinicalRecordClaims")
+  id              String           @id @default(uuid())
+  patientId       String
+  patient         Patient          @relation("PatientClaims", fields: [patientId], references: [id], onDelete: Cascade)
+  claimBatchId    String?
+  claimBatch      ClaimBatch?      @relation("ClaimBatchClaims", fields: [claimBatchId], references: [id], onDelete: SetNull)
+  claimStatusId   String
+  claimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id], onDelete: Restrict)
+  amount          Float
+  submittedAt     DateTime
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  claimSubmissions ClaimSubmission[] @relation("ClaimSubmissions")
 }
 
-model ClaimDocument {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  claimId               Int
-  claim                 Claim               @relation("ClaimDocuments", fields: [claimId], references: [id])
-  documentType          String
-  filePath              String
-  uploadedById          Int?
-  uploadedBy            User?               @relation("ClaimDocumentUploadedBy", fields: [uploadedById], references: [id])
-  description           String?
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("ClaimDocumentAuditLogs")
+// Represents a batch of claims
+model ClaimBatch {
+  id            String     @id @default(uuid())
+  batchNumber   String     @unique
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  claims        Claim[]    @relation("ClaimBatchClaims")
 }
 
-model ClaimNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  claimId               Int
-  claim                 Claim               @relation("ClaimNotifications", fields: [claimId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?
-  recipient             User?               @relation("ClaimNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+// Represents the status history of a claim
+model ClaimStatus {
+  id            String         @id @default(uuid())
+  claimId       String
+  claim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [id], onDelete: Cascade)
+  status        ClaimStatusEnum
+  changedAt     DateTime
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
-model ClaimAdjustment {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  claimId               Int
-  claim                 Claim               @relation("ClaimAdjustments", fields: [claimId], references: [id])
-  adjustmentAmount      Float
-  adjustmentReason      String
-  adjustmentDate        DateTime            @default(now())
-  createdById           Int?
-  createdBy             User?               @relation("ClaimAdjustmentCreatedBy", fields: [createdById], references: [id])
-  approvedById          Int?
-  approvedBy            User?               @relation("ClaimAdjustmentApprovedBy", fields: [approvedById], references: [id])
-  notes                 String?
-  auditLogs             AuditLog[]          @relation("ClaimAdjustmentAuditLogs")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-}
-
-model Insurance {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  providerName          String
-  providerCode          String?             @unique
-  contactDetails        String?
-  claims                Claim[]             @relation("ClaimInsurance")
-  patients              Patient[]           @relation("PatientInsurances")
-  admissions            Admission[]         @relation("AdmissionInsurance")
-  appointments          Appointment[]       @relation("AppointmentInsurance")
-  invoices              Invoice[]           @relation("InvoiceInsurance")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("InsuranceAuditLogs")
+// Represents a submission of a claim
+model ClaimSubmission {
+  id            String     @id @default(uuid())
+  claimId       String
+  claim         Claim      @relation("ClaimSubmissions", fields: [claimId], references: [id], onDelete: Cascade)
+  submittedAt   DateTime
+  details       String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
