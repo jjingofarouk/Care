@@ -1,6 +1,6 @@
 import React from 'react';
 import { getAllAppointments } from '@/services/appointmentService';
-import AppointmentTable from '@/components/AppointmentTable';
+import AppointmentTable from '@/components/appointments/AppointmentTable';
 import { Button, Typography } from '@mui/material';
 import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
