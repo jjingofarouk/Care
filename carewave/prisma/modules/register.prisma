@@ -1,16 +1,15 @@
-// Represents user registration data
 model UserRegistration {
   id                    String                  @id @default(uuid())
   email                 String                  @unique
   firstName             String
   lastName              String
+  role                  String                  // Added role field
   passwordHash          String
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   emailVerification     EmailVerificationToken? @relation("UserEmailVerification")
 }
 
-// Represents email verification tokens
 model EmailVerificationToken {
   id                String           @id @default(uuid())
   userRegistrationId String           @unique
