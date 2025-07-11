@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUser, isAuthenticated } from './auth/authUtils';
-import { login, logout } from './auth/authService';
+import { getUser, isAuthenticated } from './authUtils';
+import { login, logout } from './authService';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -13,14 +13,16 @@ const useAuth = () => {
   const refreshUser = useCallback(async () => {
     setLoading(true);
     const storedUser = getUser();
-    if (storedUser && isAuthenticated()) {
+    const token = localStorage.getItem('token');
+    if (storedUser && isAuthenticated(token)) {
       setUser(storedUser);
     } else {
       setUser(null);
       await logout();
+      router.push('/auth');
     }
     setLoading(false);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     refreshUser();
@@ -33,14 +35,14 @@ const useAuth = () => {
       router.push('/appointment');
       return user;
     } catch (error) {
-      throw new Error('Login failed');
+      throw new Error(error.message);
     }
   };
 
   const handleLogout = async () => {
     await logout();
     setUser(null);
-    router.push('/auth/login');
+    router.push('/auth');
   };
 
   return { user, loading, login: handleLogin, logout: handleLogout, refreshUser };
