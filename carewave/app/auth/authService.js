@@ -18,7 +18,7 @@ export async function login({ email, password }) {
 export async function register({ email, password, firstName, lastName }) {
   const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}`, {
     method: 'POST',
- necessity headers: {
+    headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ email, password, firstName, lastName }),
