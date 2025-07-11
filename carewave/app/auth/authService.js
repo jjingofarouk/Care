@@ -9,7 +9,10 @@ export async function login({ email, password }) {
     body: JSON.stringify({ email, password }),
   });
 
-  if (!response.ok) throw new Error('Login failed');
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Login failed');
+  }
 
   const data = await response.json();
   localStorage.setItem('token', data.token);
@@ -17,16 +20,19 @@ export async function login({ email, password }) {
   return data;
 }
 
-export async function register({ email, password, firstName, lastName }) {
+export async function register({ email, password, firstName, lastName, role }) {
   const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password, firstName, lastName }),
+    body: JSON.stringify({ email, password, firstName, lastName, role }),
   });
 
-  if (!response.ok) throw new Error('Registration failed');
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Registration failed');
+  }
 
   return response.json();
 }
