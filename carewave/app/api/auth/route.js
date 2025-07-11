@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
@@ -29,85 +28,34 @@ export async function POST(request) {
           lastName,
           role,
           passwordHash: hashedPassword,
-          userLogin: {
-            create: {
-              email,
-              passwordHash: hashedPassword,
-            },
-          },
         },
       });
 
       return NextResponse.json({ message: 'Registration successful' }, { status: 201 });
     }
 
-    const userLogin = await prisma.userLogin.findUnique({
+    const user = await prisma.userRegistration.findUnique({
       where: { email },
-      include: { userRegistration: true },
     });
 
-    const passwordMatches = userLogin && (await bcrypt.compare(password, userLogin.passwordHash));
-
-    const isValid = userLogin && passwordMatches && userLogin.userRegistration;
-
-    if (!isValid) {
-      // Log failed attempt without userLoginId if user doesn't exist
-      await prisma.loginAttempt.create({
-        data: {
-          userLoginId: userLogin?.id || uuidv4(), // Use a dummy ID or handle differently
-          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-          userAgent: request.headers.get('user-agent') || 'unknown',
-          success: false,
-          attemptedAt: new Date(),
-        },
-      });
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Log successful attempt
-    await prisma.loginAttempt.create({
-      data: {
-        userLoginId: userLogin.id,
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: request.headers.get('user-agent') || 'unknown',
-        success: true,
-        attemptedAt: new Date(),
-      },
-    });
-
-    await prisma.userLogin.update({
-      where: { id: userLogin.id },
-      data: { lastLoginAt: new Date() },
-    });
-
-    await prisma.session.updateMany({
-      where: { userLoginId: userLogin.id, isActive: true },
-      data: { isActive: false },
-    });
-
-    const sessionToken = jwt.sign(
-      { userId: userLogin.id, role: userLogin.userRegistration.role },
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    await prisma.session.create({
-      data: {
-        userLoginId: userLogin.id,
-        token: sessionToken,
-        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-        isActive: true,
-      },
-    });
-
     return NextResponse.json({
-      token: sessionToken,
+      token,
       user: {
-        id: userLogin.id,
-        email: userLogin.email,
-        firstName: userLogin.userRegistration.firstName,
-        lastName: userLogin.userRegistration.lastName,
-        role: userLogin.userRegistration.role,
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
       },
     });
   } catch (error) {
