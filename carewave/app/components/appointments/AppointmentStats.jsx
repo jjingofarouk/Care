@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, Typography, Box } from '@mui/material';
+import { Card, CardContent, CardHeader, Typography } from '@mui/material';
 import { Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import { getAllAppointments } from '@/services/appointmentService';
 import { Bar } from 'react-chartjs-2';
