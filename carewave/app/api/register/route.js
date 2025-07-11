@@ -1,42 +1,38 @@
 import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-export async function POST(req) {
-  const { email, name, role } = await req.json();
-  const userId = await prisma.user.count() + 1;
+// Handle POST requests for /api/register (registration)
+export async function POST(request) {
+  try {
+    const { email, password, firstName, lastName, role } = await request.json();
 
-  const user = await prisma.user.create({
-    data: {
-      id: userId,
-      email,
-      name,
-      role: role || 'USER',
-    },
-  });
+    if (!email || !password || !firstName || !lastName || !role) {
+      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+    }
 
-  if (role === 'DOCTOR') {
-    await prisma.doctor.create({
+    const existingUser = await prisma.userRegistration.findUnique({ where: { email } });
+    if (existingUser) {
+      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await prisma.userRegistration.create({
       data: {
-        userId: userId,
-        specialty: 'General',
-        department: 'General',
-        hospital: 'Default Hospital',
-        designation: 'Doctor',
-        availabilityStatus: 'AVAILABLE',
+        email,
+        firstName,
+        lastName,
+        role,
+        passwordHash: hashedPassword,
       },
     });
-  }
 
-  if (role === 'USER') {
-    await prisma.patient.create({
-      data: {
-        userId: userId,
-        type: 'Outpatient',
-        recordId: `P${userId}${Date.now()}`,
-      },
-    });
+    return NextResponse.json({ message: 'Registration successful' }, { status: 201 });
+  } catch (error) {
+    console.error('[REGISTER ERROR]', error);
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
   }
-
-  return Response.json({ user });
 }
