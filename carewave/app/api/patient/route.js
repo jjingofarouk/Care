@@ -1,3 +1,4 @@
+// app/api/patients/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,12 +9,14 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const includeParam = searchParams.get('include');
-    const includeRelations = includeParam?.split(',') || [];
+    const search = searchParams.get('search');
+    const gender = searchParams.get('gender');
+    const minAge = searchParams.get('minAge');
+    const maxAge = searchParams.get('maxAge');
+    const city = searchParams.get('city');
     
-    const validRelations = [
-      'admissions', 'discharges', 'transactions', 
-      'appointments', 'prescriptions', 'medicalRecords'
-    ];
+    const includeRelations = includeParam?.split(',') || [];
+    const validRelations = ['addresses', 'nextOfKin', 'insuranceInfo', 'userAccount'];
     
     const include = validRelations.reduce((acc, relation) => {
       if (includeRelations.includes(relation)) {
@@ -22,16 +25,43 @@ export async function GET(request) {
       return acc;
     }, {});
 
+    const where = {};
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    if (gender) where.gender = gender;
+    if (city) {
+      where.addresses = { some: { city: { contains: city, mode: 'insensitive' } } };
+    }
+    if (minAge || maxAge) {
+      where.dateOfBirth = {};
+      if (minAge) {
+        const minDate = new Date();
+        minDate.setFullYear(minDate.getFullYear() - parseInt(minAge));
+        where.dateOfBirth.lte = minDate;
+      }
+      if (maxAge) {
+        const maxDate = new Date();
+        maxDate.setFullYear(maxDate.getFullYear() - parseInt(maxAge));
+        where.dateOfBirth.gte = maxDate;
+      }
+    }
+
     const patients = await prisma.patient.findMany({
+      where,
       include,
       orderBy: { createdAt: 'desc' }
     });
 
     return NextResponse.json(patients);
   } catch (error) {
-    console.error('GET /api/patient error:', error);
+    console.error('GET /api/patients error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch patients', details: error.message }, 
+      { error: 'Failed to fetch patients', details: error.message },
       { status: 500 }
     );
   } finally {
@@ -43,9 +73,9 @@ export async function POST(request) {
   try {
     const data = await request.json();
     
-    if (!data.name) {
+    if (!data.firstName || !data.lastName || !data.dateOfBirth) {
       return NextResponse.json(
-        { error: 'Name is required' }, 
+        { error: 'First name, last name, and date of birth are required' },
         { status: 400 }
       );
     }
@@ -56,74 +86,66 @@ export async function POST(request) {
       });
       if (existingPatient) {
         return NextResponse.json(
-          { error: 'Email already exists' }, 
+          { error: 'Email already exists' },
           { status: 409 }
         );
       }
     }
 
-    let patientId = data.patientId;
-    if (!patientId) {
-      let isUnique = false;
-      while (!isUnique) {
-        patientId = `P-${uuidv4().slice(0, 8)}`;
-        const existing = await prisma.patient.findUnique({
-          where: { patientId }
-        });
-        isUnique = !existing;
-      }
-    } else {
-      const existing = await prisma.patient.findUnique({
-        where: { patientId }
-      });
-      if (existing) {
-        return NextResponse.json(
-          { error: 'Patient ID already exists' }, 
-          { status: 409 }
-        );
-      }
-    }
-
-    let dateOfBirth = null;
-    if (data.dateOfBirth) {
-      dateOfBirth = new Date(data.dateOfBirth);
-      if (isNaN(dateOfBirth.getTime())) {
-        return NextResponse.json(
-          { error: 'Invalid date format for dateOfBirth' }, 
-          { status: 400 }
-        );
-      }
+    const patientId = `P-${uuidv4().slice(0, 8)}`;
+    const dateOfBirth = new Date(data.dateOfBirth);
+    if (isNaN(dateOfBirth.getTime())) {
+      return NextResponse.json(
+        { error: 'Invalid date format for dateOfBirth' },
+        { status: 400 }
+      );
     }
 
     const patient = await prisma.patient.create({
       data: {
-        patientId,
-        name: data.name,
-        email: data.email || null,
+        firstName: data.firstName,
+        lastName: data.lastName,
         dateOfBirth,
         gender: data.gender || null,
         phone: data.phone || null,
-        address: data.address || null,
-        emergencyContact: data.emergencyContact || null,
-        emergencyContactPhone: data.emergencyContactPhone || null,
-        insuranceProvider: data.insuranceProvider || null,
-        insurancePolicy: data.insurancePolicy || null,
-        bloodType: data.bloodType || null,
-        allergies: data.allergies || null,
-        medicalHistory: data.medicalHistory || null,
-        presentingComplaint: data.presentingComplaint || null,
-        familyHistory: data.familyHistory || null,
-        socialHistory: data.socialHistory || null,
-        pastMedicalHistory: data.pastMedicalHistory || null,
-        medications: data.medications || null,
+        email: data.email || null,
+        addresses: data.addresses ? {
+          create: data.addresses.map(addr => ({
+            street: addr.street,
+            city: addr.city,
+            country: addr.country,
+            postalCode: addr.postalCode || null,
+          }))
+        } : undefined,
+        nextOfKin: data.nextOfKin ? {
+          create: {
+            firstName: data.nextOfKin.firstName,
+            lastName: data.nextOfKin.lastName,
+            relationship: data.nextOfKin.relationship,
+            phone: data.nextOfKin.phone || null,
+            email: data.nextOfKin.email || null,
+          }
+        } : undefined,
+        insuranceInfo: data.insuranceInfo ? {
+          create: {
+            provider: data.insuranceInfo.provider,
+            policyNumber: data.insuranceInfo.policyNumber,
+            expiryDate: data.insuranceInfo.expiryDate ? new Date(data.insuranceInfo.expiryDate) : null,
+          }
+        } : undefined,
       },
+      include: {
+        addresses: true,
+        nextOfKin: true,
+        insuranceInfo: true,
+      }
     });
 
     return NextResponse.json(patient, { status: 201 });
   } catch (error) {
-    console.error('POST /api/patient error:', error);
+    console.error('POST /api/patients error:', error);
     return NextResponse.json(
-      { error: 'Failed to create patient', details: error.message }, 
+      { error: 'Failed to create patient', details: error.message },
       { status: 500 }
     );
   } finally {
