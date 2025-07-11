@@ -1,5 +1,3 @@
-
-
 // Represents a clinical note for a patient
 model ClinicalNote {
   id            String     @id @default(uuid())
