@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUser, isAuthenticated } from './authUtils';
+import { jwtDecode } from 'jwt-decode';
 import { login, logout } from './authService';
 
 const AuthContext = createContext(null);
@@ -11,6 +11,24 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const isAuthenticated = (token) => {
+    if (!token) return false;
+    try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      return decoded.exp > currentTime;
+    } catch {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return false;
+    }
+  };
+
+  const getUser = () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  };
 
   const refreshUser = useCallback(async () => {
     setLoading(true);
