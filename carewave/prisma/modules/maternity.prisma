@@ -1,97 +1,44 @@
-enum MaternityStatus {
-  ACTIVE
-  DISCHARGED
-  TRANSFERRED
-  CANCELLED
-  PENDING
+// Represents a maternity case
+model MaternityCase {
+  id            String      @id @default(uuid())
+  patientId     String
+  patient       Patient     @relation("PatientMaternityCases", fields: [patientId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deliveryRecords DeliveryRecord[] @relation("MaternityCaseDeliveries")
+  ancVisits     ANCVisit[]  @relation("MaternityCaseANCVisits")
+  pncVisits     PNCVisit[]  @relation("MaternityCasePNCVisits")
 }
 
-enum DeliveryType {
-  NORMAL
-  CESAREAN
-  ASSISTED
+// Represents a delivery record for a maternity case
+model DeliveryRecord {
+  id              String        @id @default(uuid())
+  maternityCaseId String
+  maternityCase   MaternityCase @relation("MaternityCaseDeliveries", fields: [maternityCaseId], references: [id], onDelete: Cascade)
+  deliveryDate    DateTime
+  deliveryType    String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
-model Maternity {
-  id                      Int                     @id @default(autoincrement())
-  uuid                    String                  @unique @default(uuid())
-  patientId               Int
-  patient                 Patient                 @relation("PatientMaternityRecords", fields: [patientId], references: [id])
-  doctorId                Int?
-  doctor                  Doctor?                 @relation("DoctorMaternityRecords", fields: [doctorId], references: [id])
-  admissionId             Int?
-  admission               Admission?              @relation("AdmissionMaternity", fields: [admissionId], references: [id])
-  departmentId            Int?
-  department              Department?             @relation("DepartmentMaternityRecords", fields: [departmentId], references: [id])
-  clinicalSettingId       Int?
-  clinicalSetting         ClinicalSetting?        @relation(fields: [clinicalSettingId], references: [id])
-  status                  MaternityStatus         @default(PENDING)
-  expectedDeliveryDate    DateTime?
-  deliveryDate            DateTime?
-  deliveryType            DeliveryType?
-  gestationWeeks          Int?
-  prenatalCarePlan        String?
-  complications           String?
-  babyDetails             String?
-  clinicalRecordId        Int?
-  clinicalRecord          ClinicalRecord?         @relation(fields: [clinicalRecordId], references: [id])
-  billingId               Int?
-  billing                 Billing?                @relation(fields: [billingId], references: [id])
-  claimId                 Int?
-  claim                   Claim?                  @relation(fields: [claimId], references: [id])
-  wardId                  Int?
-  ward                    Ward?                   @relation(fields: [wardId], references: [id])
-  bedId                   Int?
-  bed                     Bed?                    @relation(fields: [bedId], references: [id])
-  laboratoryId            Int?
-  laboratory              Laboratory?             @relation(fields: [laboratoryId], references: [id])
-  radiologyId             Int?
-  radiology               Radiology?              @relation("MaternityRadiology", fields: [radiologyId], references: [id])
-  pharmacyId              Int?
-  pharmacy                Pharmacy?               @relation("MaternityPharmacy", fields: [pharmacyId], references: [id])
-  operationTheatreId      Int?
-  operationTheatre        OperationTheatre?       @relation("MaternityOperationTheatre", fields: [operationTheatreId], references: [id])
-  medicalRecordId         Int?
-  medicalRecord           MedicalRecord?          @relation("MedicalRecordMaternity", fields: [medicalRecordId], references: [id])
-  notes                   String?
-  createdById             Int?
-  createdBy               User?                   @relation("MaternityCreatedBy", fields: [createdById], references: [id])
-  updatedById             Int?
-  updatedBy               User?                   @relation("MaternityUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs               AuditLog[]              @relation("MaternityAuditLogs")
-  maternityDocuments      MaternityDocument[]     @relation("MaternityDocuments")
-  maternityNotifications  MaternityNotification[] @relation("MaternityNotifications")
-  dashboardWidget         DashboardWidget?        @relation("DashboardWidgetMaternity")
-  createdAt               DateTime                @default(now())
-  updatedAt               DateTime                @updatedAt
+// Represents an Antenatal Care (ANC) visit
+model ANCVisit {
+  id              String        @id @default(uuid())
+  maternityCaseId String
+  maternityCase   MaternityCase @relation("MaternityCaseANCVisits", fields: [maternityCaseId], references: [id], onDelete: Cascade)
+  visitDate       DateTime
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
-model MaternityDocument {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  maternityId           Int
-  maternity             Maternity           @relation("MaternityDocuments", fields: [maternityId], references: [id])
-  documentType          String
-  filePath              String
-  description           String?
-  uploadedById          Int?
-  uploadedBy            User?               @relation("MaternityDocumentUploadedBy", fields: [uploadedById], references: [id])
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("MaternityDocumentAuditLogs")
-}
-
-model MaternityNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  maternityId           Int
-  maternity             Maternity           @relation("MaternityNotifications", fields: [maternityId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?
-  recipient             User?               @relation("MaternityNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+// Represents a Postnatal Care (PNC) visit
+model PNCVisit {
+  id              String        @id @default(uuid())
+  maternityCaseId String
+  maternityCase   MaternityCase @relation("MaternityCasePNCVisits", fields: [maternityCaseId], references: [id], onDelete: Cascade)
+  visitDate       DateTime
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
