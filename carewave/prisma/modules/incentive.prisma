@@ -1,64 +1,24 @@
-enum IncentiveStatus {
-  PENDING
-  APPROVED
-  DISBURSED
-  REJECTED
-  CANCELLED
+// Represents an incentive program for hospital staff
+model IncentiveProgram {
+  id                String            @id @default(uuid())
+  name              String            @unique
+  description       String?
+  startDate         DateTime
+  endDate           DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  incentiveRecords  IncentiveRecord[] @relation("ProgramIncentives")
 }
 
-enum IncentiveType {
-  PERFORMANCE
-  ATTENDANCE
-  SPECIALTY
-  BONUS
-  REFERRAL
-  OTHER
-}
-
-
-
-model Incentive {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  userId                Int                 @unique
-  user                  User                @relation("IncentiveUser", fields: [userId], references: [id])
-  doctorId              Int?                @unique
-  doctor                Doctor?             @relation("IncentiveDoctor", fields: [doctorId], references: [id])
-  departmentId          Int?                @unique
-  department            Department?         @relation("DepartmentIncentives", fields: [departmentId], references: [id])
-  incentiveType         IncentiveType
-  status                IncentiveStatus     @default(PENDING)
-  amount                Float
-  description           String?
-  calculationBasis      String?
-  awardedDate           DateTime?
-  disbursedDate         DateTime?
-  transactionId         Int?                @unique
-  transaction           Transaction?        @relation("IncentiveTransaction", fields: [transactionId], references: [id])
-  rejectionReason       String?
-  createdById           Int?                @unique
-  createdBy             User?               @relation("IncentiveCreatedBy", fields: [createdById], references: [id])
-  approvedById          Int?                @unique
-  approvedBy            User?               @relation("IncentiveApprovedBy", fields: [approvedById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("IncentiveUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("IncentiveAuditLogs")
-  incentiveNotifications IncentiveNotification[] @relation("IncentiveNotifications")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-}
-
-model IncentiveNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  incentiveId           Int
-  incentive             Incentive           @relation("IncentiveNotifications", fields: [incentiveId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?                @unique
-  recipient             User?               @relation("IncentiveNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Tracks individual incentive records for staff
+model IncentiveRecord {
+  id                String           @id @default(uuid())
+  programId         String
+  program           IncentiveProgram @relation("ProgramIncentives", fields: [programId], references: [id], onDelete: Cascade)
+  staffId           String
+  staffType         String
+  amount            Float
+  awardedAt         DateTime
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 }
