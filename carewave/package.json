@@ -27,6 +27,7 @@
     "postcss": "postcss ./app/globals.css -o ./app/output.css"
   },
   "dependencies": {
+    "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@heroicons/react": "^2.1.5",
@@ -41,7 +42,7 @@
     "firebase": "^10.14.1",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
-    "lucide-react": "^0.367.0", 
+    "lucide-react": "^0.367.0",
     "next": "^14.2.15",
     "nodemailer": "^6.9.15",
     "pg": "^8.16.0",
