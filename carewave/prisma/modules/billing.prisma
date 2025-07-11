@@ -1,3 +1,4 @@
+// billing.prisma
 enum BillingCategoryEnum {
   CONSULTATION
   PROCEDURE
