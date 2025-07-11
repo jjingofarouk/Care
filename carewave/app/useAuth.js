@@ -1,37 +1,49 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUser } from './auth/authUtils';
+import { getUser, isAuthenticated } from './authUtils';
+import { login, logout } from './authService';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    const userData = getUser();
-    setUser(userData);
+  const refreshUser = useCallback(async () => {
+    setLoading(true);
+    const storedUser = getUser();
+    if (storedUser && isAuthenticated()) {
+      setUser(storedUser);
+    } else {
+      setUser(null);
+      await logout();
+    }
     setLoading(false);
   }, []);
 
-  const login = async (credentials) => {
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+
+  const handleLogin = async (credentials) => {
     try {
-      const { user } = await import('./auth/authService').then((m) => m.login(credentials));
+      const { user } = await login(credentials);
       setUser(user);
       router.push('/appointment');
+      return user;
     } catch (error) {
       throw new Error('Login failed');
     }
   };
 
-  const logout = async () => {
-    await import('./auth/authService').then((m) => m.logout());
+  const handleLogout = async () => {
+    await logout();
     setUser(null);
     router.push('/auth/login');
   };
 
-  return { user, loading, login, logout };
+  return { user, loading, login: handleLogin, logout: handleLogout, refreshUser };
 };
 
 export default useAuth;
