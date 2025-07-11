@@ -1,3 +1,4 @@
+// doctor.prisma
 // Represents a doctor in the hospital
 model Doctor {
   id               String              @id @default(uuid())
@@ -16,6 +17,7 @@ model Doctor {
   clinicalNotes    ClinicalNote[]      @relation("DoctorClinicalNotes")
   progressNotes    ProgressNote[]      @relation("DoctorProgressNotes")
   soapNotes        SOAPNote[]          @relation("DoctorSOAPNotes")
+  prescriptions    Prescription[]      @relation("DoctorPrescriptions")
 }
 
 // Represents a doctor's specialization
