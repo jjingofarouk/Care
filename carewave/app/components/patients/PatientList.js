@@ -1,3 +1,4 @@
+"use client;
 // app/components/patients/PatientList.js
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
