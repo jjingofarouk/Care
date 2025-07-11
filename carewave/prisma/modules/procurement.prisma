@@ -1,172 +1,32 @@
-enum SupplierStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  PENDING_APPROVAL
-}
-
-enum PurchaseOrderStatus {
-  PENDING
-  PROCESSING
-  APPROVED
-  DELIVERED
-  CANCELLED
-  PARTIALLY_DELIVERED
-}
-
-enum PurchaseOrderItemStatus {
-  PENDING
-  ORDERED
-  DELIVERED
-  BACKORDERED
-  CANCELLED
-}
-
-enum ProcurementStatus {
-  PENDING
-  APPROVED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
-
-model Procurement {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  requestNumber       String                @unique
-  departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  requesterId         Int?
-  requester           User?                 @relation("ProcurementRequester", fields: [requesterId], references: [id])
-  status              ProcurementStatus     @default(PENDING)
-  requestDate         DateTime              @default(now())
-  approvedDate        DateTime?
-  completionDate      DateTime?
-  description         String?
-  budgetId            Int?
-  budget              Budget?               @relation("BudgetProcurements", fields: [budgetId], references: [id])
-  purchaseOrderId     Int?
-  purchaseOrder       PurchaseOrder?        @relation(fields: [purchaseOrderId], references: [id])
-  medicationId        Int?
-  medication          Medication?           @relation(fields: [medicationId], references: [id])
-  cssdInstrumentId    Int?
-  cssdInstrument      CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
-  inventoryItemId     Int?
-  inventoryItem       Inventory?            @relation(fields: [inventoryItemId], references: [id])
-  billingId           Int?
-  billing             Billing?              @relation(fields: [billingId], references: [id])
-  notes               String?
-  documents           String?
-  createdById         Int?
-  createdBy           User?                 @relation("ProcurementCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("ProcurementUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("ProcurementAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  transactions        Transaction[]         @relation("TransactionProcurement")
-  utilityMaintenances UtilityMaintenance[]  @relation("ProcurementUtilityMaintenance")
-}
-
-model Supplier {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String
-  status              SupplierStatus        @default(PENDING_APPROVAL)
-  contactName         String?
-  contactPhone        String?
-  email               String?               @unique
-  address             String?
-  website             String?
-  taxId               String?
-  paymentTerms        String?
-  creditLimit         Float?
-  contractStartDate   DateTime?
-  contractEndDate     DateTime?
-  contractDetails       String?
-  departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  medications         Medication[]
-  purchaseOrders      PurchaseOrder[]
-  cssdInstruments     CSSDInstrument[]
-  inventoryItems      Inventory[]
-  performanceRating   Float?
-  lastReviewDate      DateTime?
-  notes               String?
-  documents           String?
-  createdById         Int?
-  createdBy           User?                 @relation("SupplierCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("SupplierUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("SupplierAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
+// Represents a purchase order for procurement
 model PurchaseOrder {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  orderNumber         String                @unique
-  supplierId          Int
-  supplier            Supplier              @relation(fields: [supplierId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  procurementId       Int?
-  procurement         Procurement?          @relation(fields: [procurementId], references: [id])
-  orderDate           DateTime              @default(now())
-  expectedDeliveryDate DateTime?
-  actualDeliveryDate  DateTime?
-  status              PurchaseOrderStatus   @default(PENDING)
-  totalAmount         Float
-  taxAmount           Float?
-  discountAmount      Float?
-  shippingCost        Float?
-  paymentStatus       String?
-  transactionId       Int?
-  transaction         Transaction?          @relation("TransactionPurchaseOrders", fields: [transactionId], references: [id])
-  inventoryId         Int?
-  inventory           Inventory?            @relation(fields: [inventoryId], references: [id])
-  cssdInstrumentId    Int?
-  cssdInstrument      CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
-  notes               String?
-  documents           String?
-  items               PurchaseOrderItem[]
-  createdById         Int?
-  createdBy           User?                 @relation("PurchaseOrderCreatedBy", fields: [createdById], references: [id])
-  approvedById        Int?
-  approvedBy          User?                 @relation("PurchaseOrderApprovedBy", fields: [approvedById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("PurchaseOrderUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("PurchaseOrderAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  id                String           @id @default(uuid())
+  supplierId        String
+  supplier          Supplier         @relation("SupplierPurchaseOrders", fields: [supplierId], references: [id], onDelete: Restrict)
+  orderDate         DateTime
+  totalAmount       Float
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  goodsReceivedNotes GoodsReceivedNote[] @relation("PurchaseOrderGRNs")
 }
 
-model PurchaseOrderItem {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  purchaseOrderId     Int
-  purchaseOrder       PurchaseOrder         @relation(fields: [purchaseOrderId], references: [id])
-  medicationId        Int?
-  medication          Medication?           @relation(fields: [medicationId], references: [id])
-  cssdInstrumentId    Int?
-  cssdInstrument      CSSDInstrument?       @relation(fields: [cssdInstrumentId], references: [id])
-  inventoryItemId     Int?
-  inventoryItem       Inventory?            @relation(fields: [inventoryItemId], references: [id])
-  quantity            Int
-  unitPrice           Float
-  totalPrice          Float
-  batchNumber         String?
-  expiryDate          DateTime?
-  status              PurchaseOrderItemStatus @default(PENDING)
-  receivedQuantity    Int?
-  receivedDate        DateTime?
-  notes               String?
-  createdById         Int?
-  createdBy           User?                 @relation("PurchaseOrderItemCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("PurchaseOrderItemUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("PurchaseOrderItemAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Represents a supplier for procurement
+model Supplier {
+  id              String          @id @default(uuid())
+  name            String          @unique
+  contactInfo     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  purchaseOrders  PurchaseOrder[] @relation("SupplierPurchaseOrders")
+}
+
+// Represents a goods received note
+model GoodsReceivedNote {
+  id              String        @id @default(uuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation("PurchaseOrderGRNs", fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  receivedAt      DateTime
+  details         String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
