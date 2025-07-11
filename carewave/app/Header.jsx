@@ -112,7 +112,7 @@ export default function Header() {
                 <span className="font-semibold text-hospital-gray-900 dark:text-hospital-white text-sm">
                   {user.name || user.email}
                 </span>
-                <div className="text-xs font-semibold text-[${roleColors[user.role] || '#64748b'}] bg-[${roleColors[user.role] || '#64748b'}]/10 rounded px-2 py-1 mt-1">
+                <div className="text-xs font-semibold" style={{ color: roleColors[user.role] || '#64748b', backgroundColor: `${roleColors[user.role] || '#64748b'}10` }}>
                   {roleDisplayNames[user.role] || 'User'}
                 </div>
               </div>
@@ -139,7 +139,7 @@ export default function Header() {
               aria-label="User menu"
             >
               {user ? (
-                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-white font-semibold text-sm bg-[${roleColors[user.role] || '#64748b'}] hover:scale-105 transition-transform duration-200`}>
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-white font-semibold text-sm" style={{ backgroundColor: roleColors[user.role] || '#64748b' }}>
                   {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </div>
               ) : (
@@ -151,7 +151,7 @@ export default function Header() {
       </header>
 
       <div
-        className={`fixed top-16 sm:top-20 lg:top-24 right-4 bg-hospital-white dark:bg-hospital-gray-800 rounded-xl shadow-lg border border-hospital-gray-200 dark:border-hospital-gray-700 w-64 sm:w-72 max-h-[calc(100vh-6rem)] overflow-y-auto transition-all duration-200 ${anchorEl ? 'block' : 'hidden'}`}
+        className={`fixed top-16 sm:top-20 lg:top-24 right-4 bg-hospital-white dark:bg-hospital-gray-800 rounded-xl shadow-lg border border-hospital-gray-200 dark:border-hospital-gray-700 w-64 sm:w-72 max-h-[calc(100vh-6rem)] overflow-y-auto transition-all duration-200 z-[1000] ${anchorEl ? 'block' : 'hidden'}`}
       >
         {user && (
           <div className="p-4 border-b border-hospital-gray-200 dark:border-hospital-gray-700">
@@ -183,7 +183,7 @@ export default function Header() {
 
       {user && (
         <div
-          className={`fixed top-16 sm:top-20 lg:top-24 right-4 bg-hospital-white dark:bg-hospital-gray-800 rounded-xl shadow-lg border border-hospital-gray-200 dark:border-hospital-gray-700 w-64 sm:w-72 max-h-[calc(100vh-6rem)] overflow-y-auto transition-all duration-200 ${notificationAnchor ? 'block' : 'hidden'}`}
+          className={`fixed top-16 sm:top-20 lg:top-24 right-4 bg-hospital-white dark:bg-hospital-gray-800 rounded-xl shadow-lg border border-hospital-gray-200 dark:border-hospital-gray-700 w-64 sm:w-72 max-h-[calc(100vh-6rem)] overflow-y-auto transition-all duration-200 z-[1000] ${notificationAnchor ? 'block' : 'hidden'}`}
         >
           <div className="p-4 border-b border-hospital-gray-200 dark:border-hospital-gray-700">
             <div className="font-semibold text-sm">Notifications</div>
