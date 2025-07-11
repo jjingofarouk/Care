@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react'; // ✅ Add this line
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
