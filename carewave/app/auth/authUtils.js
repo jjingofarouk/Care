@@ -1,8 +1,8 @@
 "use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export const isAuthenticated = () => {
   const token = localStorage.getItem('token');
@@ -13,6 +13,8 @@ export const isAuthenticated = () => {
     const currentTime = Date.now() / 1000;
     return decoded.exp > currentTime;
   } catch {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     return false;
   }
 };
@@ -26,8 +28,13 @@ export const requireAuth = (WrappedComponent) => {
   const AuthenticatedComponent = (props) => {
     const router = useRouter();
 
+    useEffect(() => {
+      if (!isAuthenticated()) {
+        router.push('/auth');
+      }
+    }, [router]);
+
     if (!isAuthenticated()) {
-      router.push('/auth');
       return null;
     }
 
