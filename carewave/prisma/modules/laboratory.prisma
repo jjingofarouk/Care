@@ -1,99 +1,47 @@
-enum LabTestStatus {
-  ORDERED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  FAILED
+// Represents a laboratory test
+model LabTest {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  description   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  labRequests   LabRequest[] @relation("LabTestRequests")
 }
 
-enum LabTestType {
-  BLOOD
-  URINE
-  MICROBIOLOGY
-  PATHOLOGY
-  BIOCHEMISTRY
-  IMMUNOLOGY
-  OTHER
+// Represents a laboratory test result
+model LabResult {
+  id            String     @id @default(uuid())
+  labRequestId  String
+  labRequest    LabRequest @relation("LabRequestResults", fields: [labRequestId], references: [id], onDelete: Cascade)
+  result        String
+  resultedAt    DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-model Laboratory {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  testCode              String              @unique
-  patientId             Int
-  patient               Patient             @relation("PatientLaboratoryTests", fields: [patientId], references: [id])
-  doctorId              Int?
-  doctor                Doctor?             @relation("LaboratoryOrders", fields: [doctorId], references: [id])
-  appointmentId         Int?                @unique
-  appointment           Appointment?        @relation("AppointmentLaboratory")
-  admissionId           Int?
-  admission             Admission?          @relation("AdmissionLaboratoryTests", fields: [admissionId], references: [id])
-  clinicalRecordId      Int?                @unique
-  clinicalRecord        ClinicalRecord?     @relation("ClinicalRecordLaboratory")
-  departmentId          Int?
-  department            Department?         @relation("DepartmentLaboratoryTests", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?    @relation("LaboratoryClinicalSettings", fields: [clinicalSettingId], references: [id])
-  testType              LabTestType
-  status                LabTestStatus       @default(ORDERED)
-  testName              String
-  description           String?
-  orderDate             DateTime            @default(now())
-  sampleCollectionDate  DateTime?
-  resultDate            DateTime?
-  results               String?
-  normalRange           String?
-  billingId             Int?
-  billing               Billing?            @relation("LaboratoryBilling", fields: [billingId], references: [id])
-  claimId               Int?                @unique
-  claim                 Claim?              @relation("ClaimLaboratory", fields: [claimId], references: [id])
-  sampleId              String?
-  performedById         Int?
-  performedBy           User?               @relation("PerformedBy", fields: [performedById], references: [id])
-  reviewedById          Int?
-  reviewedBy            User?               @relation("ReviewedBy", fields: [reviewedById], references: [id])
-  notes                 String?
-  createdById           Int?
-  createdBy             User?               @relation("LaboratoryCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("LaboratoryUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("LaboratoryAuditLogs")
-  labDocuments          LabDocument[]       @relation("LaboratoryDocuments")
-  labNotifications      LabNotification[]   @relation("LaboratoryNotifications")
-  dashboardWidget       DashboardWidget?    @relation("DashboardWidgetLaboratory")
-  homeCares             HomeCare[]          @relation("HomeCareLaboratory")
-  nhifClaims            NhifClaim[]         @relation("NhifClaimLaboratory")
-  emergency             Emergency?          @relation("EmergencyLaboratory")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a request for a laboratory test
+model LabRequest {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientLabRequests", fields: [patientId], references: [id], onDelete: Cascade)
+  labTestId     String
+  labTest       LabTest    @relation("LabTestRequests", fields: [labTestId], references: [id], onDelete: Restrict)
+  sampleId      String?
+  sample        Sample?    @relation("LabRequestSample", fields: [sampleId], references: [id], onDelete: SetNull)
+  requestedAt   DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  labResults    LabResult[] @relation("LabRequestResults")
 }
 
-model LabDocument {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  laboratoryId          Int
-  laboratory            Laboratory          @relation("LaboratoryDocuments", fields: [laboratoryId], references: [id])
-  documentType          String
-  filePath              String
-  description           String?
-  uploadedById          Int?
-  uploadedBy            User?               @relation("LabDocumentUploadedBy", fields: [uploadedById], references: [id])
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("LabDocumentAuditLogs")
-}
-
-model LabNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  laboratoryId          Int
-  laboratory            Laboratory          @relation("LaboratoryNotifications", fields: [laboratoryId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?
-  recipient             User?               @relation("LabNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a sample collected for a lab test
+model Sample {
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       Patient      @relation("PatientSamples", fields: [patientId], references: [id], onDelete: Cascade)
+  sampleType    String
+  collectedAt   DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  labRequests   LabRequest[] @relation("LabRequestSample")
 }
