@@ -1,182 +1,118 @@
-// appointmentService.js
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function getAppointments({ status, type, dateFrom, dateTo, doctorId, patientId } = {}) {
+export async function getAllAppointments(filters) {
   return prisma.appointment.findMany({
     where: {
-      ...(status && status !== 'ALL' ? { status } : {}),
-      ...(type && type !== 'ALL' ? { type } : {}),
-      ...(dateFrom ? { date: { gte: new Date(dateFrom) } } : {}),
-      ...(dateTo ? { date: { lte: new Date(dateTo) } } : {}),
-      ...(doctorId ? { doctorId: parseInt(doctorId) } : {}),
-      ...(patientId ? { patientId: parseInt(patientId) } : {}),
+      ...(filters.status && { appointmentStatus: filters.status }),
+      ...(filters.doctorId && { doctorId: filters.doctorId }),
+      ...(filters.patientId && { patientId: filters.patientId }),
+      ...(filters.dateFrom && filters.dateTo && {
+        appointmentDate: {
+          gte: new Date(filters.dateFrom),
+          lte: new Date(filters.dateTo),
+        },
+      }),
     },
     include: {
-      patient: { include: { user: true } },
-      doctor: { include: { user: true } },
-      department: true,
-      queue: true,
+      patient: { select: { name: true } },
+      doctor: { select: { name: true, department: { select: { name: true } } } },
+      visitType: { select: { name: true } },
+      appointmentStatusRecords: true,
     },
+    orderBy: { appointmentDate: 'asc' },
   });
 }
 
-export async function getAppointment(id) {
+export async function getAppointmentById(id) {
   return prisma.appointment.findUnique({
-    where: { id: parseInt(id) },
+    where: { id },
     include: {
-      patient: { include: { user: true } },
-      doctor: { include: { user: true } },
-      department: true,
-      queue: true,
+      patient: { select: { name: true } },
+      doctor: { select: { name: true, department: { select: { name: true } } } },
+      visitType: { select: { name: true } },
+      appointmentStatusRecords: { orderBy: { changedAt: 'desc' } },
     },
   });
 }
 
 export async function createAppointment(data) {
-  const { patientId, doctorId, departmentId, date, type, reason, notes, bookedById } = data;
-  const parsedDate = new Date(date);
-  const queueNumber = await prisma.queue.count({
-    where: {
-      appointment: {
-        doctorId: parseInt(doctorId),
-        date: {
-          gte: new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate()),
-          lte: new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate(), 23, 59, 59),
+  return prisma.appointment.create({
+    data: {
+      patientId: data.patientId,
+      doctorId: data.doctorId,
+      visitTypeId: data.visitTypeId,
+      appointmentDate: new Date(data.appointmentDate),
+      appointmentStatus: data.status || 'PENDING',
+      appointmentStatusRecords: {
+        create: {
+          status: data.status || 'PENDING',
+          changedAt: new Date(data.appointmentDate),
         },
       },
     },
-  }) + 1;
-
-  return prisma.$transaction(async (tx) => {
-    const appointment = await tx.appointment.create({
-      data: {
-        patientId: parseInt(patientId),
-        doctorId: parseInt(doctorId),
-        departmentId: departmentId ? parseInt(departmentId) : null,
-        date: parsedDate,
-        type: type || 'REGULAR',
-        reason,
-        notes,
-        bookedById: bookedById ? parseInt(bookedById) : null,
-        status: 'SCHEDULED',
-      },
-      include: {
-        patient: { include: { user: true } },
-        doctor: { include: { user: true } },
-        department: true,
-      },
-    });
-
-    await tx.queue.create({
-      data: {
-        appointmentId: appointment.id,
-        queueNumber,
-        status: 'WAITING',
-      },
-    });
-
-    return appointment;
+    include: {
+      patient: { select: { name: true } },
+      doctor: { select: { name: true, department: { select: { name: true } } } },
+      visitType: { select: { name: true } },
+    },
   });
 }
 
 export async function updateAppointment(id, data) {
-  const parsedDate = data.date ? new Date(data.date) : undefined;
   return prisma.appointment.update({
-    where: { id: parseInt(id) },
+    where: { id },
     data: {
-      patientId: data.patientId ? parseInt(data.patientId) : undefined,
-      doctorId: data.doctorId ? parseInt(data.doctorId) : undefined,
-      departmentId: data.departmentId ? parseInt(data.departmentId) : null,
-      date: parsedDate,
-      type: data.type,
-      reason: data.reason,
-      notes: data.notes,
-      status: data.status,
-      checkInTime: data.checkInTime ? new Date(data.checkInTime) : undefined,
-      checkOutTime: data.checkOutTime ? new Date(data.checkOutTime) : undefined,
+      ...(data.patientId && { patientId: data.patientId }),
+      ...(data.doctorId && { doctorId: data.doctorId }),
+      ...(data.visitTypeId && { visitTypeId: data.visitTypeId }),
+      ...(data.appointmentDate && { appointmentDate: new Date(data.appointmentDate) }),
+      ...(data.status && { 
+        appointmentStatus: data.status,
+        appointmentStatusRecords: {
+          create: {
+            status: data.status,
+            changedAt: new Date(),
+          },
+        },
+      }),
     },
     include: {
-      patient: { include: { user: true } },
-      doctor: { include: { user: true } },
-      department: true,
-      queue: true,
+      patient: { select: { name: true } },
+      doctor: { select: { name: true, department: { select: { name: true } } } },
+      visitType: { select: { name: true } },
     },
+  });
+}
+
+export async function deleteAppointment(id) {
+  return prisma.appointment.delete({
+    where: { id },
   });
 }
 
 export async function getPatients() {
   return prisma.patient.findMany({
-    include: { user: true },
+    select: { id: true, name: true },
   });
 }
 
 export async function getDoctors() {
   return prisma.doctor.findMany({
-    include: { user: true },
+    select: { id: true, name: true, department: { select: { name: true } } },
   });
 }
 
-export async function getDepartments() {
-  return prisma.department.findMany();
-}
-
-export async function createDepartment(data) {
-  return prisma.department.create({
-    data: {
-      name: data.name,
-      description: data.description,
-    },
+export async function getVisitTypes() {
+  return prisma.visitType.findMany({
+    select: { id: true, name: true, description: true },
   });
 }
 
-export async function getAvailability({ doctorId }) {
-  return prisma.doctorAvailability.findMany({
-    where: { doctorId: parseInt(doctorId) },
-    orderBy: { startTime: 'asc' },
-  });
-}
-
-export async function createAvailability(data) {
-  return prisma.doctorAvailability.create({
-    data: {
-      doctorId: parseInt(data.doctorId),
-      startTime: new Date(data.startTime),
-      endTime: new Date(data.endTime),
-      status: data.status || 'AVAILABLE',
-    },
-  });
-}
-
-export async function getQueue({ doctorId }) {
-  return prisma.queue.findMany({
-    where: {
-      appointment: { doctorId: parseInt(doctorId) },
-      status: { in: ['WAITING', 'IN_PROGRESS'] },
-    },
-    include: {
-      appointment: {
-        include: {
-          patient: { include: { user: true } },
-          doctor: { include: { user: true } },
-        },
-      },
-    },
-  });
-}
-
-export async function updateQueue(id, data) {
-  return prisma.queue.update({
-    where: { id: parseInt(id) },
-    data: { status: data.status },
-    include: {
-      appointment: {
-        include: {
-          patient: { include: { user: true } },
-          doctor: { include: { user: true } },
-        },
-      },
-    },
+export async function getStatusHistory(appointmentId) {
+  return prisma.appointmentStatus.findMany({
+    where: { appointmentId },
+    orderBy: { changedAt: 'desc' },
   });
 }
