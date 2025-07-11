@@ -1,49 +1,48 @@
-enum MedicalRecordStatus {
-  DRAFT
-  FINALIZED
-  ARCHIVED
-  UNDER_REVIEW
-  AMENDED
+// Represents a patient's medical record
+model MedicalRecord {
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       Patient      @relation("PatientMedicalRecords", fields: [patientId], references: [id], onDelete: Cascade)
+  recordDate    DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  allergies     Allergy[]    @relation("MedicalRecordAllergies")
+  diagnoses     Diagnosis[]  @relation("MedicalRecordDiagnoses")
+  vitalSigns    VitalSign[]  @relation("MedicalRecordVitalSigns")
 }
 
+// Represents a patient's allergies
+model Allergy {
+  id              String        @id @default(uuid())
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation("MedicalRecordAllergies", fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  name            String
+  severity        String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
 
-model MedicalRecord {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  patientId             Int
-  patient               Patient               @relation("PatientMedicalRecords", fields: [patientId], references: [id])
-  doctorId              Int?
-  doctor                Doctor?               @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
-  appointmentId         Int?                  @unique
-  appointment           Appointment?          @relation("AppointmentMedicalRecord")
-  admissionId           Int?                  @unique
-  admission             Admission?            @relation("AdmissionMedicalRecord")
-  clinicalRecordId      Int?
-  clinicalRecord        ClinicalRecord?       @relation("MedicalRecordClinicalRecords")
-  departmentId          Int?
-  department            Department?           @relation("DepartmentMedicalRecords", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?      @relation("MedicalRecordClinicalSettings", fields: [clinicalSettingId], references: [id])
-  status                MedicalRecordStatus   @default(DRAFT)
-  diagnosis             String?
-  treatmentPlan         String?
-  notes                 String?
-  createdById           Int?
-  createdBy             User?                 @relation("MedicalRecordCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("MedicalRecordUpdatedBy", fields: [updatedById], references: [id])
-  reviewedById          Int?
-  reviewedBy            User?               @relation("MedicalRecordReviewedBy", fields: [reviewedById], references: [id])
-  prescriptions         Prescription[]        @relation("PrescriptionMedicalRecords")
-  laboratoryTests       Laboratory[]          @relation("MedicalRecordLaboratoryTests")
-  radiologyTests        Radiology[]           @relation("MedicalRecordRadiology")
-  radiologyTestRecords  RadiologyTest[]       @relation("MedicalRecordRadiologyTests")
-  maternity             Maternity?            @relation("MedicalRecordMaternity")
-  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetMedicalRecords")
-  auditLogs             AuditLog[]            @relation("MedicalRecordAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  discharges            Discharge[]           @relation("DischargeMedicalRecord")
-  socialServiceCases    SocialServiceCase[]   @relation("SocialServiceCaseMedicalRecords")
-  clinicalRecords       ClinicalRecord[]      @relation("ClinicalRecordMedicalRecords")
+// Represents a diagnosis in a medical record
+model Diagnosis {
+  id              String        @id @default(uuid())
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation("MedicalRecordDiagnoses", fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  code            String
+  description     String
+  diagnosedAt     DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// Represents vital signs recorded for a patient
+model VitalSign {
+  id              String        @id @default(uuid())
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation("MedicalRecordVitalSigns", fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  bloodPressure   String?
+  heartRate       Int?
+  temperature     Float?
+  recordedAt      DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
