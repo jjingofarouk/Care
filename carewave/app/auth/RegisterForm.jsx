@@ -3,15 +3,14 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import styles from './RegisterForm.module.css';
 import { register, login } from './authService';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: '',
-    role: 'PATIENT',
+    firstName: '',
+    lastName: '',
   });
   const [error, setError] = useState(null);
   const router = useRouter();
@@ -24,7 +23,6 @@ export default function RegisterForm() {
     e.preventDefault();
     try {
       await register(formData);
-      // Automatically log in after registration
       await login({ email: formData.email, password: formData.password });
       router.push('/');
     } catch (err) {
@@ -33,62 +31,65 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className={styles.container}>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <h2 className={styles.formTitle}>Register</h2>
-        <div className={styles.formField}>
-          <label className={styles.formLabel}>Name</label>
+    <div className="flex min-h-screen items-center justify-center bg-[var(--hospital-gray-50)]">
+      <form className="w-full max-w-md space-y-6 rounded-lg bg-[var(--hospital-white)] p-8 shadow-md" onSubmit={handleSubmit}>
+        <h2 className="text-2xl font-bold text-[var(--hospital-gray-900)]">Register</h2>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-[var(--hospital-gray-700)]">First Name</label>
           <input
             type="text"
-            name="name"
-            value={formData.name}
+            name="firstName"
+            value={formData.firstName}
             onChange={handleChange}
-            className={styles.formInput}
+            className="input w-full"
             required
           />
         </div>
-        <div className={styles.formField}>
-          <label className={styles.formLabel}>Email</label>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-[var(--hospital-gray-700)]">Last Name</label>
+          <input
+            type="text"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            className="input w-full"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-[var(--hospital-gray-700)]">Email</label>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className={styles.formInput}
+            className="input w-full"
             required
           />
         </div>
-        <div className={styles.formField}>
-          <label className={styles.formLabel}>Password</label>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-[var(--hospital-gray-700)]">Password</label>
           <input
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className={styles.formInput}
+            className="input w-full"
             required
           />
         </div>
-        <div className={styles.formField}>
-          <label className={styles.formLabel}>Role</label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className={styles.formInput}
-          >
-            <option value="PATIENT">Patient</option>
-            <option value="DOCTOR">Doctor</option>
-            <option value="NURSE">Nurse</option>
-            <option value="LAB_TECHNICIAN">Lab Technician</option>
-            <option value="STAFF">Staff</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </div>
-        {error && <p className={styles.formError}>{error}</p>}
-        <button type="submit" className={styles.formButton}>Register</button>
-        <p className={styles.registerLink}>
-          Already have an account? <Link href="/auth/login">Login</Link>
+        {error && <p className="text-sm text-[var(--hospital-error)]">{error}</p>}
+        <button
+          type="submit"
+          className="w-full rounded-md bg-[var(--hospital-accent)] px-4 py-2 text-[var(--hospital-white)] hover:bg-opacity-90"
+        >
+          Register
+        </button>
+        <p className="text-center text-sm text-[var(--hospital-gray-700)]">
+          Already have an account?{' '}
+          <Link href="/auth/login" className="text-[var(--hospital-accent)] hover:underline">
+            Login
+          </Link>
         </p>
       </form>
     </div>
