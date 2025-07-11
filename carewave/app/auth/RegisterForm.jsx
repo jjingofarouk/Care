@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, Heart, 
-  CheckCircle, ChevronDown, Stethoscope, Users, Settings 
+  CheckCircle, Stethoscope, Users, Settings 
 } from 'lucide-react';
 import { register } from './authService';
 
