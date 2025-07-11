@@ -1,4 +1,4 @@
-// modules/substore.prisma
+// substore.prisma
 // Represents a substore in the hospital
 model Substore {
   id                String             @id @default(uuid())
