@@ -1,0 +1,22 @@
+// Represents user registration data
+model UserRegistration {
+  id                    String                  @id @default(uuid())
+  email                 String                  @unique
+  firstName             String
+  lastName              String
+  passwordHash          String
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  emailVerification     EmailVerificationToken? @relation("UserEmailVerification")
+}
+
+// Represents email verification tokens
+model EmailVerificationToken {
+  id                String           @id @default(uuid())
+  userRegistrationId String           @unique
+  userRegistration  UserRegistration @relation("UserEmailVerification", fields: [userRegistrationId], references: [id], onDelete: Cascade)
+  token             String           @unique
+  expiresAt         DateTime
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
