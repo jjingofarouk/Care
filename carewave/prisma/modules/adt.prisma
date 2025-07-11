@@ -12,6 +12,7 @@ model Admission {
   updatedAt     DateTime   @updatedAt
   discharges    Discharge[] @relation("AdmissionDischarges")
   transfers     Transfer[]  @relation("AdmissionTransfers")
+  emergencyCases EmergencyCase[] @relation("EmergencyCaseAdmission")
 }
 
 // Represents a patient discharge
