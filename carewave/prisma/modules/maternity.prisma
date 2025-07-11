@@ -1,3 +1,4 @@
+// maternity.prisma
 // Represents a maternity case
 model MaternityCase {
   id            String      @id @default(uuid())
