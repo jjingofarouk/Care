@@ -1,0 +1,30 @@
+// Represents a generated report
+model Report {
+  id              String          @id @default(uuid())
+  reportTemplateId String
+  reportTemplate  ReportTemplate  @relation("ReportTemplateReports", fields: [reportTemplateId], references: [id], onDelete: Restrict)
+  generatedAt     DateTime
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+// Represents a template for generating reports
+model ReportTemplate {
+  id              String       @id @default(uuid())
+  name            String       @unique
+  description     String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  reports         Report[]     @relation("ReportTemplateReports")
+  reportSchedules ReportSchedule[] @relation("TemplateReportSchedules")
+}
+
+// Represents a schedule for generating reports
+model ReportSchedule {
+  id              String         @id @default(uuid())
+  reportTemplateId String
+  reportTemplate  ReportTemplate @relation("TemplateReportSchedules", fields: [reportTemplateId], references: [id], onDelete: Cascade)
+  scheduleDate    DateTime
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
