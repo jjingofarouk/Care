@@ -52,6 +52,7 @@ model Bed {
   admissions    Admission[]  @relation("AdmissionBed")
 }
 
+// departments.prisma
 // Represents a hospital ward
 model Ward {
   id            String       @id @default(uuid())
