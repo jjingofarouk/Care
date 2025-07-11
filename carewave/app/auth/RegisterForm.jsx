@@ -14,7 +14,6 @@ export default function RegisterForm() {
     role: 'PATIENT',
   });
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -25,18 +24,16 @@ export default function RegisterForm() {
     e.preventDefault();
     try {
       await register(formData);
-      setSuccess('Registration successful, please verify your email');
-      setError(null);
+      router.push('/auth/login');
     } catch (err) {
       setError('Failed to register');
-      setSuccess(null);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--hospital-gray-50)]">
-      <form className="w-full max-w-md space-y-6 rounded-lg bg-[var(--hospital-white)] p-8 shadow-md" onSubmit={handleSubmit}>
-        <h2 className="text-2xl font-bold text-[var(--hospital-gray-900)]">Register</h2>
+    <div className="flex min-h-screen items-center justify-center bg-[var(--hospital-gray-50)] px-4">
+      <form className="w-full max-w-md space-y-6 rounded-lg bg-[var(--hospital-white)] p-6 sm:p-8 shadow-md" onSubmit={handleSubmit}>
+        <h2 className="text-2xl font-bold text-[var(--hospital-gray-900)] text-center">Register</h2>
         <div className="space-y-2">
           <label className="block text-sm font-medium text-[var(--hospital-gray-700)]">First Name</label>
           <input
@@ -93,15 +90,24 @@ export default function RegisterForm() {
             <option value="DOCTOR">Doctor</option>
             <option value="NURSE">Nurse</option>
             <option value="LAB_TECHNICIAN">Lab Technician</option>
-            <option value="STAFF">Staff</option>
+            <option value="PHARMACIST">Pharmacist</option>
+            <option value="RECEPTIONIST">Receptionist</option>
+            <option value="RADIOLOGIST">Radiologist</option>
+            <option value="SURGEON">Surgeon</option>
             <option value="ADMIN">Admin</option>
+            <option value="STAFF">Staff</option>
+            <option value="ACCOUNTANT">Accountant</option>
+            <option value="BILLING_OFFICER">Billing Officer</option>
+            <option value="HOSPITAL_MANAGER">Hospital Manager</option>
+            <option value="IT_SUPPORT">IT Support</option>
+            <option value="CLEANING_STAFF">Cleaning Staff</option>
+            <option value="SECURITY">Security</option>
           </select>
         </div>
-        {error && <p className="text-sm text-[var(--hospital-error)]">{error}</p>}
-        {success && <p className="text-sm text-[var(--hospital-accent)]">{success}</p>}
+        {error && <p className="text-sm text-[var(--hospital-error)] text-center">{error}</p>}
         <button
           type="submit"
-          className="w-full rounded-md bg-[var(--hospital-accent)] px-4 py-2 text-[var(--hospital-white)] hover:bg-opacity-90"
+          className="w-full rounded-md bg-[var(--hospital-accent)] px-4 py-2 text-[var(--hospital-white)] hover:bg-opacity-90 transition-colors"
         >
           Register
         </button>
