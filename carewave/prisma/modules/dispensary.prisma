@@ -1,92 +1,32 @@
-enum PatientType {
-  INPATIENT
-  OUTPATIENT
+// Represents a dispensary in the hospital
+model Dispensary {
+  id                String          @id @default(uuid())
+  name              String          @unique
+  location          String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  dispensaryStocks  DispensaryStock[] @relation("DispensaryStocks")
 }
 
-enum StockAdjustmentType {
-  INCREASE
-  DECREASE
-  DAMAGED
-  EXPIRED
-  TRANSFER
+// Represents a pharmacist working in the dispensary
+model Pharmacist {
+  id            String     @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String     @unique
+  phone         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-
-model PrescriptionItem {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  prescriptionId      Int
-  prescription        Prescription          @relation("PrescriptionItems", fields: [prescriptionId], references: [id])
-  medicationId        Int
-  medication          Medication            @relation("PrescriptionItemMedication", fields: [medicationId], references: [id])
-  dosage              String
-  quantity            Int
-  frequency           String
-  duration            String
-  route               String?
-  instructions        String?
-  refillCount         Int?                  @default(0)
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("PrescriptionItemCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("PrescriptionItemUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("PrescriptionItemAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model DispensingRecord {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  prescriptionId      Int
-  prescription        Prescription          @relation("PrescriptionDispensingRecords", fields: [prescriptionId], references: [id])
-  medicationId        Int
-  medication          Medication            @relation("DispensingRecordMedication", fields: [medicationId], references: [id])
-  patientType         PatientType
-  quantity            Int
-  dispensedDate       DateTime              @default(now())
-  dispensedById       Int
-  dispensedBy         User                  @relation("DispensedBy", fields: [dispensedById], references: [id])
-  pharmacyId          Int?                  @unique
-  pharmacy            Pharmacy?             @relation("DispensingRecordPharmacy", fields: [pharmacyId], references: [id])
-  invoiceId           Int?                  @unique
-  invoice             Invoice?              @relation("InvoiceDispensingRecords", fields: [invoiceId], references: [id])
-  batchNumber         String?
-  expiryDate          DateTime?
-  notes               String?
-  status              String                @default("DISPENSED")
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("DispensingRecordCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("DispensingRecordUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("DispensingRecordAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model StockAdjustment {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  medicationId        Int
-  medication          Medication            @relation("StockAdjustmentMedication", fields: [medicationId], references: [id])
-  pharmacyId          Int?                  @unique
-  pharmacy            Pharmacy?             @relation("StockAdjustmentPharmacy", fields: [pharmacyId], references: [id])
-  quantity            Int
-  adjustmentType      StockAdjustmentType
-  reason              String
-  adjustedById        Int
-  adjustedBy          User                  @relation("AdjustedBy", fields: [adjustedById], references: [id])
-  approvedById        Int?                  @unique
-  approvedBy          User?                 @relation("AdjustmentApprovedBy", fields: [approvedById], references: [id])
-  adjustmentDate      DateTime              @default(now())
-  batchNumber         String?
-  expiryDate          DateTime?
-  procurementId       Int?                  @unique
-  procurement         Procurement?          @relation("StockAdjustmentProcurement", fields: [procurementId], references: [id])
-  inventoryId         Int?                  @unique
-  inventory           Inventory?            @relation("StockAdjustmentInventory", fields: [inventoryId], references: [id])
-  notes               String?
-  auditLogs           AuditLog[]            @relation("StockAdjustmentAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Represents stock in the dispensary
+model DispensaryStock {
+  id            String     @id @default(uuid())
+  dispensaryId  String
+  dispensary    Dispensary @relation("DispensaryStocks", fields: [dispensaryId], references: [id], onDelete: Cascade)
+  drugId        String
+  drug          Drug       @relation("DispensaryStockDrug", fields: [drugId], references: [id], onDelete: Restrict)
+  quantity      Int
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
