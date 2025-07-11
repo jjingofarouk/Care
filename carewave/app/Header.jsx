@@ -12,7 +12,7 @@ import {
   Home,
   ChevronDown 
 } from 'lucide-react';
-import { useAuth } from './auth/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import Sidebar from './Sidebar';
 
 const roleColors = {
