@@ -1,3 +1,4 @@
+// mkt-referral.prisma
 // Represents a patient referral
 model Referral {
   id                String          @id @default(uuid())
