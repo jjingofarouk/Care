@@ -1,8 +1,213 @@
 // prisma/seed.ts
-import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcryptjs';
+const { PrismaClient } = require('@prisma/client');
+const { hash } = require('bcryptjs');
 
 const prisma = new PrismaClient();
+
+async function clearDatabase() {
+  // Models ordered by dependency (child tables first, parent tables last)
+  const models = [
+    // Auth & Verification
+    'VerificationToken',
+    'UserVerificationStatus',
+    'EmailVerificationToken',
+    'LoginAttempt',
+    'Session',
+    'UserLogin',
+    'UserRegistration',
+    
+    // Audit & Logs
+    'AuditLog',
+    'AdminLog',
+    'EmergencyLog',
+    'BackupGeneratorStatus',
+    'ElectricityLog',
+    'WaterLog',
+    
+    // Clinical Data
+    'Allergy',
+    'Diagnosis',
+    'VitalSign',
+    'ClinicalNote',
+    'ProgressNote',
+    'SOAPNote',
+    'ClinicalTask',
+    'MedicalRecord',
+    
+    // Appointments
+    'AppointmentStatus',
+    'Appointment',
+    
+    // Emergency
+    'EmergencyCase',
+    'Triage',
+    'Ambulance',
+    
+    // Maternity
+    'PNCVisit',
+    'ANCVisit',
+    'DeliveryRecord',
+    'MaternityCase',
+    
+    // Vaccination
+    'VaccinationRecord',
+    'ImmunizationSchedule',
+    'Vaccine',
+    
+    // Pharmacy
+    'DispenseRecord',
+    'Prescription',
+    'PharmacyItem',
+    'DispensaryStock',
+    'Dispensary',
+    'Pharmacist',
+    'Drug',
+    
+    // Lab & Radiology
+    'LabResult',
+    'LabRequest',
+    'Sample',
+    'LabTest',
+    'ScanImage',
+    'RadiologyResult',
+    'ImagingOrder',
+    'RadiologyTest',
+    
+    // Surgery
+    'Surgery',
+    'PreOpAssessment',
+    'SterilizationCycle',
+    'InstrumentRequest',
+    'CSSDItem',
+    'SurgicalTeam',
+    'Theatre',
+    
+    // ADT (Admissions)
+    'Discharge',
+    'Transfer',
+    'Admission',
+    'Bed',
+    'Room',
+    'Ward',
+    
+    // Queue Management
+    'QueueEntry',
+    'QueueStatus',
+    'ServiceCounter',
+    
+    // Social Work
+    'PatientSupportCase',
+    'SocialWorker',
+    
+    // Billing
+    'Payment',
+    'BillingItem',
+    'Invoice',
+    
+    // Claims
+    'NHIFSubmission',
+    'NHIFClaim',
+    'NHIFBenefit',
+    'ClaimSubmission',
+    'ClaimStatus',
+    'Claim',
+    'ClaimBatch',
+    
+    // Accounting
+    'TrialBalance',
+    'JournalEntry',
+    'Ledger',
+    'Account',
+    
+    // Inventory
+    'ExpiryAlert',
+    'StockMovement',
+    'Inventory',
+    'Requisition',
+    'SubstoreTransfer',
+    'Substore',
+    'GoodsReceivedNote',
+    'PurchaseOrder',
+    'Supplier',
+    'Item',
+    
+    // Fixed Assets
+    'AssetAudit',
+    'DepreciationSchedule',
+    'FixedAsset',
+    
+    // Helpdesk
+    'HelpTicket',
+    'SupportAgent',
+    
+    // System
+    'FeatureToggle',
+    'SystemSetting',
+    'ThemeSetting',
+    
+    // Dashboard
+    'Widget',
+    'DashboardStats',
+    'KPI',
+    'Notification',
+    
+    // Homepage
+    'HeroSection',
+    'Highlight',
+    'News',
+    'HomepageConfig',
+    
+    // Reports
+    'ReportFilter',
+    'ReportField',
+    'Report',
+    'ReportSchedule',
+    'ReportTemplate',
+    'CustomReport',
+    
+    // Referrals
+    'Referral',
+    'ReferringDoctor',
+    'ReferralSource',
+    
+    // Human Resources
+    'IncentiveRecord',
+    'IncentiveProgram',
+    'Shift',
+    'NurseSchedule',
+    'Nurse',
+    'DoctorLeave',
+    'DoctorSchedule',
+    'DoctorSpecialization',
+    'Doctor',
+    'Permission',
+    'Role',
+    'SystemAdmin',
+    
+    // Patient Data
+    'PatientAddress',
+    'NextOfKin',
+    'InsuranceInfo',
+    'Patient',
+    
+    // Departments
+    'Unit',
+    'Department'
+  ];
+
+  console.log('Clearing database...');
+  
+  // Delete all records from each model
+  for (const model of models) {
+    try {
+      await prisma.$executeRawUnsafe(`DELETE FROM "${model}";`);
+      console.log(`Cleared ${model}`);
+    } catch (error) {
+      console.error(`Error clearing ${model}:`, error.message);
+    }
+  }
+}
+
 
 async function main() {
   // Create departments
