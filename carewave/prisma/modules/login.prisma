@@ -1,9 +1,8 @@
-
 model UserLogin {
   id            String         @id @default(uuid())
   email         String         @unique
   passwordHash  String
-  lastLoginAt   DateTime?      // Added to track last successful login
+  lastLoginAt   DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   loginAttempts LoginAttempt[] @relation("UserLoginAttempts")
@@ -16,7 +15,7 @@ model LoginAttempt {
   userLoginId   String
   userLogin     UserLogin  @relation("UserLoginAttempts", fields: [userLoginId], references: [id], onDelete: Cascade)
   ipAddress     String?
-  userAgent     String?    // Added to track user agent for security
+  userAgent     String?
   success       Boolean
   attemptedAt   DateTime   @default(now())
   createdAt     DateTime   @default(now())
@@ -29,7 +28,7 @@ model Session {
   userLogin     UserLogin  @relation("UserSessions", fields: [userLoginId], references: [id], onDelete: Cascade)
   token         String     @unique
   expiresAt     DateTime
-  isActive      Boolean    @default(true) // Added to track active sessions
+  isActive      Boolean    @default(true)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
