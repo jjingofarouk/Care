@@ -1,10 +1,8 @@
 "use client";
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { isAuthenticated } from './authUtils';
-
-
 
 export default function AuthLayout({ children }) {
   const router = useRouter();
@@ -17,7 +15,7 @@ export default function AuthLayout({ children }) {
   }, [router]);
 
   return (
-    <div style={{ marginTop: '64px', padding: '0' }}>
+    <div className="mt-16 p-0">
       <main>{children}</main>
     </div>
   );
