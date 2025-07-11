@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
@@ -12,7 +12,7 @@ import {
   Home,
   ChevronDown 
 } from 'lucide-react';
-import useAuth from './useAuth';
+import { useAuth } from '../auth/AuthContext';
 import Sidebar from './Sidebar';
 
 const roleColors = {
@@ -86,12 +86,6 @@ export default function Header() {
   ];
 
   const unreadCount = notifications.filter(n => n.unread).length;
-
-  useEffect(() => {
-    if (!user) {
-      setSidebarOpen(false);
-    }
-  }, [user]);
 
   if (loading) return null;
 
