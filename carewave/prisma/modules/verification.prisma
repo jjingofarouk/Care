@@ -1,85 +1,33 @@
-enum VerificationStatus {
-  PENDING
-  VERIFIED
-  REJECTED
-  EXPIRED
-  IN_PROGRESS
+// Represents verification tokens for users
+model VerificationToken {
+  id            String     @id @default(uuid())
+  userId        String
+  userType      String
+  token         String     @unique
+  expiresAt     DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  userVerificationStatus UserVerificationStatus? @relation("TokenUserVerification")
 }
 
-enum VerificationType {
-  EMAIL
-  PHONE
-  IDENTITY
-  INSURANCE
-  MEDICAL_LICENSE
-  EMPLOYMENT
-  ADDRESS
+// Tracks audit logs for system actions
+model AuditLog {
+  id            String     @id @default(uuid())
+  userId        String
+  userType      String
+  action        String
+  details       String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-enum VerificationMethod {
-  OTP
-  DOCUMENT_UPLOAD
-  THIRD_PARTY_API
-  MANUAL_REVIEW
-  BIOMETRIC
-}
-
-model Verification {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  verificationNumber  String                @unique
-  userId              Int?
-  user                User?                 @relation("VerifiedUser", fields: [userId], references: [id])
-  patientId           Int?
-  patient             Patient?              @relation(fields: [patientId], references: [id])
-  doctorId            Int?
-  doctor              Doctor?               @relation("DoctorVerification", fields: [doctorId], references: [id])
-  type                VerificationType
-  status              VerificationStatus    @default(PENDING)
-  method              VerificationMethod
-  requestDate         DateTime              @default(now())
-  verificationDate    DateTime?
-  expiryDate          DateTime?
-  token               String?
-  documentPath        String?
-  documentType        String?
-  thirdPartyReference String?
-  rejectionReason     String?
-  notes               String?
-  departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  verifiedById        Int?
-  verifiedBy          User?                 @relation("VerifiedBy", fields: [verifiedById], references: [id])
-  auditLogs           AuditLog[]            @relation("VerificationAuditLogs")
-  createdById         Int?
-  createdBy           User?                 @relation("VerificationCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("VerificationUpdatedBy", fields: [updatedById], references: [id])
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model VerificationConfiguration {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  type                VerificationType
-  method              VerificationMethod
-  maxAttempts         Int                   @default(3)
-  tokenExpiryMinutes  Int                   @default(10)
-  requiredDocuments   String?
-  thirdPartyApi       String?
-  apiCredentials      String?
-  autoVerify          Boolean               @default(false)
-  notificationSettings String?
-  status              String                @default("ACTIVE")
-  departmentId        Int?
-  department          Department?           @relation(fields: [departmentId], references: [id])
-  notes               String?
-  createdById         Int?
-  createdBy           User?                 @relation("ConfigCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("ConfigUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("VerificationConfigAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Represents the verification status of a user
+model UserVerificationStatus {
+  id                String            @id @default(uuid())
+  verificationTokenId String           @unique
+  verificationToken VerificationToken @relation("TokenUserVerification", fields: [verificationTokenId], references: [id], onDelete: Cascade)
+  status            String
+  verifiedAt        DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 }
