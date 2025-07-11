@@ -199,8 +199,8 @@ const roleBasedNavItems = {
   ],
   GUEST: [
     { name: 'Home', path: '/', icon: Home, category: 'main' },
-    { name: 'Login', path: '/auth/login', icon: Key, category: 'auth' },
-    { name: 'Register', path: '/auth/register', icon: User, category: 'auth' },
+    { name: 'Login', path: '/auth', icon: Key, category: 'auth' },
+    { name: 'Register', path: '/auth', icon: User, category: 'auth' },
     { name: 'Contact', path: '/contact', icon: Phone, category: 'auth' },
     { name: 'About', path: '/about', icon: HelpCircle, category: 'auth' },
   ],
@@ -242,7 +242,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   const pathname = usePathname();
   const { user, loading } = useAuth();
 
-  const navItems = user ? roleBasedNavItems[user.role] || roleBasedNavItems.GUEST : roleBasedNavItems.GUEST;
+  const navItems = user ? roleBasedNavItems[user?.role] || roleBasedNavItems.GUEST : roleBasedNavItems.GUEST;
   const groupedNavItems = navItems.reduce((acc, item) => {
     const category = item.category || 'main';
     if (!acc[category]) acc[category] = [];
@@ -253,7 +253,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   if (loading) return null;
 
   return (
-    <div className={`fixed inset-y-0 left-0 z-40 w-64 bg-gradient-to-b from-[var(--hospital-gray-900)] to-[var(--hospital-gray-800)] text-[var(--hospital-white)] transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:w-72 lg:w-80 shadow-xl`}>
+    <div className={`fixed inset-y-0 left-0 z-[60] w-64 bg-gradient-to-b from-[var(--hospital-gray-900)] to-[var(--hospital-gray-800)] text-[var(--hospital-white)] transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:w-72 lg:w-80 shadow-xl mt-16 lg:mt-20`}>
       <div className="flex items-center p-4 border-b border-[var(--hospital-gray-700)] bg-gradient-to-r from-[var(--hospital-accent)] to-[var(--hospital-gray-800)]">
         <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg mr-3">
           <Image 
@@ -276,7 +276,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
         </button>
       </div>
       
-      <div className="overflow-y-auto h-[calc(100vh-4rem)] p-4 custom-scrollbar">
+      <div className="overflow-y-auto h-[calc(100vh-8rem)] p-4 custom-scrollbar">
         {Object.entries(groupedNavItems).map(([category, items], index) => {
           const CategoryIcon = categoryIcons[category] || Home;
           return (
@@ -324,7 +324,20 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
           <div className="flex items-center gap-3 p-3 bg-[var(--hospital-gray-700)]/50 rounded-lg">
             <div 
               className="w-10 h-10 rounded-lg flex items-center justify-center text-[var(--hospital-white)] font-bold shadow-sm"
-              style={{ backgroundColor: user.role === 'DOCTOR' ? '#7c3aed' : user.role === 'NURSE' ? '#dc2626' : '#059669' }}
+              style={{ 
+                backgroundColor: user.role === 'DOCTOR' ? '#7c3aed' : 
+                               user.role === 'NURSE' ? '#dc2626' : 
+                               user.role === 'ADMIN' ? '#64748b' :
+                               user.role === 'RECEPTIONIST' ? '#10b981' :
+                               user.role === 'RADIOLOGIST' ? '#f97316' :
+                               user.role === 'SURGEON' ? '#8b5cf6' :
+                               user.role === 'ACCOUNTANT' ? '#6b7280' :
+                               user.role === 'BILLING_OFFICER' ? '#ef4444' :
+                               user.role === 'HOSPITAL_MANAGER' ? '#3b82f6' :
+                               user.role === 'IT_SUPPORT' ? '#d97706' :
+                               user.role === 'CLEANING_STAFF' ? '#6d28d9' :
+                               user.role === 'SECURITY' ? '#475569' : '#059669'
+              }}
             >
               {user.firstName?.charAt(0).toUpperCase() || 'U'}
             </div>
