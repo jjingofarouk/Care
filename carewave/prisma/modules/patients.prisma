@@ -1,75 +1,58 @@
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-}
-
-enum PatientStatus {
-  ACTIVE
-  INACTIVE
-  DECEASED
-  TRANSFERRED
-}
-
-enum MaritalStatus {
-  SINGLE
-  MARRIED
-  DIVORCED
-  WIDOWED
-  SEPARATED
-}
-
+// Represents a patient in the hospital system
 model Patient {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  firstName             String
-  lastName              String
-  middleName            String?
-  dateOfBirth           DateTime
-  gender                Gender
-  status                PatientStatus         @default(ACTIVE)
-  address               String?
-  phoneNumber           String?
-  email                 String?               @unique
-  nationalId            String?               @unique
-  passportNumber        String?               @unique
-  maritalStatus         MaritalStatus?
-  occupation            String?
-  emergencyContactName  String?
-  emergencyContactPhone String?
-  bloodGroup            String?
-  allergies             String?
-  medicalHistory        String?
-  createdById           Int?                  @unique
-  createdBy             User?                 @relation("PatientCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                  @unique
-  updatedBy             User?                 @relation("PatientUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("PatientAuditLogs")
-  clinicalRecords       ClinicalRecord[]      @relation("PatientClinicalRecords")
-  medicalRecords        MedicalRecord[]       @relation("PatientMedicalRecords")
-  appointments          Appointment[]         @relation("PatientAppointments")
-  admissions            Admission[]           @relation("PatientAdmissions")
-  transfers             Transfer[]            @relation("PatientTransfers")
-  discharges            Discharge[]           @relation("DischargedPatient")
-  invoices              Invoice[]             @relation("PatientInvoices")
-  transactions          Transaction[]         @relation("PatientTransactions")
-  billing               Billing[]             @relation("PatientBilling")
-  claims                Claim[]               @relation("PatientClaims")
-  nhifClaims            NhifClaim[]           @relation("PatientNhifClaims")
-  prescriptions         Prescription[]        @relation("PatientPrescriptions")
-  adverseReactions      AdverseReaction[]     @relation("PatientAdverseReactions")
-  pharmacyRecords       Pharmacy[]            @relation("PatientPharmacyRecords")
-  laboratoryTests       Laboratory[]          @relation("PatientLaboratoryTests")
-  radiologyTests        RadiologyTest[]       @relation("PatientRadiologyTests")
-  homeCares             HomeCare[]            @relation("PatientHomeCare")
-  socialServices        SocialService[]       @relation("PatientSocialServices")
-  socialServiceCases    SocialServiceCase[]   @relation("PatientSocialServiceCases")
-  insurances            Insurance[]           @relation("PatientInsurances")
-  clinicalSettings      ClinicalSetting[]     @relation("PatientClinicalSettings")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  recurringAppointments  RecurringAppointment[] @relation("PatientRecurringAppointments")
-  emergencies           Emergency[]           @relation("PatientEmergencies")
-  queues                Queue[]               @relation("PatientQueue")
-  referrals             Referral[]            @relation("PatientReferrals")
+  id              String           @id @default(uuid())
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime
+  gender          String
+  phone           String?
+  email           String?          @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  medicalRecords  MedicalRecord[]  @relation("PatientMedicalRecords")
+  appointments    Appointment[]    @relation("PatientAppointments")
+  admissions      Admission[]      @relation("PatientAdmissions")
+  addresses       PatientAddress[] @relation("PatientAddresses")
+  nextOfKin       NextOfKin?       @relation("PatientNextOfKin")
+  insuranceInfo   InsuranceInfo?   @relation("PatientInsurance")
+  supportCases    PatientSupportCase[] @relation("PatientSupportCases")
+}
+
+// Represents a patient's address
+model PatientAddress {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   Patient  @relation("PatientAddresses", fields: [patientId], references: [id], onDelete: Cascade)
+  street    String
+  city      String
+  country   String
+  postalCode String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Represents a patient's next of kin
+model NextOfKin {
+  id        String   @id @default(uuid())
+  patientId String   @unique
+  patient   Patient  @relation("PatientNextOfKin", fields: [patientId], references: [id], onDelete: Cascade)
+  firstName String
+  lastName  String
+  relationship String
+  phone     String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Represents a patient's insurance information
+model InsuranceInfo {
+  id            String   @id @default(uuid())
+  patientId     String   @unique
+  patient       Patient  @relation("PatientInsurance", fields: [patientId], references: [id], onDelete: Cascade)
+  provider      String
+  policyNumber  String   @unique
+  expiryDate    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
