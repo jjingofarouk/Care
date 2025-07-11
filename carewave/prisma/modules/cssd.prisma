@@ -1,210 +1,33 @@
-enum CSSDInstrumentStatus {
-  AVAILABLE
-  IN_USE
-  UNDER_MAINTENANCE
-  STERILIZATION_IN_PROGRESS
-  OUT_OF_SERVICE
-  RESERVED
-}
-
-enum CSSDSterilizationMethod {
-  STEAM
-  ETHYLENE_OXIDE
-  PLASMA
-  DRY_HEAT
-  CHEMICAL
-}
-
-enum CSSDRecordStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  FAILED
-  CANCELLED
-}
-
-enum CSSDRequisitionStatus {
-  PENDING
-  APPROVED
-  DISPATCHED
-  REJECTED
-  RETURNED
-}
-
-enum CSSDStatus {
-  ACTIVE
-  INACTIVE
-  MAINTENANCE
-}
-
-model Cssd {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  departmentId        Int?
-  department          Department?           @relation("DepartmentCssd", fields: [departmentId], references: [id])
-  clinicalSettingId   Int?                  @unique
-  clinicalSetting     ClinicalSetting?      @relation("ClinicalSettingCssd", fields: [clinicalSettingId], references: [id])
-  name                String
-  status              CSSDStatus            @default(ACTIVE)
-  location            String?
-  capacity            Int?
-  operatingHours      String?
-  instruments         CSSDInstrument[]      @relation("CssdInstruments")
-  records             CSSDRecord[]          @relation("CssdRecords")
-  requisitions        CSSDRequisition[]     @relation("CssdRequisitions")
-  maintenanceRecords  CSSDMaintenance[]     @relation("CssdMaintenanceRecords")
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("CssdCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("CssdUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("CssdAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model CSSDInstrument {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  cssdId              Int?
-  cssd                Cssd?                 @relation("CssdInstruments", fields: [cssdId], references: [id])
-  name                String
-  serialNumber        String                @unique
-  type                String?
-  status              CSSDInstrumentStatus  @default(AVAILABLE)
-  lastSterilized      DateTime?
-  lastMaintenance     DateTime?
-  location            String?
-  stockQuantity       Int                   @default(1)
-  minStockThreshold   Int                   @default(1)
-  maxStockThreshold   Int?
-  manufacturer        String?
-  model               String?
-  purchaseDate        DateTime?
-  warrantyExpires     DateTime?
-  departmentId        Int?
-  department          Department?           @relation("DepartmentCSSDInstruments", fields: [departmentId], references: [id])
-  operationTheatreId  Int?                  @unique
-  operationTheatre    OperationTheatre?     @relation("OperationTheatreCSSDInstruments", fields: [operationTheatreId], references: [id])
-  clinicalSettingId   Int?                  @unique
-  clinicalSetting     ClinicalSetting?      @relation("ClinicalSettingCSSDInstruments", fields: [clinicalSettingId], references: [id])
-  procurementId       Int?                  @unique
-  procurement         Procurement?          @relation("CSSDInstrumentProcurement", fields: [procurementId], references: [id])
-  fixedAssetId        Int?                  @unique
-  fixedAsset          FixedAsset?           @relation("CSSDInstrumentFixedAsset", fields: [fixedAssetId], references: [id])
-  cssdRecords         CSSDRecord[]          @relation("InstrumentCSSDRecords")
-  requisitions        CSSDRequisition[]     @relation("RequisitionInstrument")
-  logs                CSSDLog[]             @relation("InstrumentLogs")
-  maintenanceRecords  CSSDMaintenance[]     @relation("InstrumentMaintenanceRecords")
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("InstrumentCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("InstrumentUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("CSSDInstrumentAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model CSSDRecord {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  cssdId              Int?
-  cssd                Cssd?                 @relation("CssdRecords", fields: [cssdId], references: [id])
-  instrumentId        Int
-  instrument          CSSDInstrument        @relation("InstrumentCSSDRecords", fields: [instrumentId], references: [id])
-  sterilizationDate   DateTime?
-  sterilizationMethod CSSDSterilizationMethod?
-  cycleNumber         String?
-  status              CSSDRecordStatus      @default(PENDING)
-  qualityCheck        String?
-  qualityCheckDate    DateTime?
-  sterilizerId        String?
-  batchNumber         String?
-  expiryDate          DateTime?
-  notes               String?
-  operationTheatreId  Int?                  @unique
-  operationTheatre    OperationTheatre?     @relation("OperationTheatreCSSDRecords", fields: [operationTheatreId], references: [id])
-  clinicalSettingId   Int?                  @unique
-  clinicalSetting     ClinicalSetting?      @relation("ClinicalSettingCSSDRecords", fields: [clinicalSettingId], references: [id])
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("RecordCreatedBy", fields: [createdById], references: [id])
-  qualityCheckedById  Int?                  @unique
-  qualityCheckedBy    User?                 @relation("RecordQualityCheckedBy", fields: [qualityCheckedById], references: [id])
-  logs                CSSDLog[]             @relation("RecordLogs")
-  auditLogs           AuditLog[]            @relation("CSSDRecordAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model CSSDRequisition {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  cssdId              Int?
-  cssd                Cssd?                 @relation("CssdRequisitions", fields: [cssdId], references: [id])
-  instrumentId        Int
-  instrument          CSSDInstrument        @relation("RequisitionInstrument", fields: [instrumentId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation("DepartmentCSSDRequisitions", fields: [departmentId], references: [id])
-  operationTheatreId  Int?                  @unique
-  operationTheatre    OperationTheatre?     @relation("OperationTheatreCSSDRequisitions", fields: [operationTheatreId], references: [id])
-  requestedById       Int
-  requestedBy         User                  @relation("RequisitionRequestedBy", fields: [requestedById], references: [id])
-  approvedById        Int?                  @unique
-  approvedBy          User?                 @relation("RequisitionApprovedBy", fields: [approvedById], references: [id])
-  quantity            Int
-  requestDate         DateTime              @default(now())
-  dispatchDate        DateTime?
-  returnDate          DateTime?
-  status              CSSDRequisitionStatus @default(PENDING)
-  notes               String?
-  clinicalSettingId   Int?                  @unique
-  clinicalSetting     ClinicalSetting?      @relation("ClinicalSettingCSSDRequisitions", fields: [clinicalSettingId], references: [id])
-  procurementId       Int?                  @unique
-  procurement         Procurement?          @relation("CSSDRequisitionProcurement", fields: [procurementId], references: [id])
-  logs                CSSDLog[]             @relation("RequisitionLogs")
-  auditLogs           AuditLog[]            @relation("CSSDRequisitionAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model CSSDMaintenance {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  cssdId              Int?
-  cssd                Cssd?                 @relation("CssdMaintenanceRecords", fields: [cssdId], references: [id])
-  instrumentId        Int
-  instrument          CSSDInstrument        @relation("InstrumentMaintenanceRecords", fields: [instrumentId], references: [id])
-  maintenanceDate     DateTime              @default(now())
-  maintenanceType     String?
+// Represents an item in the Central Sterile Services Department (CSSD)
+model CSSDItem {
+  id                  String              @id @default(uuid())
+  name                String              @unique
   description         String?
-  performedById       Int?                  @unique
-  performedBy         User?                 @relation("MaintenancePerformedBy", fields: [performedById], references: [id])
-  cost                Float?
-  status              String                @default("PENDING")
-  notes               String?
-  procurementId       Int?                  @unique
-  procurement         Procurement?          @relation("CSSDMaintenanceProcurement", fields: [procurementId], references: [id])
-  logs                CSSDLog[]             @relation("MaintenanceLogs")
-  auditLogs           AuditLog[]            @relation("CSSDMaintenanceAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  sterilizationCycles  SterilizationCycle[] @relation("CSSDItemCycles")
+  instrumentRequests  InstrumentRequest[] @relation("CSSDItemRequests")
 }
 
-model CSSDLog {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  cssdId              Int?
-  cssd                Cssd?                 @relation("CssdLogs", fields: [cssdId], references: [id])
-  instrumentId        Int?
-  instrument          CSSDInstrument?       @relation("InstrumentLogs", fields: [instrumentId], references: [id])
-  recordId            Int?                  @unique
-  record              CSSDRecord?           @relation("RecordLogs", fields: [recordId], references: [id])
-  requisitionId       Int?                  @unique
-  requisition         CSSDRequisition?      @relation("RequisitionLogs", fields: [requisitionId], references: [id])
-  maintenanceId       Int?                  @unique
-  maintenance         CSSDMaintenance?      @relation("MaintenanceLogs", fields: [maintenanceId], references: [id])
-  userId              Int
-  user                User                  @relation("LoggedBy", fields: [userId], references: [id])
-  action              String
-  details             String?
-  createdAt           DateTime              @default(now())
+// Represents a sterilization cycle in the CSSD
+model SterilizationCycle {
+  id            String     @id @default(uuid())
+  cssdItemId    String
+  cssdItem      CSSDItem   @relation("CSSDItemCycles", fields: [cssdItemId], references: [id], onDelete: Restrict)
+  cycleDate     DateTime
+  status        String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a request for an instrument from the CSSD
+model InstrumentRequest {
+  id            String     @id @default(uuid())
+  cssdItemId    String
+  cssdItem      CSSDItem   @relation("CSSDItemRequests", fields: [cssdItemId], references: [id], onDelete: Restrict)
+  departmentId  String
+  department    Department @relation("InstrumentRequestDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  requestedAt   DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
