@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
@@ -22,7 +22,16 @@ const roleColors = {
   LAB_TECHNICIAN: '#ea580c',
   STAFF: '#0891b2',
   ADMIN: '#64748b',
-  GUEST: '#374151'
+  GUEST: '#374151',
+  RECEPTIONIST: '#10b981',
+  RADIOLOGIST: '#f97316',
+  SURGEON: '#8b5cf6',
+  ACCOUNTANT: '#6b7280',
+  BILLING_OFFICER: '#ef4444',
+  HOSPITAL_MANAGER: '#3b82f6',
+  IT_SUPPORT: '#d97706',
+  CLEANING_STAFF: '#6d28d9',
+  SECURITY: '#475569'
 };
 
 const roleDisplayNames = {
@@ -32,7 +41,16 @@ const roleDisplayNames = {
   LAB_TECHNICIAN: 'Lab Tech',
   STAFF: 'Staff',
   ADMIN: 'Administrator',
-  GUEST: 'Guest'
+  GUEST: 'Guest',
+  RECEPTIONIST: 'Receptionist',
+  RADIOLOGIST: 'Radiologist',
+  SURGEON: 'Surgeon',
+  ACCOUNTANT: 'Accountant',
+  BILLING_OFFICER: 'Billing Officer',
+  HOSPITAL_MANAGER: 'Hospital Manager',
+  IT_SUPPORT: 'IT Support',
+  CLEANING_STAFF: 'Cleaning Staff',
+  SECURITY: 'Security'
 };
 
 export default function Header() {
@@ -48,6 +66,7 @@ export default function Header() {
   const handleLogout = async () => {
     await logout();
     setUserMenuOpen(false);
+    setSidebarOpen(false);
   };
 
   const userMenuItems = user ? [
@@ -56,8 +75,8 @@ export default function Header() {
     { name: 'Logout', path: '#', onClick: handleLogout, icon: LogOut, description: 'Sign out of your account', danger: true },
   ] : [
     { name: 'Home', path: '/', icon: Home },
-    { name: 'Login', path: '/auth/login', icon: User },
-    { name: 'Register', path: '/auth/register', icon: User },
+    { name: 'Login', path: '/auth', icon: User },
+    { name: 'Register', path: '/auth', icon: User },
   ];
 
   const notifications = [
@@ -68,12 +87,18 @@ export default function Header() {
 
   const unreadCount = notifications.filter(n => n.unread).length;
 
+  useEffect(() => {
+    if (!user) {
+      setSidebarOpen(false);
+    }
+  }, [user]);
+
   if (loading) return null;
 
   return (
     <>
-      <header className="fixed top-0 left-0 z-50 w-full bg-[var(--hospital-white)] border-b border-[var(--hospital-gray-200)] shadow-sm backdrop-blur-md">
-        <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:h-20">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-[var(--hospital-white)] border-b border-[var(--hospital-gray-200)] shadow-sm backdrop-blur-md">
+        <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:h-20 max-w-[1440px] mx-auto">
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
@@ -115,6 +140,50 @@ export default function Header() {
                     </span>
                   )}
                 </button>
+                {notificationOpen && (
+                  <div className="absolute top-12 right-0 bg-[var(--hospital-white)] rounded-xl shadow-lg border border-[var(--hospital-gray-200)] w-80 max-h-[calc(100vh-5rem)] overflow-y-auto z-[1000]">
+                    <div className="p-4 border-b border-[var(--hospital-gray-200)] bg-gradient-to-r from-[var(--hospital-accent)]/5 to-transparent">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-[var(--hospital-gray-900)]">Notifications</p>
+                        {unreadCount > 0 && (
+                          <span className="bg-[var(--hospital-accent)] text-[var(--hospital-white)] text-xs px-2 py-1 rounded-full font-medium">
+                            {unreadCount} new
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-4 border-l-4 cursor-pointer transition-colors duration-200 ${
+                            notification.unread 
+                              ? 'border-[var(--hospital-accent)] bg-[var(--hospital-accent)]/5 hover:bg-[var(--hospital-accent)]/10' 
+                              : 'border-transparent hover:bg-[var(--hospital-gray-200)]/50'
+                          }`}
+                          onClick={() => setNotificationOpen(false)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className={`text-sm ${notification.unread ? 'font-semibold' : 'font-normal'} text-[var(--hospital-gray-900)]`}>
+                                {notification.title}
+                              </p>
+                              <p className="text-xs text-[var(--hospital-gray-500)] mt-1">{notification.time}</p>
+                            </div>
+                            {notification.unread && (
+                              <div className="w-2 h-2 bg-[var(--hospital-accent)] rounded-full mt-2"></div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="p-4 border-t border-[var(--hospital-gray-200)] bg-[var(--hospital-gray-50)]">
+                      <p className="text-sm text-[var(--hospital-accent)] font-medium cursor-pointer hover:underline text-center">
+                        View all notifications
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             
@@ -149,101 +218,53 @@ export default function Header() {
                   </div>
                 )}
               </button>
+              {userMenuOpen && (
+                <div className="absolute top-12 right-0 bg-[var(--hospital-white)] rounded-xl shadow-lg border border-[var(--hospital-gray-200)] w-72 max-h-[calc(100vh-5rem)] overflow-y-auto z-[1000]">
+                  {user && (
+                    <div className="p-4 border-b border-[var(--hospital-gray-200)] bg-gradient-to-r from-[var(--hospital-accent)]/5 to-transparent">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-12 h-12 rounded-lg flex items-center justify-center text-[var(--hospital-white)] font-bold text-lg shadow-sm"
+                          style={{ backgroundColor: roleColors[user.role] || '#64748b' }}
+                        >
+                          {user.firstName?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[var(--hospital-gray-900)]">
+                            {user.firstName} {user.lastName}
+                          </p>
+                          <p className="text-xs text-[var(--hospital-gray-500)]">
+                            {roleDisplayNames[user.role]}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="py-2">
+                    {userMenuItems.map(({ name, path, onClick, icon: Icon, description, danger }) => (
+                      <Link
+                        key={path}
+                        href={onClick ? '#' : path}
+                        onClick={onClick || (() => setUserMenuOpen(false))}
+                        className={`flex items-center gap-3 p-3 mx-2 rounded-lg transition-colors duration-200 ${
+                          danger 
+                            ? 'hover:bg-[var(--hospital-error)]/10 hover:text-[var(--hospital-error)]' 
+                            : 'hover:bg-[var(--hospital-accent)]/10 text-[var(--hospital-gray-900)]'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <div>
+                          <p className="font-medium">{name}</p>
+                          {description && <p className="text-xs text-[var(--hospital-gray-500)]">{description}</p>}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        {/* User Menu Dropdown */}
-        {userMenuOpen && (
-          <div className="fixed top-16 sm:top-20 right-4 bg-[var(--hospital-white)] rounded-xl shadow-lg border border-[var(--hospital-gray-200)] w-72 max-h-[calc(100vh-5rem)] overflow-y-auto z-[1000]">
-            {user && (
-              <div className="p-4 border-b border-[var(--hospital-gray-200)] bg-gradient-to-r from-[var(--hospital-accent)]/5 to-transparent">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center text-[var(--hospital-white)] font-bold text-lg shadow-sm"
-                    style={{ backgroundColor: roleColors[user.role] || '#64748b' }}
-                  >
-                    {user.firstName?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--hospital-gray-900)]">
-                      {user.firstName} {user.lastName}
-                    </p>
-                    <p className="text-xs text-[var(--hospital-gray-500)]">
-                      {roleDisplayNames[user.role]}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div className="py-2">
-              {userMenuItems.map(({ name, path, onClick, icon: Icon, description, danger }) => (
-                <Link
-                  key={path}
-                  href={onClick ? '#' : path}
-                  onClick={onClick || (() => setUserMenuOpen(false))}
-                  className={`flex items-center gap-3 p-3 mx-2 rounded-lg transition-colors duration-200 ${
-                    danger 
-                      ? 'hover:bg-[var(--hospital-error)]/10 hover:text-[var(--hospital-error)]' 
-                      : 'hover:bg-[var(--hospital-accent)]/10 text-[var(--hospital-gray-900)]'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <div>
-                    <p className="font-medium">{name}</p>
-                    {description && <p className="text-xs text-[var(--hospital-gray-500)]">{description}</p>}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Notifications Dropdown */}
-        {notificationOpen && user && (
-          <div className="fixed top-16 sm:top-20 right-4 bg-[var(--hospital-white)] rounded-xl shadow-lg border border-[var(--hospital-gray-200)] w-80 max-h-[calc(100vh-5rem)] overflow-y-auto z-[1000]">
-            <div className="p-4 border-b border-[var(--hospital-gray-200)] bg-gradient-to-r from-[var(--hospital-accent)]/5 to-transparent">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-[var(--hospital-gray-900)]">Notifications</p>
-                {unreadCount > 0 && (
-                  <span className="bg-[var(--hospital-accent)] text-[var(--hospital-white)] text-xs px-2 py-1 rounded-full font-medium">
-                    {unreadCount} new
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="max-h-96 overflow-y-auto">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-4 border-l-4 cursor-pointer transition-colors duration-200 ${
-                    notification.unread 
-                      ? 'border-[var(--hospital-accent)] bg-[var(--hospital-accent)]/5 hover:bg-[var(--hospital-accent)]/10' 
-                      : 'border-transparent hover:bg-[var(--hospital-gray-200)]/50'
-                  }`}
-                  onClick={() => setNotificationOpen(false)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className={`text-sm ${notification.unread ? 'font-semibold' : 'font-normal'} text-[var(--hospital-gray-900)]`}>
-                        {notification.title}
-                      </p>
-                      <p className="text-xs text-[var(--hospital-gray-500)] mt-1">{notification.time}</p>
-                    </div>
-                    {notification.unread && (
-                      <div className="w-2 h-2 bg-[var(--hospital-accent)] rounded-full mt-2"></div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-4 border-t border-[var(--hospital-gray-200)] bg-[var(--hospital-gray-50)]">
-              <p className="text-sm text-[var(--hospital-accent)] font-medium cursor-pointer hover:underline text-center">
-                View all notifications
-              </p>
-            </div>
-          </div>
-        )}
       </header>
 
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
