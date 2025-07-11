@@ -1,3 +1,4 @@
+// patients.prisma
 // Represents a patient in the hospital system
 model Patient {
   id              String           @id @default(uuid())
@@ -21,6 +22,21 @@ model Patient {
   progressNotes   ProgressNote[]   @relation("PatientProgressNotes")
   soapNotes       SOAPNote[]       @relation("PatientSOAPNotes")
   clinicalTasks   ClinicalTask[]   @relation("PatientClinicalTasks")
+  emergencyCases  EmergencyCase[]  @relation("PatientEmergencyCases")
+  triage          Triage[]         @relation("PatientTriage")
+  maternityCases  MaternityCase[]  @relation("PatientMaternityCases")
+  vaccinationRecords VaccinationRecord[] @relation("PatientVaccinationRecords")
+  surgeries       Surgery[]        @relation("PatientSurgeries")
+  preOpAssessments PreOpAssessment[] @relation("PatientPreOpAssessments")
+  labRequests     LabRequest[]     @relation("PatientLabRequests")
+  samples         Sample[]         @relation("PatientSamples")
+  imagingOrders   ImagingOrder[]   @relation("PatientImagingOrders")
+  prescriptions   Prescription[]   @relation("PatientPrescriptions")
+  dispenseRecords DispenseRecord[] @relation("PatientDispenseRecords")
+  invoices        Invoice[]        @relation("PatientInvoices")
+  claims          Claim[]          @relation("PatientClaims")
+  nhifClaims      NHIFClaim[]      @relation("PatientNHIFClaims")
+  referrals       Referral[]       @relation("PatientReferrals")
 }
 
 // Represents a patient's address
