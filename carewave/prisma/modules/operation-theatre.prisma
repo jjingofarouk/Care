@@ -1,129 +1,47 @@
-enum OperationTheatreStatus {
-  AVAILABLE
-  IN_USE
-  UNDER_MAINTENANCE
-  RESERVED
-  OUT_OF_SERVICE
+// Represents a surgical procedure
+model Surgery {
+  id                String           @id @default(uuid())
+  patientId         String
+  patient           Patient          @relation("PatientSurgeries", fields: [patientId], references: [id], onDelete: Cascade)
+  theatreId         String
+  theatre           Theatre          @relation("TheatreSurgeries", fields: [theatreId], references: [id], onDelete: Restrict)
+  surgicalTeamId    String
+  surgicalTeam      SurgicalTeam     @relation("SurgeryTeam", fields: [surgicalTeamId], references: [id], onDelete: Restrict)
+  preOpAssessmentId String?
+  preOpAssessment   PreOpAssessment? @relation("SurgeryPreOp", fields: [preOpAssessmentId], references: [id], onDelete: SetNull)
+  surgeryDate       DateTime
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 }
 
-enum ProcedureStatus {
-  SCHEDULED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  POSTPONED
+// Represents an operation theatre
+model Theatre {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  departmentId  String
+  department    Department   @relation("TheatreDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  surgeries     Surgery[]    @relation("TheatreSurgeries")
 }
 
-enum ProcedureType {
-  ELECTIVE
-  EMERGENCY
-  MINOR
-  MAJOR
-  DIAGNOSTIC
+// Represents a surgical team
+model SurgicalTeam {
+  id            String     @id @default(uuid())
+  name          String     @unique
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  surgeries     Surgery[]  @relation("SurgeryTeam")
 }
 
-model OperationTheatre {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  name                  String
-  theatreNumber         String                @unique
-  status                OperationTheatreStatus @default(AVAILABLE)
-  departmentId          Int?
-  department            Department?           @relation("DepartmentOperationTheatres", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?      @relation("ClinicalSettingOperationTheatre")
-  location              String?
-  capacity              Int?
-  equipmentList         String?
-  cssdInstrumentId      Int?
-  cssdInstrument        CSSDInstrument?       @relation("OperationTheatreCSSDInstrument", fields: [cssdInstrumentId], references: [id])
-  procedures            SurgicalProcedure[]   @relation("OperationTheatreProcedures")
-  emergency             Emergency?            @relation("EmergencyOperationTheatre")
-  createdById           Int?
-  createdBy             User?                 @relation("TheatreCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("TheatreUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("OperationTheatreAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  dashboardWidgets      DashboardWidget[]     @relation("DashboardWidgetOperationTheatre")
-  claims                Claim[]               @relation("ClaimOperationTheatre")
-  doctorAvailability    DoctorAvailability[]  @relation("OperationTheatreDoctorAvailability")
-  doctors               Doctor[]              @relation("DoctorOperationTheatres")
-  maternityRecords      Maternity[]           @relation("MaternityOperationTheatre")
-  appointments          Appointment[]         @relation("AppointmentOperationTheatre")
-  clinicalRecords       ClinicalRecord[]      @relation("ClinicalRecordOperationTheatre")
-}
-
-model SurgicalProcedure {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  patientId             Int
-  patient               Patient               @relation("PatientSurgicalProcedures", fields: [patientId], references: [id])
-  doctorId              Int?
-  doctor                Doctor?               @relation("Surgeon", fields: [doctorId], references: [id])
-  operationTheatreId    Int
-  operationTheatre      OperationTheatre      @relation("OperationTheatreProcedures", fields: [operationTheatreId], references: [id])
-  appointmentId         Int?                  @unique
-  appointment           Appointment?          @relation("ProcedureAppointment", fields: [appointmentId], references: [id])
-  admissionId           Int?
-  admission             Admission?            @relation("ProcedureAdmission", fields: [admissionId], references: [id])
-  clinicalRecordId      Int?
-  clinicalRecord        ClinicalRecord?       @relation("SurgicalProcedureClinicalRecord", fields: [clinicalRecordId], references: [id])
-  medicalRecordId       Int?
-  medicalRecord         MedicalRecord?        @relation("ProcedureMedicalRecord", fields: [medicalRecordId], references: [id])
-  departmentId          Int?
-  department            Department?           @relation("DepartmentSurgicalProcedures", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?      @relation("SurgicalProcedureClinicalSetting", fields: [clinicalSettingId], references: [id])
-  type                  ProcedureType
-  status                ProcedureStatus       @default(SCHEDULED)
-  procedureCode         String?
-  description           String?
-  startTime             DateTime
-  endTime               DateTime?
-  duration              Int?
-  anesthesiaType        String?
-  preOpNotes            String?
-  postOpNotes           String?
-  complications         String?
-  cssdRequisitionId     Int?
-  cssdRequisition       CSSDRequisition?      @relation("SurgicalProcedureCSSDRequisition", fields: [cssdRequisitionId], references: [id])
-  pharmacyId            Int?
-  pharmacy              Pharmacy?             @relation("ProcedurePharmacy", fields: [pharmacyId], references: [id])
-  nursingId             Int?                  @unique
-  nursing               Nursing?              @relation("ProcedureNursing", fields: [nursingId], references: [id])
-  billingId             Int?
-  billing               Billing?              @relation("ProcedureBilling", fields: [billingId], references: [id])
-  claimId               Int?                  @unique
-  claim                 Claim?                @relation("ProcedureClaim", fields: [claimId], references: [id])
-  nhifClaimId           Int?
-  nhifClaim             NhifClaim?            @relation("ProcedureNhifClaim", fields: [nhifClaimId], references: [id])
-  staffAssignments      SurgicalStaff[]       @relation("ProcedureStaffAssignments")
-  documents             String?
-  createdById           Int?
-  createdBy             User?                 @relation("ProcedureCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("ProcedureUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("SurgicalProcedureAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-}
-
-model SurgicalStaff {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  procedureId           Int
-  procedure             SurgicalProcedure     @relation("ProcedureStaffAssignments", fields: [procedureId], references: [id])
-  staffId               Int
-  staff                 User                  @relation("SurgicalStaff", fields: [staffId], references: [id])
-  role                  String
-  notes                 String?
-  createdById           Int?
-  createdBy             User?                 @relation("StaffAssignmentCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("StaffAssignmentUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("SurgicalStaffAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+// Represents a pre-operative assessment
+model PreOpAssessment {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientPreOpAssessments", fields: [patientId], references: [id], onDelete: Cascade)
+  assessment    String
+  assessedAt    DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  surgeries     Surgery[]  @relation("SurgeryPreOp")
 }
