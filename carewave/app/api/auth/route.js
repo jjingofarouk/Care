@@ -2,31 +2,45 @@ import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
-    const { email, password, name, role } = await request.json();
+    const { email, password, firstName, lastName } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
     // Handle registration
-    if (name && role) {
-      const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (firstName && lastName) {
+      const existingUser = await prisma.userRegistration.findUnique({ where: { email } });
       if (existingUser) {
         return NextResponse.json({ error: 'User already exists' }, { status: 400 });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      await prisma.user.create({
+      const userRegistration = await prisma.userRegistration.create({
         data: {
           email,
-          password: hashedPassword,
-          name,
-          role,
+          firstName,
+          lastName,
+          passwordHash: hashedPassword,
+          emailVerification: {
+            create: {
+              token: uuidv4(),
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+            },
+          },
+        },
+      });
+
+      const userLogin = await prisma.userLogin.create({
+        data: {
+          email,
+          passwordHash: hashedPassword,
         },
       });
 
@@ -34,15 +48,44 @@ export async function POST(request) {
     }
 
     // Handle login
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    const userLogin = await prisma.userLogin.findUnique({ where: { email } });
+    if (!userLogin || !(await bcrypt.compare(password, userLogin.passwordHash))) {
+      await prisma.loginAttempt.create({
+        data: {
+          userLoginId: userLogin?.id || uuidv4(),
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          success: false,
+        },
+      });
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    await prisma.loginAttempt.create({
+      data: {
+        userLoginId: userLogin.id,
+        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+        success: true,
+      },
+    });
+
+    const token = jwt.sign({ userId: userLogin.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    await prisma.session.create({
+      data: {
+        userLoginId: userLogin.id,
+        token,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+      },
+    });
+
+    const userRegistration = await prisma.userRegistration.findUnique({ where: { email } });
     return NextResponse.json({
       token,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      user: {
+        id: userLogin.id,
+        email: userLogin.email,
+        firstName: userRegistration?.firstName,
+        lastName: userRegistration?.lastName,
+      },
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
