@@ -1,3 +1,4 @@
+// inventory.prisma
 // Represents an item in the inventory
 model Item {
   id              String          @id @default(uuid())
@@ -8,6 +9,8 @@ model Item {
   inventories     Inventory[]     @relation("ItemInventories")
   stockMovements  StockMovement[] @relation("ItemStockMovements")
   expiryAlerts    ExpiryAlert[]   @relation("ItemExpiryAlerts")
+  substoreTransfers SubstoreTransfer[] @relation("SubstoreTransferItem")
+  requisitions    Requisition[]   @relation("RequisitionItem")
 }
 
 // Represents the inventory stock for an item
