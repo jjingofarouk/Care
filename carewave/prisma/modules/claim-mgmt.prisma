@@ -1,3 +1,4 @@
+// claim-mgmt.prisma
 enum ClaimStatusEnum {
   PENDING
   APPROVED
@@ -12,8 +13,8 @@ model Claim {
   patient         Patient          @relation("PatientClaims", fields: [patientId], references: [id], onDelete: Cascade)
   claimBatchId    String?
   claimBatch      ClaimBatch?      @relation("ClaimBatchClaims", fields: [claimBatchId], references: [id], onDelete: SetNull)
-  claimStatusId   String
-  claimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id], onDelete: Restrict)
+  claimStatusId   String           @unique
+  claimStatus     ClaimStatus      @relation("ClaimStatusRecord")
   amount          Float
   submittedAt     DateTime
   createdAt       DateTime         @default(now())
@@ -33,8 +34,7 @@ model ClaimBatch {
 // Represents the status history of a claim
 model ClaimStatus {
   id            String         @id @default(uuid())
-  claimId       String
-  claim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [id], onDelete: Cascade)
+  claim         Claim          @relation("ClaimStatusRecord")
   status        ClaimStatusEnum
   changedAt     DateTime
   createdAt     DateTime       @default(now())
