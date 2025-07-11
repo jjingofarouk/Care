@@ -1,12 +1,21 @@
 import React from 'react';
 import { getAllAppointments } from '@/services/appointmentService';
 import AppointmentTable from '@/components/appointments/AppointmentTable';
+import AppointmentFilter from '@/components/appointments/AppointmentFilter';
+import AppointmentStats from '@/components/appoitments/AppointmentStats';
 import { Button, Typography } from '@mui/material';
 import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default async function AppointmentsPage() {
-  const appointments = await getAllAppointments({});
+export default async function AppointmentsPage({ searchParams }) {
+  const filters = {
+    status: searchParams.status || '',
+    doctorId: searchParams.doctorId || '',
+    patientId: searchParams.patientId || '',
+    dateFrom: searchParams.dateFrom || '',
+    dateTo: searchParams.dateTo || '',
+  };
+  const appointments = await getAllAppointments(filters);
 
   return (
     <div className="p-6">
@@ -24,6 +33,8 @@ export default async function AppointmentsPage() {
           </Button>
         </Link>
       </div>
+      <AppointmentStats />
+      <AppointmentFilter initialFilters={filters} />
       <AppointmentTable appointments={appointments} />
     </div>
   );
