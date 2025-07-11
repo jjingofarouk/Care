@@ -1,229 +1,62 @@
-// prisma/seed.ts
 const { PrismaClient } = require('@prisma/client');
 const { hash } = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
 async function clearDatabase() {
-  // Models ordered by dependency (child tables first, parent tables last)
-  const models = [
-    // Auth & Verification
-    'VerificationToken',
-    'UserVerificationStatus',
-    'EmailVerificationToken',
-    'LoginAttempt',
-    'Session',
-    'UserLogin',
-    'UserRegistration',
+  try {
+    // Disable FK constraints temporarily
+    await prisma.$executeRaw`ALTER TABLE "Department" DISABLE TRIGGER ALL;`;
     
-    // Audit & Logs
-    'AuditLog',
-    'AdminLog',
-    'EmergencyLog',
-    'BackupGeneratorStatus',
-    'ElectricityLog',
-    'WaterLog',
-    
-    // Clinical Data
-    'Allergy',
-    'Diagnosis',
-    'VitalSign',
-    'ClinicalNote',
-    'ProgressNote',
-    'SOAPNote',
-    'ClinicalTask',
-    'MedicalRecord',
-    
-    // Appointments
-    'AppointmentStatus',
-    'Appointment',
-    
-    // Emergency
-    'EmergencyCase',
-    'Triage',
-    'Ambulance',
-    
-    // Maternity
-    'PNCVisit',
-    'ANCVisit',
-    'DeliveryRecord',
-    'MaternityCase',
-    
-    // Vaccination
-    'VaccinationRecord',
-    'ImmunizationSchedule',
-    'Vaccine',
-    
-    // Pharmacy
-    'DispenseRecord',
-    'Prescription',
-    'PharmacyItem',
-    'DispensaryStock',
-    'Dispensary',
-    'Pharmacist',
-    'Drug',
-    
-    // Lab & Radiology
-    'LabResult',
-    'LabRequest',
-    'Sample',
-    'LabTest',
-    'ScanImage',
-    'RadiologyResult',
-    'ImagingOrder',
-    'RadiologyTest',
-    
-    // Surgery
-    'Surgery',
-    'PreOpAssessment',
-    'SterilizationCycle',
-    'InstrumentRequest',
-    'CSSDItem',
-    'SurgicalTeam',
-    'Theatre',
-    
-    // ADT (Admissions)
-    'Discharge',
-    'Transfer',
-    'Admission',
-    'Bed',
-    'Room',
-    'Ward',
-    
-    // Queue Management
-    'QueueEntry',
-    'QueueStatus',
-    'ServiceCounter',
-    
-    // Social Work
-    'PatientSupportCase',
-    'SocialWorker',
-    
-    // Billing
-    'Payment',
-    'BillingItem',
-    'Invoice',
-    
-    // Claims
-    'NHIFSubmission',
-    'NHIFClaim',
-    'NHIFBenefit',
-    'ClaimSubmission',
-    'ClaimStatus',
-    'Claim',
-    'ClaimBatch',
-    
-    // Accounting
-    'TrialBalance',
-    'JournalEntry',
-    'Ledger',
-    'Account',
-    
-    // Inventory
-    'ExpiryAlert',
-    'StockMovement',
-    'Inventory',
-    'Requisition',
-    'SubstoreTransfer',
-    'Substore',
-    'GoodsReceivedNote',
-    'PurchaseOrder',
-    'Supplier',
-    'Item',
-    
-    // Fixed Assets
-    'AssetAudit',
-    'DepreciationSchedule',
-    'FixedAsset',
-    
-    // Helpdesk
-    'HelpTicket',
-    'SupportAgent',
-    
-    // System
-    'FeatureToggle',
-    'SystemSetting',
-    'ThemeSetting',
-    
-    // Dashboard
-    'Widget',
-    'DashboardStats',
-    'KPI',
-    'Notification',
-    
-    // Homepage
-    'HeroSection',
-    'Highlight',
-    'News',
-    'HomepageConfig',
-    
-    // Reports
-    'ReportFilter',
-    'ReportField',
-    'Report',
-    'ReportSchedule',
-    'ReportTemplate',
-    'CustomReport',
-    
-    // Referrals
-    'Referral',
-    'ReferringDoctor',
-    'ReferralSource',
-    
-    // Human Resources
-    'IncentiveRecord',
-    'IncentiveProgram',
-    'Shift',
-    'NurseSchedule',
-    'Nurse',
-    'DoctorLeave',
-    'DoctorSchedule',
-    'DoctorSpecialization',
-    'Doctor',
-    'Permission',
-    'Role',
-    'SystemAdmin',
-    
-    // Patient Data
-    'PatientAddress',
-    'NextOfKin',
-    'InsuranceInfo',
-    'Patient',
-    
-    // Departments
-    'Unit',
-    'Department'
-  ];
+    // Get all tables except migrations
+    const tables = await prisma.$queryRaw`
+      SELECT tablename FROM pg_tables 
+      WHERE schemaname = 'public'
+      AND tablename != '_prisma_migrations'
+    `;
 
-  console.log('Clearing database...');
-  
-  // Delete all records from each model
-  for (const model of models) {
-    try {
-      await prisma.$executeRawUnsafe(`DELETE FROM "${model}";`);
-      console.log(`Cleared ${model}`);
-    } catch (error) {
-      console.error(`Error clearing ${model}:`, error.message);
+    // Clear all tables with CASCADE
+    for (const { tablename } of tables) {
+      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "public"."${tablename}" CASCADE;`);
+      console.log(`✓ Cleared ${tablename}`);
     }
+
+    // Re-enable FK constraints
+    await prisma.$executeRaw`ALTER TABLE "Department" ENABLE TRIGGER ALL;`;
+    
+    console.log('✔ Database cleared successfully');
+  } catch (error) {
+    console.error('Error clearing database:', error);
+    throw error;
   }
 }
 
+async function seedDatabase() {
+  try {
+    console.log('🌱 Starting database seeding...');
 
-async function main() {
-  // Create departments
-  const clinicalDept = await prisma.department.create({
-    data: {
-      name: 'Clinical Services',
-      departmentType: 'CLINICAL',
-    },
-  });
+    // ========================
+    // DEPARTMENT SEEDING
+    // ========================
+    const clinicalDept = await prisma.department.create({
+      data: {
+        name: 'Clinical Services',
+        departmentType: 'CLINICAL',
+      },
+    });
 
-  const adminDept = await prisma.department.create({
-    data: {
-      name: 'Administration',
-      departmentType: 'ADMINISTRATIVE',
-    },
-  });
+    const adminDept = await prisma.department.create({
+      data: {
+        name: 'Administration',
+        departmentType: 'ADMINISTRATIVE',
+      },
+    });
+
+    // ========================
+    // ADD REMAINING SEED DATA BELOW
+    // ========================
+
+    
 
   const supportDept = await prisma.department.create({
     data: {
@@ -1815,14 +1648,28 @@ async function main() {
     },
   });
 
-  console.log('Database seeding completed successfully!');
+console.log('✔ Database seeded successfully');
+    return { clinicalDept, adminDept }; // Return if you need these elsewhere
+  } catch (error) {
+    console.error('Error seeding database:', error);
+    throw error;
+  }
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
+async function main() {
+  try {
+    await clearDatabase();
+    const { clinicalDept, adminDept } = await seedDatabase(); // Destructure if needed
+    
+    // Add any post-seeding logic here if needed
+    // Example: await createStaffMembers(clinicalDept.id);
+    
+  } catch (error) {
+    console.error('❌ Seeding failed:', error);
     process.exit(1);
-  })
-  .finally(async () => {
+  } finally {
     await prisma.$disconnect();
-  });
+  }
+}
+
+main();
