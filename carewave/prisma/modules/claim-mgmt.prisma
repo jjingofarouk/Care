@@ -14,7 +14,7 @@ model Claim {
   claimBatchId    String?
   claimBatch      ClaimBatch?      @relation("ClaimBatchClaims", fields: [claimBatchId], references: [id], onDelete: SetNull)
   claimStatusId   String           @unique
-  claimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id])
+  claimStatus     ClaimStatus      @relation("ClaimStatusRecord")
   amount          Float
   submittedAt     DateTime
   createdAt       DateTime         @default(now())
@@ -34,8 +34,8 @@ model ClaimBatch {
 // Represents the status history of a claim
 model ClaimStatus {
   id            String         @id @default(uuid())
-  claimId       String
-  claim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [id], onDelete: Cascade)
+  claimId       String         @unique
+  claim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [claimStatusId], onDelete: Cascade)
   status        ClaimStatusEnum
   changedAt     DateTime
   createdAt     DateTime       @default(now())
