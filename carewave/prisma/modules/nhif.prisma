@@ -1,3 +1,4 @@
+// nhif.prisma
 // Represents an NHIF claim
 model NHIFClaim {
   id            String       @id @default(uuid())
