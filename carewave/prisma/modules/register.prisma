@@ -1,21 +1,42 @@
+enum Role {
+  PATIENT
+  DOCTOR
+  NURSE
+  LAB_TECHNICIAN
+  PHARMACIST
+  RECEPTIONIST
+  RADIOLOGIST
+  SURGEON
+  ADMIN
+  STAFF
+  ACCOUNTANT
+  BILLING_OFFICER
+  HOSPITAL_MANAGER
+  IT_SUPPORT
+  CLEANING_STAFF
+  SECURITY
+}
+
 model UserRegistration {
   id                    String                  @id @default(uuid())
   email                 String                  @unique
   firstName             String
   lastName              String
-  role                  String                  // Added role field
+  role                  Role                    @default(PATIENT)
   passwordHash          String
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   emailVerification     EmailVerificationToken? @relation("UserEmailVerification")
+  userLogin             UserLogin?              @relation("UserRegistrationToUserLogin", fields: [email], references: [email], onDelete: Cascade)
 }
 
 model EmailVerificationToken {
-  id                String           @id @default(uuid())
-  userRegistrationId String           @unique
-  userRegistration  UserRegistration @relation("UserEmailVerification", fields: [userRegistrationId], references: [id], onDelete: Cascade)
-  token             String           @unique
-  expiresAt         DateTime
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id                   String           @id @default(uuid())
+  userRegistrationId   String           @unique
+  userRegistration     UserRegistration @relation("UserEmailVerification", fields: [userRegistrationId], references: [id], onDelete: Cascade)
+  token                String           @unique
+  expiresAt            DateTime
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 }
+
