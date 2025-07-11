@@ -1,188 +1,51 @@
-enum MedicationStatus {
-  ACTIVE
-  DISCONTINUED
-  OUT_OF_STOCK
-  EXPIRED
+// Represents an item in the pharmacy inventory
+model PharmacyItem {
+  id              String          @id @default(uuid())
+  drugId          String
+  drug            Drug            @relation("PharmacyItemDrug", fields: [drugId], references: [id], onDelete: Restrict)
+  batchNumber     String
+  expiryDate      DateTime
+  quantity        Int
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  dispenseRecords DispenseRecord[] @relation("PharmacyItemDispenses")
 }
 
-enum PrescriptionStatus {
-  PENDING
-  ISSUED
-  DISPENSED
-  CANCELLED
-  EXPIRED
-}
-
-enum DispensingStatus {
-  PENDING
-  DISPENSED
-  PARTIALLY_DISPENSED
-  CANCELLED
-}
-
-model Pharmacy {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  patientId             Int?
-  patient               Patient?              @relation("PatientPharmacyRecords", fields: [patientId], references: [id])
-  appointmentId         Int?                  @unique
-  appointment           Appointment?          @relation("AppointmentPharmacy")
-  admissionId           Int?
-  admission             Admission?            @relation("PharmacyAdmissions", fields: [admissionId], references: [id])
-  prescriptionId        Int?
-  prescription          Prescription?         @relation("PharmacyPrescriptions", fields: [prescriptionId], references: [id])
-  invoiceId             Int?
-  invoice               Invoice?              @relation("InvoicePharmacy", fields: [invoiceId], references: [id])
-  departmentId          Int?
-  department            Department?           @relation("DepartmentPharmacyRecords", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?      @relation("PharmacyClinicalSettings", fields: [clinicalSettingId], references: [id])
-  dispensingRecords     DispensingRecord[]    @relation("PharmacyDispensingRecords")
-  createdById           Int?
-  createdBy             User?                 @relation("PharmacyCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("PharmacyUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("PharmacyAuditLogs")
-  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetPharmacy")
-  maternityId           Int?
-  maternity             Maternity?            @relation("MaternityPharmacy", fields: [maternityId], references: [id])
-  homeCares             HomeCare[]            @relation("HomeCarePharmacy")
-  nhifClaims            NhifClaim[]           @relation("NhifClaimPharmacy")
-  clinicalRecords       ClinicalRecord[]      @relation("ClinicalRecordPharmacy")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  stockAdjustments      StockAdjustment[]     @relation("StockAdjustmentPharmacy")
-  emergencies           Emergency[]           @relation("EmergencyPharmacy")
-  discharges            Discharge[]           @relation("DischargePharmacy")
-  nursingCares          NursingCare[]         @relation("NursingCarePharmacy")
-}
-
-model Medication {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  name                  String
-  genericName           String?
-  brandName             String?
-  manufacturer          String?
-  strength              String?
-  dosageForm            String?
-  route                 String?
-  status                MedicationStatus      @default(ACTIVE)
-  unitPrice             Float
-  stockQuantity         Int                   @default(0)
-  reorderLevel          Int?
-  expiryDate            DateTime?
-  batchNumber           String?               @unique
-  inventoryId           Int?
-  inventory             Inventory?            @relation("MedicationInventory", fields: [inventoryId], references: [id])
-  prescriptions         Prescription[]        @relation("MedicationPrescriptions")
-  dispensingRecords     DispensingRecord[]    @relation("MedicationDispensingRecords")
-  adverseReactions      AdverseReaction[]     @relation("MedicationAdverseReactions")
-  drugInteractions1     DrugInteraction[]     @relation("DrugInteractionMedication1")
-  drugInteractions2     DrugInteraction[]     @relation("DrugInteractionMedication2")
-  formulary             Formulary[]           @relation("MedicationFormulary")
-  billingItems          BillingItem[]         @relation("BillingItemMedication")
-  createdById           Int?
-  createdBy             User?                 @relation("MedicationCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("MedicationUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("MedicationAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  stockAdjustments      StockAdjustment[]     @relation("StockAdjustmentMedication")
-  prescriptionItems     PrescriptionItem[]    @relation("PrescriptionItemMedication")
-}
-
+// Represents a prescription for a patient
 model Prescription {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  patientId             Int
-  patient               Patient               @relation("PatientPrescriptions", fields: [patientId], references: [id])
-  doctorId              Int?
-  doctor                Doctor?               @relation("Prescriptions", fields: [doctorId], references: [id])
-  medicationId          Int
-  medication            Medication            @relation("MedicationPrescriptions", fields: [medicationId], references: [id])
-  appointmentId         Int?
-  appointment           Appointment?          @relation("PrescriptionAppointments", fields: [appointmentId], references: [id])
-  admissionId           Int?
-  admission             Admission?            @relation("PrescriptionAdmissions", fields: [admissionId], references: [id])
-  clinicalRecordId      Int?
-  clinicalRecord        ClinicalRecord?       @relation("PrescriptionClinicalRecords", fields: [clinicalRecordId], references: [id])
-  medicalRecordId       Int?
-  medicalRecord         MedicalRecord?        @relation("PrescriptionMedicalRecords", fields: [medicalRecordId], references: [id])
-  pharmacyRecords       Pharmacy[]            @relation("PharmacyPrescriptions")
-  invoice               Invoice?              @relation("InvoicePrescription")
-  dosage                String
-  frequency             String
-  duration              String?
-  quantity              Int
-  status                PrescriptionStatus    @default(PENDING)
-  issuedDate            DateTime              @default(now())
-  expiryDate            DateTime?
-  instructions          String?
-  dispensingRecords     DispensingRecord[]    @relation("PrescriptionDispensingRecords")
-  createdById           Int?
-  createdBy             User?                 @relation("PrescriptionCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("PrescriptionUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("PrescriptionAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  prescription_ITEMS    PrescriptionItem[]    @relation("PrescriptionItems")
-  nursingCares          NursingCare[]         @relation("NursingCarePrescription")
-  nursingTasks          NursingTask[]         @relation("NursingTaskPrescription")
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientPrescriptions", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor     @relation("DoctorPrescriptions", fields: [doctorId], references: [id], onDelete: Restrict)
+  drugId        String
+  drug          Drug       @relation("PrescriptionDrug", fields: [drugId], references: [id], onDelete: Restrict)
+  dosage        String
+  prescribedAt  DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-model Formulary {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  medicationId          Int
-  medication            Medication            @relation("MedicationFormulary", fields: [medicationId], references: [id])
-  formularyCode         String                @unique
-  category              String?
-  status                String                @default("ACTIVE")
-  createdById           Int?
-  createdBy             User?                 @relation("FormularyCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("FormularyUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("FormularyAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+// Represents a drug in the pharmacy
+model Drug {
+  id              String          @id @default(uuid())
+  name            String          @unique
+  description     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  pharmacyItems   PharmacyItem[]  @relation("PharmacyItemDrug")
+  prescriptions   Prescription[]  @relation("PrescriptionDrug")
 }
 
-model DrugInteraction {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  medicationId1         Int
-  medication1           Medication            @relation("DrugInteractionMedication1", fields: [medicationId1], references: [id])
-  medicationId2         Int
-  medication2           Medication            @relation("DrugInteractionMedication2", fields: [medicationId2], references: [id])
-  description           String
-  severity              String
-  createdById           Int?
-  createdBy             User?                 @relation("InteractionCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("InteractionUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("DrugInteractionAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-}
-
-model AdverseReaction {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  medicationId          Int
-  medication            Medication            @relation("MedicationAdverseReactions", fields: [medicationId], references: [id])
-  patientId             Int
-  patient               Patient               @relation("PatientAdverseReactions", fields: [patientId], references: [id])
-  description           String
-  severity              String
-  reportedDate          DateTime              @default(now())
-  createdById           Int?
-  createdBy             User?                 @relation("AdverseReactionCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("AdverseReactionUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("AdverseReactionAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+// Represents a record of dispensed medication
+model DispenseRecord {
+  id              String        @id @default(uuid())
+  pharmacyItemId  String
+  pharmacyItem    PharmacyItem  @relation("PharmacyItemDispenses", fields: [pharmacyItemId], references: [id], onDelete: Restrict)
+  patientId       String
+  patient         Patient       @relation("PatientDispenseRecords", fields: [patientId], references: [id], onDelete: Cascade)
+  dispensedAt     DateTime
+  quantity        Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
