@@ -1,160 +1,44 @@
-enum RadiologyTestStatus {
-  SCHEDULED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  PENDING_REPORT
-  REPORTED
-}
-
-enum RadiologyTestType {
-  XRAY
-  CT
-  MRI
-  ULTRASOUND
-  MAMMOGRAPHY
-  FLUOROSCOPY
-  NUCLEAR_MEDICINE
-  PET_SCAN
-}
-
-enum RadiologyEquipmentStatus {
-  AVAILABLE
-  IN_USE
-  UNDER_MAINTENANCE
-  OUT_OF_SERVICE
-}
-
-model Radiology {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  patientId           Int?
-  patient             Patient?              @relation("PatientRadiology", fields: [patientId], references: [id])
-  appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("AppointmentRadiology", fields: [appointmentId], references: [id], map: "Radiology_appointment_fkey")
-  emergencyId         Int?                  @unique
-  emergency           Emergency?            @relation("EmergencyRadiology", fields: [emergencyId], references: [id], map: "Radiology_emergency_fkey")
-  invoiceId           Int?                  @unique
-  invoice             Invoice?              @relation("InvoiceRadiology", fields: [invoiceId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation("DepartmentRadiologyTests", fields: [departmentId], references: [id])
-  doctorId            Int?
-  doctor              Doctor?               @relation("RadiologyOrders", fields: [doctorId], references: [id])
-  status              RadiologyTestStatus   @default(SCHEDULED)
-  createdById         Int?
-  createdBy           User?                 @relation("RadiologyCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("RadiologyUpdatedBy", fields: [updatedById], references: [id])
-  radiologyTests      RadiologyTest[]       @relation("RadiologyTests")
-  auditLogs           AuditLog[]            @relation("RadiologyAuditLogs")
-  dashboardWidget     DashboardWidget?      @relation("DashboardWidgetRadiology")
-  maternityId         Int?                  @unique
-  maternity           Maternity?            @relation("MaternityRadiology", fields: [maternityId], references: [id])
-  medicalRecordId     Int?
-  medicalRecord       MedicalRecord?        @relation("MedicalRecordRadiology")
-  homeCares           HomeCare[]            @relation("HomeCareRadiology")
-  nhifClaims          NhifClaim[]           @relation("NhifClaimRadiology")
-  clinicalRecords     ClinicalRecord[]      @relation("ClinicalRecordRadiology")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  claims              Claim[]               @relation("ClaimRadiology")
-  clinicalSetting     ClinicalSetting?      @relation("ClinicalSettingRadiology")
-}
-
+// Represents a radiology test
 model RadiologyTest {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  testNumber          String                @unique
-  patientId           Int
-  patient             Patient               @relation("PatientRadiologyTests", fields: [patientId], references: [id])
-  radiologyId         Int?
-  radiology           Radiology?            @relation("RadiologyTests", fields: [radiologyId], references: [id])
-  doctorId            Int?
-  doctor              Doctor?               @relation("RadiologyDoctor", fields: [doctorId], references: [id])
-  radiologistId       Int?
-  radiologist         User?                 @relation("Radiologist", fields: [radiologistId], references: [id])
-  appointmentId       Int?
-  appointment         Appointment?          @relation("AppointmentRadiologyTests", fields: [appointmentId], references: [id])
-  admissionId         Int?
-  admission           Admission?            @relation("AdmissionRadiologyTests", fields: [admissionId], references: [id])
-  clinicalRecordId    Int?
-  clinicalRecord      ClinicalRecord?       @relation("ClinicalRecordRadiologyTests", fields: [clinicalRecordId], references: [id])
-  medicalRecordId     Int?
-  medicalRecord       MedicalRecord?        @relation("MedicalRecordRadiologyTests", fields: [medicalRecordId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation("DepartmentRadiologyTest", fields: [departmentId], references: [id])
-  clinicalSettingId   Int?
-  clinicalSetting     ClinicalSetting?      @relation("RadiologyTestClinicalSettings", fields: [clinicalSettingId], references: [id])
-  type                RadiologyTestType
-  status              RadiologyTestStatus   @default(SCHEDULED)
-  testDate            DateTime              @default(now())
-  scheduledDate       DateTime?
-  completedDate       DateTime?
-  reportDate          DateTime?
-  equipmentId         Int?
-  equipment           RadiologyEquipment?   @relation("RadiologyTestEquipment", fields: [equipmentId], references: [id])
-  billingId           Int?
-  billing             Billing?              @relation("RadiologyTestBilling", fields: [billingId], references: [id])
-  claimId             Int?                  @unique
-  claim               Claim?                @relation("RadiologyTestClaim", fields: [claimId], references: [id])
-  nhifClaimId         Int?                  @unique
-  nhifClaim           NhifClaim?            @relation("RadiologyTestNhifClaim", fields: [nhifClaimId], references: [id])
-  testCode            String?
-  indications         String?
-  findings            String?
-  report              String?
-  images              String?
-  contrastUsed        Boolean               @default(false)
-  contrastType        String?
-  radiationDose       Float?
-  notes               String?
-  priority            String?
-  createdById         Int?
-  createdBy           User?                 @relation("RadiologyTestCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("RadiologyTestUpdatedBy", fields: [updatedById], references: [id])
-  reportedById        Int?
-  reportedBy          User?                 @relation("RadiologyTestReportedBy", fields: [reportedById], references: [id])
-  auditLogs           AuditLog[]            @relation("RadiologyTestAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  id              String          @id @default(uuid())
+  name            String          @unique
+  description     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  imagingOrders   ImagingOrder[]  @relation("RadiologyTestOrders")
 }
 
-model RadiologyEquipment {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String
-  equipmentId         String                @unique
-  type                RadiologyTestType
-  status              RadiologyEquipmentStatus @default(AVAILABLE)
-  departmentId        Int?
-  department          Department?           @relation("DepartmentRadiologyEquipment", fields: [departmentId], references: [id])
-  clinicalSettingId   Int?
-  clinicalSetting     ClinicalSetting?      @relation("RadiologyEquipmentClinicalSettings")
-  location            String?
-  manufacturer        String?
-  model               String?
-  serialNumber        String?               @unique
-  purchaseDate        DateTime?
-  warrantyExpires     DateTime?
-  lastMaintenance     DateTime?
-  maintenanceSchedule String?
-  calibrationDate     DateTime?
-  calibrationDetails  String?
-  radiationSafetyCheck DateTime?
-  cost                Float?
-  fixedAssetId        Int?
-  fixedAsset          FixedAsset?           @relation("RadiologyEquipmentFixedAsset")
-  procurementId       Int?
-  procurement         Procurement?          @relation("RadiologyEquipmentProcurement")
-  radiologyTests      RadiologyTest[]       @relation("RadiologyTestEquipment")
-  notes               String?
-  documents           String?
-  createdById         Int?
-  createdBy           User?                 @relation("EquipmentCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("EquipmentUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("RadiologyEquipmentAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Represents a radiology test result
+model RadiologyResult {
+  id            String       @id @default(uuid())
+  imagingOrderId String
+  imagingOrder  ImagingOrder @relation("ImagingOrderResults", fields: [imagingOrderId], references: [id], onDelete: Cascade)
+  result        String
+  resultedAt    DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  scanImages    ScanImage[]  @relation("ResultScanImages")
+}
+
+// Represents an order for a radiology test
+model ImagingOrder {
+  id              String          @id @default(uuid())
+  patientId       String
+  patient         Patient         @relation("PatientImagingOrders", fields: [patientId], references: [id], onDelete: Cascade)
+  radiologyTestId String
+  radiologyTest   RadiologyTest   @relation("RadiologyTestOrders", fields: [radiologyTestId], references: [id], onDelete: Restrict)
+  orderedAt       DateTime
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  radiologyResults RadiologyResult[] @relation("ImagingOrderResults")
+}
+
+// Represents a scan image from a radiology test
+model ScanImage {
+  id              String          @id @default(uuid())
+  radiologyResultId String
+  radiologyResult RadiologyResult @relation("ResultScanImages", fields: [radiologyResultId], references: [id], onDelete: Cascade)
+  imageUrl        String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
