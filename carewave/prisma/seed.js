@@ -5,8 +5,8 @@ const prisma = new PrismaClient();
 
 async function clearDatabase() {
   try {
-    // Disable FK constraints temporarily
-    await prisma.$executeRaw`ALTER TABLE "Department" DISABLE TRIGGER ALL;`;
+    // Disable FK constraints temporarily (PostgreSQL/Supabase specific)
+    await prisma.$executeRaw`SET session_replication_role = 'replica';`;
     
     // Get all tables except migrations
     const tables = await prisma.$queryRaw`
@@ -22,7 +22,7 @@ async function clearDatabase() {
     }
 
     // Re-enable FK constraints
-    await prisma.$executeRaw`ALTER TABLE "Department" ENABLE TRIGGER ALL;`;
+    await prisma.$executeRaw`SET session_replication_role = 'origin';`;
     
     console.log('✔ Database cleared successfully');
   } catch (error) {
@@ -35,9 +35,7 @@ async function seedDatabase() {
   try {
     console.log('🌱 Starting database seeding...');
 
-    // ========================
-    // DEPARTMENT SEEDING
-    // ========================
+    // Create departments
     const clinicalDept = await prisma.department.create({
       data: {
         name: 'Clinical Services',
@@ -51,6 +49,8 @@ async function seedDatabase() {
         departmentType: 'ADMINISTRATIVE',
       },
     });
+
+    
 
     // ========================
     // ADD REMAINING SEED DATA BELOW
@@ -1649,7 +1649,7 @@ async function seedDatabase() {
   });
 
 console.log('✔ Database seeded successfully');
-    return { clinicalDept, adminDept }; // Return if you need these elsewhere
+    return { clinicalDept, adminDept };
   } catch (error) {
     console.error('Error seeding database:', error);
     throw error;
@@ -1659,11 +1659,7 @@ console.log('✔ Database seeded successfully');
 async function main() {
   try {
     await clearDatabase();
-    const { clinicalDept, adminDept } = await seedDatabase(); // Destructure if needed
-    
-    // Add any post-seeding logic here if needed
-    // Example: await createStaffMembers(clinicalDept.id);
-    
+    await seedDatabase();
   } catch (error) {
     console.error('❌ Seeding failed:', error);
     process.exit(1);
