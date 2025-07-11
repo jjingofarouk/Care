@@ -1,90 +1,46 @@
-enum EmergencyStatus {
-  PENDING
-  STABILIZED
-  TRANSFERRED
-  DISCHARGED
-  CANCELLED
+// Represents an emergency case
+model EmergencyCase {
+  id            String      @id @default(uuid())
+  patientId     String
+  patient       Patient     @relation("PatientEmergencyCases", fields: [patientId], references: [id], onDelete: Cascade)
+  triageId      String
+  triage        Triage      @relation("EmergencyCaseTriage", fields: [triageId], references: [id], onDelete: Cascade)
+  admissionId   String?
+  admission     Admission?  @relation("EmergencyCaseAdmission", fields: [admissionId], references: [id], onDelete: SetNull)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  logs          EmergencyLog[] @relation("EmergencyCaseLogs")
 }
 
-model Emergency {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  patientId             Int
-  patient               Patient             @relation("PatientEmergencies", fields: [patientId], references: [id])
-  doctorId              Int?                @unique
-  doctor                Doctor?             @relation("DoctorEmergencies", fields: [doctorId], references: [id])
-  admissionId           Int?                @unique
-  admission             Admission?          @relation("AdmissionEmergency")
-  departmentId          Int?
-  department            Department?         @relation("DepartmentEmergencies", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                @unique
-  clinicalSetting       ClinicalSetting?    @relation("EmergencyClinicalSettings", fields: [clinicalSettingId], references: [id])
-  triagePriority        TriagePriority
-  triageNotes           String?
-  triageDate            DateTime?
-  status                EmergencyStatus     @default(PENDING)
-  incidentDate          DateTime            @default(now())
-  presentingComplaints  String?
-  initialAssessment     String?
-  treatmentProvided     String?
-  laboratoryId          Int?                @unique
-  laboratory            Laboratory?         @relation("EmergencyLaboratory", fields: [laboratoryId], references: [id])
-  radiologyId           Int?                @unique
-  radiology             Radiology?          @relation("EmergencyRadiology", fields: [radiologyId], references: [id], map: "Emergency_radiology_fkey")
-  pharmacyId            Int?                @unique
-  pharmacy              Pharmacy?           @relation("EmergencyPharmacy", fields: [pharmacyId], references: [id])
-  operationTheatreId    Int?                @unique
-  operationTheatre      OperationTheatre?   @relation("EmergencyOperationTheatre", fields: [operationTheatreId], references: [id])
-  billingId             Int?                @unique
-  billing               Billing?            @relation("EmergencyBilling", fields: [billingId], references: [id], map: "Emergency_billing_fkey")
-  claimId               Int?                @unique
-  claim                 Claim?              @relation("EmergencyClaims", fields: [claimId], references: [id], map: "Emergency_claim_fkey")
-  wardId                Int?                @unique
-  ward                  Ward?               @relation("EmergencyWard", fields: [wardId], references: [id])
-  bedId                 Int?                @unique
-  bed                   Bed?                @relation("EmergencyBed", fields: [bedId], references: [id])
-  transferReason        String?
-  transferDate          DateTime?
-  dischargeDate         DateTime?
-  dischargeNotes        String?
-  createdById           Int?                @unique
-  createdBy             User?               @relation("EmergencyCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("EmergencyUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("EmergencyAuditLogs")
-  emergencyDocuments    EmergencyDocument[] @relation("EmergencyDocuments")
-  emergencyNotifications EmergencyNotification[] @relation("EmergencyNotifications")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a triage assessment for an emergency case
+model Triage {
+  id              String         @id @default(uuid())
+  patientId       String
+  patient         Patient        @relation("PatientTriage", fields: [patientId], references: [id], onDelete: Cascade)
+  triageLevel     String
+  symptoms        String
+  assessedAt      DateTime
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  emergencyCases  EmergencyCase[] @relation("EmergencyCaseTriage")
 }
 
-
-model EmergencyDocument {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  emergencyId           Int
-  emergency             Emergency           @relation("EmergencyDocuments", fields: [emergencyId], references: [id])
-  documentType          String
-  filePath              String
-  description           String?
-  uploadedById          Int?                @unique
-  uploadedBy            User?               @relation("EmergencyDocumentUploadedBy", fields: [uploadedById], references: [id])
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("EmergencyDocumentAuditLogs")
+// Represents an ambulance used in emergencies
+model Ambulance {
+  id            String     @id @default(uuid())
+  vehicleNumber String     @unique
+  status        String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-model EmergencyNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  emergencyId           Int
-  emergency             Emergency           @relation("EmergencyNotifications", fields: [emergencyId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?                @unique
-  recipient             User?               @relation("EmergencyNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Tracks emergency-related activities
+model EmergencyLog {
+  id              String        @id @default(uuid())
+  emergencyCaseId String
+  emergencyCase   EmergencyCase @relation("EmergencyCaseLogs", fields: [emergencyCaseId], references: [id], onDelete: Cascade)
+  description     String
+  loggedAt        DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
