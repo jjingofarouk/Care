@@ -14,7 +14,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    // Handle registration
+    // Handle registration if firstName and lastName are provided
     if (firstName && lastName) {
       const existingUser = await prisma.userRegistration.findUnique({ where: { email } });
       if (existingUser) {
@@ -22,7 +22,8 @@ export async function POST(request) {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const userRegistration = await prisma.userRegistration.create({
+
+      await prisma.userRegistration.create({
         data: {
           email,
           firstName,
@@ -46,33 +47,26 @@ export async function POST(request) {
       where: { email },
       include: { userRegistration: true },
     });
-    if (!userLogin || !(await bcrypt.compare(password, userLogin.passwordHash))) {
-      await prisma.loginAttempt.create({
-        data: {
-          userLoginId: userLogin?.id || uuidv4(),
-          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-          userAgent: request.headers.get('user-agent') || 'unknown',
-          success: false,
-          attemptedAt: new Date(),
-        },
-      });
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-    }
 
-    if (!userLogin.userRegistration) {
-      return NextResponse.json({ error: 'User registration not found' }, { status: 400 });
-    }
+    const passwordMatches = userLogin && await bcrypt.compare(password, userLogin.passwordHash);
+
+    const isValid = userLogin && passwordMatches && userLogin.userRegistration;
 
     await prisma.loginAttempt.create({
       data: {
-        userLoginId: userLogin.id,
+        userLoginId: userLogin?.id || uuidv4(),
         ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
         userAgent: request.headers.get('user-agent') || 'unknown',
-        success: true,
+        success: Boolean(isValid),
         attemptedAt: new Date(),
       },
     });
 
+    if (!isValid) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // Update last login and deactivate old sessions
     await prisma.userLogin.update({
       where: { id: userLogin.id },
       data: { lastLoginAt: new Date() },
@@ -88,6 +82,7 @@ export async function POST(request) {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
+
     await prisma.session.create({
       data: {
         userLoginId: userLogin.id,
@@ -108,6 +103,7 @@ export async function POST(request) {
       },
     });
   } catch (error) {
+    console.error('[AUTH ERROR]', error);
     return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
   }
 }
