@@ -1,4 +1,3 @@
-
 export const API_ROUTES = {
   ACCOUNTING: '/api/accounting',
   ADT: '/api/adt',
@@ -31,6 +30,7 @@ export const API_ROUTES = {
   PROCUREMENT: '/api/procurement',
   QUEUE_MNGMT: '/api/queue-mngmt',
   RADIOLOGY: '/api/radiology',
+  REGISTER: '/api/register', // Added new register endpoint
   REPORTS: '/api/reports',
   SETTINGS: '/api/settings',
   SOCIAL_SERVICE: '/api/social-service',
