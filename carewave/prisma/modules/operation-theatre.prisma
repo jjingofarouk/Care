@@ -1,3 +1,4 @@
+// operation-theatre.prisma
 // Represents a surgical procedure
 model Surgery {
   id                String           @id @default(uuid())
