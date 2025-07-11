@@ -1,110 +1,42 @@
-// prisma/homecare.prisma
-
-enum HomeCareStatus {
-  SCHEDULED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  ON_HOLD
+// Represents configuration for the hospital homepage
+model HomepageConfig {
+  id            String    @id @default(uuid())
+  title         String
+  subtitle      String?
+  theme         String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  heroSections  HeroSection[] @relation("HomepageHeroSections")
 }
 
-enum HomeCareServiceType {
-  NURSING
-  PHYSIOTHERAPY
-  OCCUPATIONAL_THERAPY
-  MEDICAL_CHECKUP
-  PALLIATIVE_CARE
-  OTHER
+// Represents the hero section on the homepage
+model HeroSection {
+  id              String         @id @default(uuid())
+  homepageConfigId String
+  homepageConfig  HomepageConfig @relation("HomepageHeroSections", fields: [homepageConfigId], references: [id], onDelete: Cascade)
+  imageUrl        String?
+  headline        String
+  subheadline     String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
+// Represents news articles displayed on the homepage
+model News {
+  id            String    @id @default(uuid())
+  title         String
+  content       String
+  publishedAt   DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
-model HomeCare {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  patientId             Int
-  patient               Patient             @relation("PatientHomeCare", fields: [patientId], references: [id])
-  doctorId              Int?
-  doctor                Doctor?             @relation("DoctorHomeCare", fields: [doctorId], references: [id])
-  nurseId               Int?
-  nurse                 User?               @relation("NurseHomeCare", fields: [nurseId], references: [id])
-  departmentId          Int?
-  department            Department?         @relation("DepartmentHomeCare", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?    @relation("HomeCareClinicalSettings", fields: [clinicalSettingId], references: [id])
-  serviceType           HomeCareServiceType
-  status                HomeCareStatus      @default(SCHEDULED)
-  startDate             DateTime
-  endDate               DateTime?
-  frequency             String?
-  address               String
-  carePlan              String?
-  notes                 String?
-  billingId             Int?
-  billing               Billing?            @relation("HomeCareBilling", fields: [billingId], references: [id])
-  claimId               Int?
-  claim                 Claim?              @relation("HomeCareClaims", fields: [claimId], references: [id])
-  pharmacyId            Int?
-  pharmacy              Pharmacy?           @relation("HomeCarePharmacy", fields: [pharmacyId], references: [id])
-  laboratoryId          Int?
-  laboratory            Laboratory?         @relation("HomeCareLaboratory", fields: [laboratoryId], references: [id])
-  radiologyId           Int?
-  radiology             Radiology?          @relation("HomeCareRadiology", fields: [radiologyId], references: [id])
-  appointmentId         Int?
-  appointment           Appointment?        @relation("HomeCareAppointments", fields: [appointmentId], references: [id])
-  createdById           Int?
-  createdBy             User?               @relation("HomeCareCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("HomeCareUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("HomeCareAuditLogs")
-  homeCareVisits        HomeCareVisit[]     @relation("HomeCareVisits")
-  homeCareNotifications HomeCareNotification[] @relation("HomeCareNotifications")
-  nhifClaims            NhifClaim[]         @relation("NhifClaimHomeCare")
-  socialServices        SocialService[]     @relation("SocialServiceHomeCare")
-  transactions          Transaction[]       @relation("HomeCareTransactions")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  admissions            Admission[]         @relation("HomeCareAdmissions")
-}
-
-model HomeCareVisit {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  homeCareId            Int
-  homeCare              HomeCare            @relation("HomeCareVisits", fields: [homeCareId], references: [id])
-  visitDate             DateTime
-  caregiverId           Int?
-  caregiver             User?               @relation("HomeCareVisitCaregiver", fields: [caregiverId], references: [id])
-  status                String              @default("SCHEDULED")
-  visitNotes            String?
-  vitals                String?
-  clinicalRecordId      Int?
-  clinicalRecord        ClinicalRecord?     @relation("HomeCareVisitClinicalRecords", fields: [clinicalRecordId], references: [id])
-  createdById           Int?
-  createdBy             User?               @relation("HomeCareVisitCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("HomeCareVisitUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("HomeCareVisitAuditLogs")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-}
-
-model HomeCareNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  homeCareId            Int
-  homeCare              HomeCare            @relation("HomeCareNotifications", fields: [homeCareId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?
-  recipient             User?               @relation("HomeCareNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+// Represents highlighted content on the homepage
+model Highlight {
+  id            String    @id @default(uuid())
+  title         String
+  description   String?
+  imageUrl      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
