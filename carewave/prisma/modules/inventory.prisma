@@ -1,110 +1,45 @@
-enum InventoryStatus {
-  IN_STOCK
-  LOW_STOCK
-  OUT_OF_STOCK
-  EXPIRED
-  DISPOSED
+// Represents an item in the inventory
+model Item {
+  id              String          @id @default(uuid())
+  name            String          @unique
+  description     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  inventories     Inventory[]     @relation("ItemInventories")
+  stockMovements  StockMovement[] @relation("ItemStockMovements")
+  expiryAlerts    ExpiryAlert[]   @relation("ItemExpiryAlerts")
 }
 
-enum InventoryType {
-  MEDICATION
-  MEDICAL_SUPPLIES
-  EQUIPMENT
-  CONSUMABLES
-  OTHER
-}
-
+// Represents the inventory stock for an item
 model Inventory {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  itemCode              String              @unique
-  name                  String
-  description           String?
-  type                  InventoryType
-  status                InventoryStatus     @default(IN_STOCK)
-  quantity              Int
-  minimumStockLevel     Int?
-  maximumStockLevel     Int?
-  unitPrice             Float?
-  totalValue            Float?              @default(0.0)
-  batchNumber           String?
-  expiryDate            DateTime?
-  purchaseDate          DateTime?
-  supplierId            Int?                @unique
-  supplier              InventorySupplier?  @relation("InventorySupplier", fields: [supplierId], references: [id])
-  departmentId          Int?                @unique
-  department            Department?         @relation("DepartmentInventory", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                @unique
-  clinicalSetting       ClinicalSetting?    @relation("ClinicalSettingInventory", fields: [clinicalSettingId], references: [id])
-  pharmacyId            Int?                @unique
-  pharmacy              Pharmacy?           @relation("PharmacyInventory", fields: [pharmacyId], references: [id])
-  storageLocation       String?
-  reorderPoint          Int?
-  reorderQuantity       Int?
-  lastRestockedDate     DateTime?
-  createdById           Int?                @unique
-  createdBy             User?               @relation("InventoryCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("InventoryUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("InventoryAuditLogs")
-  inventoryTransactions InventoryTransaction[] @relation("InventoryTransactions")
-  inventoryNotifications InventoryNotification[] @relation("InventoryNotifications")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  dashboardWidgets      DashboardWidget[]   @relation("DashboardWidgetInventory")
+  id            String     @id @default(uuid())
+  itemId        String
+  item          Item       @relation("ItemInventories", fields: [itemId], references: [id], onDelete: Restrict)
+  quantity      Int
+  location      String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-model InventoryTransaction {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  inventoryId           Int
-  inventory             Inventory           @relation("InventoryTransactions", fields: [inventoryId], references: [id])
-  transactionType       String
-  quantity              Int
-  transactionDate       DateTime            @default(now())
-  reason                String?
-  referenceId           Int?
-  referenceType         String?
-  performedById         Int?                @unique
-  performedBy           User?               @relation("InventoryTransactionPerformedBy", fields: [performedById], references: [id])
-  createdById           Int?                @unique
-  createdBy             User?               @relation("InventoryTransactionCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("InventoryTransactionUpdatedBy", fields: [updatedById], references: [id])
-  notes                 String?
-  auditLogs             AuditLog[]          @relation("InventoryTransactionAuditLogs")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a stock movement for an item
+model StockMovement {
+  id            String     @id @default(uuid())
+  itemId        String
+  item          Item       @relation("ItemStockMovements", fields: [itemId], references: [id], onDelete: Restrict)
+  quantity      Int
+  movementType  String
+  movedAt       DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-model InventoryNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  inventoryId           Int
-  inventory             Inventory           @relation("InventoryNotifications", fields: [inventoryId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?                @unique
-  recipient             User?               @relation("InventoryNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-}
-
-model InventorySupplier {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  name                  String
-  contactDetails        String?
-  address               String?
-  supplierCode          String?             @unique
-  createdById           Int?                @unique
-  createdBy             User?               @relation("InventorySupplierCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("InventorySupplierUpdatedBy", fields: [updatedById], references: [id])
-  inventory             Inventory[]         @relation("InventorySupplier")
-  auditLogs             AuditLog[]          @relation("SupplierAuditLogs")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents an expiry alert for an item
+model ExpiryAlert {
+  id            String     @id @default(uuid())
+  itemId        String
+  item          Item       @relation("ItemExpiryAlerts", fields: [itemId], references: [id], onDelete: Restrict)
+  expiryDate    DateTime
+  alertedAt     DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
