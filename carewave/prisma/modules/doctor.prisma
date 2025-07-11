@@ -13,6 +13,9 @@ model Doctor {
   leaves           DoctorLeave[]       @relation("DoctorLeaves")
   appointments     Appointment[]       @relation("DoctorAppointments")
   specializations  DoctorSpecialization[] @relation("DoctorSpecializations")
+  clinicalNotes    ClinicalNote[]      @relation("DoctorClinicalNotes")
+  progressNotes    ProgressNote[]      @relation("DoctorProgressNotes")
+  soapNotes        SOAPNote[]          @relation("DoctorSOAPNotes")
 }
 
 // Represents a doctor's specialization
