@@ -14,8 +14,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    // Handle registration if firstName and lastName are provided
-    if (firstName && lastName) {
+    if (firstName && lastName && role) {
       const existingUser = await prisma.userRegistration.findUnique({ where: { email } });
       if (existingUser) {
         return NextResponse.json({ error: 'User already exists' }, { status: 400 });
@@ -23,12 +22,12 @@ export async function POST(request) {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      await prisma.userRegistration.create({
+      const userRegistration = await prisma.userRegistration.create({
         data: {
           email,
           firstName,
           lastName,
-          role: role || 'PATIENT',
+          role,
           passwordHash: hashedPassword,
           userLogin: {
             create: {
@@ -37,12 +36,12 @@ export async function POST(request) {
             },
           },
         },
+        include: { userLogin: true },
       });
 
       return NextResponse.json({ message: 'Registration successful' }, { status: 201 });
     }
 
-    // Handle login
     const userLogin = await prisma.userLogin.findUnique({
       where: { email },
       include: { userRegistration: true },
@@ -66,7 +65,6 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Update last login and deactivate old sessions
     await prisma.userLogin.update({
       where: { id: userLogin.id },
       data: { lastLoginAt: new Date() },
