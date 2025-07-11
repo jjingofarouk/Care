@@ -18,30 +18,28 @@ enum UserRole {
 }
 
 model UserRegistration {
-  id                    String                  @id @default(uuid())
-  email                 String                  @unique
-  firstName             String
-  lastName              String
-  role                  UserRole                @default(PATIENT)
-  passwordHash          String
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
-  userLogin             UserLogin?              @relation("UserRegistrationToUserLogin", fields: [email], references: [email], onDelete: Cascade)
+  id                     String                    @id @default(uuid())
+  email                  String                    @unique
+  firstName              String
+  lastName               String
+  role                   UserRole                  @default(PATIENT)
+  passwordHash           String
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  userLogin              UserLogin?                @relation("UserRegistrationToUserLogin", fields: [email], references: [email], onDelete: Cascade)
+
+  // ✅ Inverse side of the relation to EmailVerificationToken
+  emailVerificationToken EmailVerificationToken?   @relation("UserEmailVerification")
 }
-
-
-
 
 model EmailVerificationToken {
   id                   String           @id @default(uuid())
   userRegistrationId   String           @unique
-  userRegistration     UserRegistration @relation("UserEmailVerification", fields: [userRegistrationId], references: [id], onDelete: Cascade)
   token                String           @unique
   expiresAt            DateTime
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
+
+  // ✅ Forward side of the relation to UserRegistration
+  userRegistration     UserRegistration @relation("UserEmailVerification", fields: [userRegistrationId], references: [id], onDelete: Cascade)
 }
-
-
-
-
