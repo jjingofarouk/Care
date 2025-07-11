@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import Header from './components/Header';
+import Header from './Header';
 import { AuthProvider } from './auth/AuthContext';
 import './globals.css';
 
