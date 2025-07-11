@@ -9,13 +9,13 @@ export default function AuthLayout({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!isAuthenticated(token)) {
-      router.push('/auth');
+    if (isAuthenticated(token)) {
+      router.push('/appointment');
     }
   }, [router]);
 
   return (
-    <div className="mt-16 p-0">
+    <div className="min-h-screen">
       <main>{children}</main>
     </div>
   );
