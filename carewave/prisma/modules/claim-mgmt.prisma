@@ -35,7 +35,7 @@ model ClaimBatch {
 model ClaimStatus {
   id            String         @id @default(uuid())
   claimId       String         @unique
-  claim         Claim          @relation("ClaimStatusRecord")
+  claim         Claim?         @relation("ClaimStatusRecord")
   status        ClaimStatusEnum
   changedAt     DateTime
   createdAt     DateTime       @default(now())
