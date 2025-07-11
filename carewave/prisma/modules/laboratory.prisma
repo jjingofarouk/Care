@@ -1,3 +1,4 @@
+// laboratory.prisma
 // Represents a laboratory test
 model LabTest {
   id            String       @id @default(uuid())
