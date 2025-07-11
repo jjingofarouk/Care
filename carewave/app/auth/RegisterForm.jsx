@@ -57,6 +57,7 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (currentStep !== 3) return; // Only submit on the final step
     setIsLoading(true);
     setError(null);
     
@@ -71,11 +72,15 @@ export default function RegisterForm() {
   };
 
   const nextStep = () => {
-    if (currentStep < 3) setCurrentStep(currentStep + 1);
+    if (isStepValid() && currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
   const isStepValid = () => {
