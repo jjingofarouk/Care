@@ -18,14 +18,13 @@ model Appointment {
   appointmentDate DateTime
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
-  appointmentStatusId String?
-  appointmentStatusRecord AppointmentStatus? @relation("AppointmentStatusRecord", fields: [appointmentStatusId], references: [id], onDelete: SetNull)
+  appointmentStatusRecords AppointmentStatus[] @relation("AppointmentStatusRecord")
 }
 
 // Represents the status history of an appointment
 model AppointmentStatus {
   id            String       @id @default(uuid())
-  appointmentId String
+  appointmentId String       @unique
   appointment   Appointment  @relation("AppointmentStatusRecord", fields: [appointmentId], references: [id], onDelete: Cascade)
   status        AppointmentStatusEnum
   changedAt     DateTime
