@@ -87,7 +87,7 @@ export default function PatientList() {
         <Button 
           className="btn btn-primary"
           startIcon={<Add />}
-          onClick={() => router.push('/patients/new')}
+          onClick={() => router.push('/patient/new')}
         >
           New Patient
         </Button>
