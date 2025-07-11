@@ -1,3 +1,4 @@
+// vaccination.prisma
 // Represents a vaccination record for a patient
 model VaccinationRecord {
   id                  String              @id @default(uuid())
