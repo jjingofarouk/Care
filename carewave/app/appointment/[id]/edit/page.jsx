@@ -1,6 +1,6 @@
 import React from 'react';
 import { getAppointmentById } from '@/services/appointmentService';
-import AppointmentForm from '@/components/AppointmentForm';
+import AppointmentForm from '@/components/appointments/AppointmentForm';
 
 export default async function EditAppointmentPage({ params }) {
   const appointment = await getAppointmentById(params.id);
