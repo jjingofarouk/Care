@@ -1,87 +1,43 @@
-enum DashboardWidgetType {
-  CHART
-  TABLE
-  METRIC
-  CALENDAR
-  ALERT
-  SUMMARY
+// Represents key statistics for the hospital dashboard
+model DashboardStats {
+  id            String    @id @default(uuid())
+  name          String
+  value         Float
+  period        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  widgets       Widget[]  @relation("DashboardWidgetStats")
 }
 
-enum DashboardAccessLevel {
-  PUBLIC
-  ROLE_BASED
-  PRIVATE
+// Represents key performance indicators for hospital operations
+model KPI {
+  id            String    @id @default(uuid())
+  name          String
+  target        Float
+  currentValue  Float
+  period        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
-model Dashboard {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String
-  description         String?
-  accessLevel         DashboardAccessLevel  @default(PRIVATE)
-  role                String?
-  userId              Int?                  @unique
-  user                User?                 @relation("DashboardOwner", fields: [userId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation("DepartmentDashboards", fields: [departmentId], references: [id])
-  widgets             DashboardWidget[]     @relation("DashboardWidgets")
-  layout              String?
-  isDefault           Boolean               @default(false)
-  filters             String?
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("DashboardCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("DashboardUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("DashboardAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Represents notifications displayed on the dashboard
+model Notification {
+  id            String    @id @default(uuid())
+  message       String
+  type          String
+  priority      String
+  isRead        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
-model DashboardWidget {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  dashboardId         Int
-  dashboard           Dashboard             @relation("DashboardWidgets", fields: [dashboardId], references: [id])
-  type                DashboardWidgetType
-  title               String
-  dataSource          String?
-  configuration       String?
-  appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("DashboardWidgetAppointments", fields: [appointmentId], references: [id])
-  admissionId         Int?                  @unique
-  admission           Admission?            @relation("DashboardWidgetAdmissions", fields: [admissionId], references: [id])
-  billingId           Int?                  @unique
-  billing             Billing?              @relation("DashboardWidgetBilling", fields: [billingId], references: [id])
-  laboratoryId        Int?                  @unique
-  laboratory          Laboratory?           @relation("DashboardWidgetLaboratory", fields: [laboratoryId], references: [id])
-  radiologyId         Int?                  @unique
-  radiology           Radiology?            @relation("DashboardWidgetRadiology", fields: [radiologyId], references: [id])
-  pharmacyId          Int?                  @unique
-  pharmacy            Pharmacy?             @relation("DashboardWidgetPharmacy", fields: [pharmacyId], references: [id])
-  operationTheatreId  Int?                  @unique
-  operationTheatre    OperationTheatre?     @relation("DashboardWidgetOperationTheatre", fields: [operationTheatreId], references: [id])
-  queueId             Int?                  @unique
-  queue               Queue?                @relation("DashboardWidgetQueue", fields: [queueId], references: [id])
-  inventoryId         Int?                  @unique
-  inventory           Inventory?            @relation("DashboardWidgetInventory", fields: [inventoryId], references: [id])
-  claimId             Int?                  @unique
-  claim               Claim?                @relation("DashboardWidgetClaims", fields: [claimId], references: [id])
-  nhifClaimId         Int?                  @unique
-  nhifClaim           NhifClaim?            @relation("DashboardWidgetNhifClaims", fields: [nhifClaimId], references: [id])
-  medicalRecordId     Int?                  @unique
-  medicalRecord       MedicalRecord?        @relation("DashboardWidgetMedicalRecords", fields: [medicalRecordId], references: [id])
-  maternityId         Int?                  @unique
-  maternity           Maternity?            @relation("DashboardWidgetMaternity", fields: [maternityId], references: [id])
-  positionX           Int
-  positionY           Int
-  width               Int
-  height              Int
-  refreshInterval     Int?
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("WidgetCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("WidgetUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("DashboardWidgetAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Represents customizable widgets on the dashboard
+model Widget {
+  id              String         @id @default(uuid())
+  title           String
+  type            String
+  statsId         String?
+  stats           DashboardStats? @relation("DashboardWidgetStats", fields: [statsId], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }
