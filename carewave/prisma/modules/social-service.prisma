@@ -1,138 +1,24 @@
-// prisma/socialservice.prisma
-
-enum SocialServiceCaseStatus {
-  OPEN
-  IN_PROGRESS
-  CLOSED
-  PENDING
-  REFERRED
+// Represents a social worker in the hospital
+model SocialWorker {
+  id                String              @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String              @unique
+  phone             String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  supportCases      PatientSupportCase[] @relation("SocialWorkerCases")
 }
 
-enum SocialServiceType {
-  COUNSELING
-  FINANCIAL_AID
-  HOUSING_ASSISTANCE
-  LEGAL_AID
-  PSYCHOSOCIAL_SUPPORT
-  CHILD_PROTECTION
-  ELDER_CARE
-}
-
-enum SocialServicePriority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
-}
-
-enum SocialServiceStatus {
-  PENDING
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
-
-model SocialService {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  patientId           Int?
-  patient             Patient?              @relation("PatientSocialServices", fields: [patientId], references: [id])
-  dischargeId         Int?
-  discharge           Discharge?            @relation("SocialServiceDischarges", fields: [dischargeId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation("DepartmentSocialServices", fields: [departmentId], references: [id])
-  clinicalSettingId   Int?
-  clinicalSetting     ClinicalSetting?      @relation("SocialServiceClinicalSettings", fields: [clinicalSettingId], references: [id])
-  socialWorkerId      Int?
-  socialWorker        User?                 @relation("SocialServiceWorker", fields: [socialWorkerId], references: [id])
-  status              SocialServiceStatus   @default(PENDING)
-  serviceType         SocialServiceType?
-  startDate           DateTime              @default(now())
-  endDate             DateTime?
-  notes               String?
-  socialServiceCases  SocialServiceCase[]   @relation("SocialServiceCases")
-  billingId           Int?
-  billing             Billing?              @relation("SocialServiceBilling", fields: [billingId], references: [id])
-  createdById         Int?
-  createdBy           User?               @relation("SocialServiceCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?               @relation("SocialServiceUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("SocialServiceAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  homeCareId          Int?
-  homeCare            HomeCare?             @relation("SocialServiceHomeCare", fields: [homeCareId], references: [id])
-  discharges           Discharge[]           @relation("DischargeSocialService")
-}
-
-model SocialServiceCase {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  caseNumber          String                @unique
-  patientId           Int?
-  patient             Patient?              @relation("PatientSocialServiceCases", fields: [patientId], references: [id])
-  socialServiceId     Int?
-  socialService       SocialService?        @relation("SocialServiceCases", fields: [socialServiceId], references: [id])
-  socialWorkerId      Int?
-  socialWorker        User?                 @relation("SocialWorker", fields: [socialWorkerId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation("DepartmentSocialServiceCases", fields: [departmentId], references: [id])
-  clinicalSettingId   Int?
-  clinicalSetting     ClinicalSetting?      @relation("SocialServiceCaseClinicalSettings", fields: [clinicalSettingId], references: [id])
-  type                SocialServiceType
-  status              SocialServiceCaseStatus @default(OPEN)
-  priority            SocialServicePriority @default(MEDIUM)
-  openDate            DateTime              @default(now())
-  closeDate           DateTime?
-  description         String?
-  assessment          String?
-  interventionPlan    String?
-  progressNotes       String?
-  referralId          Int?
-  referral            Referral?             @relation("SocialServiceCaseReferrals", fields: [referralId], references: [id])
-  medicalRecordId     Int?
-  medicalRecord       MedicalRecord?        @relation("SocialServiceCaseMedicalRecords", fields: [medicalRecordId], references: [id])
-  billingId           Int?
-  billing             Billing?              @relation("SocialServiceCaseBilling", fields: [billingId], references: [id])
-  claimId             Int?
-  claim               Claim?                @relation("SocialServiceCaseClaims", fields: [claimId], references: [id])
-  nhifClaimId         Int?
-  nhifClaim           NhifClaim?            @relation("SocialServiceCaseNhifClaims", fields: [nhifClaimId], references: [id])
-  externalAgencyId    Int?
-  externalAgency      ExternalAgency?       @relation("SocialServiceCaseExternalAgency", fields: [externalAgencyId], references: [id])
-  documents           String?
-  followUpSchedule    String?
-  outcome             String?
-  createdById         Int?
-  createdBy           User?               @relation("CaseCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?               @relation("CaseUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("SocialServiceCaseAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  transactions        Transaction[]         @relation("TransactionSocialServiceCases")
-}
-
-model ExternalAgency {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String
-  contactName         String?
-  contactPhone        String?
-  email               String?               @unique
-  address             String?
-  servicesProvided    String?
-  status              String                @default("ACTIVE")
-  contractStartDate   DateTime?
-  contractEndDate     DateTime?
-  notes               String?
-  documents           String?
-  socialServiceCases  SocialServiceCase[]   @relation("SocialServiceCaseExternalAgency")
-  createdById         Int?
-  createdBy           User?               @relation("AgencyCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?               @relation("AgencyUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("ExternalAgencyAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Represents support cases handled by social workers
+model PatientSupportCase {
+  id              String        @id @default(uuid())
+  patientId       String
+  patient         Patient       @relation("PatientSupportCases", fields: [patientId], references: [id], onDelete: Cascade)
+  socialWorkerId  String
+  socialWorker    SocialWorker  @relation("SocialWorkerCases", fields: [socialWorkerId], references: [id], onDelete: Restrict)
+  caseDetails     String
+  status          String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
