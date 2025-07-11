@@ -1,116 +1,27 @@
-enum UtilityType {
-  ELECTRICITY
-  WATER
-  GAS
-  INTERNET
-  WASTE_DISPOSAL
-  HVAC_MAINTENANCE
-  MEDICAL_GAS
+// Tracks electricity usage logs
+model ElectricityLog {
+  id            String     @id @default(uuid())
+  recordedAt    DateTime
+  usageKwh      Float
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-enum UtilityStatus {
-  ACTIVE
-  INACTIVE
-  MAINTENANCE
-  DISRUPTED
+// Tracks water usage logs
+model WaterLog {
+  id            String     @id @default(uuid())
+  recordedAt    DateTime
+  usageLiters   Float
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-enum BillingCycle {
-  DAILY
-  WEEKLY
-  MONTHLY
-  QUARTERLY
-  ANNUAL
-}
-
-model Utility {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String
-  type                UtilityType
-  status              UtilityStatus         @default(ACTIVE)
-  departmentId        Int?
-  department          Department?           @relation("DepartmentUtilities", fields: [departmentId], references: [id])
-  location            String?
-  providerId          Int?
-  provider            UtilityProvider?      @relation("UtilityProvider", fields: [providerId], references: [id])
-  meterNumber         String?               @unique
-  capacity            Float?
-  unitOfMeasure       String?
-  billingCycle        BillingCycle?
-  lastReading         Float?
-  lastReadingDate     DateTime?
-  currentReading      Float?
-  currentReadingDate  DateTime?
-  consumption         Float?
-  costPerUnit         Float?
-  totalCost           Float?
-  contractStartDate   DateTime?
-  contractEndDate     DateTime?
-  maintenanceSchedule String?
-  lastMaintenance     DateTime?
-  notes               String?
-  documents           String?
-  transactionId       Int?
-  transaction         Transaction?          @relation("UtilityTransaction", fields: [transactionId], references: [id])
-  billingId           Int?
-  billing             Billing?              @relation("UtilityBilling", fields: [billingId], references: [id])
-  createdById         Int?
-  createdBy           User?                 @relation("UtilityCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("UtilityUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("UtilityAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  utilityMaintenance  UtilityMaintenance[]  @relation("UtilityMaintenanceRecords")
-}
-
-model UtilityProvider {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String
-  contactName         String?
-  contactPhone        String?
-  email               String?               @unique
-  address             String?
-  website             String?
-  accountNumber       String?
-  paymentTerms        String?
-  contractDetails     String?
-  status              String                @default("ACTIVE")
-  utilities           Utility[]             @relation("UtilityProvider")
-  documents           String?
-  createdById         Int?
-  createdBy           User?                 @relation("ProviderCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("ProviderUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("UtilityProviderAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model UtilityMaintenance {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  utilityId           Int
-  utility             Utility               @relation("UtilityMaintenanceRecords", fields: [utilityId], references: [id])
-  maintenanceDate     DateTime              @default(now())
-  maintenanceType     String
-  description         String?
-  performedById       Int?
-  performedBy         User?                 @relation("MaintenancePerformedBy", fields: [performedById], references: [id])
-  cost                Float?
-  status              String                @default("PENDING")
-  downtimeDuration    Int?
-  procurementId       Int?
-  procurement         Procurement?          @relation("ProcurementUtilityMaintenance", fields: [procurementId], references: [id])
-  documents           String?
-  notes               String?
-  createdById         Int?
-  createdBy           User?                 @relation("MaintenanceCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("MaintenanceUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("UtilityMaintenanceAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Tracks the status of backup generators
+model BackupGeneratorStatus {
+  id            String     @id @default(uuid())
+  generatorId   String     @unique
+  status        String
+  lastCheckedAt DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
