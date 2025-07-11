@@ -1,141 +1,61 @@
-enum DoctorStatus {
-  ACTIVE
-  INACTIVE
-  ON_LEAVE
-  SUSPENDED
-  RETIRED
-}
-
-enum AvailabilityStatus {
-  AVAILABLE
-  UNAVAILABLE
-  ON_CALL
-  IN_SURGERY
-  ON_BREAK
-}
-
-enum QualificationType {
-  DEGREE
-  CERTIFICATION
-  FELLOWSHIP
-  LICENSE
-  DIPLOMA
-}
-
+// Represents a doctor in the hospital
 model Doctor {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  doctorId              String                @unique
-  userId                Int?                  @unique
-  user                  User?                 @relation("DoctorUser", fields: [userId], references: [id])
-  firstName             String
-  lastName              String
-  email                 String?               @unique
-  phone                 String?
-  specialty             String
-  licenseNumber         String                @unique
-  office                String?
-  departmentId          Int?
-  department            Department?           @relation("DepartmentDoctors", fields: [departmentId], references: [id])
-  status                DoctorStatus          @default(ACTIVE)
-  hireDate              DateTime?
-  biography             String?
-  qualifications        String?
-  profileImage          String?
-  consultationFee       Float?
-  maxPatientsPerSlot    Int?
-  clinicalSettingId     Int?
-  clinicalSetting       ClinicalSetting?      @relation("DoctorClinicalSettings", fields: [clinicalSettingId], references: [id])
-  admissions            Admission[]           @relation("DoctorAdmissions")
-  discharges            Discharge[]           @relation("DischargingDoctor")
-  appointments          Appointment[]         @relation("DoctorAppointments")
-  availability          DoctorAvailability[]  @relation("DoctorAvailability")
-  prescriptions         Prescription[]        @relation("Prescriptions")
-  clinicalRecords       ClinicalRecord[]      @relation("DoctorClinicalRecords")
-  laboratoryOrders      Laboratory[]          @relation("LaboratoryOrders")
-  radiologyOrders       Radiology[]           @relation("RadiologyOrders")
-  radiologyTests        RadiologyTest[]       @relation("RadiologyDoctor")
-  operationTheatres     OperationTheatre[]    @relation("DoctorOperationTheatres")
-  nursingRecords        Nursing[]             @relation("DoctorNursingRecords")
-  maternityRecords      Maternity[]           @relation("DoctorMaternityRecords")
-  vaccinationRecords    Vaccination[]         @relation("DoctorVaccinationRecords")
-  helpdeskTickets       Helpdesk[]            @relation("DoctorHelpdeskTickets")
-  doctorQualifications  DoctorQualification[] @relation("DoctorQualifications")
-  doctorNotifications   DoctorNotification[]  @relation("DoctorNotifications")
-  recurringAppointments  RecurringAppointment[] @relation("DoctorRecurringAppointments")
-  createdById           Int?
-  createdBy             User?                 @relation("DoctorCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?                 @relation("DoctorUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("DoctorAuditLogs")
-  queues                Queue[]               @relation("QueueDoctor")
-  surgicalProcedures    SurgicalProcedure[]   @relation("Surgeon")
-  homeCare              HomeCare[]            @relation("DoctorHomeCare")
-  vaccinations          Vaccination[]         @relation("VaccinationDoctor")
-  verifications         Verification[]        @relation("DoctorVerification")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  emergencies           Emergency[]           @relation("DoctorEmergencies")
+  id               String              @id @default(uuid())
+  firstName        String
+  lastName         String
+  email            String              @unique
+  phone            String?
+  departmentId     String
+  department       Department          @relation("DoctorDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  schedules        DoctorSchedule[]    @relation("DoctorSchedules")
+  leaves           DoctorLeave[]       @relation("DoctorLeaves")
+  appointments     Appointment[]       @relation("DoctorAppointments")
+  specializations  DoctorSpecialization[] @relation("DoctorSpecializations")
 }
 
-model DoctorAvailability {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  doctorId              Int
-  doctor                Doctor                @relation("DoctorAvailability", fields: [doctorId], references: [id])
-  departmentId          Int?
-  department            Department?           @relation("DepartmentDoctorAvailability", fields: [departmentId], references: [id])
-  startTime             DateTime
-  endTime               DateTime
-  status                AvailabilityStatus    @default(AVAILABLE)
-  location              String?
-  notes                 String?
-  appointment           Appointment?          @relation("DoctorAvailabilityAppointments")
-  appointmentId         Int?                  @unique
-  createdById           Int?
-  createdBy             User?               @relation("DoctorAvailabilityCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("DoctorAvailabilityUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("DoctorAvailabilityAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  operationTheatre      OperationTheatre?     @relation("OperationTheatreDoctorAvailability", fields: [operationTheatreId], references: [id])
-  operationTheatreId    Int?
+// Represents a doctor's specialization
+model Specialization {
+  id               String              @id @default(uuid())
+  name             String              @unique
+  description      String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  doctors          DoctorSpecialization[] @relation("SpecializationDoctors")
 }
 
-model DoctorQualification {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  doctorId              Int
-  doctor                Doctor                @relation("DoctorQualifications", fields: [doctorId], references: [id])
-  type                  QualificationType
-  name                  String
-  institution           String?
-  issueDate             DateTime?
-  expiryDate            DateTime?
-  certificateNumber     String?               @unique
-  verificationStatus    String?               @default("PENDING")
-  documentPath          String?
-  createdById           Int?
-  createdBy             User?                 @relation("DoctorQualificationCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("DoctorQualificationUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]            @relation("DoctorQualificationAuditLogs")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+// Join table for many-to-many relation between Doctor and Specialization
+model DoctorSpecialization {
+  id              String         @id @default(uuid())
+  doctorId        String
+  specializationId String
+  doctor          Doctor         @relation("DoctorSpecializations", fields: [doctorId], references: [id], onDelete: Cascade)
+  specialization  Specialization @relation("SpecializationDoctors", fields: [specializationId], references: [id], onDelete: Cascade)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }
 
-model DoctorNotification {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  doctorId              Int
-  doctor                Doctor                @relation("DoctorNotifications", fields: [doctorId], references: [id])
-  notificationType      String
-  status                NotificationStatus    @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?
-  recipient             User?                 @relation("DoctorNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a doctor's schedule
+model DoctorSchedule {
+  id            String     @id @default(uuid())
+  doctorId      String
+  doctor        Doctor     @relation("DoctorSchedules", fields: [doctorId], references: [id], onDelete: Cascade)
+  startTime     DateTime
+  endTime       DateTime
+  dayOfWeek     String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a doctor's leave of absence
+model DoctorLeave {
+  id            String     @id @default(uuid())
+  doctorId      String
+  doctor        Doctor     @relation("DoctorLeaves", fields: [doctorId], references: [id], onDelete: Cascade)
+  startDate     DateTime
+  endDate       DateTime
+  reason        String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
