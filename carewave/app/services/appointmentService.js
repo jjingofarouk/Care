@@ -116,3 +116,25 @@ export async function getStatusHistory(appointmentId) {
     orderBy: { changedAt: 'desc' },
   });
 }
+
+export async function bulkCreateAppointments(appointments) {
+  return prisma.$transaction(
+    appointments.map((appt) =>
+      prisma.appointment.create({
+        data: {
+          patientId: appt.patientId,
+          doctorId: appt.doctorId,
+          visitTypeId: appt.visitTypeId,
+          appointmentDate: new Date(appt.appointmentDate),
+          appointmentStatus: appt.status || 'PENDING',
+          appointmentStatusRecords: {
+            create: {
+              status: appt.status || 'PENDING',
+              changedAt: new Date(appt.appointmentDate),
+            },
+          },
+        },
+      })
+    )
+  );
+}
