@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home, User, Calendar, Calculator, Settings, Flask, Briefcase,
+  Home, User, Calendar, Calculator, Settings, Briefcase,
   ClipboardList, FileText, Heart, Badge, Inbox,
   Key, ShieldCheck, ShoppingCart, Grid3X3, Table, Users,
   Wrench, X, Stethoscope, Syringe, Pill, Headphones,
@@ -36,7 +36,7 @@ const roleBasedNavItems = {
   ],
   LAB_TECHNICIAN: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Laboratory', path: '/laboratory', icon: Flask, category: 'lab' },
+    { name: 'Laboratory', path: '/laboratory', icon: Badge, category: 'lab' },
   ],
   PHARMACIST: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
@@ -67,7 +67,7 @@ const roleBasedNavItems = {
     { name: 'Emergency', path: '/emergency', icon: X, category: 'patient-care' },
     { name: 'Queue Management', path: '/queue-mgmt', icon: Users, category: 'patient-care' },
     { name: 'Clinical', path: '/clinical', icon: Stethoscope, category: 'clinical' },
-    { name: 'Laboratory', path: '/laboratory', icon: Flask, category: 'clinical' },
+    { name: 'Laboratory', path: '/laboratory', icon: Badge, category: 'clinical' },
     { name: 'Radiology', path: '/radiology', icon: ScanLine, category: 'clinical' },
     { name: 'Operation Theatre', path: '/operation-theatre', icon: Scissors, category: 'clinical' },
     { name: 'Clinical Settings', path: '/clinical-settings', icon: Wrench, category: 'clinical' },
