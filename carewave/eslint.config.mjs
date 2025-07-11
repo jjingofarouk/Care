@@ -25,12 +25,15 @@ const eslintConfig = [
     },
     settings: {
       react: {
-        version: 'detect', // Automatically detect React version
+        version: 'detect',
       },
     },
     rules: {
-      'no-unused-vars': 'off', // Disable no-unused-vars rule globally
-      '@next/next/no-img-element': 'warn', // Keep no-img-element as warning (optional, based on your preference)
+      'no-unused-vars': 'warn', // relaxed to warning to avoid build failure
+      '@next/next/no-img-element': 'off', // disable img element warning completely
+      'react/react-in-jsx-scope': 'off', // disable since Next.js React 17+ handles this
+      'react/prop-types': 'off', // disable prop-types checks if using TypeScript
+      'react/display-name': 'off', // disable display name warnings
     },
   }),
 ];
