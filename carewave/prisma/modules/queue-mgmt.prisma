@@ -1,108 +1,33 @@
-enum QueueStatus {
-  WAITING
-  IN_PROGRESS
-  COMPLETED
-  SKIPPED
-  CANCELLED
+// Represents an entry in the hospital queue
+model QueueEntry {
+  id              String        @id @default(uuid())
+  patientId       String
+  patient         Patient       @relation("PatientQueueEntries", fields: [patientId], references: [id], onDelete: Cascade)
+  serviceCounterId String
+  serviceCounter  ServiceCounter @relation("ServiceCounterQueueEntries", fields: [serviceCounterId], references: [id], onDelete: Restrict)
+  queueStatusId   String
+  queueStatus     QueueStatus   @relation("QueueEntryStatus", fields: [queueStatusId], references: [id], onDelete: Restrict)
+  queueNumber     Int           @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
-enum QueuePriority {
-  EMERGENCY
-  URGENT
-  NON_URGENT
+// Represents a service counter for queue management
+model ServiceCounter {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  departmentId  String
+  department    Department   @relation("ServiceCounterDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  queueEntries  QueueEntry[] @relation("ServiceCounterQueueEntries")
 }
 
-enum QueueConfigStatus {
-  ACTIVE
-  INACTIVE
-}
-
-model Queue {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  queueNumber         Int
-  status              QueueStatus           @default(WAITING)
-  priority            QueuePriority?
-  patientId           Int?                  @unique
-  patient             Patient?              @relation("PatientQueue", fields: [patientId], references: [id], map: "Queue_patient_fkey")
-  appointmentId       Int?                  @unique
-  appointment         Appointment?          @relation("AppointmentQueue", fields: [appointmentId], references: [id], map: "Queue_appointment_fkey")
-  admissionId         Int?                  @unique
-  admission           Admission?            @relation("AdmissionQueue", fields: [admissionId], references: [id], map: "Queue_admission_fkey")
-  departmentId        Int?
-  department          Department?           @relation("DepartmentQueues", fields: [departmentId], references: [id])
-  doctorId            Int?
-  doctor              Doctor?               @relation("QueueDoctor", fields: [doctorId], references: [id])
-  clinicalSettingId   Int?                  @unique
-  clinicalSetting     ClinicalSetting?      @relation("QueueClinicalSettings", fields: [clinicalSettingId], references: [id], map: "Queue_clinicalSetting_fkey")
-  wardId              Int?
-  ward                Ward?                 @relation("WardQueue", fields: [wardId], references: [id])
-  serviceType         String?
-  estimatedWaitTime   Int?
-  calledAt            DateTime?
-  completedAt         DateTime?
-  notes               String?
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("QueueCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("QueueUpdatedBy", fields: [updatedById], references: [id])
-  queueLogs           QueueLog[]            @relation("QueueLogs")
-  notifications       QueueNotification[]   @relation("QueueNotifications")
-  auditLogs           AuditLog[]            @relation("QueueAuditLogs")
-  dashboardWidgets    DashboardWidget[]     @relation("DashboardWidgetQueue")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model QueueLog {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  queueId             Int
-  queue               Queue                 @relation("QueueLogs", fields: [queueId], references: [id])
-  action              String
-  actionById          Int?                  @unique
-  actionBy            User?                 @relation("QueueLogActionBy", fields: [actionById], references: [id])
-  actionDate          DateTime              @default(now())
-  notes               String?
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model QueueNotification {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  queueId             Int
-  queue               Queue                 @relation("QueueNotifications", fields: [queueId], references: [id])
-  notificationType    String
-  status              NotificationStatus    @default(PENDING)
-  sentAt              DateTime?
-  recipientId         Int?                  @unique
-  recipient           User?                 @relation("QueueNotificationRecipient", fields: [recipientId], references: [id])
-  message             String?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-}
-
-model QueueConfiguration {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  departmentId        Int?
-  department          Department?           @relation("DepartmentQueueConfigurations", fields: [departmentId], references: [id])
-  clinicalSettingId   Int?                  @unique
-  clinicalSetting     ClinicalSetting?      @relation("QueueConfigClinicalSettings", fields: [clinicalSettingId], references: [id])
-  name                String
-  description         String?
-  maxQueueSize        Int?
-  priorityRules       String?
-  autoAssignDoctor    Boolean               @default(false)
-  notificationSettings String?
-  operatingHours      String?
-  status              QueueConfigStatus     @default(ACTIVE)
-  createdById         Int?                  @unique
-  createdBy           User?                 @relation("QueueConfigCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?                  @unique
-  updatedBy           User?                 @relation("QueueConfigUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("QueueConfigAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Represents the status of a queue entry
+model QueueStatus {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  queueEntries  QueueEntry[] @relation("QueueEntryStatus")
 }
