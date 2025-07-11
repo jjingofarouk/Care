@@ -3,43 +3,12 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
-import nodemailer from 'nodemailer';
 
 const prisma = new PrismaClient();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
 export async function POST(request) {
   try {
-    const { email, password, firstName, lastName, role, action, token } = await request.json();
-
-    if (action === 'verify') {
-      const verification = await prisma.emailVerificationToken.findFirst({
-        where: { token, expiresAt: { gte: new Date() } },
-        include: { userRegistration: true },
-      });
-
-      if (!verification) {
-        return NextResponse.json({ error: 'Invalid or expired verification token' }, { status: 400 });
-      }
-
-      await prisma.userRegistration.update({
-        where: { id: verification.userRegistrationId },
-        data: { updatedAt: new Date() },
-      });
-
-      await prisma.emailVerificationToken.delete({ where: { id: verification.id } });
-
-      return NextResponse.json({ message: 'Email verified successfully' }, { status: 200 });
-    }
+    const { email, password, firstName, lastName, role } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
@@ -53,7 +22,6 @@ export async function POST(request) {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const verificationToken = uuidv4();
       const userRegistration = await prisma.userRegistration.create({
         data: {
           email,
@@ -61,12 +29,6 @@ export async function POST(request) {
           lastName,
           role: role || 'PATIENT',
           passwordHash: hashedPassword,
-          emailVerification: {
-            create: {
-              token: verificationToken,
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            },
-          },
           userLogin: {
             create: {
               email,
@@ -76,14 +38,7 @@ export async function POST(request) {
         },
       });
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: 'Verify Your Email',
-        html: `<p>Please verify your email by clicking <a href="${process.env.BASE_URL}/auth/verify?token=${verificationToken}">here</a>.</p>`,
-      });
-
-      return NextResponse.json({ message: 'Registration successful, please verify your email' }, { status: 201 });
+      return NextResponse.json({ message: 'Registration successful' }, { status: 201 });
     }
 
     // Handle login
@@ -123,7 +78,6 @@ export async function POST(request) {
       data: { lastLoginAt: new Date() },
     });
 
-    // Invalidate previous sessions
     await prisma.session.updateMany({
       where: { userLoginId: userLogin.id, isActive: true },
       data: { isActive: false },
