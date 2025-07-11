@@ -46,23 +46,34 @@ export async function POST(request) {
       include: { userRegistration: true },
     });
 
-    const passwordMatches = userLogin && await bcrypt.compare(password, userLogin.passwordHash);
+    const passwordMatches = userLogin && (await bcrypt.compare(password, userLogin.passwordHash));
 
     const isValid = userLogin && passwordMatches && userLogin.userRegistration;
 
+    if (!isValid) {
+      // Log failed attempt without userLoginId if user doesn't exist
+      await prisma.loginAttempt.create({
+        data: {
+          userLoginId: userLogin?.id || uuidv4(), // Use a dummy ID or handle differently
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
+          success: false,
+          attemptedAt: new Date(),
+        },
+      });
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // Log successful attempt
     await prisma.loginAttempt.create({
       data: {
-        userLoginId: userLogin?.id || uuidv4(),
+        userLoginId: userLogin.id,
         ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
         userAgent: request.headers.get('user-agent') || 'unknown',
-        success: Boolean(isValid),
+        success: true,
         attemptedAt: new Date(),
       },
     });
-
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-    }
 
     await prisma.userLogin.update({
       where: { id: userLogin.id },
