@@ -1,312 +1,44 @@
-// prisma/transactions.prisma
-
-enum TransactionType {
-  INCOME
-  EXPENSE
-  TRANSFER
-  REFUND
-  ADJUSTMENT
-  PAYROLL
-  DEPRECIATION
+// Represents a journal entry in the accounting system
+model JournalEntry {
+  id            String     @id @default(uuid())
+  accountId     String
+  account       Account    @relation("AccountJournalEntries", fields: [accountId], references: [id], onDelete: Restrict)
+  amount        Float
+  entryDate     DateTime
+  description   String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  ledgerId      String
+  ledger        Ledger     @relation("LedgerJournalEntries", fields: [ledgerId], references: [id], onDelete: Cascade)
 }
 
-enum TransactionStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  CANCELLED
-  ON_HOLD
-  PROCESSING
-  REVERSED
+// Represents a ledger for accounting
+model Ledger {
+  id              String         @id @default(uuid())
+  name            String         @unique
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  journalEntries  JournalEntry[] @relation("LedgerJournalEntries")
+  trialBalances   TrialBalance[] @relation("LedgerTrialBalances")
 }
 
-enum AccountType {
-  ASSET
-  LIABILITY
-  EQUITY
-  REVENUE
-  EXPENSE
+// Represents an account in the accounting system
+model Account {
+  id              String         @id @default(uuid())
+  name            String         @unique
+  accountType     String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  journalEntries  JournalEntry[] @relation("AccountJournalEntries")
 }
 
-enum BudgetStatus {
-  DRAFT
-  PENDING_APPROVAL
-  APPROVED
-  REJECTED
-  CLOSED
-}
-
-enum ReconciliationStatus {
-  PENDING
-  RECONCILED
-  DISCREPANCY
-  UNDER_REVIEW
-}
-
-enum PaymentMethod {
-  CASH
-  CREDIT_CARD
-  DEBIT_CARD
-  MOBILE_PAYMENT
-  INSURANCE
-  BANK_TRANSFER
-  CHECK
-  DIGITAL_WALLET
-  CRYPTO
-}
-
-model Transaction {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique @default(uuid())
-  description       String
-  amount            Float
-  currency          String              @default("USD")
-  type              TransactionType
-  status            TransactionStatus
-  paymentMethod     PaymentMethod?
-  date              DateTime            @default(now())
-  referenceNumber   String?             @unique
-  taxAmount         Float?              @default(0.0)
-  discountAmount    Float?              @default(0.0)
-  costCenterId      Int?
-  costCenter        CostCenter?         @relation("TransactionCostCenter", fields: [costCenterId], references: [id])
-  patientId         Int?
-  patient           Patient?            @relation("PatientTransactions", fields: [patientId], references: [id])
-  invoiceId         Int?
-  invoice           Invoice?            @relation("TransactionInvoices", fields: [invoiceId], references: [id])
-  claimId           Int?
-  claim             Claim?              @relation("TransactionClaims", fields: [claimId], references: [id])
-  nhifClaimId       Int?
-  nhifClaim         NhifClaim?          @relation("TransactionNhifClaims", fields: [nhifClaimId], references: [id])
-  departmentId      Int?
-  department        Department?         @relation("DepartmentTransactions", fields: [departmentId], references: [id])
-  procurementId     Int?
-  procurement       Procurement?        @relation("TransactionProcurement", fields: [procurementId], references: [id])
-  fixedAssetId      Int?
-  fixedAsset        FixedAsset?         @relation("TransactionFixedAssets", fields: [fixedAssetId], references: [id])
-  createdById       Int?
-  createdBy         User?               @relation("TransactionCreatedBy", fields: [createdById], references: [id])
-  approvedById      Int?
-  approvedBy        User?               @relation("TransactionApprovedBy", fields: [approvedById], references: [id])
-  generalLedgerId   Int?
-  generalLedger     GeneralLedger?      @relation("TransactionGeneralLedger", fields: [generalLedgerId], references: [id])
-  budgetId          Int?
-  budget            Budget?             @relation("TransactionBudget", fields: [budgetId], references: [id])
-  reconciliations   Reconciliation[]    @relation("TransactionReconciliations")
-  auditLogs         AuditLog[]          @relation("TransactionAuditLogs")
-  taxCategoryId     Int?
-  taxCategory       TaxCategory?        @relation("TransactionTaxCategory", fields: [taxCategoryId], references: [id])
-  paymentTerms      String?
-  dueDate           DateTime?
-  notes             String?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  payrolls          Payroll[]           @relation("TransactionPayrolls")
-  refunds           Refund[]            @relation("RefundTransaction")
-  payments          Payment[]           @relation("PaymentTransaction")
-  homeCares         HomeCare[]          @relation("HomeCareTransactions")
-  socialServiceCases SocialServiceCase[] @relation("TransactionSocialServiceCases")
-  purchaseOrders    PurchaseOrder[]     @relation("TransactionPurchaseOrders")
-  referralRewards   ReferralReward[]    @relation("TransactionReferralRewards")
-  utilities         Utility[]           @relation("UtilityTransaction")
-  admissions        Admission[]         @relation("TransactionAdmissions")
-}
-
-model CostCenter {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique @default(uuid())
-  name              String
-  code              String              @unique
-  description       String?
-  departmentId      Int?
-  department        Department?         @relation("DepartmentCostCenters", fields: [departmentId], references: [id])
-  transactions      Transaction[]       @relation("TransactionCostCenter")
-  budgetId          Int?
-  budget            Budget?             @relation("CostCenterBudget", fields: [budgetId], references: [id])
-  managerId         Int?
-  manager           User?               @relation("CostCenterManager", fields: [managerId], references: [id])
-  parentCostCenterId Int?
-  parentCostCenter  CostCenter?         @relation("CostCenterHierarchy", fields: [parentCostCenterId], references: [id])
-  subCostCenters    CostCenter[]        @relation("CostCenterHierarchy")
-  costAllocations   CostAllocation[]    @relation("CostCenterAllocations")
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("CostCenterAuditLogs")
-  payrolls          Payroll[]           @relation("CostCenterPayrolls")
-  invoices          Invoice[]           @relation("InvoiceCostCenter")
-}
-
-model Budget {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique @default(uuid())
-  name              String
-  code              String              @unique
-  fiscalYear        Int
-  amount            Float
-  remainingAmount   Float
-  departmentId      Int?
-  department        Department?         @relation("DepartmentBudgets", fields: [departmentId], references: [id])
-  costCenterId      Int?
-  costCenter        CostCenter?         @relation("CostCenterBudget", fields: [costCenterId], references: [id])
-  transactions      Transaction[]       @relation("TransactionBudget")
-  createdById       Int?
-  createdBy         User?               @relation("BudgetCreatedBy", fields: [createdById], references: [id])
-  approvedById      Int?
-  approvedBy        User?               @relation("BudgetApprovedBy", fields: [approvedById], references: [id])
-  status            BudgetStatus        @default(DRAFT)
-  startDate         DateTime
-  endDate           DateTime
-  budgetItems       BudgetItem[]        @relation("BudgetItems")
-  costAllocations   CostAllocation[]    @relation("BudgetAllocations")
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("BudgetAuditLogs")
-  procurements      Procurement[]       @relation("BudgetProcurements")
-}
-
-model BudgetItem {
-  id               Int       @id @default(autoincrement())
-  uuid             String    @unique @default(uuid())
-  budgetId         Int
-  budget           Budget    @relation("BudgetItems", fields: [budgetId], references: [id])
-  name             String
-  amount           Float
-  remainingAmount  Float
-  category         String
-  description      String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-}
-
-model Reconciliation {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique @default(uuid())
-  transactionId     Int
-  transaction       Transaction         @relation("TransactionReconciliations", fields: [transactionId], references: [id])
-  bankStatementId   Int?
-  bankStatement     BankStatement?      @relation("ReconciliationBankStatement", fields: [bankStatementId], references: [id])
-  reconciledDate    DateTime?
-  status            ReconciliationStatus @default(PENDING)
-  discrepancyAmount Float?              @default(0.0)
-  notes             String?
-  createdById       Int?
-  createdBy         User?               @relation("ReconciliationCreatedBy", fields: [createdById], references: [id])
-  approvedById      Int?
-  approvedBy        User?               @relation("ReconciliationApprovedBy", fields: [approvedById], references: [id])
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("ReconciliationAuditLogs")
-}
-
-model BankStatement {
-  id               Int                  @id @default(autoincrement())
-  uuid             String               @unique @default(uuid())
-  statementDate    DateTime
-  referenceNumber  String               @unique
-  amount           Float
-  currency         String               @default("USD")
-  bankAccountId    Int?
-  bankAccount      BankAccount?         @relation("BankStatementBankAccount", fields: [bankAccountId], references: [id])
-  reconciliations  Reconciliation[]     @relation("ReconciliationBankStatement")
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
-  auditLogs        AuditLog[]           @relation("BankStatementAuditLogs")
-}
-
-model BankAccount {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique @default(uuid())
-  accountNumber     String              @unique
-  bankName          String
-  branchName        String?
-  accountType       String
-  balance           Float               @default(0.0)
-  currency          String              @default("USD")
-  departmentId      Int?
-  department        Department?         @relation("BankAccountDepartment", fields: [departmentId], references: [id])
-  bankStatements    BankStatement[]     @relation("BankStatementBankAccount")
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("BankAccountAuditLogs")
-}
-
-model GeneralLedger {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique @default(uuid())
-  accountCode       String              @unique
-  accountName       String
-  accountType       AccountType
-  balance           Float               @default(0.0)
-  departmentId      Int?
-  department        Department?         @relation("GeneralLedgerDepartment", fields: [departmentId], references: [id])
-  parentAccountId   Int?
-  parentAccount     GeneralLedger?      @relation("GeneralLedgerHierarchy", fields: [parentAccountId], references: [id])
-  subAccounts       GeneralLedger[]     @relation("GeneralLedgerHierarchy")
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("GeneralLedgerAuditLogs")
-  transactions      Transaction[]       @relation("TransactionGeneralLedger")
-}
-
-model TaxCategory {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique @default(uuid())
-  name              String
-  rate              Float
-  description       String?
-  transactions      Transaction[]       @relation("TransactionTaxCategory")
-  billingItems      BillingItem[]       @relation("BillingItemTaxCategory")
-  services          Service[]           @relation("ServiceTaxCategory")
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("TaxCategoryAuditLogs")
-}
-
-model CostAllocation {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique @default(uuid())
-  costCenterId      Int
-  costCenter        CostCenter          @relation("CostCenterAllocations", fields: [costCenterId], references: [id])
-  budgetId          Int?
-  budget            Budget?             @relation("BudgetAllocations", fields: [budgetId], references: [id])
-  amount            Float
-  allocationDate    DateTime
-  description       String?
-  createdById       Int?
-  createdBy         User?               @relation("CostAllocationCreatedBy", fields: [createdById], references: [id])
-  approvedById      Int?
-  approvedBy        User?               @relation("CostAllocationApprovedBy", fields: [approvedById], references: [id])
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  auditLogs         AuditLog[]          @relation("CostAllocationAuditLogs")
-}
-
-model Payroll {
-  id              Int                 @id @default(autoincrement())
-  uuid            String              @unique @default(uuid())
-  employeeId      Int
-  employee        User                @relation("PayrollEmployee", fields: [employeeId], references: [id])
-  transactionId   Int?
-  transaction     Transaction?        @relation("TransactionPayrolls", fields: [transactionId], references: [id])
-  grossAmount     Float
-  netAmount       Float
-  deductions      Float               @default(0.0)
-  taxes           Float               @default(0.0)
-  payPeriodStart  DateTime
-  payPeriodEnd    DateTime
-  paymentDate     DateTime
-  status          TransactionStatus   @default(PENDING)
-  paymentMethod   PaymentMethod
-  departmentId    Int?
-  department      Department?         @relation("PayrollDepartment", fields: [departmentId], references: [id])
-  costCenterId    Int?
-  costCenter      CostCenter?         @relation("CostCenterPayrolls", fields: [costCenterId], references: [id])
-  createdById     Int?
-  createdBy       User?               @relation("PayrollCreatedBy", fields: [createdById], references: [id])
-  approvedById    Int?
-  approvedBy      User?               @relation("PayrollApprovedBy", fields: [approvedById], references: [id])
-  notes           String?
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  auditLogs       AuditLog[]          @relation("PayrollAuditLogs")
+// Represents a trial balance for accounting
+model TrialBalance {
+  id            String     @id @default(uuid())
+  ledgerId      String
+  ledger        Ledger     @relation("LedgerTrialBalances", fields: [ledgerId], references: [id], onDelete: Cascade)
+  period        String
+  balance       Float
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
