@@ -1,3 +1,4 @@
+// radiology.prisma
 // Represents a radiology test
 model RadiologyTest {
   id              String          @id @default(uuid())
