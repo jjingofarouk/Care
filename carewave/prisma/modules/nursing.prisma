@@ -1,163 +1,39 @@
-enum NursingCareType {
-  ROUTINE
-  CRITICAL
-  POST_OPERATIVE
-  MATERNITY
-  PEDIATRIC
-  GERIATRIC
+// Represents a nurse in the hospital
+model Nurse {
+  id            String         @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String         @unique
+  phone         String?
+  departmentId  String
+  department    Department     @relation("NurseDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  schedules     NurseSchedule[] @relation("NurseSchedules")
+  shifts        Shift[]        @relation("NurseShifts")
 }
 
-enum NursingCareStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  ON_HOLD
+// Represents a nurse's schedule
+model NurseSchedule {
+  id            String     @id @default(uuid())
+  nurseId       String
+  nurse         Nurse      @relation("NurseSchedules", fields: [nurseId], references: [id], onDelete: Cascade)
+  startTime     DateTime
+  endTime       DateTime
+  dayOfWeek     String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-enum NursingTaskStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  MISSED
-}
-
-enum NursingStatus {
-  PENDING
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
-
-model Nursing {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  patientId           Int?
-  patient             Patient?              @relation("PatientNursingRecords", fields: [patientId], references: [id])
-  doctorId            Int?
-  doctor              Doctor?               @relation("DoctorNursingRecords", fields: [doctorId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation("DepartmentNursingRecords", fields: [departmentId], references: [id])
-  clinicalRecordId    Int?
-  clinicalRecord      ClinicalRecord?       @relation("ClinicalRecordNursing")
-  admissionId         Int?
-  admission           Admission?            @relation("AdmissionNursing")
-  wardId              Int?
-  ward                Ward?                 @relation("WardNursing", fields: [wardId], references: [id])
-  clinicalSettingId   Int?
-  clinicalSetting     ClinicalSetting?      @relation("ClinicalSettingNursing")
-  status              NursingStatus         @default(PENDING)
-  startDate           DateTime              @default(now())
-  endDate             DateTime?
-  nursingCareId       Int?
-  nursingCare         NursingCare?          @relation("NursingCareRecords", fields: [nursingCareId], references: [id])
-  billingId           Int?
-  billing             Billing?              @relation("NursingBilling")
-  notes               String?
-  createdById         Int?
-  createdBy           User?                 @relation("NursingCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("NursingUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("NursingAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  surgicalProcedure   SurgicalProcedure?    @relation("ProcedureNursing")
-}
-
-model NursingCare {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  patientId           Int
-  patient             Patient               @relation("PatientNursingCare", fields: [patientId], references: [id])
-  nurseId             Int?
-  nurse               User?                 @relation("NurseAssigned", fields: [nurseId], references: [id])
-  admissionId         Int?
-  admission           Admission?            @relation("AdmissionNursingCare", fields: [admissionId], references: [id])
-  clinicalRecordId    Int?
-  clinicalRecord      ClinicalRecord?       @relation(fields: [clinicalRecordId], references: [id])
-  medicalRecordId     Int?
-  medicalRecord       MedicalRecord?        @relation("NursingCareMedicalRecord", fields: [medicalRecordId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation("DepartmentNursingCares", fields: [departmentId], references: [id])
-  wardId              Int?
-  ward                Ward?                 @relation("WardNursingCare", fields: [wardId], references: [id])
-  clinicalSettingId   Int?
-  clinicalSetting     ClinicalSetting?      @relation(fields: [clinicalSettingId], references: [id])
-  type                NursingCareType
-  status              NursingCareStatus     @default(PENDING)
-  carePlan            String?
-  vitals              String?
-  medicationsAdministered String?
-  nursingNotes        String?
-  startDate           DateTime              @default(now())
-  endDate             DateTime?
-  shiftId             Int?
-  shift               NursingShift?         @relation("NursingCareShift", fields: [shiftId], references: [id])
-  prescriptionId      Int?
-  prescription        Prescription?         @relation(fields: [prescriptionId], references: [id])
-  pharmacyId          Int?
-  pharmacy            Pharmacy?             @relation("NursingCarePharmacy", fields: [pharmacyId], references: [id])
-  billingId           Int?
-  billing             Billing?              @relation("NursingCareBilling", fields: [billingId], references: [id])
-  nursing             Nursing[]             @relation("NursingCareRecords")
-  tasks               NursingTask[]         @relation("NursingCareTasks")
-  documents           String?
-  createdById         Int?
-  createdBy           User?                 @relation("NursingCareCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("NursingCareUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("NursingCareAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model NursingTask {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  nursingCareId       Int
-  nursingCare         NursingCare           @relation("NursingCareTasks", fields: [nursingCareId], references: [id])
-  nurseId             Int?
-  nurse               User?                 @relation("TaskAssignedNurse", fields: [nurseId], references: [id])
-  taskType            String
-  description         String?
-  status              NursingTaskStatus     @default(PENDING)
-  scheduledTime       DateTime?
-  completedTime       DateTime?
-  priority            String?
-  notes               String?
-  prescriptionId      Int?
-  prescription        Prescription?         @relation(fields: [prescriptionId], references: [id])
-  shiftId             Int?
-  shift               NursingShift?         @relation("NursingTaskShift", fields: [shiftId], references: [id])
-  createdById         Int?
-  createdBy           User?                 @relation("TaskCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("TaskUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("NursingTaskAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model NursingShift {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  nurseId             Int?
-  nurse               User?                 @relation("ShiftNurse", fields: [nurseId], references: [id])
-  wardId              Int?
-  ward                Ward?                 @relation("WardNursingShifts", fields: [wardId], references: [id])
-  departmentId        Int?
-  department          Department?           @relation("DepartmentNursingShifts", fields: [departmentId], references: [id])
-  startTime           DateTime
-  endTime             DateTime
-  status              String                @default("SCHEDULED")
-  notes               String?
-  nursingCares        NursingCare[]         @relation("NursingCareShift")
-  nursingTasks        NursingTask[]         @relation("NursingTaskShift")
-  createdById         Int?
-  createdBy           User?                 @relation("ShiftCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?                 @relation("ShiftUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("NursingShiftAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+// Represents a shift assigned to a nurse
+model Shift {
+  id            String     @id @default(uuid())
+  nurseId       String
+  nurse         Nurse      @relation("NurseShifts", fields: [nurseId], references: [id], onDelete: Cascade)
+  wardId        String
+  ward          Ward       @relation("ShiftWard", fields: [wardId], references: [id], onDelete: Restrict)
+  startTime     DateTime
+  endTime       DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
