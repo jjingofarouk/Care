@@ -7,6 +7,7 @@ model UserRegistration {
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  patient      Patient?
 }
 
 enum UserRole {
