@@ -1,113 +1,32 @@
-enum TicketStatus {
-  OPEN
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-  ESCALATED
-  ON_HOLD
-}
-
-enum TicketPriority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum TicketCategory {
+enum HelpCategoryEnum {
   TECHNICAL
-  CLINICAL
-  ADMINISTRATIVE
   BILLING
-  FACILITY
+  CLINICAL
   OTHER
 }
 
-model Helpdesk {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  ticketNumber          String              @unique
-  title                 String
-  description           String
-  category              TicketCategory
-  priority              TicketPriority      @default(MEDIUM)
-  status                TicketStatus        @default(OPEN)
-  reportedById          Int?                @unique
-  reportedBy            User?               @relation("ReportedBy", fields: [reportedById], references: [id])
-  assignedToId          Int?                @unique
-  assignedTo            User?               @relation("AssignedTo", fields: [assignedToId], references: [id])
-  doctorId              Int?                @unique
-  doctor                Doctor?             @relation("DoctorHelpdeskTickets", fields: [doctorId], references: [id])
-  departmentId          Int?
-  department            Department?         @relation("DepartmentHelpdeskTickets", fields: [departmentId], references: [id])
-  clinicalSettingId     Int?                @unique
-  clinicalSetting       ClinicalSetting?    @relation("HelpdeskClinicalSettings", fields: [clinicalSettingId], references: [id])
-  patientId             Int?                @unique
-  patient               Patient?            @relation("PatientHelpdeskTickets", fields: [patientId], references: [id])
-  admissionId           Int?                @unique
-  admission             Admission?          @relation("HelpdeskAdmissions", fields: [admissionId], references: [id])
-  appointmentId         Int?                @unique
-  appointment           Appointment?        @relation("HelpdeskAppointments", fields: [appointmentId], references: [id])
-  invoiceId             Int?                @unique
-  invoice               Invoice?            @relation("HelpdeskInvoices", fields: [invoiceId], references: [id])
-  fixedAssetId          Int?                @unique
-  fixedAsset            FixedAsset?         @relation("HelpdeskFixedAssets", fields: [fixedAssetId], references: [id])
-  createdDate           DateTime            @default(now())
-  resolvedDate          DateTime?
-  dueDate               DateTime?
-  resolutionNotes       String?
-  escalationReason      String?
-  createdById           Int?                @unique
-  createdBy             User?               @relation("HelpdeskCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("HelpdeskUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("HelpdeskAuditLogs")
-  ticketComments        TicketComment[]     @relation("TicketComments")
-  ticketAttachments     TicketAttachment[]  @relation("TicketAttachments")
-  ticketNotifications   TicketNotification[] @relation("TicketNotifications")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a help desk ticket
+model HelpTicket {
+  id              String           @id @default(uuid())
+  userId          String
+  userType        String
+  category        HelpCategoryEnum
+  description     String
+  status          String
+  supportAgentId  String?
+  supportAgent    SupportAgent?   @relation("TicketSupportAgent", fields: [supportAgentId], references: [id], onDelete: SetNull)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
-model TicketComment {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  helpdeskId            Int
-  helpdesk              Helpdesk            @relation("TicketComments", fields: [helpdeskId], references: [id])
-  comment               String
-  createdById           Int?                @unique
-  createdBy             User?               @relation("TicketCommentCreatedBy", fields: [createdById], references: [id])
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("TicketCommentAuditLogs")
-}
-
-model TicketAttachment {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  helpdeskId            Int
-  helpdesk              Helpdesk            @relation("TicketAttachments", fields: [helpdeskId], references: [id])
-  filePath              String
-  fileName              String
-  fileType              String
-  uploadedById          Int?                @unique
-  uploadedBy            User?               @relation("TicketAttachmentUploadedBy", fields: [uploadedById], references: [id])
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("TicketAttachmentAuditLogs")
-}
-
-model TicketNotification {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  helpdeskId            Int
-  helpdesk              Helpdesk            @relation("TicketNotifications", fields: [helpdeskId], references: [id])
-  notificationType      String
-  status                NotificationStatus  @default(PENDING)
-  sentAt                DateTime?
-  recipientId           Int?                @unique
-  recipient             User?               @relation("TicketNotificationRecipient", fields: [recipientId], references: [id])
-  message               String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a support agent for the help desk
+model SupportAgent {
+  id            String       @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String       @unique
+  phone         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  helpTickets   HelpTicket[] @relation("TicketSupportAgent")
 }
