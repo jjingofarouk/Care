@@ -48,7 +48,7 @@ import {
   UserCheck,
   Zap
 } from 'lucide-react';
-import useAuth from './useAuth';
+import { useAuth } from '../auth/AuthContext';
 
 const roleBasedNavItems = {
   PATIENT: [
