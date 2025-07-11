@@ -1,302 +1,43 @@
-enum InvoiceStatus {
-  PENDING
-  PAID
-  PARTIALLY_PAID
-  OVERDUE
-  REFUNDED
-  CANCELLED
-  VOID
-  DISPUTED
-}
-
-enum BillingItemType {
-  SERVICE
+enum BillingCategoryEnum {
+  CONSULTATION
+  PROCEDURE
   MEDICATION
-  LAB_TEST
-  RADIOLOGY
-  PROCEDURE
-  ROOM_CHARGE
-  CONSULTATION
-  EQUIPMENT
-}
-
-enum RefundStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  COMPLETED
-  PROCESSING
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  PARTIAL
-  REVERSED
-}
-
-enum ServiceType {
-  CONSULTATION
-  PROCEDURE
-  DIAGNOSTIC
-  THERAPY
-  SURGERY
   OTHER
 }
 
-enum ServiceStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-}
-
-model Service {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  name                String
-  description         String?
-  type                ServiceType
-  status              ServiceStatus         @default(ACTIVE)
-  departmentId        Int?
-  department          Department?           @relation("DepartmentServices", fields: [departmentId], references: [id])
-  clinicalSettingId   Int?
-  clinicalSetting     ClinicalSetting?      @relation("ServiceClinicalSetting", fields: [clinicalSettingId], references: [id])
-  basePrice           Float
-  taxCategoryId       Int?
-  taxCategory         TaxCategory?          @relation("ServiceTaxCategory", fields: [taxCategoryId], references: [id])
-  duration            Int?
-  billingItems        BillingItem[]         @relation("ServiceBillingItems")
-  billing             Billing[]             @relation("BillingServices")
-  createdById         Int?
-  createdBy           User?                 @relation("ServiceCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?               @relation("ServiceUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]            @relation("ServiceAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model Billing {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  patientId             Int?
-  patient               Patient?            @relation("PatientBilling")
-  appointment           Appointment?        @relation("AppointmentBilling")
-  serviceId             Int?
-  service               Service?            @relation("BillingServices", fields: [serviceId], references: [id])
-  totalAmount           Float
-  taxAmount             Float?              @default(0.0)
-  discountAmount        Float?              @default(0.0)
-  status                InvoiceStatus       @default(PENDING)
-  paymentMethod         PaymentMethod?
-  invoiceNumber         String              @unique
-  issuedDate            DateTime            @default(now())
-  dueDate               DateTime?
-  createdById           Int?
-  createdBy             User?               @relation("BillingCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("BillingUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("BillingAuditLogs")
-  notifications         BillingNotification[] @relation("BillingNotifications")
-  admissions            Admission[]         @relation("AdmissionBilling")
-  discharges            Discharge[]         @relation("DischargeBilling")
-  dashboardWidget       DashboardWidget?     @relation("DashboardWidgetBilling")
-  homeCare              HomeCare[]          @relation("HomeCareBilling")
-  vaccinations          Vaccination[]       @relation("VaccinationBilling")
-  nhifClaims            NhifClaim[]         @relation("NhifClaimBilling")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  emergencies           Emergency[]         @relation("EmergencyBilling")
-  clinicalRecords       ClinicalRecord[]    @relation("ClinicalRecordBilling")
-}
-
+// Represents an invoice for a patient
 model Invoice {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  patientId             Int
-  patient               Patient             @relation("PatientInvoices", fields: [patientId], references: [id])
-  prescriptionId        Int?
-  prescription          Prescription?       @relation("InvoicePrescription", fields: [prescriptionId], references: [id])
-  appointmentId         Int?
-  appointment           Appointment?        @relation("AppointmentInvoices", fields: [appointmentId], references: [id])
-  admissionId           Int?
-  admission             Admission?          @relation("AdmissionInvoices", fields: [admissionId], references: [id])
-  laboratoryId          Int?
-  laboratory            Laboratory?         @relation("InvoiceLaboratory", fields: [laboratoryId], references: [id])
-  radiologyId           Int?
-  radiology             Radiology?          @relation("InvoiceRadiology", fields: [radiologyId], references: [id])
-  pharmacyId            Int?
-  pharmacy              Pharmacy?           @relation("InvoicePharmacy", fields: [pharmacyId], references: [id])
-  operationTheatreId    Int?
-  operationTheatre      OperationTheatre?   @relation("InvoiceOperationTheatre", fields: [operationTheatreId], references: [id])
-  totalAmount           Float
-  taxAmount             Float?              @default(0.0)
-  discountAmount        Float?              @default(0.0)
-  status                InvoiceStatus       @default(PENDING)
-  paymentMethod         PaymentMethod?
-  transactionId         Int?
-  transaction           Transaction?        @relation("TransactionInvoices", fields: [transactionId], references: [id])
-  claimId               Int?
-  claim                 Claim?              @relation("InvoiceClaims", fields: [claimId], references: [id])
-  nhifClaimId           Int?
-  nhifClaim             NhifClaim?          @relation("NhifClaimInvoices", fields: [nhifClaimId], references: [id])
-  departmentId          Int?
-  department            Department?         @relation("DepartmentInvoices", fields: [departmentId], references: [id])
-  invoiceNumber         String              @unique
-  dueDate               DateTime?
-  issuedDate            DateTime            @default(now())
-  dispensingRecords     DispensingRecord[]  @relation("InvoiceDispensingRecords")
-  refunds               Refund[]            @relation("InvoiceRefunds")
-  billingItems          BillingItem[]       @relation("InvoiceBillingItems")
-  costCenterId          Int?
-  costCenter            CostCenter?         @relation("InvoiceCostCenter", fields: [costCenterId], references: [id])
-  insuranceId           Int?
-  insurance             Insurance?          @relation("InvoiceInsurance", fields: [insuranceId], references: [id])
-  paymentTerms          String?
-  notes                 String?
-  createdById           Int?
-  createdBy             User?               @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy           User?               @relation("InvoiceUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("InvoiceAuditLogs")
-  paymentPlans          PaymentPlan[]       @relation("InvoicePaymentPlans")
-  invoiceDocuments      InvoiceDocument[]   @relation("InvoiceDocuments")
-  notifications         BillingNotification[] @relation("InvoiceNotifications")
-  payments              Payment[]           @relation("PaymentInvoices")
-  nhifClaims            NhifClaim[]         @relation("NhifClaimInvoice")
-  patients              Patient[]           @relation("PatientInsurances")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  id              String            @id @default(uuid())
+  patientId       String
+  patient         Patient           @relation("PatientInvoices", fields: [patientId], references: [id], onDelete: Cascade)
+  invoiceDate     DateTime
+  totalAmount     Float
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  payments        Payment[]         @relation("InvoicePayments")
+  billingItems    BillingItem[]     @relation("InvoiceBillingItems")
 }
 
-model BillingItem {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  invoiceId             Int
-  invoice               Invoice             @relation("InvoiceBillingItems", fields: [invoiceId], references: [id])
-  itemType              BillingItemType
-  description           String
-  quantity              Int                 @default(1)
-  unitPrice             Float
-  totalPrice            Float
-  taxAmount             Float?              @default(0.0)
-  discountAmount        Float?              @default(0.0)
-  serviceId             Int?
-  service               Service?            @relation("ServiceBillingItems", fields: [serviceId], references: [id])
-  medicationId          Int?
-  medication            Medication?         @relation("BillingItemMedication", fields: [medicationId], references: [id])
-  taxCategoryId         Int?
-  taxCategory           TaxCategory?        @relation("BillingItemTaxCategory", fields: [taxCategoryId], references: [id])
-  createdById           Int?
-  createdBy             User?               @relation("BillingItemCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy           User?               @relation("BillingItemUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("BillingItemAuditLogs")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-}
-
-model Refund {
-  id               Int                  @id @default(autoincrement())
-  uuid             String               @unique @default(uuid())
-  invoiceId        Int
-  invoice          Invoice              @relation("InvoiceRefunds", fields: [invoiceId], references: [id])
-  reason           String
-  amount           Float
-  refundDate       DateTime             @default(now())
-  transactionId    Int?
-  transaction      Transaction?         @relation("RefundTransaction", fields: [transactionId], references: [id])
-  processedById    Int
-  processedBy      User                 @relation("RefundProcessedBy", fields: [processedById], references: [id])
-  approvedById     Int?
-  approvedBy       User?                @relation("RefundApprovedBy", fields: [approvedById], references: [id])
-  status           RefundStatus         @default(PENDING)
-  notes            String?
-  refundMethod     PaymentMethod?
-  refundReference  String?              @unique
-  auditLogs        AuditLog[]           @relation("RefundAuditLogs")
-  notifications    BillingNotification[] @relation("RefundNotifications")
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
-}
-
-model PaymentPlan {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  invoiceId             Int
-  invoice               Invoice             @relation("InvoicePaymentPlans", fields: [invoiceId], references: [id])
-  totalAmount           Float
-  installmentAmount     Float
-  numberOfInstallments  Int
-  startDate             DateTime
-  endDate               DateTime?
-  status                String              @default("ACTIVE")
-  createdById           Int?
-  createdBy             User?               @relation("PaymentPlanCreatedBy", fields: [createdById], references: [id])
-  approvedById          Int?
-  approvedBy            User?               @relation("PaymentPlanApprovedBy", fields: [approvedById], references: [id])
-  payments              Payment[]           @relation("PaymentPlanPayments")
-  auditLogs             AuditLog[]          @relation("PaymentPlanAuditLogs")
-  notifications         BillingNotification[] @relation("PaymentPlanNotifications")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-}
-
+// Represents a payment for an invoice
 model Payment {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  invoiceId             Int?
-  invoice               Invoice?            @relation("PaymentInvoices", fields: [invoiceId], references: [id])
-  paymentPlanId         Int?
-  paymentPlan           PaymentPlan?        @relation("PaymentPlanPayments", fields: [paymentPlanId], references: [id])
-  amount                Float
-  paymentDate           DateTime            @default(now())
-  paymentMethod         PaymentMethod
-  transactionId         Int?
-  transaction           Transaction?        @relation("PaymentTransaction", fields: [transactionId], references: [id])
-  referenceNumber       String?             @unique
-  status                PaymentStatus       @default(PENDING)
-  createdById           Int?
-  createdBy             User?               @relation("PaymentCreatedBy", fields: [createdById], references: [id])
-  notes                 String?
-  auditLogs             AuditLog[]          @relation("PaymentAuditLogs")
-  notifications         BillingNotification[] @relation("PaymentNotifications")
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  id            String     @id @default(uuid())
+  invoiceId     String
+  invoice       Invoice    @relation("InvoicePayments", fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount        Float
+  paymentDate   DateTime
+  method        String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-model InvoiceDocument {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  invoiceId             Int
-  invoice               Invoice             @relation("InvoiceDocuments", fields: [invoiceId], references: [id])
-  documentType          String
-  filePath              String
-  uploadedById          Int?
-  uploadedBy            User?               @relation("InvoiceDocumentUploadedBy", fields: [uploadedById], references: [id])
-  createdAt             DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  auditLogs             AuditLog[]          @relation("InvoiceDocumentAuditLogs")
-}
-
-model BillingNotification {
-  id              Int                 @id @default(autoincrement())
-  uuid            String              @unique @default(uuid())
-  invoiceId       Int?
-  invoice         Invoice?            @relation("InvoiceNotifications", fields: [invoiceId], references: [id])
-  refundId        Int?
-  refund          Refund?             @relation("RefundNotifications", fields: [refundId], references: [id])
-  paymentId       Int?
-  payment         Payment?            @relation("PaymentNotifications", fields: [paymentId], references: [id])
-  paymentPlanId   Int?
-  paymentPlan     PaymentPlan?        @relation("PaymentPlanNotifications", fields: [paymentPlanId], references: [id])
-  notificationType String
-  status          NotificationStatus  @default(PENDING)
-  sentAt          DateTime?
-  recipientId     Int?
-  recipient       User?               @relation("BillingNotificationRecipient", fields: [recipientId], references: [id])
-  message         String?
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+// Represents an item on an invoice
+model BillingItem {
+  id              String            @id @default(uuid())
+  invoiceId       String
+  invoice         Invoice           @relation("InvoiceBillingItems", fields: [invoiceId], references: [id], onDelete: Cascade)
+  billingCategory BillingCategoryEnum
+  description     String
+  amount          Float
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
