@@ -1,0 +1,27 @@
+// Represents system-wide settings
+model SystemSetting {
+  id            String     @id @default(uuid())
+  key           String     @unique
+  value         String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents feature toggles for the system
+model FeatureToggle {
+  id            String     @id @default(uuid())
+  name          String     @unique
+  isEnabled     Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents theme settings for the system
+model ThemeSetting {
+  id            String     @id @default(uuid())
+  name          String     @unique
+  primaryColor  String
+  secondaryColor String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
