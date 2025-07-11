@@ -16,6 +16,11 @@ model Patient {
   nextOfKin       NextOfKin?       @relation("PatientNextOfKin")
   insuranceInfo   InsuranceInfo?   @relation("PatientInsurance")
   supportCases    PatientSupportCase[] @relation("PatientSupportCases")
+  queueEntries    QueueEntry[]     @relation("PatientQueueEntries")
+  clinicalNotes   ClinicalNote[]   @relation("PatientClinicalNotes")
+  progressNotes   ProgressNote[]   @relation("PatientProgressNotes")
+  soapNotes       SOAPNote[]       @relation("PatientSOAPNotes")
+  clinicalTasks   ClinicalTask[]   @relation("PatientClinicalTasks")
 }
 
 // Represents a patient's address
