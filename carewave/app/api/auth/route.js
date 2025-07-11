@@ -22,7 +22,7 @@ export async function POST(request) {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const userRegistration = await prisma.userRegistration.create({
+      await prisma.userRegistration.create({
         data: {
           email,
           firstName,
@@ -36,7 +36,6 @@ export async function POST(request) {
             },
           },
         },
-        include: { userLogin: true },
       });
 
       return NextResponse.json({ message: 'Registration successful' }, { status: 201 });
