@@ -92,7 +92,7 @@ export async function POST(request) {
       }
     }
 
-    const patientId = `P-${uuidv4().slice(0, 8)}`;
+    const id = `P-${uuidv4().slice(0, 8)}`;
     const dateOfBirth = new Date(data.dateOfBirth);
     if (isNaN(dateOfBirth.getTime())) {
       return NextResponse.json(
@@ -103,6 +103,7 @@ export async function POST(request) {
 
     const patient = await prisma.patient.create({
       data: {
+        id,
         firstName: data.firstName,
         lastName: data.lastName,
         dateOfBirth,
