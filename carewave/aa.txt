@@ -1,0 +1,180 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "aws-0-us-east-1.pooler.supabase.com:5432"
+
+
+Error: Prisma schema validation - (validate wasm)
+Error code: P1012
+[1;91merror[0m: [1mThe model "Room" cannot be defined because a model with that name already exists.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:718[0m
+[1;94m   | [0m
+[1;94m717 | [0m
+[1;94m718 | [0mmodel [1;91mRoom[0m {
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Laboratory" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:675[0m
+[1;94m   | [0m
+[1;94m674 | [0m  laboratoryId          Int?                  @unique
+[1;94m675 | [0m  laboratory            [1;91mLaboratory[0m?           @relation("ClinicalSettingLaboratory")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Radiology" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:677[0m
+[1;94m   | [0m
+[1;94m676 | [0m  radiologyId           Int?                  @unique
+[1;94m677 | [0m  radiology             [1;91mRadiology[0m?            @relation("ClinicalSettingRadiology")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Pharmacy" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:679[0m
+[1;94m   | [0m
+[1;94m678 | [0m  pharmacyId            Int?                  @unique
+[1;94m679 | [0m  pharmacy              [1;91mPharmacy[0m?             @relation("ClinicalSettingPharmacy")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "OperationTheatre" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:681[0m
+[1;94m   | [0m
+[1;94m680 | [0m  operationTheatreId    Int?                  @unique
+[1;94m681 | [0m  operationTheatre      [1;91mOperationTheatre[0m?     @relation("ClinicalSettingOperationTheatre")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Nursing" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:683[0m
+[1;94m   | [0m
+[1;94m682 | [0m  nursingId             Int?                  @unique
+[1;94m683 | [0m  nursing               [1;91mNursing[0m?              @relation("ClinicalSettingNursing")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Cssd" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:685[0m
+[1;94m   | [0m
+[1;94m684 | [0m  cssdId                Int?                  @unique
+[1;94m685 | [0m  cssd                  [1;91mCssd[0m?                 @relation("ClinicalSettingCssd")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "User" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:693[0m
+[1;94m   | [0m
+[1;94m692 | [0m  createdById           Int?                  @unique
+[1;94m693 | [0m  createdBy             [1;91mUser[0m?                 @relation("ClinicalSettingCreatedBy", fields: [createdById], references: [id])
+[1;94m   | [0m
+[1;91merror[0m: [1mType "User" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:695[0m
+[1;94m   | [0m
+[1;94m694 | [0m  updatedById           Int?                  @unique
+[1;94m695 | [0m  updatedBy             [1;91mUser[0m?                 @relation("ClinicalSettingUpdatedBy", fields: [updatedById], references: [id])
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Service" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:699[0m
+[1;94m   | [0m
+[1;94m698 | [0m  clinicalSettingNotifications ClinicalSettingNotification[] @relation("ClinicalSettingNotifications")
+[1;94m699 | [0m  services              [1;91mService[0m[]             @relation("ServiceClinicalSetting")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "ClinicalRecord" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:701[0m
+[1;94m   | [0m
+[1;94m700 | [0m  patients              Patient[]             @relation("PatientClinicalSettings")
+[1;94m701 | [0m  clinicalRecords       [1;91mClinicalRecord[0m[]      @relation("ClinicalRecordClinicalSettings")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "HomeCare" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:702[0m
+[1;94m   | [0m
+[1;94m701 | [0m  clinicalRecords       ClinicalRecord[]      @relation("ClinicalRecordClinicalSettings")
+[1;94m702 | [0m  homeCares             [1;91mHomeCare[0m[]            @relation("HomeCareClinicalSettings")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "SocialService" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:703[0m
+[1;94m   | [0m
+[1;94m702 | [0m  homeCares             HomeCare[]            @relation("HomeCareClinicalSettings")
+[1;94m703 | [0m  socialServices        [1;91mSocialService[0m[]       @relation("SocialServiceClinicalSettings")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "SocialServiceCase" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:704[0m
+[1;94m   | [0m
+[1;94m703 | [0m  socialServices        SocialService[]       @relation("SocialServiceClinicalSettings")
+[1;94m704 | [0m  socialServiceCases    [1;91mSocialServiceCase[0m[]   @relation("SocialServiceCaseClinicalSettings")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Laboratory" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:706[0m
+[1;94m   | [0m
+[1;94m705 | [0m  radiologyTests        RadiologyTest[]       @relation("RadiologyTestClinicalSettings")
+[1;94m706 | [0m  laboratoryTests       [1;91mLaboratory[0m[]          @relation("LaboratoryClinicalSettings")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Emergency" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:709[0m
+[1;94m   | [0m
+[1;94m708 | [0m  updatedAt             DateTime              @updatedAt
+[1;94m709 | [0m  emergencies           [1;91mEmergency[0m[]           @relation("EmergencyClinicalSettings")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "CSSDInstrument" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:711[0m
+[1;94m   | [0m
+[1;94m710 | [0m  doctors               Doctor[]              @relation("DoctorClinicalSettings")
+[1;94m711 | [0m  cssdInstruments       [1;91mCSSDInstrument[0m[]      @relation("ClinicalSettingCSSDInstruments")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "CSSDRecord" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:712[0m
+[1;94m   | [0m
+[1;94m711 | [0m  cssdInstruments       CSSDInstrument[]      @relation("ClinicalSettingCSSDInstruments")
+[1;94m712 | [0m  cssdRecords           [1;91mCSSDRecord[0m[]          @relation("ClinicalSettingCSSDRecords")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "CSSDRequisition" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:713[0m
+[1;94m   | [0m
+[1;94m712 | [0m  cssdRecords           CSSDRecord[]          @relation("ClinicalSettingCSSDRecords")
+[1;94m713 | [0m  cssdRequisitions      [1;91mCSSDRequisition[0m[]     @relation("ClinicalSettingCSSDRequisitions")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "NursingCare" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:714[0m
+[1;94m   | [0m
+[1;94m713 | [0m  cssdRequisitions      CSSDRequisition[]     @relation("ClinicalSettingCSSDRequisitions")
+[1;94m714 | [0m  nursingCares          [1;91mNursingCare[0m[]         @relation("NursingCareClinicalSettings")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Queue" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:715[0m
+[1;94m   | [0m
+[1;94m714 | [0m  nursingCares          NursingCare[]         @relation("NursingCareClinicalSettings")
+[1;94m715 | [0m  queues                [1;91mQueue[0m[]               @relation("QueueClinicalSettings")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "User" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:735[0m
+[1;94m   | [0m
+[1;94m734 | [0m  createdById           Int?                  @unique
+[1;94m735 | [0m  createdBy             [1;91mUser[0m?                 @relation("RoomCreatedBy", fields: [createdById], references: [id])
+[1;94m   | [0m
+[1;91merror[0m: [1mType "User" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:737[0m
+[1;94m   | [0m
+[1;94m736 | [0m  updatedById           Int?                  @unique
+[1;94m737 | [0m  updatedBy             [1;91mUser[0m?                 @relation("RoomUpdatedBy", fields: [updatedById], references: [id])
+[1;94m   | [0m
+[1;91merror[0m: [1mType "User" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:756[0m
+[1;94m   | [0m
+[1;94m755 | [0m  createdById           Int?                  @unique
+[1;94m756 | [0m  createdBy             [1;91mUser[0m?                 @relation("RoomScheduleCreatedBy", fields: [createdById], references: [id])
+[1;94m   | [0m
+[1;91merror[0m: [1mType "User" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:758[0m
+[1;94m   | [0m
+[1;94m757 | [0m  updatedById           Int?                  @unique
+[1;94m758 | [0m  updatedBy             [1;91mUser[0m?                 @relation("RoomScheduleUpdatedBy", fields: [updatedById], references: [id])
+[1;94m   | [0m
+[1;91merror[0m: [1mType "User" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:773[0m
+[1;94m   | [0m
+[1;94m772 | [0m  uploadedById          Int?                  @unique
+[1;94m773 | [0m  uploadedBy            [1;91mUser[0m?                 @relation("ClinicalSettingDocumentUploadedBy", fields: [uploadedById], references: [id])
+[1;94m   | [0m
+[1;91merror[0m: [1mType "NotificationStatus" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:785[0m
+[1;94m   | [0m
+[1;94m784 | [0m  notificationType      String
+[1;94m785 | [0m  status                [1;91mNotificationStatus[0m    @default(PENDING)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "User" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:788[0m
+[1;94m   | [0m
+[1;94m787 | [0m  recipientId           Int?                  @unique
+[1;94m788 | [0m  recipient             [1;91mUser[0m?                 @relation("ClinicalSettingNotificationRecipient", fields: [recipientId], references: [id])
+[1;94m   | [0m
+
+Validation Error Count: 28
+[Context: validate]
+
+Prisma CLI Version : 5.22.0

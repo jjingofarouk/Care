@@ -1,3 +1,0 @@
-Need to install the following packages:
-migrate@2.1.0
-Ok to proceed? (y) 

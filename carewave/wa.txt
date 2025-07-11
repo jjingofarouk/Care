@@ -1,0 +1,47 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "aws-0-us-east-1.pooler.supabase.com:5432"
+
+
+Error: Prisma schema validation - (validate wasm)
+Error code: P1012
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claimStatus` on Model `Claim` and `claim` on Model `ClaimStatus` both provide the `references` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1452[0m
+[1;94m   | [0m
+[1;94m1451 | [0m  claimStatusId   String           @unique
+[1;94m1452 | [0m  [1;91mclaimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id])[0m
+[1;94m1453 | [0m  amount          Float
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claimStatus` on Model `Claim` and `claim` on Model `ClaimStatus` both provide the `references` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1473[0m
+[1;94m   | [0m
+[1;94m1472 | [0m  claimId       String
+[1;94m1473 | [0m  [1;91mclaim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [id], onDelete: Cascade)[0m
+[1;94m1474 | [0m  status        ClaimStatusEnum
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claimStatus` on Model `Claim` and `claim` on Model `ClaimStatus` both provide the `fields` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1452[0m
+[1;94m   | [0m
+[1;94m1451 | [0m  claimStatusId   String           @unique
+[1;94m1452 | [0m  [1;91mclaimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id])[0m
+[1;94m1453 | [0m  amount          Float
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claimStatus` on Model `Claim` and `claim` on Model `ClaimStatus` both provide the `fields` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1473[0m
+[1;94m   | [0m
+[1;94m1472 | [0m  claimId       String
+[1;94m1473 | [0m  [1;91mclaim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [id], onDelete: Cascade)[0m
+[1;94m1474 | [0m  status        ClaimStatusEnum
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation field `claim` on Model `ClaimStatus` must not specify the `onDelete` or `onUpdate` argument in the @relation attribute. You must only specify it on the opposite field `claimStatus` on model `Claim`.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1473[0m
+[1;94m   | [0m
+[1;94m1472 | [0m  claimId       String
+[1;94m1473 | [0m  [1;91mclaim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [id], onDelete: Cascade)[0m
+[1;94m1474 | [0m  status        ClaimStatusEnum
+[1;94m   | [0m
+
+Validation Error Count: 5
+[Context: validate]
+
+Prisma CLI Version : 5.22.0

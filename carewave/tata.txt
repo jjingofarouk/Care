@@ -1,0 +1,187 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "aws-0-us-east-1.pooler.supabase.com:5432"
+
+
+Error: Prisma schema validation - (validate wasm)
+Error code: P1012
+[1;91merror[0m: [1mError validating field `patient` in model `EmergencyCase`: The relation field `patient` on model `EmergencyCase` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:754[0m
+[1;94m   | [0m
+[1;94m753 | [0m  patientId     String
+[1;94m754 | [0m  [1;91mpatient       Patient     @relation("PatientEmergencyCases", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m755 | [0m  triageId      String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `Triage`: The relation field `patient` on model `Triage` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:768[0m
+[1;94m   | [0m
+[1;94m767 | [0m  patientId       String
+[1;94m768 | [0m  [1;91mpatient         Patient        @relation("PatientTriage", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m769 | [0m  triageLevel     String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `MaternityCase`: The relation field `patient` on model `MaternityCase` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:805[0m
+[1;94m   | [0m
+[1;94m804 | [0m  patientId     String
+[1;94m805 | [0m  [1;91mpatient       Patient     @relation("PatientMaternityCases", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m806 | [0m  createdAt     DateTime    @default(now())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `VaccinationRecord`: The relation field `patient` on model `VaccinationRecord` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:854[0m
+[1;94m   | [0m
+[1;94m853 | [0m  patientId           String
+[1;94m854 | [0m  [1;91mpatient             Patient             @relation("PatientVaccinationRecords", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m855 | [0m  vaccineId           String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `Surgery`: The relation field `patient` on model `Surgery` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:892[0m
+[1;94m   | [0m
+[1;94m891 | [0m  patientId         String
+[1;94m892 | [0m  [1;91mpatient           Patient          @relation("PatientSurgeries", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m893 | [0m  theatreId         String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `PreOpAssessment`: The relation field `patient` on model `PreOpAssessment` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:928[0m
+[1;94m   | [0m
+[1;94m927 | [0m  patientId     String
+[1;94m928 | [0m  [1;91mpatient       Patient    @relation("PatientPreOpAssessments", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m929 | [0m  assessment    String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `LabRequest`: The relation field `patient` on model `LabRequest` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:965[0m
+[1;94m   | [0m
+[1;94m964 | [0m  patientId     String
+[1;94m965 | [0m  [1;91mpatient       Patient    @relation("PatientLabRequests", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m966 | [0m  labTestId     String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `Sample`: The relation field `patient` on model `Sample` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:980[0m
+[1;94m   | [0m
+[1;94m979 | [0m  patientId     String
+[1;94m980 | [0m  [1;91mpatient       Patient      @relation("PatientSamples", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m981 | [0m  sampleType    String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `ImagingOrder`: The relation field `patient` on model `ImagingOrder` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1018[0m
+[1;94m   | [0m
+[1;94m1017 | [0m  patientId       String
+[1;94m1018 | [0m  [1;91mpatient         Patient         @relation("PatientImagingOrders", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m1019 | [0m  radiologyTestId String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `Prescription`: The relation field `patient` on model `Prescription` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1058[0m
+[1;94m   | [0m
+[1;94m1057 | [0m  patientId     String
+[1;94m1058 | [0m  [1;91mpatient       Patient    @relation("PatientPrescriptions", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m1059 | [0m  doctorId      String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `doctor` in model `Prescription`: The relation field `doctor` on model `Prescription` is missing an opposite relation field on the model `Doctor`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1060[0m
+[1;94m   | [0m
+[1;94m1059 | [0m  doctorId      String
+[1;94m1060 | [0m  [1;91mdoctor        Doctor     @relation("DoctorPrescriptions", fields: [doctorId], references: [id], onDelete: Restrict)[0m
+[1;94m1061 | [0m  drugId        String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `DispenseRecord`: The relation field `patient` on model `DispenseRecord` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1087[0m
+[1;94m   | [0m
+[1;94m1086 | [0m  patientId       String
+[1;94m1087 | [0m  [1;91mpatient         Patient       @relation("PatientDispenseRecords", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m1088 | [0m  dispensedAt     DateTime
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `Invoice`: The relation field `patient` on model `Invoice` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1323[0m
+[1;94m   | [0m
+[1;94m1322 | [0m  patientId       String
+[1;94m1323 | [0m  [1;91mpatient         Patient           @relation("PatientInvoices", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m1324 | [0m  invoiceDate     DateTime
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `Claim`: The relation field `patient` on model `Claim` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1420[0m
+[1;94m   | [0m
+[1;94m1419 | [0m  patientId       String
+[1;94m1420 | [0m  [1;91mpatient         Patient          @relation("PatientClaims", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m1421 | [0m  claimBatchId    String?
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claimStatus` on Model `Claim` and `claim` on Model `ClaimStatus` both provide the `references` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1424[0m
+[1;94m   | [0m
+[1;94m1423 | [0m  claimStatusId   String
+[1;94m1424 | [0m  [1;91mclaimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id], onDelete: Restrict)[0m
+[1;94m1425 | [0m  amount          Float
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claimStatus` on Model `Claim` and `claim` on Model `ClaimStatus` both provide the `references` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1445[0m
+[1;94m   | [0m
+[1;94m1444 | [0m  claimId       String
+[1;94m1445 | [0m  [1;91mclaim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [id], onDelete: Cascade)[0m
+[1;94m1446 | [0m  status        ClaimStatusEnum
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claimStatus` on Model `Claim` and `claim` on Model `ClaimStatus` both provide the `fields` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1424[0m
+[1;94m   | [0m
+[1;94m1423 | [0m  claimStatusId   String
+[1;94m1424 | [0m  [1;91mclaimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id], onDelete: Restrict)[0m
+[1;94m1425 | [0m  amount          Float
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claimStatus` on Model `Claim` and `claim` on Model `ClaimStatus` both provide the `fields` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1445[0m
+[1;94m   | [0m
+[1;94m1444 | [0m  claimId       String
+[1;94m1445 | [0m  [1;91mclaim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [id], onDelete: Cascade)[0m
+[1;94m1446 | [0m  status        ClaimStatusEnum
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claim` on Model `ClaimStatus` and `claimStatus` on Model `Claim` both provide the `onDelete` or `onUpdate` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1445[0m
+[1;94m   | [0m
+[1;94m1444 | [0m  claimId       String
+[1;94m1445 | [0m  [1;91mclaim         Claim          @relation("ClaimStatusRecord", fields: [claimId], references: [id], onDelete: Cascade)[0m
+[1;94m1446 | [0m  status        ClaimStatusEnum
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": The relation fields `claimStatus` on Model `Claim` and `claim` on Model `ClaimStatus` both provide the `onDelete` or `onUpdate` argument in the @relation attribute. You have to provide it only on one of the two fields.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1424[0m
+[1;94m   | [0m
+[1;94m1423 | [0m  claimStatusId   String
+[1;94m1424 | [0m  [1;91mclaimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id], onDelete: Restrict)[0m
+[1;94m1425 | [0m  amount          Float
+[1;94m   | [0m
+[1;91merror[0m: [1mError parsing attribute "@relation": A one-to-one relation must use unique fields on the defining side. Either add an `@unique` attribute to the field `claimStatusId`, or change the relation to one-to-many.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1424[0m
+[1;94m   | [0m
+[1;94m1423 | [0m  claimStatusId   String
+[1;94m1424 | [0m  [1;91mclaimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id], onDelete: Restrict)[0m
+[1;94m1425 | [0m  amount          Float
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `NHIFClaim`: The relation field `patient` on model `NHIFClaim` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1471[0m
+[1;94m   | [0m
+[1;94m1470 | [0m  patientId     String
+[1;94m1471 | [0m  [1;91mpatient       Patient      @relation("PatientNHIFClaims", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m1472 | [0m  nhifBenefitId String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `item` in model `SubstoreTransfer`: The relation field `item` on model `SubstoreTransfer` is missing an opposite relation field on the model `Item`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1614[0m
+[1;94m   | [0m
+[1;94m1613 | [0m  itemId          String
+[1;94m1614 | [0m  [1;91mitem            Item       @relation("SubstoreTransferItem", fields: [itemId], references: [id], onDelete: Restrict)[0m
+[1;94m1615 | [0m  quantity        Int
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `item` in model `Requisition`: The relation field `item` on model `Requisition` is missing an opposite relation field on the model `Item`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1627[0m
+[1;94m   | [0m
+[1;94m1626 | [0m  itemId        String
+[1;94m1627 | [0m  [1;91mitem          Item       @relation("RequisitionItem", fields: [itemId], references: [id], onDelete: Restrict)[0m
+[1;94m1628 | [0m  quantity      Int
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating field `patient` in model `Referral`: The relation field `patient` on model `Referral` is missing an opposite relation field on the model `Patient`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:1788[0m
+[1;94m   | [0m
+[1;94m1787 | [0m  patientId         String
+[1;94m1788 | [0m  [1;91mpatient           Patient         @relation("PatientReferrals", fields: [patientId], references: [id], onDelete: Cascade)[0m
+[1;94m1789 | [0m  referringDoctorId String?
+[1;94m   | [0m
+
+Validation Error Count: 25
+[Context: validate]
+
+Prisma CLI Version : 5.22.0
