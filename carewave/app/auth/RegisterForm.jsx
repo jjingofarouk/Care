@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { register, login } from './authService';
+import { register } from './authService';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -11,8 +11,10 @@ export default function RegisterForm() {
     password: '',
     firstName: '',
     lastName: '',
+    role: 'PATIENT',
   });
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -23,10 +25,11 @@ export default function RegisterForm() {
     e.preventDefault();
     try {
       await register(formData);
-      await login({ email: formData.email, password: formData.password });
-      router.push('/');
+      setSuccess('Registration successful, please verify your email');
+      setError(null);
     } catch (err) {
-      setError('Failed to register or login');
+      setError('Failed to register');
+      setSuccess(null);
     }
   };
 
@@ -78,7 +81,24 @@ export default function RegisterForm() {
             required
           />
         </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-[var(--hospital-gray-700)]">Role</label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="input w-full"
+          >
+            <option value="PATIENT">Patient</option>
+            <option value="DOCTOR">Doctor</option>
+            <option value="NURSE">Nurse</option>
+            <option value="LAB_TECHNICIAN">Lab Technician</option>
+            <option value="STAFF">Staff</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
         {error && <p className="text-sm text-[var(--hospital-error)]">{error}</p>}
+        {success && <p className="text-sm text-[var(--hospital-accent)]">{success}</p>}
         <button
           type="submit"
           className="w-full rounded-md bg-[var(--hospital-accent)] px-4 py-2 text-[var(--hospital-white)] hover:bg-opacity-90"
