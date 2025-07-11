@@ -2,61 +2,117 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
-  Home, User, Calendar, Calculator, Settings, Briefcase,
-  ClipboardList, FileText, Heart, Badge, Inbox,
-  Key, ShieldCheck, ShoppingCart, Grid3X3, Table, Users,
-  Wrench, X, Stethoscope, Syringe, Pill, Headphones,
-  ScanLine, Scissors, DollarSign, Building2, HardHat, Lock,
+  Home, 
+  User, 
+  Calendar, 
+  Calculator, 
+  Settings, 
+  Briefcase,
+  ClipboardList, 
+  FileText, 
+  Heart, 
+  Badge, 
+  Inbox,
+  Key, 
+  ShieldCheck, 
+  ShoppingCart, 
+  Grid3X3, 
+  Table, 
+  Users,
+  Wrench, 
+  X, 
+  Stethoscope, 
+  Syringe, 
+  Pill, 
+  Headphones,
+  ScanLine, 
+  Scissors, 
+  DollarSign, 
+  Building2, 
+  Lock,
+  Activity,
+  AlertCircle,
+  BookOpen,
+  CreditCard,
+  Database,
+  FileBarChart,
+  HelpCircle,
+  MapPin,
+  Monitor,
+  Package,
+  Phone,
+  Printer,
+  Search,
+  Shield,
+  Star,
+  TrendingUp,
+  UserCheck,
+  Zap
 } from 'lucide-react';
 import useAuth from './useAuth';
 
 const roleBasedNavItems = {
   PATIENT: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'health' },
+    { name: 'My Appointments', path: '/appointment', icon: Calendar, category: 'health' },
     { name: 'Medical Records', path: '/medical-records', icon: FileText, category: 'health' },
-    { name: 'Billing', path: '/billing', icon: Table, category: 'finance' },
+    { name: 'Test Results', path: '/test-results', icon: FileBarChart, category: 'health' },
+    { name: 'Prescriptions', path: '/prescriptions', icon: Pill, category: 'health' },
+    { name: 'Billing & Payments', path: '/billing', icon: CreditCard, category: 'finance' },
   ],
   DOCTOR: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Patients', path: '/patient', icon: User, category: 'patient-care' },
+    { name: 'My Patients', path: '/patient', icon: User, category: 'patient-care' },
     { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
-    { name: 'Clinical', path: '/clinical', icon: Stethoscope, category: 'clinical' },
+    { name: 'Clinical Notes', path: '/clinical', icon: Stethoscope, category: 'clinical' },
     { name: 'Operation Theatre', path: '/operation-theatre', icon: Scissors, category: 'clinical' },
+    { name: 'Lab Results', path: '/lab-results', icon: Activity, category: 'clinical' },
+    { name: 'Prescriptions', path: '/prescriptions', icon: Pill, category: 'clinical' },
   ],
   NURSE: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Patients', path: '/patient', icon: User, category: 'patient-care' },
+    { name: 'Patient Care', path: '/patient', icon: User, category: 'patient-care' },
     { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
-    { name: 'Nursing', path: '/nursing', icon: Heart, category: 'nursing' },
-    { name: 'Maternity', path: '/maternity', icon: Heart, category: 'nursing' },
+    { name: 'Nursing Tasks', path: '/nursing', icon: Heart, category: 'nursing' },
+    { name: 'Maternity Ward', path: '/maternity', icon: Heart, category: 'nursing' },
     { name: 'Vaccination', path: '/vaccination', icon: Syringe, category: 'nursing' },
+    { name: 'Medication', path: '/medication', icon: Pill, category: 'nursing' },
   ],
   LAB_TECHNICIAN: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'Laboratory', path: '/laboratory', icon: Badge, category: 'lab' },
+    { name: 'Test Results', path: '/test-results', icon: FileBarChart, category: 'lab' },
+    { name: 'Sample Tracking', path: '/sample-tracking', icon: Search, category: 'lab' },
   ],
   PHARMACIST: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'Pharmacy', path: '/pharmacy', icon: Pill, category: 'pharmacy' },
     { name: 'Dispensary', path: '/dispensary', icon: Inbox, category: 'pharmacy' },
+    { name: 'Inventory', path: '/pharmacy-inventory', icon: Package, category: 'pharmacy' },
+    { name: 'Prescriptions', path: '/prescriptions', icon: FileText, category: 'pharmacy' },
   ],
   RECEPTIONIST: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
+    { name: 'Patient Registration', path: '/patient-registration', icon: UserCheck, category: 'patient-care' },
     { name: 'Queue Management', path: '/queue-mgmt', icon: Users, category: 'patient-care' },
     { name: 'Helpdesk', path: '/helpdesk', icon: Headphones, category: 'support' },
   ],
   RADIOLOGIST: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'Radiology', path: '/radiology', icon: ScanLine, category: 'lab' },
+    { name: 'Imaging Reports', path: '/imaging-reports', icon: FileBarChart, category: 'lab' },
+    { name: 'Scan Schedule', path: '/scan-schedule', icon: Calendar, category: 'lab' },
   ],
   SURGEON: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Patients', path: '/patient', icon: User, category: 'patient-care' },
+    { name: 'My Patients', path: '/patient', icon: User, category: 'patient-care' },
     { name: 'Operation Theatre', path: '/operation-theatre', icon: Scissors, category: 'clinical' },
+    { name: 'Surgery Schedule', path: '/surgery-schedule', icon: Calendar, category: 'clinical' },
+    { name: 'Post-Op Care', path: '/post-op-care', icon: Heart, category: 'clinical' },
   ],
   ADMIN: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
@@ -64,7 +120,7 @@ const roleBasedNavItems = {
     { name: 'Doctors', path: '/doctor', icon: Badge, category: 'patient-care' },
     { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
     { name: 'ADT', path: '/adt', icon: ClipboardList, category: 'patient-care' },
-    { name: 'Emergency', path: '/emergency', icon: X, category: 'patient-care' },
+    { name: 'Emergency', path: '/emergency', icon: AlertCircle, category: 'patient-care' },
     { name: 'Queue Management', path: '/queue-mgmt', icon: Users, category: 'patient-care' },
     { name: 'Clinical', path: '/clinical', icon: Stethoscope, category: 'clinical' },
     { name: 'Laboratory', path: '/laboratory', icon: Badge, category: 'clinical' },
@@ -77,67 +133,80 @@ const roleBasedNavItems = {
     { name: 'Vaccination', path: '/vaccination', icon: Syringe, category: 'nursing' },
     { name: 'Pharmacy', path: '/pharmacy', icon: Pill, category: 'pharmacy' },
     { name: 'Dispensary', path: '/dispensary', icon: Inbox, category: 'pharmacy' },
-    { name: 'Billing', path: '/billing', icon: Table, category: 'finance' },
+    { name: 'Billing', path: '/billing', icon: CreditCard, category: 'finance' },
     { name: 'Accounting', path: '/accounting', icon: Calculator, category: 'finance' },
     { name: 'Claim Management', path: '/claim-mgmt', icon: FileText, category: 'finance' },
     { name: 'NHIF', path: '/nhif', icon: ShieldCheck, category: 'finance' },
     { name: 'Incentive', path: '/incentive', icon: DollarSign, category: 'finance' },
-    { name: 'Inventory', path: '/inventory', icon: Grid3X3, category: 'operations' },
+    { name: 'Inventory', path: '/inventory', icon: Package, category: 'operations' },
     { name: 'Procurement', path: '/procurement', icon: ShoppingCart, category: 'operations' },
     { name: 'Substore', path: '/substore', icon: Grid3X3, category: 'operations' },
     { name: 'Fixed Assets', path: '/fixed-assets', icon: Briefcase, category: 'operations' },
-    { name: 'Reports', path: '/reports', icon: Table, category: 'reports' },
-    { name: 'Dynamic Report', path: '/dynamic-report', icon: Table, category: 'reports' },
+    { name: 'Reports', path: '/reports', icon: FileBarChart, category: 'reports' },
+    { name: 'Dynamic Report', path: '/dynamic-report', icon: TrendingUp, category: 'reports' },
     { name: 'Medical Records', path: '/medical-records', icon: FileText, category: 'reports' },
     { name: 'Helpdesk', path: '/helpdesk', icon: Headphones, category: 'support' },
     { name: 'Marketing Referral', path: '/mkt-referral', icon: Users, category: 'support' },
     { name: 'Social Service', path: '/social-service', icon: Users, category: 'support' },
     { name: 'Settings', path: '/settings', icon: Settings, category: 'admin' },
-    { name: 'System Admin', path: '/system-admin', icon: Wrench, category: 'admin' },
+    { name: 'System Admin', path: '/system-admin', icon: Monitor, category: 'admin' },
     { name: 'Utilities', path: '/utilities', icon: Wrench, category: 'admin' },
     { name: 'Verification', path: '/verification', icon: ShieldCheck, category: 'admin' },
   ],
   STAFF: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'Helpdesk', path: '/helpdesk', icon: Headphones, category: 'support' },
-    { name: 'Inventory', path: '/inventory', icon: Grid3X3, category: 'operations' },
+    { name: 'Inventory', path: '/inventory', icon: Package, category: 'operations' },
     { name: 'Procurement', path: '/procurement', icon: ShoppingCart, category: 'operations' },
+    { name: 'Maintenance', path: '/maintenance', icon: Wrench, category: 'operations' },
   ],
   ACCOUNTANT: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'Accounting', path: '/accounting', icon: Calculator, category: 'finance' },
-    { name: 'Billing', path: '/billing', icon: Table, category: 'finance' },
+    { name: 'Billing', path: '/billing', icon: CreditCard, category: 'finance' },
+    { name: 'Financial Reports', path: '/financial-reports', icon: FileBarChart, category: 'finance' },
+    { name: 'Payments', path: '/payments', icon: DollarSign, category: 'finance' },
   ],
   BILLING_OFFICER: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Billing', path: '/billing', icon: Table, category: 'finance' },
-    { name: 'Claim Management', path: '/claim-mgmt', icon: FileText, category: 'finance' },
+    { name: 'Billing', path: '/billing', icon: CreditCard, category: 'finance' },
+    { name: 'Claims', path: '/claim-mgmt', icon: FileText, category: 'finance' },
     { name: 'NHIF', path: '/nhif', icon: ShieldCheck, category: 'finance' },
+    { name: 'Payments', path: '/payments', icon: DollarSign, category: 'finance' },
   ],
   HOSPITAL_MANAGER: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Reports', path: '/reports', icon: Table, category: 'reports' },
-    { name: 'Dynamic Report', path: '/dynamic-report', icon: Table, category: 'reports' },
+    { name: 'Analytics', path: '/analytics', icon: TrendingUp, category: 'reports' },
+    { name: 'Reports', path: '/reports', icon: FileBarChart, category: 'reports' },
     { name: 'Departments', path: '/departments', icon: Building2, category: 'admin' },
+    { name: 'Performance', path: '/performance', icon: Star, category: 'admin' },
     { name: 'Settings', path: '/settings', icon: Settings, category: 'admin' },
   ],
   IT_SUPPORT: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'System Admin', path: '/system-admin', icon: Wrench, category: 'admin' },
+    { name: 'System Admin', path: '/system-admin', icon: Monitor, category: 'admin' },
     { name: 'Utilities', path: '/utilities', icon: Wrench, category: 'admin' },
+    { name: 'Network', path: '/network', icon: Zap, category: 'admin' },
+    { name: 'Backups', path: '/backups', icon: Database, category: 'admin' },
   ],
   CLEANING_STAFF: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'CSSD', path: '/cssd', icon: ShieldCheck, category: 'operations' },
+    { name: 'Schedules', path: '/cleaning-schedules', icon: Calendar, category: 'operations' },
+    { name: 'Supplies', path: '/cleaning-supplies', icon: Package, category: 'operations' },
   ],
   SECURITY: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Security', path: '/security', icon: Lock, category: 'operations' },
+    { name: 'Security', path: '/security', icon: Shield, category: 'operations' },
+    { name: 'Visitor Log', path: '/visitor-log', icon: BookOpen, category: 'operations' },
+    { name: 'Incident Reports', path: '/incident-reports', icon: AlertCircle, category: 'operations' },
   ],
   GUEST: [
     { name: 'Home', path: '/', icon: Home, category: 'main' },
     { name: 'Login', path: '/auth/login', icon: Key, category: 'auth' },
     { name: 'Register', path: '/auth/register', icon: User, category: 'auth' },
+    { name: 'Contact', path: '/contact', icon: Phone, category: 'auth' },
+    { name: 'About', path: '/about', icon: HelpCircle, category: 'auth' },
   ],
 };
 
@@ -146,7 +215,7 @@ const categoryLabels = {
   'patient-care': 'Patient Care',
   clinical: 'Clinical Services',
   nursing: 'Nursing Care',
-  lab: 'Laboratory',
+  lab: 'Laboratory & Diagnostics',
   pharmacy: 'Pharmacy',
   finance: 'Finance & Billing',
   operations: 'Operations',
@@ -155,6 +224,22 @@ const categoryLabels = {
   admin: 'Administration',
   auth: 'Authentication',
   health: 'Health Services',
+};
+
+const categoryIcons = {
+  main: Home,
+  'patient-care': User,
+  clinical: Stethoscope,
+  nursing: Heart,
+  lab: Badge,
+  pharmacy: Pill,
+  finance: CreditCard,
+  operations: Wrench,
+  reports: FileBarChart,
+  support: Headphones,
+  admin: Settings,
+  auth: Key,
+  health: Activity,
 };
 
 export default function Sidebar({ toggleSidebar, isOpen }) {
@@ -172,43 +257,91 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   if (loading) return null;
 
   return (
-    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-[var(--hospital-gray-900)] text-[var(--hospital-white)] transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-200 ease-in-out md:w-72 lg:w-80`}>
+    <div className={`fixed inset-y-0 left-0 z-40 w-64 bg-gradient-to-b from-[var(--hospital-gray-900)] to-[var(--hospital-gray-800)] text-[var(--hospital-white)] transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:w-72 lg:w-80 shadow-xl`}>
       <div className="flex items-center p-4 border-b border-[var(--hospital-gray-700)] bg-gradient-to-r from-[var(--hospital-accent)] to-[var(--hospital-gray-800)]">
-        <img src="/logo.png" alt="CareWave Logo" className="w-8 h-8 rounded-md mr-2" />
-        <h2 className="text-lg font-bold">CareWave</h2>
-        <button onClick={toggleSidebar} className="ml-auto text-[var(--hospital-white)] hover:text-[var(--hospital-accent)]">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+        <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg mr-3">
+          <Image 
+            src="/logo.png" 
+            alt="CareWave Logo" 
+            width={40} 
+            height={40} 
+            className="object-cover" 
+          />
+        </div>
+        <div className="flex-1">
+          <h2 className="text-lg font-bold">CareWave</h2>
+          <p className="text-xs text-[var(--hospital-gray-300)]">Hospital Management</p>
+        </div>
+        <button 
+          onClick={toggleSidebar} 
+          className="ml-auto text-[var(--hospital-white)] hover:text-[var(--hospital-accent)] p-2 rounded-lg transition-colors duration-200"
+        >
+          <X className="w-5 h-5" />
         </button>
       </div>
-      <div className="overflow-y-auto h-[calc(100vh-4rem)] p-4">
-        {Object.entries(groupedNavItems).map(([category, items], index) => (
-          <div key={category} className="mb-4">
-            {index > 0 && <hr className="my-2 border-[var(--hospital-gray-700)]" />}
-            <h3 className="text-xs font-semibold uppercase text-[var(--hospital-gray-500)] mb-2">{categoryLabels[category]}</h3>
-            <ul className="space-y-1">
-              {items.map(({ name, path, icon: Icon }) => (
-                <li key={path}>
-                  <Link
-                    href={path}
-                    onClick={toggleSidebar}
-                    className={`flex items-center p-2 rounded-md text-sm hover:bg-[var(--hospital-accent)]/10 ${pathname === path ? 'bg-[var(--hospital-accent)]/20 text-[var(--hospital-accent)]' : ''}`}
-                  >
-                    <Icon className="w-5 h-5 mr-2" />
-                    {name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      
+      <div className="overflow-y-auto h-[calc(100vh-4rem)] p-4 custom-scrollbar">
+        {Object.entries(groupedNavItems).map(([category, items], index) => {
+          const CategoryIcon = categoryIcons[category] || Home;
+          return (
+            <div key={category} className="mb-6">
+              {index > 0 && <hr className="my-4 border-[var(--hospital-gray-700)]" />}
+              <div className="flex items-center gap-2 mb-3">
+                <CategoryIcon className="w-4 h-4 text-[var(--hospital-accent)]" />
+                <h3 className="text-xs font-semibold uppercase text-[var(--hospital-gray-400)] tracking-wider">
+                  {categoryLabels[category]}
+                </h3>
+              </div>
+              <ul className="space-y-1">
+                {items.map(({ name, path, icon: Icon }) => {
+                  const isActive = pathname === path;
+                  return (
+                    <li key={path}>
+                      <Link
+                        href={path}
+                        onClick={toggleSidebar}
+                        className={`flex items-center p-3 rounded-lg text-sm transition-all duration-200 group ${
+                          isActive 
+                            ? 'bg-[var(--hospital-accent)] text-[var(--hospital-white)] shadow-lg' 
+                            : 'hover:bg-[var(--hospital-gray-700)] hover:text-[var(--hospital-accent)]'
+                        }`}
+                      >
+                        <Icon className={`w-5 h-5 mr-3 transition-transform duration-200 ${
+                          isActive ? 'text-[var(--hospital-white)]' : 'text-[var(--hospital-gray-400)] group-hover:text-[var(--hospital-accent)]'
+                        } group-hover:scale-110`} />
+                        <span className="font-medium">{name}</span>
+                        {isActive && (
+                          <div className="ml-auto w-2 h-2 bg-[var(--hospital-white)] rounded-full"></div>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
       </div>
+      
       {user && (
-        <div className="absolute bottom-0 w-full p-4 border-t border-[var(--hospital-gray-700)] bg-[var(--hospital-gray-800)]">
-          <p className="text-xs text-[var(--hospital-gray-500)]">Logged in as</p>
-          <p className="text-sm font-semibold">{user.firstName} {user.lastName}</p>
-          <p className="text-xs text-[var(--hospital-accent)]">{user.role?.replace('_', ' ')}</p>
+        <div className="absolute bottom-0 w-full p-4 border-t border-[var(--hospital-gray-700)] bg-gradient-to-r from-[var(--hospital-gray-800)] to-[var(--hospital-gray-900)]">
+          <div className="flex items-center gap-3 p-3 bg-[var(--hospital-gray-700)]/50 rounded-lg">
+            <div 
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-[var(--hospital-white)] font-bold shadow-sm"
+              style={{ backgroundColor: user.role === 'DOCTOR' ? '#7c3aed' : user.role === 'NURSE' ? '#dc2626' : '#059669' }}
+            >
+              {user.firstName?.charAt(0).toUpperCase() || 'U'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[var(--hospital-white)] truncate">
+                {user.firstName} {user.lastName}
+              </p>
+              <p className="text-xs text-[var(--hospital-accent)] truncate">
+                {user.role?.replace('_', ' ')}
+              </p>
+            </div>
+            <div className="w-2 h-2 bg-[var(--hospital-accent)] rounded-full animate-pulse"></div>
+          </div>
         </div>
       )}
     </div>
