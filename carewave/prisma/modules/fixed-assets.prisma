@@ -1,80 +1,33 @@
-enum AssetStatus {
-  ACTIVE
-  INACTIVE
-  UNDER_MAINTENANCE
-  DISPOSED
-  LOST
-}
-
-enum DepreciationMethod {
-  STRAIGHT_LINE
-  REDUCING_BALANCE
-  UNITS_OF_PRODUCTION
-}
-
-enum AssetType {
-  EQUIPMENT
-  FURNITURE
-  VEHICLE
-  BUILDING
-  IT_ASSET
-  OTHER
-}
-
+// Represents a fixed asset in the hospital
 model FixedAsset {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  name                  String
-  assetCode             String?             @unique
-  description           String?
-  assetType             AssetType
-  purchaseDate          DateTime
-  purchaseCost          Float
-  depreciationMethod    DepreciationMethod?
-  depreciationRate      Float?
-  depreciationAmount    Float               @default(0.0)
-  currentValue          Float
-  status                AssetStatus         @default(ACTIVE)
-  departmentId          Int?
-  department            Department?         @relation("DepartmentFixedAssets", fields: [departmentId], references: [id])
-  location              String?
-  serialNumber          String?
-  manufacturer          String?
-  model                 String?
-  warrantyEndDate       DateTime?
-  maintenanceSchedule   String?
-  lastMaintenanceDate   DateTime?
-  disposalDate          DateTime?
-  disposalReason        String?
-  disposalValue         Float?              @default(0.0)
-  cssdInstrument        CSSDInstrument?     @relation("CSSDInstrumentFixedAsset")
-  createdById           Int?                @unique
-  createdBy             User?               @relation("FixedAssetCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("FixedAssetUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs             AuditLog[]          @relation("FixedAssetAuditLogs")
-  maintenanceRecords    MaintenanceRecord[] @relation("AssetMaintenanceRecords")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  id                  String              @id @default(uuid())
+  name                String              @unique
+  purchaseDate        DateTime
+  cost                Float
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  depreciationSchedules DepreciationSchedule[] @relation("AssetDepreciationSchedules")
+  assetAudits         AssetAudit[]        @relation("AssetAudits")
 }
 
-model MaintenanceRecord {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  fixedAssetId          Int
-  fixedAsset            FixedAsset          @relation("AssetMaintenanceRecords", fields: [fixedAssetId], references: [id])
-  maintenanceDate       DateTime            @default(now())
-  maintenanceType       String
-  description           String?
-  cost                  Float?              @default(0.0)
-  performedById         Int?                @unique
-  performedBy           User?               @relation("MaintenancePerformedBy", fields: [performedById], references: [id])
-  createdById           Int?                @unique
-  createdBy             User?               @relation("MaintenanceCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?                @unique
-  updatedBy             User?               @relation("MaintenanceUpdatedBy", fields: [updatedById], references: [id])
-  notes                 String?
-  auditLogs             AuditLog[]          @relation("MaintenanceRecordAuditLogs")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+// Represents a depreciation schedule for a fixed asset
+model DepreciationSchedule {
+  id            String     @id @default(uuid())
+  fixedAssetId  String
+  fixedAsset    FixedAsset @relation("AssetDepreciationSchedules", fields: [fixedAssetId], references: [id], onDelete: Cascade)
+  depreciationDate DateTime
+  amount        Float
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents an audit of a fixed asset
+model AssetAudit {
+  id            String     @id @default(uuid())
+  fixedAssetId  String
+  fixedAsset    FixedAsset @relation("AssetAudits", fields: [fixedAssetId], references: [id], onDelete: Cascade)
+  auditDate     DateTime
+  findings      String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
