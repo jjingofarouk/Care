@@ -46,7 +46,7 @@ export async function POST(request) {
     }
 
     // Handle registration
-    if (firstName && lastName && role) {
+    if (firstName && lastName) {
       const existingUser = await prisma.userRegistration.findUnique({ where: { email } });
       if (existingUser) {
         return NextResponse.json({ error: 'User already exists' }, { status: 400 });
@@ -59,21 +59,20 @@ export async function POST(request) {
           email,
           firstName,
           lastName,
-          role,
+          role: role || 'PATIENT',
           passwordHash: hashedPassword,
           emailVerification: {
             create: {
               token: verificationToken,
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
             },
           },
-        },
-      });
-
-      await prisma.userLogin.create({
-        data: {
-          email,
-          passwordHash: hashedPassword,
+          userLogin: {
+            create: {
+              email,
+              passwordHash: hashedPassword,
+            },
+          },
         },
       });
 
@@ -88,20 +87,24 @@ export async function POST(request) {
     }
 
     // Handle login
-    const userLogin = await prisma.userLogin.findUnique({ where: { email } });
+    const userLogin = await prisma.userLogin.findUnique({
+      where: { email },
+      include: { userRegistration: true },
+    });
     if (!userLogin || !(await bcrypt.compare(password, userLogin.passwordHash))) {
       await prisma.loginAttempt.create({
         data: {
           userLoginId: userLogin?.id || uuidv4(),
           ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
           success: false,
+          attemptedAt: new Date(),
         },
       });
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const userRegistration = await prisma.userRegistration.findUnique({ where: { email } });
-    if (!userRegistration) {
+    if (!userLogin.userRegistration) {
       return NextResponse.json({ error: 'User registration not found' }, { status: 400 });
     }
 
@@ -109,16 +112,34 @@ export async function POST(request) {
       data: {
         userLoginId: userLogin.id,
         ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
         success: true,
+        attemptedAt: new Date(),
       },
     });
 
-    const sessionToken = jwt.sign({ userId: userLogin.id, role: userRegistration.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    await prisma.userLogin.update({
+      where: { id: userLogin.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    // Invalidate previous sessions
+    await prisma.session.updateMany({
+      where: { userLoginId: userLogin.id, isActive: true },
+      data: { isActive: false },
+    });
+
+    const sessionToken = jwt.sign(
+      { userId: userLogin.id, role: userLogin.userRegistration.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
     await prisma.session.create({
       data: {
         userLoginId: userLogin.id,
         token: sessionToken,
-        expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        isActive: true,
       },
     });
 
@@ -127,9 +148,9 @@ export async function POST(request) {
       user: {
         id: userLogin.id,
         email: userLogin.email,
-        firstName: userRegistration.firstName,
-        lastName: userRegistration.lastName,
-        role: userRegistration.role,
+        firstName: userLogin.userRegistration.firstName,
+        lastName: userLogin.userRegistration.lastName,
+        role: userLogin.userRegistration.role,
       },
     });
   } catch (error) {
