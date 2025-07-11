@@ -1,335 +1,44 @@
-// prisma/user.prisma
-
-enum UserRole {
-  ADMIN
-  DOCTOR
-  NURSE
-  PHARMACIST
-  RADIOLOGIST
-  SOCIAL_WORKER
-  PATIENT
-  BILLING_OFFICER
-  RECEPTIONIST
-  LAB_TECHNICIAN
-  IT_SUPPORT
+// Represents a system administrator
+model SystemAdmin {
+  id            String       @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String       @unique
+  roleId        String
+  role          Role         @relation("AdminRole", fields: [roleId], references: [id], onDelete: Restrict)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  logs          AdminLog[]   @relation("AdminLogs")
 }
 
-enum PermissionLevel {
-  FULL_ACCESS
-  READ_ONLY
-  WRITE
-  RESTRICTED
+// Represents permissions assigned to roles
+model Permission {
+  id            String     @id @default(uuid())
+  name          String     @unique
+  description   String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  roles         Role[]     @relation("RolePermissions")
 }
 
-enum SystemLogType {
-  LOGIN
-  LOGOUT
-  DATA_MODIFICATION
-  ERROR
-  SECURITY
-  SYSTEM_EVENT
+// Represents roles assigned to system admins
+model Role {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  description   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  admins        SystemAdmin[] @relation("AdminRole")
+  permissions   Permission[] @relation("RolePermissions")
 }
 
-model User {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  email                 String                @unique
-  name                  String
-  password              String
-  role                  UserRole              @default(PATIENT)
-  status                String                @default("ACTIVE")
-  departmentId          Int?
-  department            Department?           @relation("UserDepartment", fields: [departmentId], references: [id], map: "User_department_fkey")
-  phone                 String?
-  address               String?
-  profileImage          String?
-  lastLogin             DateTime?
-  loginAttempts         Int                   @default(0)
-  accountLocked         Boolean               @default(false)
-  permissions           String?
-  createdById           Int?
-  createdBy             User?                 @relation("UserCreatedBy", fields: [createdById], references: [id], map: "User_createdBy_fkey")
-  updatedById           Int?
-  updatedBy             User?                 @relation("UserUpdatedBy", fields: [updatedById], references: [id], map: "User_updatedBy_fkey")
-  createdUsers          User[]                @relation("UserCreatedBy")
-  updatedUsers          User[]                @relation("UserUpdatedBy")
-  payrolls              Payroll[]             @relation("PayrollEmployee")
-  cssdLogs              CSSDLog[]             @relation("LoggedBy")
-  cssdRequisitions      CSSDRequisition[]     @relation("RequisitionRequestedBy")
-  appointmentsBooked    Appointment[]         @relation("AppointmentBookedBy")
-  appointmentsCreated   Appointment[]         @relation("AppointmentCreatedBy")
-  appointmentsUpdated   Appointment[]         @relation("AppointmentUpdatedBy")
-  dispensingRecords     DispensingRecord[]    @relation("DispensedBy")
-  refundsProcessed      Refund[]              @relation("RefundProcessedBy")
-  refundsApproved       Refund[]              @relation("RefundApprovedBy")
-  stockAdjustments      StockAdjustment[]     @relation("AdjustedBy")
-  socialServiceCases    SocialServiceCase[]   @relation("SocialWorker")
-  radiologyTests        RadiologyTest[]       @relation("Radiologist")
-  radiologyTestsCreated RadiologyTest[]       @relation("RadiologyTestCreatedBy")
-  radiologyTestsUpdated RadiologyTest[]       @relation("RadiologyTestUpdatedBy")
-  radiologyTestsReported RadiologyTest[]      @relation("RadiologyTestReportedBy")
-  radiologyCreated      Radiology[]           @relation("RadiologyCreatedBy")
-  radiologyUpdated      Radiology[]           @relation("RadiologyUpdatedBy")
-  nursingCare           NursingCare[]         @relation("NurseAssigned")
-  nursingTasks          NursingTask[]         @relation("TaskAssignedNurse")
-  nursingShifts         NursingShift[]        @relation("ShiftNurse")
-  surgicalStaff         SurgicalStaff[]       @relation("SurgicalStaff")
-  systemLogs            SystemLog[]           @relation("LoggedBy")
-  auditLogs             AuditLog[]            @relation("PerformedBy")
-  patientRecords        Patient[]             @relation("PatientUser")
-  patientCreated        Patient[]             @relation("PatientCreatedBy")
-  patientUpdated        Patient[]             @relation("PatientUpdatedBy")
-  doctorRecords         Doctor[]              @relation("DoctorUser")
-  doctorCreated         Doctor[]              @relation("DoctorCreatedBy")
-  doctorUpdated         Doctor[]              @relation("DoctorUpdatedBy")
-  dashboardsOwned       Dashboard[]           @relation("DashboardOwner")
-  dashboardsCreated     Dashboard[]           @relation("DashboardCreatedBy")
-  dashboardsUpdated     Dashboard[]           @relation("DashboardUpdatedBy")
-  departmentsHeaded     Department[]          @relation("DepartmentHead")
-  createdDepartments    Department[]          @relation("DepartmentCreatedBy")
-  updatedDepartments    Department[]          @relation("DepartmentUpdatedBy")
-  widgetCreated         DashboardWidget[]     @relation("WidgetCreatedBy")
-  widgetUpdated         DashboardWidget[]     @relation("WidgetUpdatedBy")
-  systemConfigCreated   SystemConfiguration[] @relation("ConfigCreatedBy")
-  systemConfigUpdated   SystemConfiguration[] @relation("ConfigUpdatedBy")
-  permissionCreated     RolePermission[]      @relation("PermissionCreatedBy")
-  permissionUpdated     RolePermission[]      @relation("PermissionUpdatedBy")
-  transactionCreated    Transaction[]         @relation("TransactionCreatedBy")
-  transactionApproved   Transaction[]         @relation("TransactionApprovedBy")
-  costCenterManaged     CostCenter[]          @relation("CostCenterManager")
-  budgetCreated         Budget[]              @relation("BudgetCreatedBy")
-  budgetApproved        Budget[]              @relation("BudgetApprovedBy")
-  reconciliationCreated  Reconciliation[]      @relation("ReconciliationCreatedBy")
-  reconciliationApproved Reconciliation[]      @relation("ReconciliationApprovedBy")
-  costAllocationCreated CostAllocation[]      @relation("CostAllocationCreatedBy")
-  costAllocationApproved CostAllocation[]     @relation("CostAllocationApprovedBy")
-  payrollCreated        Payroll[]             @relation("PayrollCreatedBy")
-  payrollApproved       Payroll[]             @relation("PayrollApprovedBy")
-  serviceCreated        Service[]             @relation("ServiceCreatedBy")
-  serviceUpdated        Service[]             @relation("ServiceUpdatedBy")
-  billingCreated        Billing[]             @relation("BillingCreatedBy")
-  billingUpdated        Billing[]             @relation("BillingUpdatedBy")
-  invoiceCreated        Invoice[]             @relation("InvoiceCreatedBy")
-  invoiceUpdated        Invoice[]             @relation("InvoiceUpdatedBy")
-  billingItemCreated    BillingItem[]         @relation("BillingItemCreatedBy")
-  billingItemUpdated    BillingItem[]         @relation("BillingItemUpdatedBy")
-  paymentCreated        Payment[]             @relation("PaymentCreatedBy")
-  paymentPlanCreated    PaymentPlan[]         @relation("PaymentPlanCreatedBy")
-  paymentPlanApproved   PaymentPlan[]         @relation("PaymentPlanApprovedBy")
-  invoiceDocumentUploaded InvoiceDocument[]   @relation("InvoiceDocumentUploadedBy")
-  billingNotificationRecipient BillingNotification[] @relation("BillingNotificationRecipient")
-  appointmentNotificationRecipient AppointmentNotification[] @relation("NotificationRecipient")
-  appointmentDocumentUploaded AppointmentDocument[] @relation("DocumentUploadedBy")
-  recurringAppointmentCreated RecurringAppointment[] @relation("RecurringAppointmentCreatedBy")
-  recurringAppointmentUpdated RecurringAppointment[] @relation("RecurringAppointmentUpdatedBy")
-  doctorAvailabilityCreated DoctorAvailability[] @relation("DoctorAvailabilityCreatedBy")
-  doctorAvailabilityUpdated DoctorAvailability[] @relation("DoctorAvailabilityUpdatedBy")
-  doctorQualificationCreated DoctorQualification[] @relation("DoctorQualificationCreatedBy")
-  doctorQualificationUpdated DoctorQualification[] @relation("DoctorQualificationUpdatedBy")
-  doctorNotificationRecipient DoctorNotification[] @relation("DoctorNotificationRecipient")
-  medicalRecordCreated  MedicalRecord[]       @relation("MedicalRecordCreatedBy")
-  medicalRecordUpdated  MedicalRecord[]       @relation("MedicalRecordUpdatedBy")
-  medicalRecordReviewed MedicalRecord[]       @relation("MedicalRecordReviewedBy")
-  medicationCreated     Medication[]          @relation("MedicationCreatedBy")
-  medicationUpdated     Medication[]          @relation("MedicationUpdatedBy")
-  formularyCreated      Formulary[]           @relation("FormularyCreatedBy")
-  formularyUpdated      Formulary[]           @relation("FormularyUpdatedBy")
-  interactionCreated    DrugInteraction[]     @relation("InteractionCreatedBy")
-  interactionUpdated    DrugInteraction[]     @relation("InteractionUpdatedBy")
-  adverseReactionCreated AdverseReaction[]    @relation("AdverseReactionCreatedBy")
-  adverseReactionUpdated AdverseReaction[]    @relation("AdverseReactionUpdatedBy")
-  pharmacyCreated       Pharmacy[]            @relation("PharmacyCreatedBy")
-  pharmacyUpdated       Pharmacy[]            @relation("PharmacyUpdatedBy")
-  equipmentCreated      RadiologyEquipment[]  @relation("EquipmentCreatedBy")
-  equipmentUpdated      RadiologyEquipment[]  @relation("EquipmentUpdatedBy")
-  maternityCreated      Maternity[]           @relation("MaternityCreatedBy")
-  maternityUpdated      Maternity[]           @relation("MaternityUpdatedBy")
-  maternityDocumentUploaded MaternityDocument[] @relation("MaternityDocumentUploadedBy")
-  maternityNotificationRecipient MaternityNotification[] @relation("MaternityNotificationRecipient")
-  vaccinationsCreated   Vaccination[]         @relation("VaccinationCreatedBy")
-  vaccinationsUpdated   Vaccination[]         @relation("VaccinationUpdatedBy")
-  vaccinationsNurse      Vaccination[]         @relation("VaccinationNurse")
-  campaignsCreated      VaccinationCampaign[] @relation("CampaignCreatedBy")
-  campaignsUpdated      VaccinationCampaign[] @relation("CampaignUpdatedBy")
-  homeCareNurse         HomeCare[]            @relation("NurseHomeCare")
-  homeCareCreated       HomeCare[]            @relation("HomeCareCreatedBy")
-  homeCareUpdated       HomeCare[]            @relation("HomeCareUpdatedBy")
-  homeCareVisitCaregiver HomeCareVisit[]      @relation("HomeCareVisitCaregiver")
-  homeCareVisitCreated  HomeCareVisit[]       @relation("HomeCareVisitCreatedBy")
-  homeCareVisitUpdated  HomeCareVisit[]       @relation("HomeCareVisitUpdatedBy")
-  homeCareNotificationRecipient HomeCareNotification[] @relation("HomeCareNotificationRecipient")
-  verifications         Verification[]        @relation("VerifiedUser")
-  verificationCreated   Verification[]        @relation("VerificationCreatedBy")
-  verificationUpdated   Verification[]        @relation("VerificationUpdatedBy")
-  verifiedBy            Verification[]        @relation("VerifiedBy")
-  verificationConfigCreated VerificationConfiguration[] @relation("ConfigCreatedBy")
-  verificationConfigUpdated VerificationConfiguration[] @relation("ConfigUpdatedBy")
-  referralProgramsCreated ReferralProgram[]   @relation("ReferralProgramCreatedBy")
-  referralProgramsUpdated ReferralProgram[]   @relation("ReferralProgramUpdatedBy")
-  referralsAsReferrer   Referral[]            @relation("Referrer")
-  referralsAsReferee    Referral[]            @relation("Referee")
-  referralsCreated      Referral[]            @relation("ReferralCreatedBy")
-  referralsUpdated      Referral[]            @relation("ReferralUpdatedBy")
-  referralRewardsRedeemed ReferralReward[]    @relation("RewardRedeemedBy")
-  referralRewardsCreated ReferralReward[]     @relation("RewardCreatedBy")
-  referralRewardsUpdated ReferralReward[]     @relation("RewardUpdatedBy")
-  marketingCampaignsCreated MarketingCampaign[] @relation("CampaignCreatedBy")
-  marketingCampaignsUpdated MarketingCampaign[] @relation("CampaignUpdatedBy")
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  admissionsCreated     Admission[]           @relation("AdmissionCreatedBy")
-  admissionsUpdated     Admission[]           @relation("AdmissionUpdatedBy")
-  dischargesCreated     Discharge[]           @relation("DischargeCreatedBy")
-  dischargesApproved    Discharge[]           @relation("DischargeApprovedBy")
-  wardsNurseInCharge    Ward[]                @relation("WardNurseInCharge")
-  wardsCreated          Ward[]                @relation("WardCreatedBy")
-  wardsUpdated          Ward[]                @relation("WardUpdatedBy")
-  bedsCreated           Bed[]                 @relation("BedCreatedBy")
-  bedsUpdated           Bed[]                 @relation("BedUpdatedBy")
-  transfersCreated      Transfer[]            @relation("TransferCreatedBy")
-  transfersApproved     Transfer[]            @relation("TransferApprovedBy")
-  socialServicesWorker  SocialService[]       @relation("SocialServiceWorker")
-  socialServicesCreated SocialService[]       @relation("SocialServiceCreatedBy")
-  socialServicesUpdated SocialService[]       @relation("SocialServiceUpdatedBy")
-  emergencyCreated      Emergency[]           @relation("EmergencyCreatedBy")
-  emergencyUpdated      Emergency[]           @relation("EmergencyUpdatedBy")
-  emergencyDocumentUploaded EmergencyDocument[] @relation("EmergencyDocumentUploadedBy")
-  emergencyNotificationRecipient EmergencyNotification[] @relation("EmergencyNotificationRecipient")
-  queueCreated          Queue[]               @relation("QueueCreatedBy")
-  queueUpdated          Queue[]               @relation("QueueUpdatedBy")
-  queueLogActionBy      QueueLog[]            @relation("QueueLogActionBy")
-  queueNotificationRecipient QueueNotification[] @relation("QueueNotificationRecipient")
-  queueConfigCreated    QueueConfiguration[]  @relation("QueueConfigCreatedBy")
-  queueConfigUpdated    QueueConfiguration[]  @relation("QueueConfigUpdatedBy")
-  clinicalSettingCreated ClinicalSetting[]    @relation("ClinicalSettingCreatedBy")
-  clinicalSettingUpdated ClinicalSetting[]    @relation("ClinicalSettingUpdatedBy")
-  clinicalRecordCreated ClinicalRecord[]     @relation("ClinicalRecordCreatedBy")
-  clinicalRecordUpdated ClinicalRecord[]     @relation("ClinicalRecordUpdatedBy")
-  clinicalRecordReviewed ClinicalRecord[]    @relation("ClinicalRecordReviewedBy")
-  clinicalDocumentUploaded ClinicalDocument[] @relation("ClinicalDocumentUploadedBy")
-}
-
-model SystemConfiguration {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  key                 String                @unique
-  value               String
-  description         String?
-  category            String?
-  status              String                @default("ACTIVE")
-  createdById         Int?
-  createdBy           User?                 @relation("ConfigCreatedBy", fields: [createdById], references: [id], map: "SystemConfiguration_createdBy_fkey")
-  updatedById         Int?
-  updatedBy           User?                 @relation("ConfigUpdatedBy", fields: [updatedById], references: [id], map: "SystemConfiguration_updatedBy_fkey")
-  auditLogs           AuditLog[]            @relation("SystemConfigAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model SystemLog {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  userId              Int?
-  user                User?                 @relation("LoggedBy", fields: [userId], references: [id], map: "SystemLog_user_fkey")
-  type                SystemLogType
-  description         String
-  ipAddress           String?
-  deviceInfo          String?
-  module              String?
-  action              String
-  entityId            Int?
-  entityType          String?
-  createdAt           DateTime              @default(now())
-}
-
-model RolePermission {
-  id                  Int                   @id @default(autoincrement())
-  uuid                String                @unique @default(uuid())
-  role                UserRole
-  module              String
-  permissionLevel     PermissionLevel
-  description         String?
-  createdById         Int?
-  createdBy           User?                 @relation("PermissionCreatedBy", fields: [createdById], references: [id], map: "RolePermission_createdBy_fkey")
-  updatedById         Int?
-  updatedBy           User?                 @relation("PermissionUpdatedBy", fields: [updatedById], references: [id], map: "RolePermission_updatedBy_fkey")
-  auditLogs           AuditLog[]            @relation("RolePermissionAuditLogs")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-}
-
-model AuditLog {
-  id                    Int                   @id @default(autoincrement())
-  uuid                  String                @unique @default(uuid())
-  action                String
-  entity                String
-  entityId              Int
-  userId                Int?
-  user                  User?                 @relation("PerformedBy", fields: [userId], references: [id], map: "AuditLog_user_fkey")
-  dashboard             Dashboard?            @relation("DashboardAuditLogs")
-  dashboardWidget       DashboardWidget?      @relation("DashboardWidgetAuditLogs")
-  radiology             Radiology?            @relation("RadiologyAuditLogs")
-  radiologyTest         RadiologyTest?        @relation("RadiologyTestAuditLogs")
-  radiologyEquipment    RadiologyEquipment?   @relation("RadiologyEquipmentAuditLogs")
-  systemConfiguration   SystemConfiguration?  @relation("SystemConfigAuditLogs")
-  rolePermission        RolePermission?       @relation("RolePermissionAuditLogs")
-  transaction           Transaction?          @relation("TransactionAuditLogs")
-  costCenter            CostCenter?           @relation("CostCenterAuditLogs")
-  budget                Budget?               @relation("BudgetAuditLogs")
-  reconciliation        Reconciliation?       @relation("ReconciliationAuditLogs")
-  bankAccount           BankAccount?          @relation("BankAccountAuditLogs")
-  generalLedger         GeneralLedger?        @relation("GeneralLedgerAuditLogs")
-  taxCategory           TaxCategory?          @relation("TaxCategoryAuditLogs")
-  costAllocation        CostAllocation?       @relation("CostAllocationAuditLogs")
-  payroll               Payroll?              @relation("PayrollAuditLogs")
-  service               Service?              @relation("ServiceAuditLogs")
-  billing               Billing?              @relation("BillingAuditLogs")
-  invoice               Invoice?              @relation("InvoiceAuditLogs")
-  billingItem           BillingItem?          @relation("BillingItemAuditLogs")
-  refund                Refund?               @relation("RefundAuditLogs")
-  payment               Payment?              @relation("PaymentAuditLogs")
-  paymentPlan           PaymentPlan?          @relation("PaymentPlanAuditLogs")
-  invoiceDocument       InvoiceDocument?      @relation("InvoiceDocumentAuditLogs")
-  appointment           Appointment?          @relation("AppointmentAuditLogs")
-  appointmentDocument   AppointmentDocument?  @relation("AppointmentDocumentAuditLogs")
-  recurringAppointment  RecurringAppointment? @relation("RecurringAppointmentAuditLogs")
-  department            Department?           @relation("DepartmentAuditLogs")
-  doctor                Doctor?               @relation("DoctorAuditLogs")
-  doctorAvailability    DoctorAvailability?   @relation("DoctorAvailabilityAuditLogs")
-  doctorQualification   DoctorQualification? @relation("DoctorQualificationAuditLogs")
-  medicalRecord         MedicalRecord?        @relation("MedicalRecordAuditLogs")
-  patient               Patient?              @relation("PatientAuditLogs")
-  medication            Medication?           @relation("MedicationAuditLogs")
-  formulary             Formulary?            @relation("FormularyAuditLogs")
-  drugInteraction       DrugInteraction?      @relation("DrugInteractionAuditLogs")
-  adverseReaction       AdverseReaction?      @relation("AdverseReactionAuditLogs")
-  pharmacy              Pharmacy?             @relation("PharmacyAuditLogs")
-  maternity             Maternity?            @relation("MaternityAuditLogs")
-  maternityDocument     MaternityDocument?    @relation("MaternityDocumentAuditLogs")
-  vaccination           Vaccination?          @relation("VaccinationAuditLogs")
-  vaccinationCampaign   VaccinationCampaign?  @relation("VaccinationCampaignAuditLogs")
-  homeCare              HomeCare?             @relation("HomeCareAuditLogs")
-  homeCareVisit         HomeCareVisit?        @relation("HomeCareVisitAuditLogs")
-  verification          Verification?         @relation("VerificationAuditLogs")
-  verificationConfiguration VerificationConfiguration? @relation("VerificationConfigAuditLogs")
-  referralReward        ReferralReward?       @relation("ReferralRewardAuditLogs")
-  referralProgram       ReferralProgram?      @relation("ReferralProgramAuditLogs")
-  referral              Referral?             @relation("ReferralAuditLogs")
-  admission             Admission?            @relation("AdmissionAuditLogs")
-  discharge             Discharge?            @relation("DischargeAuditLogs")
-  ward                  Ward?                 @relation("WardAuditLogs")
-  bed                   Bed?                  @relation("BedAuditLogs")
-  transfer              Transfer?             @relation("TransferAuditLogs")
-  socialService         SocialService?        @relation("SocialServiceAuditLogs")
-  socialServiceCase     SocialServiceCase?    @relation("SocialServiceCaseAuditLogs")
-  externalAgency        ExternalAgency?       @relation("ExternalAgencyAuditLogs")
-  emergency             Emergency?            @relation("EmergencyAuditLogs")
-  emergencyDocument     EmergencyDocument?    @relation("EmergencyDocumentAuditLogs")
-  queue                 Queue?                @relation("QueueAuditLogs")
-  queueConfiguration    QueueConfiguration?   @relation("QueueConfigAuditLogs")
-  clinicalRecord        ClinicalRecord?       @relation("ClinicalRecordAuditLogs")
-  clinicalDocument      ClinicalDocument?     @relation("ClinicalDocumentAuditLogs")
-  clinicalSetting       ClinicalSetting?      @relation("ClinicalSettingAuditLogs")
-  details               String?
-  createdAt             DateTime              @default(now())
+// Tracks administrative actions
+model AdminLog {
+  id            String      @id @default(uuid())
+  adminId       String
+  admin         SystemAdmin @relation("AdminLogs", fields: [adminId], references: [id], onDelete: Cascade)
+  action        String
+  details       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
