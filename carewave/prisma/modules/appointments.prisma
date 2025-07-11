@@ -1,155 +1,44 @@
-enum AppointmentStatus {
-  SCHEDULED
+enum AppointmentStatusEnum {
+  PENDING
   CONFIRMED
-  CHECKED_IN
-  CHECKED_OUT
-  COMPLETED
   CANCELLED
-  NO_SHOW
-  RESCHEDULED
-  PENDING_CONFIRMATION
+  COMPLETED
 }
 
-enum AppointmentType {
-  REGULAR
-  WALK_IN
-  EMERGENCY
-  TELECONSULTATION
-  FOLLOW_UP
-  PRE_ADMISSION
-  POST_DISCHARGE
-  SPECIALIST_CONSULT
-}
-
-enum TriagePriority {
-  EMERGENCY
-  URGENT
-  NON_URGENT
-  CRITICAL
-}
-
-
+// Represents an appointment in the hospital
 model Appointment {
-  id                    Int                 @id @default(autoincrement())
-  uuid                  String              @unique @default(uuid())
-  patientId             Int
-  patient               Patient             @relation("PatientAppointments", fields: [patientId], references: [id])
-  doctorId              Int?
-  doctor                Doctor?             @relation("DoctorAppointments", fields: [doctorId], references: [id])
-  departmentId          Int?
-  department            Department?         @relation("DepartmentAppointments", fields: [departmentId], references: [id])
-  bookedById            Int?
-  bookedBy              User?               @relation("AppointmentBookedBy", fields: [bookedById], references: [id])
-  date                  DateTime
-  endDate               DateTime?
-  status                AppointmentStatus   @default(SCHEDULED)
-  type                  AppointmentType     @default(REGULAR)
-  reason                String
-  notes                 String?
-  checkInTime           DateTime?
-  checkOutTime          DateTime?
-  reminderSent          Boolean             @default(false)
-  reminderDate          DateTime?
-  medicalRecordId       Int?                @unique
-  medicalRecord         MedicalRecord?      @relation("AppointmentMedicalRecord")
-  billingId             Int?                @unique
-  billing               Billing?            @relation("AppointmentBilling")
-  queueId               Int?                @unique
-  queue                 Queue?              @relation("AppointmentQueue")
-  admissionId           Int?                @unique
-  admission             Admission?          @relation("AppointmentAdmission")
-  dischargeId           Int?                @unique
-  discharge             Discharge?          @relation("AppointmentDischarge")
-  laboratoryId          Int?                @unique
-  laboratory            Laboratory?         @relation("AppointmentLaboratory")
-  radiologyId           Int?                @unique
-  radiology             Radiology?          @relation("AppointmentRadiology")
-  radiologyTests        RadiologyTest[]     @relation("AppointmentRadiologyTests")
-  pharmacyId            Int?                @unique
-  pharmacy              Pharmacy?           @relation("AppointmentPharmacy")
-  operationTheatreId    Int?                @unique
-  operationTheatre      OperationTheatre?   @relation("AppointmentOperationTheatre")
-  createdById           Int?
-  createdBy             User?               @relation("AppointmentCreatedBy", fields: [createdById], references: [id])
-  updatedById           Int?
-  updatedBy             User?               @relation("AppointmentUpdatedBy", fields: [updatedById], references: [id])
-  insuranceId           Int?
-  insurance             Insurance?          @relation("AppointmentInsurance", fields: [insuranceId], references: [id])
-  referralId            Int?                @unique
-  referral              Referral?           @relation("AppointmentReferral")
-  location              String?
-  teleconsultationLink  String?
-  duration              Int?
-  cancellationReason    String?
-  cancellationDate      DateTime?
-  rescheduleCount       Int                 @default(0)
-  priority              TriagePriority?
-  notifications         AppointmentNotification[] @relation("AppointmentNotifications")
-  auditLogs             AuditLog[]          @relation("AppointmentAuditLogs")
-  appointmentDocuments  AppointmentDocument[] @relation("AppointmentDocuments")
-  recurringAppointmentId Int?               @unique
-  recurringAppointment   RecurringAppointment? @relation("RecurringAppointmentAppointments", fields: [recurringAppointmentId], references: [id])
-  dashboardWidget        DashboardWidget?     @relation("DashboardWidgetAppointments")
-  doctorAvailability    DoctorAvailability?   @relation("DoctorAvailabilityAppointments", fields: [doctorAvailabilityId], references: [id])
-  doctorAvailabilityId  Int?                @unique
-  dashboardWidgetId     Int?                @unique
-  invoice               Invoice?            @relation("AppointmentInvoices")
-  homeCares             HomeCare[]          @relation("HomeCareAppointments")
-  nhifClaims            NhifClaim[]         @relation("NhifClaimAppointments")
-  prescriptions         Prescription[]      @relation("PrescriptionAppointments")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  clinicalRecords       ClinicalRecord[]    @relation("ClinicalRecordAppointments")
+  id              String              @id @default(uuid())
+  patientId       String
+  patient         Patient             @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId        String
+  doctor          Doctor              @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Restrict)
+  visitTypeId     String
+  visitType       VisitType           @relation("AppointmentVisitType", fields: [visitTypeId], references: [id], onDelete: Restrict)
+  appointmentStatus AppointmentStatusEnum @default(PENDING)
+  appointmentDate DateTime
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  appointmentStatusId String?
+  appointmentStatusRecord AppointmentStatus? @relation("AppointmentStatusRecord", fields: [appointmentStatusId], references: [id], onDelete: SetNull)
 }
 
-model AppointmentNotification {
-  id                  Int                 @id @default(autoincrement())
-  uuid                String              @unique @default(uuid())
-  appointmentId       Int
-  appointment         Appointment         @relation("AppointmentNotifications", fields: [appointmentId], references: [id])
-  notificationType    String
-  status              NotificationStatus  @default(PENDING)
-  sentAt              DateTime?
-  recipientId         Int?
-  recipient           User?               @relation("NotificationRecipient", fields: [recipientId], references: [id])
-  message             String?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+// Represents the status history of an appointment
+model AppointmentStatus {
+  id            String       @id @default(uuid())
+  appointmentId String
+  appointment   Appointment  @relation("AppointmentStatusRecord", fields: [appointmentId], references: [id], onDelete: Cascade)
+  status        AppointmentStatusEnum
+  changedAt     DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
-model AppointmentDocument {
-  id                  Int                 @id @default(autoincrement())
-  uuid                String              @unique @default(uuid())
-  appointmentId       Int
-  appointment         Appointment         @relation("AppointmentDocuments", fields: [appointmentId], references: [id])
-  documentType        String
-  filePath            String
-  uploadedById        Int?
-  uploadedBy          User?               @relation("DocumentUploadedBy", fields: [uploadedById], references: [id])
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  auditLogs           AuditLog[]          @relation("AppointmentDocumentAuditLogs")
-}
-
-model RecurringAppointment {
-  id                  Int                 @id @default(autoincrement())
-  uuid                String              @unique @default(uuid())
-  patientId           Int
-  patient             Patient             @relation("PatientRecurringAppointments", fields: [patientId], references: [id])
-  doctorId            Int?
-  doctor              Doctor?             @relation("DoctorRecurringAppointments", fields: [doctorId], references: [id])
-  departmentId        Int?
-  department          Department?         @relation("DepartmentRecurringAppointments", fields: [departmentId], references: [id])
-  frequency           String
-  startDate           DateTime
-  endDate             DateTime?
-  occurrences         Int?
-  appointments        Appointment[]       @relation("RecurringAppointmentAppointments")
-  createdById         Int?
-  createdBy           User?               @relation("RecurringAppointmentCreatedBy", fields: [createdById], references: [id])
-  updatedById         Int?
-  updatedBy           User?               @relation("RecurringAppointmentUpdatedBy", fields: [updatedById], references: [id])
-  auditLogs           AuditLog[]          @relation("RecurringAppointmentAuditLogs")
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+// Represents the type of visit for an appointment
+model VisitType {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  description   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  appointments  Appointment[] @relation("AppointmentVisitType")
 }
