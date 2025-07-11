@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextField, Select, MenuItem, Button, FormControl, InputLabel, Box, Typography, CircularProgress } from '@mui/material';
+import { TextField, Select, MenuItem, Button, FormControl, InputLabel, Box, Typography, CircularProgress, Autocomplete } from '@mui/material';
 import { Calendar, User, Stethoscope } from 'lucide-react';
 import { getPatients, getDoctors, getVisitTypes, createAppointment, updateAppointment } from '@/services/appointmentService';
 import { useRouter } from 'next/navigation';
@@ -43,6 +43,10 @@ export default function AppointmentForm({ appointment }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleAutocompleteChange = (name, value) => {
+    setFormData({ ...formData, [name]: value ? value.id : '' });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -72,38 +76,42 @@ export default function AppointmentForm({ appointment }) {
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormControl fullWidth>
-          <InputLabel>Patient</InputLabel>
-          <Select
-            name="patientId"
-            value={formData.patientId}
-            onChange={handleChange}
-            className="select"
-            required
-            startAdornment={<User className="mr-2" size={20} />}
-          >
-            {patients.map((patient) => (
-              <MenuItem key={patient.id} value={patient.id}>
-                {patient.name}
-              </MenuItem>
-            ))}
-          </Select>
+          <Autocomplete
+            options={patients}
+            getOptionLabel={(option) => option.name}
+            onChange={(e, value) => handleAutocompleteChange('patientId', value)}
+            value={patients.find(p => p.id === formData.patientId) || null}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Patient"
+                className="input"
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: <User className="mr-2" size={20} />,
+                }}
+              />
+            )}
+          />
         </FormControl>
         <FormControl fullWidth>
-          <InputLabel>Doctor</InputLabel>
-          <Select
-            name="doctorId"
-            value={formData.doctorId}
-            onChange={handleChange}
-            className="select"
-            required
-            startAdornment={<Stethoscope className="mr-2" size={20} />}
-          >
-            {doctors.map((doctor) => (
-              <MenuItem key={doctor.id} value={doctor.id}>
-                Dr. {doctor.name} ({doctor.department?.name})
-              </MenuItem>
-            ))}
-          </Select>
+          <Autocomplete
+            options={doctors}
+            getOptionLabel={(option) => `Dr. ${option.name} (${option.department?.name})`}
+            onChange={(e, value) => handleAutocompleteChange('doctorId', value)}
+            value={doctors.find(d => d.id === formData.doctorId) || null}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Doctor"
+                className="input"
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: <Stethoscope className="mr-2" size={20} />,
+                }}
+              />
+            )}
+          />
         </FormControl>
         <FormControl fullWidth>
           <InputLabel>Visit Type</InputLabel>
