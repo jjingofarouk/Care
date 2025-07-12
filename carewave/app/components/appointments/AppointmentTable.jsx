@@ -5,10 +5,11 @@ import { Edit, Trash2, MoreHorizontal, Clock, CheckCircle, XCircle, Calendar } f
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-export default function AppointmentTable({ appointments, loading }) {
+export default function AppointmentTable({ appointments, loading, onAppointmentDeleted }) {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleMenuClick = (event, id) => {
     setAnchorEl(event.currentTarget);
@@ -21,16 +22,43 @@ export default function AppointmentTable({ appointments, loading }) {
   };
 
   const handleDelete = async () => {
+    if (!selectedAppointment) return;
+
+    setDeleteLoading(true);
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch(`/api/appointments?id=${selectedAppointment}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error('Failed to delete appointment');
-      router.refresh();
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete appointment');
+      }
+
+      // Call the callback if provided, otherwise refresh the page
+      if (onAppointmentDeleted) {
+        onAppointmentDeleted(selectedAppointment);
+      } else {
+        router.refresh();
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Error deleting appointment:', err);
+      alert('Failed to delete appointment: ' + err.message);
     } finally {
+      setDeleteLoading(false);
+      handleMenuClose();
+    }
+  };
+
+  const handleViewHistory = () => {
+    if (selectedAppointment) {
+      router.push(`/appointments/${selectedAppointment}/history`);
       handleMenuClose();
     }
   };
@@ -47,6 +75,21 @@ export default function AppointmentTable({ appointments, loading }) {
         return <Chip label="Completed" className="badge-info" icon={<Calendar size={14} />} />;
       default:
         return <Chip label={status} className="badge-neutral" />;
+    }
+  };
+
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      return 'Invalid Date';
     }
   };
 
@@ -67,30 +110,37 @@ export default function AppointmentTable({ appointments, loading }) {
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={7}><div className="loading-spinner mx-auto"></div></TableCell>
+              <TableCell colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+                <div className="loading-spinner mx-auto"></div>
+              </TableCell>
             </TableRow>
-          ) : appointments.length === 0 ? (
+          ) : !appointments || appointments.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7}>No appointments found</TableCell>
+              <TableCell colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+                No appointments found
+              </TableCell>
             </TableRow>
           ) : (
             appointments.map((appt) => (
               <TableRow key={appt.id}>
                 <TableCell>{appt.patient?.name || 'N/A'}</TableCell>
-                <TableCell>Dr. {appt.doctor?.name || 'N/A'}</TableCell>
+                <TableCell>
+                  {appt.doctor?.name ? `Dr. ${appt.doctor.name}` : 'N/A'}
+                </TableCell>
                 <TableCell>{appt.doctor?.department?.name || 'N/A'}</TableCell>
                 <TableCell>{appt.visitType?.name || 'N/A'}</TableCell>
-                <TableCell>{new Date(appt.appointmentDate).toLocaleString()}</TableCell>
+                <TableCell>{formatDate(appt.appointmentDate)}</TableCell>
                 <TableCell>{getStatusBadge(appt.appointmentStatus)}</TableCell>
                 <TableCell>
                   <Box className="flex gap-1">
                     <Link href={`/appointments/${appt.id}/edit`}>
-                      <IconButton className="btn-outline">
+                      <IconButton className="btn-outline" size="small">
                         <Edit size={16} />
                       </IconButton>
                     </Link>
                     <IconButton 
                       className="btn-outline" 
+                      size="small"
                       onClick={(e) => handleMenuClick(e, appt.id)}
                     >
                       <MoreHorizontal size={16} />
@@ -102,23 +152,26 @@ export default function AppointmentTable({ appointments, loading }) {
           )}
         </TableBody>
       </Table>
+      
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
         className="dropdown-menu"
       >
-        <MenuItem onClick={handleDelete} className="dropdown-item">
-          <Trash2 size={14} className="mr-1" /> Delete
+        <MenuItem 
+          onClick={handleDelete} 
+          className="dropdown-item"
+          disabled={deleteLoading}
+        >
+          <Trash2 size={14} className="mr-2" /> 
+          {deleteLoading ? 'Deleting...' : 'Delete'}
         </MenuItem>
         <MenuItem 
-          onClick={() => {
-            router.push(`/appointments/${selectedAppointment}/history`);
-            handleMenuClose();
-          }}
+          onClick={handleViewHistory}
           className="dropdown-item"
         >
-          <Clock size={14} className="mr-1" /> View Status History
+          <Clock size={14} className="mr-2" /> View Status History
         </MenuItem>
       </Menu>
     </div>
