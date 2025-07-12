@@ -1,15 +1,18 @@
+// components/patients/PatientForm.js
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  TextField, 
-  Button, 
-  Typography, 
-  MenuItem, 
-  CircularProgress, 
-  Grid, 
-  Paper 
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  MenuItem,
+  CircularProgress,
+  Grid,
+  Paper,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import { useRouter, useParams } from 'next/navigation';
 
@@ -21,6 +24,8 @@ export default function PatientForm() {
     gender: '',
     phone: '',
     email: '',
+    password: '',
+    createUser: false,
     addresses: [{ street: '', city: '', country: '', postalCode: '' }],
     nextOfKin: { firstName: '', lastName: '', relationship: '', phone: '', email: '' },
     insuranceInfo: { provider: '', policyNumber: '', expiryDate: '' },
@@ -46,9 +51,11 @@ export default function PatientForm() {
       setFormData({
         ...data,
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
-        addresses: data.addresses.length ? data.addresses : [{ street: '', city: '', country: '', postalCode: '' }],
+        addresses: data.addresses?.length ? data.addresses : [{ street: '', city: '', country: '', postalCode: '' }],
         nextOfKin: data.nextOfKin || { firstName: '', lastName: '', relationship: '', phone: '', email: '' },
         insuranceInfo: data.insuranceInfo || { provider: '', policyNumber: '', expiryDate: '' },
+        password: '',
+        createUser: !!data.userId,
       });
     } catch (error) {
       console.error('Failed to fetch patient:', error);
@@ -70,9 +77,11 @@ export default function PatientForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          addresses: formData.addresses.filter(addr => addr.street || addr.city || addr.country || addr.postalCode),
+          addresses: formData.addresses.filter((addr) => addr.street || addr.city || addr.country || addr.postalCode),
           nextOfKin: formData.nextOfKin.firstName || formData.nextOfKin.lastName ? formData.nextOfKin : undefined,
           insuranceInfo: formData.insuranceInfo.provider || formData.insuranceInfo.policyNumber ? formData.insuranceInfo : undefined,
+          createUser: formData.createUser && formData.email && formData.password ? true : false,
+          password: formData.createUser && formData.password ? formData.password : undefined,
         }),
       });
       if (!response.ok) {
@@ -193,8 +202,32 @@ export default function PatientForm() {
                   sx={{ mb: 2 }}
                 />
               </Grid>
-              
-              {/* Address Section */}
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.createUser}
+                      onChange={(e) => setFormData({ ...formData, createUser: e.target.checked })}
+                    />
+                  }
+                  label="Create User Account"
+                  sx={{ mb: 2 }}
+                />
+              </Grid>
+              {formData.createUser && (
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Password"
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={(e) => handleChange(e)}
+                    fullWidth
+                    required={formData.createUser}
+                    sx={{ mb: 2 }}
+                  />
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ fontWeight: 'medium', mt: 3, mb: 2 }}>
                   Address
@@ -236,8 +269,6 @@ export default function PatientForm() {
                   </Grid>
                 </Grid>
               ))}
-
-              {/* Next of Kin Section */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ fontWeight: 'medium', mt: 3, mb: 2 }}>
                   Next of Kin
@@ -288,8 +319,6 @@ export default function PatientForm() {
                   sx={{ mb: 2 }}
                 />
               </Grid>
-
-              {/* Insurance Section */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ fontWeight: 'medium', mt: 3, mb: 2 }}>
                   Insurance Information
