@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { getDepartments } from '../../services/departmentService';
