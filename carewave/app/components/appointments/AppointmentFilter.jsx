@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState } from 'react';
 import { TextField, Select, MenuItem, Button, FormControl, InputLabel, Box } from '@mui/material';
 import { Filter, X } from 'lucide-react';
@@ -35,9 +34,9 @@ export default function AppointmentFilter({ onFilterChange }) {
   };
 
   return (
-    <div className="card p-4 mb-4">
-      <form onSubmit={handleSubmit} className="flex flex-wrap gap-4">
-        <FormControl className="w-full sm:w-48">
+    <div className="card p-3 mb-2">
+      <form onSubmit={handleSubmit} className="flex flex-wrap gap-2">
+        <FormControl className="w-full sm:w-40">
           <InputLabel>Status</InputLabel>
           <Select
             name="status"
@@ -57,14 +56,14 @@ export default function AppointmentFilter({ onFilterChange }) {
           label="Patient ID"
           value={filters.patientId}
           onChange={handleChange}
-          className="input w-full sm:w-48"
+          className="input w-full sm:w-40"
         />
         <TextField
           name="doctorId"
           label="Doctor ID"
           value={filters.doctorId}
           onChange={handleChange}
-          className="input w-full sm:w-48"
+          className="input w-full sm:w-40"
         />
         <TextField
           name="dateFrom"
@@ -72,7 +71,7 @@ export default function AppointmentFilter({ onFilterChange }) {
           label="From Date"
           value={filters.dateFrom}
           onChange={handleChange}
-          className="input w-full sm:w-48"
+          className="input w-full sm:w-40"
           InputLabelProps={{ shrink: true }}
         />
         <TextField
@@ -81,7 +80,7 @@ export default function AppointmentFilter({ onFilterChange }) {
           label="To Date"
           value={filters.dateTo}
           onChange={handleChange}
-          className="input w-full sm:w-48"
+          className="input w-full sm:w-40"
           InputLabelProps={{ shrink: true }}
         />
         <Box className="flex gap-2">
@@ -89,7 +88,7 @@ export default function AppointmentFilter({ onFilterChange }) {
             type="submit"
             variant="contained"
             className="btn-primary"
-            startIcon={<Filter size={20} />}
+            startIcon={<Filter size={16} />}
           >
             Filter
           </Button>
@@ -97,7 +96,7 @@ export default function AppointmentFilter({ onFilterChange }) {
             variant="outlined"
             className="btn-secondary"
             onClick={handleClear}
-            startIcon={<X size={20} />}
+            startIcon={<X size={16} />}
           >
             Clear
           </Button>
