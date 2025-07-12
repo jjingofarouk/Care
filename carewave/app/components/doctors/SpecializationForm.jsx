@@ -1,6 +1,6 @@
+'use client';
 import React from 'react';
 import { useState } from 'react';
-import { TextField, Button } from '@mui/material';
 
 export default function SpecializationForm({ specialization, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
@@ -19,42 +19,38 @@ export default function SpecializationForm({ specialization, onSubmit, onCancel 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <TextField
+    <form onSubmit={handleSubmit} className="space-y-4 w-full">
+      <input
+        type="text"
         name="name"
-        label="Specialization Name"
+        placeholder="Specialization Name"
         value={formData.name}
         onChange={handleChange}
-        fullWidth
-        className="input"
+        className="input w-full"
         required
       />
-      <TextField
+      <textarea
         name="description"
-        label="Description"
+        placeholder="Description"
         value={formData.description}
         onChange={handleChange}
-        fullWidth
-        className="input"
-        multiline
+        className="textarea w-full"
         rows={4}
       />
-      <div className="flex gap-4">
-        <Button
+      <div className="flex flex-col sm:flex-row gap-4">
+        <button
           type="submit"
-          variant="contained"
-          className="btn btn-primary"
+          className="btn btn-primary bg-[var(--role-doctor)] hover:bg-[var(--hospital-accent-dark)] w-full sm:w-auto"
         >
           {specialization ? 'Update' : 'Create'} Specialization
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          variant="outlined"
-          className="btn btn-outline"
+          className="btn btn-outline w-full sm:w-auto"
           onClick={onCancel}
         >
           Cancel
-        </Button>
+        </button>
       </div>
     </form>
   );
