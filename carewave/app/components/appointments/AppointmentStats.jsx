@@ -1,9 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, Typography, Box } from '@mui/material';
-import { Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Calendar, TrendingUp } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,6 +36,101 @@ const NumberCounter = ({ endValue, duration = 2 }) => {
   }, [endValue, duration]);
 
   return <span>{count}</span>;
+};
+
+const StatCard = ({ title, value, icon: Icon, color, delay = 0, trend = null }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 30, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ 
+          duration: 0.6, 
+          delay: delay,
+          ease: [0.25, 0.46, 0.45, 0.94] 
+        }}
+        whileHover={{ 
+          y: -8, 
+          scale: 1.02,
+          transition: { duration: 0.3 }
+        }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="relative group"
+      >
+        {/* Background glow effect */}
+        <motion.div
+          className="absolute inset-0 rounded-3xl blur-xl opacity-20"
+          style={{ backgroundColor: color }}
+          animate={{
+            scale: isHovered ? 1.1 : 1,
+            opacity: isHovered ? 0.3 : 0.1,
+          }}
+          transition={{ duration: 0.3 }}
+        />
+        
+        {/* Main card */}
+        <div className="relative bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-2xl overflow-hidden">
+          {/* Gradient overlay */}
+          <div 
+            className="absolute inset-0 opacity-5 bg-gradient-to-br from-transparent via-transparent to-current"
+            style={{ color }}
+          />
+          
+          {/* Content */}
+          <div className="relative z-10">
+            <div className="flex items-start justify-between mb-4">
+              <motion.div
+                className="p-3 rounded-2xl bg-white/50 backdrop-blur-sm"
+                style={{ backgroundColor: `${color}15` }}
+                whileHover={{ 
+                  rotate: [0, -5, 5, 0],
+                  scale: 1.1
+                }}
+                transition={{ duration: 0.5 }}
+              >
+                <Icon className="h-6 w-6" style={{ color }} />
+              </motion.div>
+              
+              {trend && (
+                <motion.div
+                  className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: delay + 0.3 }}
+                >
+                  <TrendingUp className="h-3 w-3" />
+                  {trend}
+                </motion.div>
+              )}
+            </div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: delay + 0.2 }}
+            >
+              <Typography className="text-sm font-medium text-gray-600 mb-1">
+                {title}
+              </Typography>
+              <Typography 
+                className="text-3xl font-bold"
+                style={{ color }}
+              >
+                <NumberCounter endValue={value} duration={1.5} />
+              </Typography>
+            </motion.div>
+          </div>
+          
+          {/* Decorative elements */}
+          <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-gradient-to-br from-white/20 to-transparent blur-sm" />
+          <div className="absolute -bottom-2 -left-2 w-16 h-16 rounded-full bg-gradient-to-tr from-white/10 to-transparent blur-sm" />
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
 };
 
 export default function AppointmentStats() {
@@ -77,10 +172,10 @@ export default function AppointmentStats() {
         label: 'Appointment Status',
         data: [stats.pending, stats.confirmed, stats.cancelled, stats.completed],
         backgroundColor: [
-          'var(--hospital-warning)', // Amber
-          'var(--hospital-success)', // Green
-          'var(--hospital-error)',   // Red
-          'var(--hospital-info)',    // Blue
+          'var(--hospital-warning)', 
+          'var(--hospital-success)', 
+          'var(--hospital-error)',   
+          'var(--hospital-info)',    
         ],
         borderColor: [
           'var(--hospital-warning)',
@@ -145,163 +240,86 @@ export default function AppointmentStats() {
     },
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        duration: 0.5, 
-        ease: 'easeOut',
-        staggerChildren: 0.1 
-      } 
+  const cardData = [
+    {
+      title: "Pending",
+      value: stats.pending,
+      icon: Clock,
+      color: "var(--hospital-warning)",
+      trend: "+12%"
     },
-    hover: { 
-      scale: 1.03, 
-      boxShadow: 'var(--shadow-lg)', 
-      transition: { duration: 0.3 } 
+    {
+      title: "Confirmed",
+      value: stats.confirmed,
+      icon: CheckCircle,
+      color: "var(--hospital-success)",
+      trend: "+8%"
     },
-  };
-
-  const statVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1, transition: { duration: 0.4 } },
-  };
+    {
+      title: "Cancelled",
+      value: stats.cancelled,
+      icon: XCircle,
+      color: "var(--hospital-error)",
+      trend: "-5%"
+    },
+    {
+      title: "Completed",
+      value: stats.completed,
+      icon: Calendar,
+      color: "var(--hospital-info)",
+      trend: "+15%"
+    }
+  ];
 
   return (
-    <div className="max-w-full mx-auto mb-6">
-      <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover="hover"
-        >
-          <Card className="card bg-[var(--hospital-white)] border-none rounded-2xl overflow-hidden">
-            <CardHeader
-              title={
-                <motion.div variants={statVariants}>
-                  <Typography className="text-base font-semibold text-[var(--hospital-gray-900)]">Pending</Typography>
-                </motion.div>
-              }
-              subheader={
-                <motion.div variants={statVariants}>
-                  <Typography className="text-4xl font-extrabold text-[var(--hospital-warning)]">
-                    <NumberCounter endValue={stats.pending} duration={1.5} />
-                  </Typography>
-                </motion.div>
-              }
-              avatar={
-                <motion.div variants={statVariants}>
-                  <Clock className="h-10 w-10 text-[var(--hospital-warning)]" />
-                </motion.div>
-              }
-              className="p-6 bg-[var(--hospital-gray-50)]"
-            />
-          </Card>
-        </motion.div>
-
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover="hover"
-        >
-          <Card className="card bg-[var(--hospital-white)] border-none rounded-2xl overflow-hidden">
-            <CardHeader
-              title={
-                <motion.div variants={statVariants}>
-                  <Typography className="text-base font-semibold text-[var(--hospital-gray-900)]">Confirmed</Typography>
-                </motion.div>
-              }
-              subheader={
-                <motion.div variants={statVariants}>
-                  <Typography className="text-4xl font-extrabold text-[var(--hospital-success)]">
-                    <NumberCounter endValue={stats.confirmed} duration={1.5} />
-                  </Typography>
-                </motion.div>
-              }
-              avatar={
-                <motion.div variants={statVariants}>
-                  <CheckCircle className="h-10 w-10 text-[var(--hospital-success)]" />
-                </motion.div>
-              }
-              className="p-6 bg-[var(--hospital-gray-50)]"
-            />
-          </Card>
-        </motion.div>
-
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover="hover"
-        >
-          <Card className="card bg-[var(--hospital-white)] border-none rounded-2xl overflow-hidden">
-            <CardHeader
-              title={
-                <motion.div variants={statVariants}>
-                  <Typography className="text-base font-semibold text-[var(--hospital-gray-900)]">Cancelled</Typography>
-                </motion.div>
-              }
-              subheader={
-                <motion.div variants={statVariants}>
-                  <Typography className="text-4xl font-extrabold text-[var(--hospital-error)]">
-                    <NumberCounter endValue={stats.cancelled} duration={1.5} />
-                  </Typography>
-                </motion.div>
-              }
-              avatar={
-                <motion.div variants={statVariants}>
-                  <XCircle className="h-10 w-10 text-[var(--hospital-error)]" />
-                </motion.div>
-              }
-              className="p-6 bg-[var(--hospital-gray-50)]"
-            />
-          </Card>
-        </motion.div>
-
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover="hover"
-        >
-          <Card className="card bg-[var(--hospital-white)] border-none rounded-2xl overflow-hidden">
-            <CardHeader
-              title={
-                <motion.div variants={statVariants}>
-                  <Typography className="text-base font-semibold text-[var(--hospital-gray-900)]">Completed</Typography>
-                </motion.div>
-              }
-              subheader={
-                <motion.div variants={statVariants}>
-                  <Typography className="text-4xl font-extrabold text-[var(--hospital-info)]">
-                    <NumberCounter endValue={stats.completed} duration={1.5} />
-                  </Typography>
-                </motion.div>
-              }
-              avatar={
-                <motion.div variants={statVariants}>
-                  <Calendar className="h-10 w-10 text-[var(--hospital-info)]" />
-                </motion.div>
-              }
-              className="p-6 bg-[var(--hospital-gray-50)]"
-            />
-          </Card>
-        </motion.div>
-      </Box>
-
+    <div className="max-w-full mx-auto mb-6 p-4">
+      {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut', delay: 0.2 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8"
       >
-        <Card className="card col-span-full p-6 bg-[var(--hospital-white)] rounded-2xl shadow-md">
-          <Box className="h-[400px]">
-            <Bar data={chartData} options={chartOptions} />
-          </Box>
-        </Card>
+        <Typography variant="h4" className="text-2xl font-bold text-gray-900 mb-2">
+          Appointment Dashboard
+        </Typography>
+        <Typography variant="body1" className="text-gray-600">
+          Real-time overview of your appointment statistics
+        </Typography>
+      </motion.div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {cardData.map((card, index) => (
+          <StatCard
+            key={card.title}
+            title={card.title}
+            value={card.value}
+            icon={card.icon}
+            color={card.color}
+            delay={index * 0.1}
+            trend={card.trend}
+          />
+        ))}
+      </div>
+
+      {/* Chart */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+      >
+        <div className="relative bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
+          {/* Gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-pink-50/30 rounded-3xl" />
+          
+          {/* Chart content */}
+          <div className="relative z-10">
+            <Box className="h-[400px]">
+              <Bar data={chartData} options={chartOptions} />
+            </Box>
+          </div>
+        </div>
       </motion.div>
     </div>
   );
