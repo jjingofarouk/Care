@@ -1,6 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableRow, Chip, IconButton, Menu, MenuItem, Box } from '@mui/material';
 import { Edit, Trash2, MoreHorizontal, Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -27,9 +26,7 @@ export default function AppointmentTable({ appointments, loading, onAppointmentD
     setDeleteLoading(true);
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
+      if (!token) throw new Error('No authentication token found');
 
       const response = await fetch(`/api/appointments?id=${selectedAppointment}`, {
         method: 'DELETE',
@@ -41,7 +38,6 @@ export default function AppointmentTable({ appointments, loading, onAppointmentD
         throw new Error(errorData.error || 'Failed to delete appointment');
       }
 
-      // Call the callback if provided, otherwise refresh the page
       if (onAppointmentDeleted) {
         onAppointmentDeleted(selectedAppointment);
       } else {
@@ -66,15 +62,31 @@ export default function AppointmentTable({ appointments, loading, onAppointmentD
   const getStatusBadge = (status) => {
     switch (status) {
       case 'PENDING':
-        return <Chip label="Pending" className="badge-warning" icon={<Clock size={14} />} />;
+        return (
+          <span className="badge badge-warning">
+            <Clock className="w-3 h-3 mr-1" /> Pending
+          </span>
+        );
       case 'CONFIRMED':
-        return <Chip label="Confirmed" className="badge-success" icon={<CheckCircle size={14} />} />;
+        return (
+          <span className="badge badge-success">
+            <CheckCircle className="w-3 h-3 mr-1" /> Confirmed
+          </span>
+        );
       case 'CANCELLED':
-        return <Chip label="Cancelled" className="badge-error" icon={<XCircle size={14} />} />;
+        return (
+          <span className="badge badge-error">
+            <XCircle className="w-3 h-3 mr-1" /> Cancelled
+          </span>
+        );
       case 'COMPLETED':
-        return <Chip label="Completed" className="badge-info" icon={<Calendar size={14} />} />;
+        return (
+          <span className="badge badge-info">
+            <Calendar className="w-3 h-3 mr-1" /> Completed
+          </span>
+        );
       default:
-        return <Chip label={status} className="badge-neutral" />;
+        return <span className="badge badge-neutral">{status}</span>;
     }
   };
 
@@ -94,86 +106,81 @@ export default function AppointmentTable({ appointments, loading, onAppointmentD
   };
 
   return (
-    <div className="card">
-      <Table className="table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Patient</TableCell>
-            <TableCell>Doctor</TableCell>
-            <TableCell>Department</TableCell>
-            <TableCell>Visit Type</TableCell>
-            <TableCell>Date</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
+    <div className="card max-w-full">
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Department</th>
+            <th>Visit Type</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
           {loading ? (
-            <TableRow>
-              <TableCell colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+            <tr>
+              <td colSpan={7} className="text-center py-8">
                 <div className="loading-spinner mx-auto"></div>
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           ) : !appointments || appointments.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+            <tr>
+              <td colSpan={7} className="text-center py-8">
                 No appointments found
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           ) : (
             appointments.map((appt) => (
-              <TableRow key={appt.id}>
-                <TableCell>{appt.patient?.name || 'N/A'}</TableCell>
-                <TableCell>
-                  {appt.doctor?.name ? `Dr. ${appt.doctor.name}` : 'N/A'}
-                </TableCell>
-                <TableCell>{appt.doctor?.department?.name || 'N/A'}</TableCell>
-                <TableCell>{appt.visitType?.name || 'N/A'}</TableCell>
-                <TableCell>{formatDate(appt.appointmentDate)}</TableCell>
-                <TableCell>{getStatusBadge(appt.appointmentStatus)}</TableCell>
-                <TableCell>
-                  <Box className="flex gap-1">
+              <tr key={appt.id}>
+                <td>{appt.patient?.name || 'N/A'}</td>
+                <td>{appt.doctor?.name ? `Dr. ${appt.doctor.name}` : 'N/A'}</td>
+                <td>{appt.doctor?.department?.name || 'N/A'}</td>
+                <td>{appt.visitType?.name || 'N/A'}</td>
+                <td>{formatDate(appt.appointmentDate)}</td>
+                <td>{getStatusBadge(appt.appointmentStatus)}</td>
+                <td>
+                  <div className="flex gap-1">
                     <Link href={`/appointments/${appt.id}/edit`}>
-                      <IconButton className="btn-outline" size="small">
-                        <Edit size={16} />
-                      </IconButton>
+                      <button className="btn btn-outline btn-sm">
+                        <Edit className="w-4 h-4" />
+                      </button>
                     </Link>
-                    <IconButton 
-                      className="btn-outline" 
-                      size="small"
+                    <button
+                      className="btn btn-outline btn-sm"
                       onClick={(e) => handleMenuClick(e, appt.id)}
                     >
-                      <MoreHorizontal size={16} />
-                    </IconButton>
-                  </Box>
-                </TableCell>
-              </TableRow>
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
             ))
           )}
-        </TableBody>
-      </Table>
-      
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        className="dropdown-menu"
+        </tbody>
+      </table>
+
+      <div
+        className={`dropdown-menu ${anchorEl ? 'block' : 'hidden'}`}
       >
-        <MenuItem 
-          onClick={handleDelete} 
+        <button
+          onClick={handleDelete}
           className="dropdown-item"
           disabled={deleteLoading}
         >
-          <Trash2 size={14} className="mr-2" /> 
+          <Trash2 className="w-3 h-3 mr-2" />
           {deleteLoading ? 'Deleting...' : 'Delete'}
-        </MenuItem>
-        <MenuItem 
+        </button>
+        <button
           onClick={handleViewHistory}
           className="dropdown-item"
         >
-          <Clock size={14} className="mr-2" /> View Status History
-        </MenuItem>
-      </Menu>
+          <Clock className="w-3 h-3 mr-2" />
+          View Status History
+        </button>
+      </div>
     </div>
   );
 }
