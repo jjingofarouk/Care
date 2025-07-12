@@ -17,9 +17,9 @@ export async function GET(request) {
     const city = searchParams.get('city');
 
     const include = {
-      addresses: includeParam.includes('addresses'),
-      nextOfKin: includeParam.includes('nextOfKin'),
-      insuranceInfo: includeParam.includes('insuranceInfo'),
+      addresses: includeParam.includes('addresses') || true,
+      nextOfKin: includeParam.includes('nextOfKin') || true,
+      insuranceInfo: includeParam.includes('insuranceInfo') || true,
     };
 
     const where = {};
@@ -117,32 +117,32 @@ export async function POST(request) {
         phone: data.phone || null,
         email: data.email || null,
         userId,
-        addresses: data.addresses
-          ? {
-              create: data.addresses.map((addr) => ({
-                street: addr.street,
-                city: addr.city,
-                country: addr.country,
+        addresses: {
+          create: data.addresses?.length
+            ? data.addresses.map((addr) => ({
+                street: addr.street || '',
+                city: addr.city || '',
+                country: addr.country || '',
                 postalCode: addr.postalCode || null,
-              })),
-            }
-          : undefined,
-        nextOfKin: data.nextOfKin
+              }))
+            : [],
+        },
+        nextOfKin: data.nextOfKin?.firstName || data.nextOfKin?.lastName
           ? {
               create: {
-                firstName: data.nextOfKin.firstName,
-                lastName: data.nextOfKin.lastName,
-                relationship: data.nextOfKin.relationship,
+                firstName: data.nextOfKin.firstName || '',
+                lastName: data.nextOfKin.lastName || '',
+                relationship: data.nextOfKin.relationship || '',
                 phone: data.nextOfKin.phone || null,
                 email: data.nextOfKin.email || null,
               },
             }
           : undefined,
-        insuranceInfo: data.insuranceInfo
+        insuranceInfo: data.insuranceInfo?.provider || data.insuranceInfo?.policyNumber
           ? {
               create: {
-                provider: data.insuranceInfo.provider,
-                policyNumber: data.insuranceInfo.policyNumber,
+                provider: data.insuranceInfo.provider || '',
+                policyNumber: data.insuranceInfo.policyNumber || '',
                 expiryDate: data.insuranceInfo.expiryDate
                   ? new Date(data.insuranceInfo.expiryDate)
                   : null,
