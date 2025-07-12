@@ -1,9 +1,7 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
-import { TextField, Select, MenuItem, Button, FormControl, InputLabel, Box, Typography, CircularProgress, Autocomplete } from '@mui/material';
+import { TextField, Select, MenuItem, Button, FormControl, InputLabel, Box, Typography, Autocomplete } from '@mui/material';
 import { Calendar, User, Stethoscope } from 'lucide-react';
-import { getPatients, getDoctors, getVisitTypes, createAppointment, updateAppointment } from '@/services/appointmentService';
 import { useRouter } from 'next/navigation';
 
 export default function AppointmentForm({ appointment }) {
@@ -12,7 +10,7 @@ export default function AppointmentForm({ appointment }) {
     patientId: appointment?.patientId || '',
     doctorId: appointment?.doctorId || '',
     visitTypeId: appointment?.visitTypeId || '',
-    appointmentDate: appointment?.appointmentDate ? new Date(appointment.appointmentDate).toISOString().slice(0, 16) : '',
+    appointmentDate: appointment?.appointmentDate || '',
     status: appointment?.appointmentStatus || 'PENDING',
   });
   const [patients, setPatients] = useState([]);
@@ -24,10 +22,22 @@ export default function AppointmentForm({ appointment }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const [patientRes, doctorRes, visitTypeRes] = await Promise.all([
+          fetch('/api/appointments?resource=patients', {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          }),
+          fetch('/api/appointments?resource=doctors', {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          }),
+          fetch('/api/appointments?resource=visitTypes', {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          }),
+        ]);
+        if (!patientRes.ok || !doctorRes.ok || !visitTypeRes.ok) throw new Error('Failed to fetch data');
         const [patientData, doctorData, visitTypeData] = await Promise.all([
-          getPatients(),
-          getDoctors(),
-          getVisitTypes(),
+          patientRes.json(),
+          doctorRes.json(),
+          visitTypeRes.json(),
         ]);
         setPatients(patientData);
         setDoctors(doctorData);
@@ -51,11 +61,18 @@ export default function AppointmentForm({ appointment }) {
     e.preventDefault();
     setLoading(true);
     try {
-      if (appointment?.id) {
-        await updateAppointment(appointment.id, formData);
-      } else {
-        await createAppointment({ ...formData, bookedById: 'user-id-placeholder' });
-      }
+      const method = appointment?.id ? 'PUT' : 'POST';
+      const url = appointment?.id ? `/api/appointments` : '/api/appointments';
+      const body = appointment?.id ? { ...formData, id: appointment.id } : { ...formData, resource: 'appointment' };
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) throw new Error('Failed to save appointment');
       router.push('/appointments');
     } catch (err) {
       setError(err.message);
@@ -65,16 +82,16 @@ export default function AppointmentForm({ appointment }) {
   };
 
   return (
-    <div className="card p-6">
+    <div className="card p-4">
       <Typography variant="h5" className="card-title">
         {appointment?.id ? 'Edit Appointment' : 'New Appointment'}
       </Typography>
       {error && (
-        <div className="alert alert-error mb-4">
+        <div className="alert alert-error mb-2">
           <span>{error}</span>
         </div>
       )}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-2">
         <FormControl fullWidth>
           <Autocomplete
             options={patients}
@@ -88,7 +105,7 @@ export default function AppointmentForm({ appointment }) {
                 className="input"
                 InputProps={{
                   ...params.InputProps,
-                  startAdornment: <User className="mr-2" size={20} />,
+                  startAdornment: <User className="mr-1" size={16} />,
                 }}
               />
             )}
@@ -107,7 +124,7 @@ export default function AppointmentForm({ appointment }) {
                 className="input"
                 InputProps={{
                   ...params.InputProps,
-                  startAdornment: <Stethoscope className="mr-2" size={20} />,
+                  startAdornment: <Stethoscope className="mr-1" size={16} />,
                 }}
               />
             )}
@@ -122,6 +139,7 @@ export default function AppointmentForm({ appointment }) {
             className="select"
             required
           >
+            <MenuItem value="">Select Visit Type</MenuItem>
             {visitTypes.map((type) => (
               <MenuItem key={type.id} value={type.id}>
                 {type.name}
@@ -137,7 +155,7 @@ export default function AppointmentForm({ appointment }) {
           className="input"
           required
           InputProps={{
-            startAdornment: <Calendar className="mr-2" size={20} />,
+            startAdornment: <Calendar className="mr-1" size={16} />,
           }}
         />
         <FormControl fullWidth>
@@ -168,7 +186,7 @@ export default function AppointmentForm({ appointment }) {
             className="btn-primary"
             type="submit"
             disabled={loading}
-            startIcon={loading && <CircularProgress size={20} />}
+            startIcon={loading && <div className="loading-spinner" />}
           >
             {appointment?.id ? 'Update' : 'Create'}
           </Button>
