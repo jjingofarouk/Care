@@ -1,7 +1,8 @@
 'use client';
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Typography, Button, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from '@mui/material';
+import { Typography, Button, IconButton } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import VisitTypeForm from '@/components/appointments/VisitTypeForm';
@@ -45,6 +46,39 @@ export default function VisitTypesPage() {
     fetchVisitTypes();
   }, []);
 
+  const columns = [
+    {
+      field: 'name',
+      headerName: 'Name',
+      width: 200,
+      renderCell: (params) => params.row.name || 'N/A',
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      width: 400,
+      renderCell: (params) => params.row.description || 'N/A',
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      renderCell: (params) => (
+        <>
+          <IconButton className="btn-outline" onClick={() => setEditingVisitType(params.row)}>
+            <Edit className="h-4 w-4" />
+          </IconButton>
+          <IconButton className="btn-outline" onClick={() => handleDelete(params.row.id)}>
+            <Trash2 className="h-4 w-4" />
+          </IconButton>
+        </>
+      ),
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+  ];
+
   return (
     <div className="max-w-full mx-auto p-2 sm:p-4">
       <div className="flex justify-between items-center mb-2">
@@ -74,46 +108,55 @@ export default function VisitTypesPage() {
           onCancel={() => setEditingVisitType(null)}
         />
       )}
-      <div className="card max-w-full mx-auto">
-        <Table className="table w-full">
-          <TableHead>
-            <TableRow>
-              <TableCell className="font-semibold">Name</TableCell>
-              <TableCell className="font-semibold">Description</TableCell>
-              <TableCell className="font-semibold">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={3} className="text-center py-8">
-                  <div className="loading-spinner mx-auto"></div>
-                </TableCell>
-              </TableRow>
-            ) : visitTypes.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="text-center py-8 text-[var(--hospital-gray-500)]">
-                  No visit types available
-                </TableCell>
-              </TableRow>
-            ) : (
-              visitTypes.map((type) => (
-                <TableRow key={type.id} className="hover:bg-[var(--hospital-gray-50)]">
-                  <TableCell>{type.name}</TableCell>
-                  <TableCell>{type.description || 'N/A'}</TableCell>
-                  <TableCell>
-                    <IconButton className="btn-outline" onClick={() => setEditingVisitType(type)}>
-                      <Edit className="h-4 w-4" />
-                    </IconButton>
-                    <IconButton className="btn-outline" onClick={() => handleDelete(type.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      <div className="card w-full max-w-7xl mx-auto">
+        <div style={{ height: 600, width: '100%' }} className="overflow-x-auto custom-scrollbar">
+          <DataGrid
+            rows={loading ? [] : visitTypes}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 20, 50]}
+            loading={loading}
+            disableSelectionOnClick
+            autoHeight={false}
+            sx={{
+              '& .MuiDataGrid-root': {
+                border: 'none',
+                backgroundColor: 'var(--hospital-white)',
+                borderRadius: '0.5rem',
+                boxShadow: 'var(--shadow-sm)',
+              },
+              '& .MuiDataGrid-cell': {
+                borderTop: '1px solid var(--hospital-gray-200)',
+                color: 'var(--hospital-gray-900)',
+                padding: '0.75rem 1.5rem',
+              },
+              '& .MuiDataGrid-columnHeaders': {
+                backgroundColor: 'var(--hospital-gray-50)',
+              },
+              '& .MuiDataGrid-row:hover': {
+                backgroundColor: 'var(--hospital-gray-50)',
+              },
+              '& .MuiDataGrid-footerContainer': {
+                backgroundColor: 'var(--hospital-gray-50)',
+                borderTop: '1px solid var(--hospital-gray-200)',
+              },
+              '& .MuiDataGrid-overlay': {
+                backgroundColor: 'var(--hospital-white)',
+              },
+            }}
+            components={{
+              NoRowsOverlay: () => (
+                <div className="flex justify-center items-center h-full text-[var(--hospital-gray-500)]">
+                  {loading ? (
+                    <div className="loading-spinner"></div>
+                  ) : (
+                    'No visit types available'
+                  )}
+                </div>
+              ),
+            }}
+          />
+        </div>
       </div>
     </div>
   );
