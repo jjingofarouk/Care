@@ -20,6 +20,8 @@ export default function PatientForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
   const router = useRouter();
   const params = useParams();
   const isEdit = !!params.id;
@@ -32,6 +34,7 @@ export default function PatientForm() {
 
   const fetchPatient = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`/api/patients/${params.id}?include=addresses,nextOfKin,insuranceInfo`);
       if (!response.ok) throw new Error('Failed to fetch patient');
@@ -51,6 +54,38 @@ export default function PatientForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async (query) => {
+    if (!query) {
+      setSearchResults([]);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/patients?search=${encodeURIComponent(query)}&include=addresses,nextOfKin,insuranceInfo`);
+      if (!response.ok) throw new Error('Failed to fetch search results');
+      const data = await response.json();
+      setSearchResults(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to search patients:', error);
+      setError('Failed to search patients');
+      setSearchResults([]);
+    }
+  };
+
+  const handleSelectPatient = (patient) => {
+    setFormData({
+      ...patient,
+      dateOfBirth: patient.dateOfBirth ? new Date(patient.dateOfBirth).toISOString().split('T')[0] : '',
+      addresses: patient.addresses?.length ? patient.addresses : [{ street: '', city: '', country: '', postalCode: '' }],
+      nextOfKin: patient.nextOfKin || { firstName: '', lastName: '', relationship: '', phone: '', email: '' },
+      insuranceInfo: patient.insuranceInfo || { provider: '', policyNumber: '', expiryDate: '' },
+      password: '',
+      createUser: !!patient.userId,
+    });
+    setSearchQuery('');
+    setSearchResults([]);
+    router.push(`/patients/edit/${patient.id}`);
   };
 
   const handleSubmit = async (e) => {
@@ -104,7 +139,44 @@ export default function PatientForm() {
 
   return (
     <div className="card p-4 max-w-[100vw] overflow-x-auto min-h-screen">
-      <h1 className="card-title mb-4">{isEdit ? 'Edit Patient' : 'New Patient'}</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="card-title">{isEdit ? 'Edit Patient' : 'New Patient'}</h1>
+        {isEdit ? (
+          <button
+            className="btn btn-outline"
+            onClick={() => router.push('/patients')}
+          >
+            Cancel
+          </button>
+        ) : (
+          <div className="relative max-w-md w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--hospital-gray-400)]" />
+            <input
+              type="text"
+              placeholder="Search patients by name or email..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                handleSearch(e.target.value);
+              }}
+              className="input pl-10 w-full"
+            />
+            {searchResults.length > 0 && (
+              <div className="absolute z-10 bg-[var(--hospital-white)] rounded-lg shadow-[var(--shadow-md)] mt-1 w-full max-h-60 overflow-y-auto">
+                {searchResults.map((patient) => (
+                  <button
+                    key={patient.id}
+                    className="block w-full text-left px-4 py-2 hover:bg-[var(--hospital-gray-50)] text-[var(--hospital-gray-900)] text-sm"
+                    onClick={() => handleSelectPatient(patient)}
+                  >
+                    {patient.firstName} {patient.lastName} ({patient.email || 'No email'})
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       <div className="bg-[var(--hospital-white)] rounded-xl p-4 shadow-[var(--shadow-sm)]">
         {loading ? (
           <div className="flex justify-center p-4">
@@ -377,13 +449,15 @@ export default function PatientForm() {
               >
                 {loading ? <div className="loading-spinner !h-6 !w-6" /> : (isEdit ? 'Update' : 'Create')}
               </button>
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => router.push('/patients')}
-              >
-                Cancel
-              </button>
+              {!isEdit && (
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => router.push('/patients')}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </form>
         )}
