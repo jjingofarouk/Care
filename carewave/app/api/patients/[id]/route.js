@@ -13,20 +13,31 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const include = searchParams.get('include');
+
+    // Build include object based on query parameter
+    const includeObj = {};
+    if (include) {
+      const includeFields = include.split(',');
+      includeFields.forEach(field => {
+        switch (field.trim()) {
+          case 'addresses':
+            includeObj.addresses = true;
+            break;
+          case 'nextOfKin':
+            includeObj.nextOfKin = true;
+            break;
+          case 'insuranceInfo':
+            includeObj.insuranceInfo = true;
+            break;
+        }
+      });
+    }
+
     const patient = await prisma.patient.findUnique({
       where: { id },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        dateOfBirth: true,
-        gender: true,
-        phone: true,
-        email: true,
-        createdAt: true,
-        updatedAt: true,
-        userId: true,
-      },
+      include: includeObj,
     });
 
     if (!patient) {
@@ -97,6 +108,7 @@ export async function PUT(request, { params }) {
       }
     }
 
+    // Update patient with related data
     const patient = await prisma.patient.update({
       where: { id },
       data: {
@@ -107,18 +119,71 @@ export async function PUT(request, { params }) {
         phone: data.phone || null,
         email: data.email || null,
         userId,
+        // Update addresses
+        ...(data.addresses && {
+          addresses: {
+            deleteMany: {}, // Delete existing addresses
+            create: data.addresses
+              .filter(addr => addr.street || addr.city || addr.country || addr.postalCode)
+              .map(address => ({
+                street: address.street || '',
+                city: address.city || '',
+                country: address.country || '',
+                postalCode: address.postalCode || null,
+              }))
+          }
+        }),
+        // Update next of kin
+        ...(data.nextOfKin && (data.nextOfKin.firstName || data.nextOfKin.lastName) ? {
+          nextOfKin: {
+            upsert: {
+              create: {
+                firstName: data.nextOfKin.firstName || '',
+                lastName: data.nextOfKin.lastName || '',
+                relationship: data.nextOfKin.relationship || '',
+                phone: data.nextOfKin.phone || null,
+                email: data.nextOfKin.email || null,
+              },
+              update: {
+                firstName: data.nextOfKin.firstName || '',
+                lastName: data.nextOfKin.lastName || '',
+                relationship: data.nextOfKin.relationship || '',
+                phone: data.nextOfKin.phone || null,
+                email: data.nextOfKin.email || null,
+              }
+            }
+          }
+        } : {
+          nextOfKin: {
+            delete: true
+          }
+        }),
+        // Update insurance info
+        ...(data.insuranceInfo && (data.insuranceInfo.provider || data.insuranceInfo.policyNumber) ? {
+          insuranceInfo: {
+            upsert: {
+              create: {
+                provider: data.insuranceInfo.provider || '',
+                policyNumber: data.insuranceInfo.policyNumber || '',
+                expiryDate: data.insuranceInfo.expiryDate ? new Date(data.insuranceInfo.expiryDate) : null,
+              },
+              update: {
+                provider: data.insuranceInfo.provider || '',
+                policyNumber: data.insuranceInfo.policyNumber || '',
+                expiryDate: data.insuranceInfo.expiryDate ? new Date(data.insuranceInfo.expiryDate) : null,
+              }
+            }
+          }
+        } : {
+          insuranceInfo: {
+            delete: true
+          }
+        }),
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        dateOfBirth: true,
-        gender: true,
-        phone: true,
-        email: true,
-        createdAt: true,
-        updatedAt: true,
-        userId: true,
+      include: {
+        addresses: true,
+        nextOfKin: true,
+        insuranceInfo: true,
       },
     });
 
@@ -141,9 +206,11 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
     }
 
+    // Delete patient (related data will be deleted automatically due to cascade)
     await prisma.patient.delete({
       where: { id },
     });
+    
     return NextResponse.json({ message: 'Patient deleted successfully' });
   } catch (error) {
     console.error('DELETE /api/patients/[id] error:', error);
