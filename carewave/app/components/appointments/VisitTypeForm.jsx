@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { X, Check, FileText } from 'lucide-react';
+import { TextField, Button, Box, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 export default function VisitTypeForm({ visitType, onSubmit, onCancel }) {
@@ -43,57 +43,53 @@ export default function VisitTypeForm({ visitType, onSubmit, onCancel }) {
   };
 
   return (
-    <div className="card max-w-full p-2 mb-2">
-      <h2 className="card-title">
+    <div className="card max-w-full mx-auto p-4">
+      <Typography variant="h5" className="card-title font-bold">
         {visitType?.id ? 'Edit Visit Type' : 'New Visit Type'}
-      </h2>
+      </Typography>
       {error && (
         <div className="alert alert-error mb-2">
           <span>{error}</span>
         </div>
       )}
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <div className="relative">
-          <input
-            name="name"
-            placeholder="Name"
-            value={formData.name}
-            onChange={handleChange}
-            className="input w-full"
-            required
-          />
-          <FileText className="absolute left-3 top-3.5 w-4 h-4 text-[var(--hospital-gray-500)]" />
-        </div>
-        <textarea
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <TextField
+          name="name"
+          label="Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="input"
+          required
+          fullWidth
+        />
+        <TextField
           name="description"
-          placeholder="Description"
+          label="Description"
           value={formData.description}
           onChange={handleChange}
-          className="textarea w-full"
+          className="textarea"
+          multiline
           rows={3}
+          fullWidth
         />
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            className="btn btn-secondary"
+        <Box className="flex justify-end gap-2">
+          <Button
+            variant="outlined"
+            className="btn-secondary"
             onClick={onCancel}
           >
-            <X className="w-4 h-4 mr-2" />
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="contained"
+            className="btn-primary"
             type="submit"
-            className="btn btn-primary"
             disabled={loading}
+            startIcon={loading && <div className="loading-spinner" />}
           >
-            {loading ? (
-              <div className="loading-spinner mr-2"></div>
-            ) : (
-              <Check className="w-4 h-4 mr-2" />
-            )}
             {visitType?.id ? 'Update' : 'Create'}
-          </button>
-        </div>
+          </Button>
+        </Box>
       </form>
     </div>
   );
