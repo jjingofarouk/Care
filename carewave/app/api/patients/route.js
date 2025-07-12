@@ -2,6 +2,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -19,7 +20,6 @@ export async function GET(request) {
       addresses: includeParam.includes('addresses'),
       nextOfKin: includeParam.includes('nextOfKin'),
       insuranceInfo: includeParam.includes('insuranceInfo'),
-      userAccount: includeParam.includes('userAccount'),
     };
 
     const where = {};
@@ -75,15 +75,26 @@ export async function POST(request) {
       );
     }
 
+    let userId = null;
     if (data.email) {
-      const existingPatient = await prisma.patient.findUnique({
+      const existingUser = await prisma.userRegistration.findUnique({
         where: { email: data.email },
       });
-      if (existingPatient) {
-        return NextResponse.json(
-          { error: 'Email already exists' },
-          { status: 409 }
-        );
+      if (existingUser) {
+        userId = existingUser.id;
+      } else if (data.createUser && data.password) {
+        const passwordHash = await bcrypt.hash(data.password, 10);
+        const newUser = await prisma.userRegistration.create({
+          data: {
+            id: `U-${uuidv4().slice(0, 8)}`,
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            role: 'PATIENT',
+            passwordHash,
+          },
+        });
+        userId = newUser.id;
       }
     }
 
@@ -105,6 +116,7 @@ export async function POST(request) {
         gender: data.gender || null,
         phone: data.phone || null,
         email: data.email || null,
+        userId,
         addresses: data.addresses
           ? {
               create: data.addresses.map((addr) => ({
