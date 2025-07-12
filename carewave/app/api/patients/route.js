@@ -9,18 +9,7 @@ const prisma = new PrismaClient();
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const includeParam = searchParams.get('include')?.split(',') || [];
     const search = searchParams.get('search');
-    const gender = searchParams.get('gender');
-    const minAge = searchParams.get('minAge');
-    const maxAge = searchParams.get('maxAge');
-    const city = searchParams.get('city');
-
-    const include = {
-      addresses: includeParam.includes('addresses') || true,
-      nextOfKin: includeParam.includes('nextOfKin') || true,
-      insuranceInfo: includeParam.includes('insuranceInfo') || true,
-    };
 
     const where = {};
     if (search) {
@@ -30,26 +19,22 @@ export async function GET(request) {
         { email: { contains: search, mode: 'insensitive' } },
       ];
     }
-    if (gender) where.gender = gender;
-    if (city) where.addresses = { some: { city: { contains: city, mode: 'insensitive' } } };
-    if (minAge || maxAge) {
-      where.dateOfBirth = {};
-      if (minAge) {
-        const minDate = new Date();
-        minDate.setFullYear(minDate.getFullYear() - parseInt(minAge));
-        where.dateOfBirth.lte = minDate;
-      }
-      if (maxAge) {
-        const maxDate = new Date();
-        maxDate.setFullYear(maxDate.getFullYear() - parseInt(maxAge));
-        where.dateOfBirth.gte = maxDate;
-      }
-    }
 
     const patients = await prisma.patient.findMany({
       where,
-      include,
       orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        dateOfBirth: true,
+        gender: true,
+        phone: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        userId: true,
+      },
     });
 
     return NextResponse.json(patients);
@@ -76,13 +61,13 @@ export async function POST(request) {
     }
 
     let userId = null;
-    if (data.email) {
+    if (data.email && data.createUser && data.password) {
       const existingUser = await prisma.userRegistration.findUnique({
         where: { email: data.email },
       });
       if (existingUser) {
         userId = existingUser.id;
-      } else if (data.createUser && data.password) {
+      } else {
         const passwordHash = await bcrypt.hash(data.password, 10);
         const newUser = await prisma.userRegistration.create({
           data: {
@@ -117,43 +102,18 @@ export async function POST(request) {
         phone: data.phone || null,
         email: data.email || null,
         userId,
-        addresses: {
-          create: data.addresses?.length
-            ? data.addresses.map((addr) => ({
-                street: addr.street || '',
-                city: addr.city || '',
-                country: addr.country || '',
-                postalCode: addr.postalCode || null,
-              }))
-            : [],
-        },
-        nextOfKin: data.nextOfKin?.firstName || data.nextOfKin?.lastName
-          ? {
-              create: {
-                firstName: data.nextOfKin.firstName || '',
-                lastName: data.nextOfKin.lastName || '',
-                relationship: data.nextOfKin.relationship || '',
-                phone: data.nextOfKin.phone || null,
-                email: data.nextOfKin.email || null,
-              },
-            }
-          : undefined,
-        insuranceInfo: data.insuranceInfo?.provider || data.insuranceInfo?.policyNumber
-          ? {
-              create: {
-                provider: data.insuranceInfo.provider || '',
-                policyNumber: data.insuranceInfo.policyNumber || '',
-                expiryDate: data.insuranceInfo.expiryDate
-                  ? new Date(data.insuranceInfo.expiryDate)
-                  : null,
-              },
-            }
-          : undefined,
       },
-      include: {
-        addresses: true,
-        nextOfKin: true,
-        insuranceInfo: true,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        dateOfBirth: true,
+        gender: true,
+        phone: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        userId: true,
       },
     });
 
