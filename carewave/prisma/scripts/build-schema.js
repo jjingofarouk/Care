@@ -19,6 +19,7 @@ const MODULE_FILES = [
   'incentive.prisma',
   'patients.prisma',
   'medical-records.prisma',
+    'history-taking.prisma',
   'adt.prisma',
   'queue-mgmt.prisma',
   'clinical.prisma',
