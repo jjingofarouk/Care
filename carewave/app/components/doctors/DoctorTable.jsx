@@ -1,71 +1,75 @@
-// components/DoctorTable.jsx
 'use client';
 import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Edit, Delete } from '@mui/icons-material';
 
-export default function DoctorTable({ doctors, onEdit, onDelete }) {
+export default function DoctorTable({ doctors = [], onEdit, onDelete }) {
   const columns = [
-    { 
-      field: 'firstName', 
-      headerName: 'First Name', 
+    {
+      field: 'firstName',
+      headerName: 'First Name',
       flex: 1,
       minWidth: 120,
-      renderCell: (params) => (
-        <span className="text-[var(--hospital-gray-900)]">{params.value || 'N/A'}</span>
-      )
+      renderCell: ({ value }) => (
+        <span className="text-gray-900">{value || 'N/A'}</span>
+      ),
     },
-    { 
-      field: 'lastName', 
-      headerName: 'Last Name', 
+    {
+      field: 'lastName',
+      headerName: 'Last Name',
       flex: 1,
       minWidth: 120,
-      renderCell: (params) => (
-        <span className="text-[var(--hospital-gray-900)]">{params.value || 'N/A'}</span>
-      )
+      renderCell: ({ value }) => (
+        <span className="text-gray-900">{value || 'N/A'}</span>
+      ),
     },
-    { 
-      field: 'email', 
-      headerName: 'Email', 
+    {
+      field: 'email',
+      headerName: 'Email',
       flex: 1,
       minWidth: 180,
-      renderCell: (params) => (
-        <span className="text-[var(--hospital-gray-900)]">{params.value || 'N/A'}</span>
-      )
+      renderCell: ({ value }) => (
+        <span className="text-gray-900">{value || 'N/A'}</span>
+      ),
     },
-    { 
-      field: 'phone', 
-      headerName: 'Phone', 
+    {
+      field: 'phone',
+      headerName: 'Phone',
       flex: 1,
-      minWidth: 120,
-      renderCell: (params) => (
-        <span className="text-[var(--hospital-gray-900)]">{params.value || 'N/A'}</span>
-      )
+      minWidth: 130,
+      renderCell: ({ value }) => (
+        <span className="text-gray-900">{value || 'N/A'}</span>
+      ),
     },
     {
       field: 'department',
       headerName: 'Department',
       flex: 1,
       minWidth: 140,
-      renderCell: (params) => (
-        <span className="text-[var(--hospital-gray-900)]">{params.row?.department?.name || 'No Department'}</span>
+      renderCell: ({ row }) => (
+        <span className="text-gray-900">
+          {row?.department?.name || 'No Department'}
+        </span>
       ),
     },
     {
       field: 'specializations',
       headerName: 'Specializations',
       flex: 1,
-      minWidth: 180,
-      renderCell: (params) => (
-        <div className="flex flex-wrap gap-2 py-1">
-          {params.row?.specializations?.length > 0 ? (
-            params.row.specializations.map(spec => (
-              <span key={spec.id} className="badge badge-info">
+      minWidth: 200,
+      renderCell: ({ row }) => (
+        <div className="flex flex-wrap gap-1">
+          {row?.specializations?.length > 0 ? (
+            row.specializations.map((spec) => (
+              <span
+                key={spec.id}
+                className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded"
+              >
                 {spec.specialization?.name || 'Unknown'}
               </span>
             ))
           ) : (
-            <span className="text-[var(--hospital-gray-500)]">No specializations</span>
+            <span className="text-gray-500 text-sm">No specializations</span>
           )}
         </div>
       ),
@@ -73,21 +77,24 @@ export default function DoctorTable({ doctors, onEdit, onDelete }) {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 120,
+      minWidth: 100,
       sortable: false,
-      renderCell: (params) => (
+      disableColumnMenu: true,
+      renderCell: ({ row }) => (
         <div className="flex gap-2">
           <button
-            onClick={() => onEdit(params.row)}
-            className="btn btn-outline p-1.5"
+            onClick={() => onEdit(row)}
+            title="Edit"
+            className="text-blue-600 hover:text-blue-800 p-1"
           >
-            <Edit className="h-4 w-4" />
+            <Edit fontSize="small" />
           </button>
           <button
-            onClick={() => onDelete(params.row.id)}
-            className="btn btn-danger p-1.5"
+            onClick={() => onDelete(row.id)}
+            title="Delete"
+            className="text-red-600 hover:text-red-800 p-1"
           >
-            <Delete className="h-4 w-4" />
+            <Delete fontSize="small" />
           </button>
         </div>
       ),
@@ -95,57 +102,56 @@ export default function DoctorTable({ doctors, onEdit, onDelete }) {
   ];
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto px-1.5 sm:px-3 lg:px-4 py-1.5">
       <DataGrid
-        rows={doctors || []}
+        rows={doctors}
         columns={columns}
-        pageSizeOptions={[5, 10, 20]}
-        className="bg-[var(--hospital-white)] custom-scrollbar"
+        getRowId={(row) => row.id}
         autoHeight
+        pageSizeOptions={[5, 10, 20]}
         disableRowSelectionOnClick
+        className="bg-white"
         sx={{
           '& .MuiDataGrid-root': {
-            border: '1px solid var(--hospital-gray-200)',
+            border: '1px solid #E5E7EB',
             borderRadius: '0.5rem',
-            boxShadow: 'var(--shadow-sm)',
-            width: '100%',
+            fontFamily: 'inherit',
           },
           '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: 'var(--hospital-gray-50)',
-            color: 'var(--hospital-gray-500)',
-            textTransform: 'uppercase',
+            backgroundColor: '#F9FAFB',
+            color: '#6B7280',
             fontSize: '0.75rem',
-            letterSpacing: '0.05em',
-            borderBottom: '1px solid var(--hospital-gray-200)',
-            padding: '0.5rem 1rem',
+            textTransform: 'uppercase',
+            borderBottom: '1px solid #E5E7EB',
+            paddingY: '0.5rem',
           },
           '& .MuiDataGrid-cell': {
-            borderTop: '1px solid var(--hospital-gray-200)',
-            padding: '0.5rem 1rem',
+            borderTop: '1px solid #E5E7EB',
             fontSize: '0.875rem',
+            paddingY: '0.5rem',
           },
           '& .MuiDataGrid-row:hover': {
-            backgroundColor: 'var(--hospital-gray-50)',
+            backgroundColor: '#F3F4F6',
           },
           '& .MuiDataGrid-footerContainer': {
-            backgroundColor: 'var(--hospital-gray-50)',
-            borderTop: '1px solid var(--hospital-gray-200)',
-            padding: '0.25rem',
+            backgroundColor: '#F9FAFB',
+            borderTop: '1px solid #E5E7EB',
+            padding: '0.5rem',
           },
         }}
         slots={{
           noRowsOverlay: () => (
             <div className="flex items-center justify-center h-full py-4">
-              <span className="text-[var(--hospital-gray-500)]">No doctors found</span>
+              <span className="text-gray-500">No doctors found</span>
             </div>
           ),
           loadingOverlay: () => (
             <div className="flex items-center justify-center h-full py-4">
-              <div className="loading-spinner" />
+              <span className="text-gray-500">Loading...</span>
             </div>
           ),
         }}
-        loading={!doctors}
+        loading={!doctors.length}
       />
     </div>
   );
