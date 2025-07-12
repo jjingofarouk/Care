@@ -7,6 +7,9 @@ const { BASE_URL, API_ROUTES } = api;
 export async function getPatients() {
   try {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}?include=addresses,nextOfKin,insuranceInfo`);
+    if (!Array.isArray(response.data)) {
+      throw new Error('API response is not an array');
+    }
     return response.data;
   } catch (error) {
     console.error('Error fetching patients:', error);
@@ -16,6 +19,7 @@ export async function getPatients() {
 
 export async function getPatient(id) {
   try {
+    if (!id) throw new Error('Invalid patient ID');
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}/${id}`);
     return response.data;
   } catch (error) {
@@ -36,6 +40,7 @@ export async function createPatient(data) {
 
 export async function updatePatient(id, data) {
   try {
+    if (!id) throw new Error('Invalid patient ID');
     const response = await axios.put(`${BASE_URL}${API_ROUTES.PATIENT}/${id}`, data);
     return response.data;
   } catch (error) {
@@ -46,6 +51,7 @@ export async function updatePatient(id, data) {
 
 export async function deletePatient(id) {
   try {
+    if (!id) throw new Error('Invalid patient ID');
     const response = await axios.delete(`${BASE_URL}${API_ROUTES.PATIENT}/${id}`);
     return response.data;
   } catch (error) {
