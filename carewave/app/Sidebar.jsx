@@ -53,7 +53,7 @@ import { useAuth } from './auth/AuthContext';
 const roleBasedNavItems = {
   PATIENT: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'My Appointments', path: '/appointment', icon: Calendar, category: 'health' },
+    { name: 'My Appointments', path: '/appointments', icon: Calendar, category: 'health' },
     { name: 'Medical Records', path: '/medical-records', icon: FileText, category: 'health' },
     { name: 'Test Results', path: '/test-results', icon: FileBarChart, category: 'health' },
     { name: 'Prescriptions', path: '/prescriptions', icon: Pill, category: 'health' },
@@ -61,8 +61,8 @@ const roleBasedNavItems = {
   ],
   DOCTOR: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'My Patients', path: '/patient', icon: User, category: 'patient-care' },
-    { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
+    { name: 'My Patients', path: '/patients', icon: User, category: 'patient-care' },
+    { name: 'Appointments', path: '/appointments', icon: Calendar, category: 'patient-care' },
     { name: 'Clinical Notes', path: '/clinical', icon: Stethoscope, category: 'clinical' },
     { name: 'Operation Theatre', path: '/operation-theatre', icon: Scissors, category: 'clinical' },
     { name: 'Lab Results', path: '/lab-results', icon: Activity, category: 'clinical' },
@@ -70,8 +70,8 @@ const roleBasedNavItems = {
   ],
   NURSE: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Patient Care', path: '/patient', icon: User, category: 'patient-care' },
-    { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
+    { name: 'Patient Care', path: '/patients', icon: User, category: 'patient-care' },
+    { name: 'Appointments', path: '/appointments', icon: Calendar, category: 'patient-care' },
     { name: 'Nursing Tasks', path: '/nursing', icon: Heart, category: 'nursing' },
     { name: 'Maternity Ward', path: '/maternity', icon: Heart, category: 'nursing' },
     { name: 'Vaccination', path: '/vaccination', icon: Syringe, category: 'nursing' },
@@ -92,7 +92,7 @@ const roleBasedNavItems = {
   ],
   RECEPTIONIST: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
+    { name: 'Appointments', path: '/appointments', icon: Calendar, category: 'patient-care' },
     { name: 'Patient Registration', path: '/patient-registration', icon: UserCheck, category: 'patient-care' },
     { name: 'Queue Management', path: '/queue-mgmt', icon: Users, category: 'patient-care' },
     { name: 'Helpdesk', path: '/helpdesk', icon: Headphones, category: 'support' },
@@ -105,16 +105,16 @@ const roleBasedNavItems = {
   ],
   SURGEON: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'My Patients', path: '/patient', icon: User, category: 'patient-care' },
+    { name: 'My Patients', path: '/patients', icon: User, category: 'patient-care' },
     { name: 'Operation Theatre', path: '/operation-theatre', icon: Scissors, category: 'clinical' },
     { name: 'Surgery Schedule', path: '/surgery-schedule', icon: Calendar, category: 'clinical' },
     { name: 'Post-Op Care', path: '/post-op-care', icon: Heart, category: 'clinical' },
   ],
   ADMIN: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Patients', path: '/patient', icon: User, category: 'patient-care' },
-    { name: 'Doctors', path: '/doctor', icon: Badge, category: 'patient-care' },
-    { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
+    { name: 'Patients', path: '/patients', icon: User, category: 'patient-care' },
+    { name: 'Doctors', path: '/doctors', icon: Badge, category: 'patient-care' },
+    { name: 'Appointments', path: '/appointments', icon: Calendar, category: 'patient-care' },
     { name: 'ADT', path: '/adt', icon: ClipboardList, category: 'patient-care' },
     { name: 'Emergency', path: '/emergency', icon: AlertCircle, category: 'patient-care' },
     { name: 'Queue Management', path: '/queue-mgmt', icon: Users, category: 'patient-care' },
