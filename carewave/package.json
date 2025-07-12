@@ -1,3 +1,4 @@
+// package.json
 {
   "name": "hospital-management-system",
   "version": "1.0.3",
@@ -19,7 +20,7 @@
     "prisma:studio": "npm run schema:build && prisma studio",
     "prisma:format": "npm run schema:build && prisma format",
     "prisma:push": "npm run schema:build && prisma db push",
-    "db:seed": "npm run schema:build && npx prisma db seed -- --seed-file prisma/seed.js",
+    "db:seed": "npm run schema:build && node prisma/seed.js",
     "db:reset": "npm run schema:build && prisma migrate reset --force",
     "dev:full": "concurrently \"npm run schema:watch\" \"next dev\"",
     "prepare": "husky install",
