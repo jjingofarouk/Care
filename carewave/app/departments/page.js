@@ -1,5 +1,5 @@
 'use client';
-
+import React from 'react';
 import { useState, useEffect } from 'react';
 import DepartmentTable from '../components/departments/DepartmentTable';
 import DepartmentForm from '../components/departments/DepartmentForm';
