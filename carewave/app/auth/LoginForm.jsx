@@ -25,7 +25,7 @@ export default function LoginForm() {
     
     try {
       await login(formData);
-      router.push('/appointment');
+      router.push('/appointments');
     } catch (err) {
       setError(err.message);
     } finally {
