@@ -4,9 +4,14 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(request, { params }) {
+export async function GET(request, context) {
   try {
-    const id = params.id; // Correctly access id from params
+    console.log('GET /api/patients/[id] params:', context);
+    const id = context.params?.id;
+    if (!id) {
+      return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
+    }
+
     const patient = await prisma.patient.findUnique({
       where: { id },
       include: {
@@ -32,11 +37,15 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
   try {
-    const id = params.id; // Correctly access id from params
-    const data = await request.json();
+    console.log('PUT /api/patients/[id] params:', context);
+    const id = context.params?.id;
+    if (!id) {
+      return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
+    }
 
+    const data = await request.json();
     if (!data.firstName || !data.lastName || !data.dateOfBirth) {
       return NextResponse.json(
         { error: 'First name, last name, and date of birth are required' },
@@ -52,16 +61,18 @@ export async function PUT(request, { params }) {
       );
     }
 
+    let userId = null;
     if (data.email) {
-      const existingPatient = await prisma.patient.findFirst({
-        where: { email: data.email, id: { not: id } },
+      const existingUser = await prisma.userRegistration.findUnique({
+        where: { email: data.email },
       });
-      if (existingPatient) {
+      if (existingUser && existingUser.id !== id) {
         return NextResponse.json(
-          { error: 'Email already exists' },
+          { error: 'Email already exists for another user' },
           { status: 409 }
         );
       }
+      userId = existingUser ? existingUser.id : null;
     }
 
     const patient = await prisma.patient.update({
@@ -73,6 +84,7 @@ export async function PUT(request, { params }) {
         gender: data.gender || null,
         phone: data.phone || null,
         email: data.email || null,
+        userId,
         addresses: data.addresses
           ? {
               deleteMany: {},
@@ -128,9 +140,14 @@ export async function PUT(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request, context) {
   try {
-    const id = params.id; // Correctly access id from params
+    console.log('DELETE /api/patients/[id] params:', context);
+    const id = context.params?.id;
+    if (!id) {
+      return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
+    }
+
     await prisma.patient.delete({
       where: { id },
     });
