@@ -18,7 +18,7 @@ export async function getAllAppointments(filters) {
     },
     include: {
       patient: { select: { firstName: true, lastName: true } },
-      doctor: { select: { name: true, department: { select: { name: true } } } },
+      doctor: { select: { firstName: true, lastName: true, department: { select: { name: true } } } },
       visitType: { select: { name: true } },
       appointmentStatusRecords: true,
     },
@@ -31,7 +31,7 @@ export async function getAppointmentById(id) {
     where: { id },
     include: {
       patient: { select: { firstName: true, lastName: true } },
-      doctor: { select: { name: true, department: { select: { name: true } } } },
+      doctor: { select: { firstName: true, lastName: true, department: { select: { name: true } } } },
       visitType: { select: { name: true } },
       appointmentStatusRecords: { orderBy: { changedAt: 'desc' } },
     },
@@ -55,7 +55,7 @@ export async function createAppointment(data) {
     },
     include: {
       patient: { select: { firstName: true, lastName: true } },
-      doctor: { select: { name: true, department: { select: { name: true } } } },
+      doctor: { select: { firstName: true, lastName: true, department: { select: { name: true } } } },
       visitType: { select: { name: true } },
     },
   });
@@ -81,7 +81,7 @@ export async function updateAppointment(id, data) {
     },
     include: {
       patient: { select: { firstName: true, lastName: true } },
-      doctor: { select: { name: true, department: { select: { name: true } } } },
+      doctor: { select: { firstName: true, lastName: true, department: { select: { name: true } } } },
       visitType: { select: { name: true } },
     },
   });
@@ -101,7 +101,7 @@ export async function getPatients() {
 
 export async function getDoctors() {
   return prisma.doctor.findMany({
-    select: { id: true, name: true, department: { select: { name: true } } },
+    select: { id: true, firstName: true, lastName: true, department: { select: { name: true } } },
   });
 }
 
