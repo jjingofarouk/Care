@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { Typography, Button } from '@mui/material';
 import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import AppointmentFilter from '@/components/appointments/AppointmentFilter';
@@ -33,16 +34,19 @@ export default function AppointmentsPage() {
   }, []);
 
   return (
-    <div className="max-w-full mx-auto p-1 sm:p-2">
+    <div className="max-w-full mx-auto p-2 sm:p-4">
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--hospital-gray-900)]">
+        <Typography variant="h4" className="text-[var(--hospital-gray-900)] font-bold">
           Appointments
-        </h1>
+        </Typography>
         <Link href="/appointments/new">
-          <button className="btn btn-primary">
-            <PlusCircle className="w-4 h-4 mr-2" />
+          <Button 
+            variant="contained" 
+            className="btn-primary"
+            startIcon={<PlusCircle className="h-5 w-5" />}
+          >
             New Appointment
-          </button>
+          </Button>
         </Link>
       </div>
       <AppointmentStats />
