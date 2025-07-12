@@ -1,17 +1,31 @@
-// Represents a patient's medical record
+// medical-records.prisma
+
 model MedicalRecord {
-  id            String       @id @default(uuid())
-  patientId     String
-  patient       Patient      @relation("PatientMedicalRecords", fields: [patientId], references: [id], onDelete: Cascade)
-  recordDate    DateTime
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  allergies     Allergy[]    @relation("MedicalRecordAllergies")
-  diagnoses     Diagnosis[]  @relation("MedicalRecordDiagnoses")
-  vitalSigns    VitalSign[]  @relation("MedicalRecordVitalSigns")
+  id                 String              @id @default(uuid())
+  patientId          String
+  patient            Patient             @relation("PatientMedicalRecords", fields: [patientId], references: [id], onDelete: Cascade)
+  recordDate         DateTime
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  // Relations to clinical data
+  allergies          Allergy[]           @relation("MedicalRecordAllergies")
+  diagnoses          Diagnosis[]         @relation("MedicalRecordDiagnoses")
+  vitalSigns         VitalSign[]         @relation("MedicalRecordVitalSigns")
+
+  // History taking (1:1 or 1:N)
+  chiefComplaint     ChiefComplaint?
+  presentIllness     PresentIllness?
+  pastConditions     PastMedicalCondition[]
+  surgicalHistory    SurgicalHistory[]
+  familyHistory      FamilyHistory[]
+  medicationHistory  MedicationHistory[]
+  socialHistory      SocialHistory?
+  reviewOfSystems    ReviewOfSystems[]
+  immunizations      Immunization[]
+  travelHistory      TravelHistory[]
 }
 
-// Represents a patient's allergies
 model Allergy {
   id              String        @id @default(uuid())
   medicalRecordId String
@@ -22,7 +36,6 @@ model Allergy {
   updatedAt       DateTime      @updatedAt
 }
 
-// Represents a diagnosis in a medical record
 model Diagnosis {
   id              String        @id @default(uuid())
   medicalRecordId String
@@ -34,7 +47,6 @@ model Diagnosis {
   updatedAt       DateTime      @updatedAt
 }
 
-// Represents vital signs recorded for a patient
 model VitalSign {
   id              String        @id @default(uuid())
   medicalRecordId String
@@ -42,6 +54,8 @@ model VitalSign {
   bloodPressure   String?
   heartRate       Int?
   temperature     Float?
+  respiratoryRate Int?
+  oxygenSaturation Float?
   recordedAt      DateTime
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
