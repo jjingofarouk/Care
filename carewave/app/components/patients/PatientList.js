@@ -21,12 +21,18 @@ export default function PatientList() {
     setLoading(true);
     try {
       const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
-      if (!response.ok) throw new Error('Failed to fetch patients');
+      if (!response.ok) throw new Error(`Failed to fetch patients: ${response.status}`);
       const data = await response.json();
-      setPatients(data.map(patient => ({
-        ...patient,
-        id: patient.id,
-      })));
+      console.log('Fetched patients:', data);
+      if (!Array.isArray(data)) {
+        throw new Error('API response is not an array');
+      }
+      setPatients(
+        data.map((patient) => ({
+          ...patient,
+          id: patient.id || '',
+        }))
+      );
     } catch (error) {
       console.error('Failed to fetch patients:', error);
     } finally {
@@ -35,10 +41,14 @@ export default function PatientList() {
   };
 
   const handleDelete = async (id) => {
+    if (!id) {
+      console.error('Delete attempted with invalid ID');
+      return;
+    }
     if (window.confirm('Are you sure you want to delete this patient?')) {
       try {
         const response = await fetch(`/api/patients/${id}`, { method: 'DELETE' });
-        if (!response.ok) throw new Error('Failed to delete patient');
+        if (!response.ok) throw new Error(`Failed to delete patient: ${response.status}`);
         fetchPatients();
       } catch (error) {
         console.error('Failed to delete patient:', error);
@@ -57,7 +67,9 @@ export default function PatientList() {
       width: 100,
       flex: 0.5,
       valueGetter: ({ row }) => {
+        if (!row || !row.dateOfBirth) return '-';
         const dob = new Date(row.dateOfBirth);
+        if (isNaN(dob.getTime())) return '-';
         return Math.floor((Date.now() - dob) / (365.25 * 24 * 60 * 60 * 1000));
       },
     },
@@ -68,8 +80,9 @@ export default function PatientList() {
       width: 200,
       flex: 1.5,
       valueGetter: ({ row }) => {
-        const addr = row.addresses?.[0];
-        return addr ? `${addr.street}, ${addr.city}, ${addr.country}` : '-';
+        if (!row || !row.addresses || !Array.isArray(row.addresses) || row.addresses.length === 0) return '-';
+        const addr = row.addresses[0];
+        return addr ? `${addr.street || ''}, ${addr.city || ''}, ${addr.country || ''}` : '-';
       },
     },
     {
@@ -77,14 +90,20 @@ export default function PatientList() {
       headerName: 'Next of Kin',
       width: 150,
       flex: 1,
-      valueGetter: ({ row }) => (row.nextOfKin ? `${row.nextOfKin.firstName} ${row.nextOfKin.lastName}` : '-'),
+      valueGetter: ({ row }) => {
+        if (!row || !row.nextOfKin) return '-';
+        return `${row.nextOfKin.firstName || ''} ${row.nextOfKin.lastName || ''}`;
+      },
     },
     {
       field: 'insurance',
       headerName: 'Insurance',
       width: 150,
       flex: 1,
-      valueGetter: ({ row }) => (row.insuranceInfo ? row.insuranceInfo.provider : '-'),
+      valueGetter: ({ row }) => {
+        if (!row || !row.insuranceInfo) return '-';
+        return row.insuranceInfo.provider || '-';
+      },
     },
     {
       field: 'actions',
@@ -92,24 +111,27 @@ export default function PatientList() {
       width: 120,
       flex: 0.5,
       sortable: false,
-      renderCell: ({ row }) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton
-            color="primary"
-            onClick={() => router.push(`/patients/edit/${row.id}`)}
-            size="small"
-          >
-            <Edit />
-          </IconButton>
-          <IconButton
-            color="error"
-            onClick={() => handleDelete(row.id)}
-            size="small"
-          >
-            <Delete />
-          </IconButton>
-        </Box>
-      ),
+      renderCell: ({ row }) => {
+        if (!row || !row.id) return null;
+        return (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <IconButton
+              color="primary"
+              onClick={() => router.push(`/patients/edit/${row.id}`)}
+              size="small"
+            >
+              <Edit />
+            </IconButton>
+            <IconButton
+              color="error"
+              onClick={() => handleDelete(row.id)}
+              size="small"
+            >
+              <Delete />
+            </IconButton>
+          </Box>
+        );
+      },
     },
   ];
 
