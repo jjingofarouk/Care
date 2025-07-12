@@ -28,17 +28,17 @@ const DoctorsLayout = ({ children }) => {
         router.push('/doctors/specializations');
         break;
       case 3:
-        router.push('/25
+        router.push('/doctors/leaves');
         break;
     }
   };
 
   return (
     <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
-      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4 lg:px-6">
+      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4">
         <Box sx={{
           borderBottom: '1px solid var(--hospital-gray-200)',
-          mb: 2,
+          mb: 1,
           '& .MuiTabs-root': {
             backgroundColor: 'var(--hospital-white)',
             borderRadius: '0.5rem',
@@ -48,7 +48,7 @@ const DoctorsLayout = ({ children }) => {
             color: 'var(--hospital-gray-700)',
             fontSize: '0.875rem',
             fontWeight: 500,
-            padding: '0.5rem 1rem',
+            padding: '0.25rem 0.75rem',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
             transition: 'all var(--transition-normal)',
