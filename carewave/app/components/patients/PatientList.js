@@ -3,8 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { TextField, Button, Box, Typography, CircularProgress, IconButton } from '@mui/material';
-import { Search, Add, Edit, Delete } from '@mui/icons-material';
+import { TextField, Button, Box, Typography, CircularProgress, IconButton, Chip } from '@mui/material';
+import { Search, Add, Edit, Delete, Visibility } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
 export default function PatientList() {
@@ -22,7 +22,8 @@ export default function PatientList() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}`);
+      // Include related data in the API call
+      const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
       if (!response.ok) {
         throw new Error(`Failed to fetch patients: ${response.status} ${response.statusText}`);
       }
@@ -37,12 +38,15 @@ export default function PatientList() {
         throw new Error('API response is not an array');
       }
       
-      // Map and validate patient data
+      // Map and validate patient data with additional fields
       const validatedPatients = data.map((patient) => {
         if (!patient || typeof patient !== 'object') {
           console.warn('Invalid patient data:', patient);
           return null;
         }
+        
+        // Get primary address
+        const primaryAddress = patient.addresses?.[0];
         
         return {
           id: patient.id || '',
@@ -54,7 +58,27 @@ export default function PatientList() {
           phone: patient.phone || '',
           createdAt: patient.createdAt || '',
           updatedAt: patient.updatedAt || '',
-          userId: patient.userId || null
+          userId: patient.userId || null,
+          // Address information
+          address: primaryAddress ? {
+            street: primaryAddress.street || '',
+            city: primaryAddress.city || '',
+            country: primaryAddress.country || '',
+            postalCode: primaryAddress.postalCode || ''
+          } : null,
+          // Next of kin information
+          nextOfKin: patient.nextOfKin ? {
+            name: `${patient.nextOfKin.firstName || ''} ${patient.nextOfKin.lastName || ''}`.trim(),
+            relationship: patient.nextOfKin.relationship || '',
+            phone: patient.nextOfKin.phone || '',
+            email: patient.nextOfKin.email || ''
+          } : null,
+          // Insurance information
+          insurance: patient.insuranceInfo ? {
+            provider: patient.insuranceInfo.provider || '',
+            policyNumber: patient.insuranceInfo.policyNumber || '',
+            expiryDate: patient.insuranceInfo.expiryDate || null
+          } : null
         };
       }).filter(Boolean); // Remove null entries
       
@@ -108,6 +132,18 @@ export default function PatientList() {
     }
   };
 
+  const formatAddress = (address) => {
+    if (!address) return '-';
+    
+    const parts = [
+      address.street,
+      address.city,
+      address.country
+    ].filter(Boolean);
+    
+    return parts.length > 0 ? parts.join(', ') : '-';
+  };
+
   const columns = [
     { 
       field: 'id', 
@@ -118,28 +154,27 @@ export default function PatientList() {
     { 
       field: 'firstName', 
       headerName: 'First Name', 
-      width: 150,
+      width: 130,
       sortable: true 
     },
     { 
       field: 'lastName', 
       headerName: 'Last Name', 
-      width: 150,
+      width: 130,
       sortable: true 
     },
     { 
       field: 'email', 
       headerName: 'Email', 
-      width: 200,
+      width: 180,
       sortable: true 
     },
     {
       field: 'age',
       headerName: 'Age',
-      width: 100,
+      width: 80,
       sortable: true,
       valueGetter: (params) => {
-        // Safe destructuring with fallback
         const row = params?.row || params;
         return calculateAge(row?.dateOfBirth);
       },
@@ -153,17 +188,109 @@ export default function PatientList() {
     { 
       field: 'phone', 
       headerName: 'Phone', 
-      width: 150,
+      width: 130,
       sortable: true 
+    },
+    {
+      field: 'address',
+      headerName: 'Address',
+      width: 200,
+      sortable: false,
+      renderCell: (params) => {
+        const row = params?.row || params;
+        return (
+          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+            {formatAddress(row?.address)}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: 'nextOfKin',
+      headerName: 'Next of Kin',
+      width: 150,
+      sortable: false,
+      renderCell: (params) => {
+        const row = params?.row || params;
+        const nextOfKin = row?.nextOfKin;
+        
+        if (!nextOfKin || !nextOfKin.name) {
+          return <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'grey.500' }}>-</Typography>;
+        }
+        
+        return (
+          <Box>
+            <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 'medium' }}>
+              {nextOfKin.name}
+            </Typography>
+            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'grey.600' }}>
+              {nextOfKin.relationship}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'insurance',
+      headerName: 'Insurance',
+      width: 150,
+      sortable: false,
+      renderCell: (params) => {
+        const row = params?.row || params;
+        const insurance = row?.insurance;
+        
+        if (!insurance || !insurance.provider) {
+          return <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'grey.500' }}>-</Typography>;
+        }
+        
+        const isExpired = insurance.expiryDate && new Date(insurance.expiryDate) < new Date();
+        
+        return (
+          <Box>
+            <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 'medium' }}>
+              {insurance.provider}
+            </Typography>
+            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'grey.600' }}>
+              {insurance.policyNumber}
+            </Typography>
+            {isExpired && (
+              <Chip 
+                label="Expired" 
+                size="small" 
+                color="error" 
+                sx={{ fontSize: '0.6rem', height: '16px', mt: 0.5 }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'hasUserAccount',
+      headerName: 'User Account',
+      width: 120,
+      sortable: true,
+      renderCell: (params) => {
+        const row = params?.row || params;
+        const hasAccount = !!row?.userId;
+        
+        return (
+          <Chip
+            label={hasAccount ? 'Yes' : 'No'}
+            size="small"
+            color={hasAccount ? 'success' : 'default'}
+            sx={{ fontSize: '0.75rem' }}
+          />
+        );
+      },
     },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 120,
+      width: 150,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
-        // Safe destructuring with fallback
         const row = params?.row || params;
         const patientId = row?.id;
         
@@ -172,7 +299,15 @@ export default function PatientList() {
         }
         
         return (
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <IconButton
+              color="info"
+              onClick={() => router.push(`/patients/${patientId}`)}
+              size="small"
+              title="View Patient"
+            >
+              <Visibility />
+            </IconButton>
             <IconButton
               color="primary"
               onClick={() => router.push(`/patients/edit/${patientId}`)}
