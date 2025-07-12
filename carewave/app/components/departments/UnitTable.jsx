@@ -1,10 +1,10 @@
+'use client';
 import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
 export default function UnitTable({ units, onEdit, onDelete }) {
- 參加
   const columns = [
     { field: 'name', headerName: 'Name', flex: 1 },
     {
