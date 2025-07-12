@@ -15,7 +15,7 @@ export async function getDoctors(departmentId) {
 
 export async function getDoctor(id) {
   try {
-    const response = await axios.get(`${BASE_URL}?id=${id}`);
+    const response = await axios.get(`${BASE_URL}/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching doctor:', error);
@@ -35,7 +35,7 @@ export async function createDoctor(data) {
 
 export async function updateDoctor(id, data) {
   try {
-    const response = await axios.put(`${BASE_URL}?id=${id}`, data);
+    const response = await axios.put(`${BASE_URL}/${id}`, data);
     return response.data;
   } catch (error) {
     console.error('Error updating doctor:', error);
@@ -45,7 +45,7 @@ export async function updateDoctor(id, data) {
 
 export async function deleteDoctor(id) {
   try {
-    const response = await axios.delete(`${BASE_URL}?id=${id}`);
+    const response = await axios.delete(`${BASE_URL}/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting doctor:', error);
@@ -64,6 +64,16 @@ export async function getSchedules(doctorId) {
   }
 }
 
+export async function getSchedule(id) {
+  try {
+    const response = await axios.get(`${BASE_URL}/schedules/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching schedule:', error);
+    throw error;
+  }
+}
+
 export async function createSchedule(data) {
   try {
     const response = await axios.post(`${BASE_URL}/schedules`, data);
@@ -76,7 +86,7 @@ export async function createSchedule(data) {
 
 export async function updateSchedule(id, data) {
   try {
-    const response = await axios.put(`${BASE_URL}/schedules?id=${id}`, data);
+    const response = await axios.put(`${BASE_URL}/schedules/${id}`, data);
     return response.data;
   } catch (error) {
     console.error('Error updating schedule:', error);
@@ -86,7 +96,7 @@ export async function updateSchedule(id, data) {
 
 export async function deleteSchedule(id) {
   try {
-    const response = await axios.delete(`${BASE_URL}/schedules?id=${id}`);
+    const response = await axios.delete(`${BASE_URL}/schedules/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting schedule:', error);
@@ -105,6 +115,16 @@ export async function getLeaves(doctorId) {
   }
 }
 
+export async function getLeave(id) {
+  try {
+    const response = await axios.get(`${BASE_URL}/leaves/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching leave:', error);
+    throw error;
+  }
+}
+
 export async function createLeave(data) {
   try {
     const response = await axios.post(`${BASE_URL}/leaves`, data);
@@ -117,7 +137,7 @@ export async function createLeave(data) {
 
 export async function updateLeave(id, data) {
   try {
-    const response = await axios.put(`${BASE_URL}/leaves?id=${id}`, data);
+    const response = await axios.put(`${BASE_URL}/leaves/${id}`, data);
     return response.data;
   } catch (error) {
     console.error('Error updating leave:', error);
@@ -127,7 +147,7 @@ export async function updateLeave(id, data) {
 
 export async function deleteLeave(id) {
   try {
-    const response = await axios.delete(`${BASE_URL}/leaves?id=${id}`);
+    const response = await axios.delete(`${BASE_URL}/leaves/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting leave:', error);
@@ -145,6 +165,16 @@ export async function getSpecializations() {
   }
 }
 
+export async function getSpecialization(id) {
+  try {
+    const response = await axios.get(`${BASE_URL}/specializations/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching specialization:', error);
+    throw error;
+  }
+}
+
 export async function createSpecialization(data) {
   try {
     const response = await axios.post(`${BASE_URL}/specializations`, data);
@@ -157,7 +187,7 @@ export async function createSpecialization(data) {
 
 export async function updateSpecialization(id, data) {
   try {
-    const response = await axios.put(`${BASE_URL}/specializations?id=${id}`, data);
+    const response = await axios.put(`${BASE_URL}/specializations/${id}`, data);
     return response.data;
   } catch (error) {
     console.error('Error updating specialization:', error);
@@ -167,7 +197,7 @@ export async function updateSpecialization(id, data) {
 
 export async function deleteSpecialization(id) {
   try {
-    const response = await axios.delete(`${BASE_URL}/specializations?id=${id}`);
+    const response = await axios.delete(`${BASE_URL}/specializations/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting specialization:', error);
