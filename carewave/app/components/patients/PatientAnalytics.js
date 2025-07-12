@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, CircularProgress } from '@mui/material';
 
 export default function PatientAnalytics() {
   const [analytics, setAnalytics] = useState({ gender: {}, age: {}, insurance: {} });
@@ -52,133 +51,186 @@ export default function PatientAnalytics() {
     }
   };
 
-  const genderChart = {
-    type: 'bar',
-    data: {
-      labels: Object.keys(analytics.gender),
-      datasets: [{
-        label: 'Gender Distribution',
-        data: Object.values(analytics.gender),
-        backgroundColor: '#2196F3',
-        borderColor: '#1976D2',
-        borderWidth: 1,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { 
-          position: 'top',
-          labels: { font: { size: 12 } }
-        },
-        title: { 
-          display: true, 
-          text: 'Patient Gender Distribution',
-          font: { size: 16 },
-          padding: { bottom: 20 }
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Number of Patients' }
-        }
-      }
-    }
-  };
-
-  const ageChart = {
-    type: 'bar',
-    data: {
-      labels: Object.keys(analytics.age),
-      datasets: [{
-        label: 'Age Distribution',
-        data: Object.values(analytics.age),
-        backgroundColor: '#4CAF50',
-        borderColor: '#388E3C',
-        borderWidth: 1,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { 
-          position: 'top',
-          labels: { font: { size: 12 } }
-        },
-        title: { 
-          display: true, 
-          text: 'Patient Age Distribution',
-          font: { size: 16 },
-          padding: { bottom: 20 }
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Number of Patients' }
-        }
-      }
-    }
-  };
-
-  const insuranceChart = {
-    type: 'pie',
-    data: {
-      labels: Object.keys(analytics.insurance),
-      datasets: [{
-        label: 'Insurance Distribution',
-        data: Object.values(analytics.insurance),
-        backgroundColor: ['#FF9800', '#F44336', '#9C27B0', '#3F51B5'],
-        borderColor: ['#FB8C00', '#D32F2F', '#7B1FA2', '#303F9F'],
-        borderWidth: 1,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { 
-          position: 'top',
-          labels: { font: { size: 12 } }
-        },
-        title: { 
-          display: true, 
-          text: 'Patient Insurance Distribution',
-          font: { size: 16 },
-          padding: { bottom: 20 }
-        },
-      }
-    }
-  };
-
   return (
-    <Box sx={{ p: 4, maxWidth: '100%', overflowX: 'auto' }}>
-      <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold', mb: 4 }}>
-        Patient Analytics
-      </Typography>
+    <div className="card p-4 max-w-[100vw] overflow-x-auto min-h-screen">
+      <h1 className="card-title mb-4">Patient Analytics</h1>
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center p-4">
+          <div className="loading-spinner" />
+        </div>
       ) : (
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
-          <Paper sx={{ p: 3, height: 400, borderRadius: 2, boxShadow: 1 }}>
-            <canvas id="genderChart" />
-            <script type="chartjs">{JSON.stringify(genderChart)}</script>
-          </Paper>
-          <Paper sx={{ p: 3, height: 400, borderRadius: 2, boxShadow: 1 }}>
-            <canvas id="ageChart" />
-            <script type="chartjs">{JSON.stringify(ageChart)}</script>
-          </Paper>
-          <Paper sx={{ p: 3, height: 400, borderRadius: 2, boxShadow: 1, gridColumn: { xs: '1 / -1', md: '1 / 2' } }}>
-            <canvas id="insuranceChart" />
-            <script type="chartjs">{JSON.stringify(insuranceChart)}</script>
-          </Paper>
-        </Box>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="bg-[var(--hospital-white)] rounded-xl p-3 shadow-[var(--shadow-sm)]">
+            ```chartjs
+            {
+              "type": "bar",
+              "data": {
+                "labels": Object.keys(analytics.gender),
+                "datasets": [{
+                  "label": "Gender Distribution",
+                  "data": Object.values(analytics.gender),
+                  "backgroundColor": "var(--hospital-accent)",
+                  "borderColor": "var(--hospital-accent-dark)",
+                  "borderWidth": 1
+                }]
+              },
+              "options": {
+                "responsive": true,
+                "maintainAspectRatio": false,
+                "plugins": {
+                  "legend": {
+                    "position": "top",
+                    "labels": {
+                      "font": { "size": 12 },
+                      "color": "var(--text-primary)"
+                    }
+                  },
+                  "title": {
+                    "display": true,
+                    "text": "Patient Gender Distribution",
+                    "font": { "size": 16 },
+                    "color": "var(--hospital-gray-900)",
+                    "padding": { "bottom": 12 }
+                  }
+                },
+                "scales": {
+                  "y": {
+                    "beginAtZero": true,
+                    "title": {
+                      "display": true,
+                      "text": "Number of Patients",
+                      "color": "var(--hospital-gray-700)",
+                      "font": { "size": 12 }
+                    },
+                    "grid": { "color": "var(--hospital-gray-200)" },
+                    "ticks": { "color": "var(--text-primary)" }
+                  },
+                  "x": {
+                    "title": {
+                      "display": true,
+                      "text": "Gender",
+                      "color": "var(--hospital-gray-700)",
+                      "font": { "size": 12 }
+                    },
+                    "grid": { "display": false },
+                    "ticks": { "color": "var(--text-primary)" }
+                  }
+                }
+              }
+            }
+            ```
+          </div>
+          <div className="bg-[var(--hospital-white)] rounded-xl p-3 shadow-[var(--shadow-sm)]">
+            ```chartjs
+            {
+              "type": "bar",
+              "data": {
+                "labels": Object.keys(analytics.age),
+                "datasets": [{
+                  "label": "Age Distribution",
+                  "data": Object.values(analytics.age),
+                  "backgroundColor": "var(--hospital-stable)",
+                  "borderColor": "var(--hospital-accent-dark)",
+                  "borderWidth": 1
+                }]
+              },
+              "options": {
+                "responsive": true,
+                "maintainAspectRatio": false,
+                "plugins": {
+                  "legend": {
+                    "position": "top",
+                    "labels": {
+                      "font": { "size": 12 },
+                      "color": "var(--text-primary)"
+                    }
+                  },
+                  "title": {
+                    "display": true,
+                    "text": "Patient Age Distribution",
+                    "font": { "size": 16 },
+                    "color": "var(--hospital-gray-900)",
+                    "padding": { "bottom": 12 }
+                  }
+                },
+                "scales": {
+                  "y": {
+                    "beginAtZero": true,
+                    "title": {
+                      "display": true,
+                      "text": "Number of Patients",
+                      "color": "var(--hospital-gray-700)",
+                      "font": { "size": 12 }
+                    },
+                    "grid": { "color": "var(--hospital-gray-200)" },
+                    "ticks": { "color": "var(--text-primary)" }
+                  },
+                  "x": {
+                    "title": {
+                      "display": true,
+                      "text": "Age Group",
+                      "color": "var(--hospital-gray-700)",
+                      "font": { "size": 12 }
+                    },
+                    "grid": { "display": false },
+                    "ticks": { "color": "var(--text-primary)" }
+                  }
+                }
+              }
+            }
+            ```
+          </div>
+          <div className="bg-[var(--hospital-white)] rounded-xl p-3 shadow-[var(--shadow-sm)] md:col-span-1">
+            ```chartjs
+            {
+              "type": "pie",
+              "data": {
+                "labels": Object.keys(analytics.insurance),
+                "datasets": [{
+                  "label": "Insurance Distribution",
+                  "data": Object.values(analytics.insurance),
+                  "backgroundColor": [
+                    "var(--hospital-accent)",
+                    "var(--hospital-error)",
+                    "var(--role-doctor)",
+                    "var(--hospital-info)",
+                    "var(--hospital-gray-400)"
+                  ],
+                  "borderColor": [
+                    "var(--hospital-accent-dark)",
+                    "var(--hospital-critical)",
+                    "var(--role-doctor)",
+                    "var(--hospital-info)",
+                    "var(--hospital-gray-500)"
+                  ],
+                  "borderWidth": 1
+                }]
+              },
+              "options": {
+                "responsive": true,
+                "maintainAspectRatio": false,
+                "plugins": {
+                  "legend": {
+                    "position": "top",
+                    "labels": {
+                      "font": { "size": 12 },
+                      "color": "var(--text-primary)"
+                    }
+                  },
+                  "title": {
+                    "display": true,
+                    "text": "Patient Insurance Distribution",
+                    "font": { "size": 16 },
+                    "color": "var(--hospital-gray-900)",
+                    "padding": { "bottom": 12 }
+                  }
+                }
+              }
+            }
+            ```
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
