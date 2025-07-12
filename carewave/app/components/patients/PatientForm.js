@@ -1,19 +1,7 @@
-// components/patients/PatientForm.js
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  MenuItem,
-  CircularProgress,
-  Grid,
-  Paper,
-  FormControlLabel,
-  Checkbox,
-} from '@mui/material';
+import { Search } from '@mui/icons-material';
 import { useRouter, useParams } from 'next/navigation';
 
 export default function PatientForm() {
@@ -115,265 +103,291 @@ export default function PatientForm() {
   };
 
   return (
-    <Box sx={{ p: 4, maxWidth: '100%', overflowX: 'auto' }}>
-      <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold', mb: 4 }}>
-        {isEdit ? 'Edit Patient' : 'New Patient'}
-      </Typography>
-      <Paper sx={{ p: 4, borderRadius: 2, boxShadow: 1 }}>
+    <div className="card p-4 max-w-[100vw] overflow-x-auto min-h-screen">
+      <h1 className="card-title mb-4">{isEdit ? 'Edit Patient' : 'New Patient'}</h1>
+      <div className="bg-[var(--hospital-white)] rounded-xl p-4 shadow-[var(--shadow-sm)]">
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
-          </Box>
+          <div className="flex justify-center p-4">
+            <div className="loading-spinner" />
+          </div>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <Typography color="error" sx={{ mb: 2 }}>
-                {error}
-              </Typography>
+              <div className="alert alert-error">
+                <span>{error}</span>
+              </div>
             )}
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="First Name"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  First Name *
+                </label>
+                <input
+                  type="text"
                   name="firstName"
                   value={formData.firstName}
                   onChange={(e) => handleChange(e)}
-                  fullWidth
+                  className="input w-full"
                   required
-                  sx={{ mb: 2 }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Last Name"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={(e) => handleChange(e)}
-                  fullWidth
+                  className="input w-full"
                   required
-                  sx={{ mb: 2 }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Date of Birth"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Date of Birth *
+                </label>
+                <input
                   type="date"
                   name="dateOfBirth"
                   value={formData.dateOfBirth}
                   onChange={(e) => handleChange(e)}
-                  fullWidth
+                  className="input w-full"
                   required
-                  InputLabelProps={{ shrink: true }}
-                  sx={{ mb: 2 }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Gender"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Gender
+                </label>
+                <select
                   name="gender"
                   value={formData.gender}
                   onChange={(e) => handleChange(e)}
-                  select
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="select w-full"
                 >
-                  <MenuItem value="Male">Male</MenuItem>
-                  <MenuItem value="Female">Female</MenuItem>
-                  <MenuItem value="Other">Other</MenuItem>
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Phone"
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Phone
+                </label>
+                <input
+                  type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={(e) => handleChange(e)}
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Email"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
                   name="email"
                   value={formData.email}
                   onChange={(e) => handleChange(e)}
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.createUser}
-                      onChange={(e) => setFormData({ ...formData, createUser: e.target.checked })}
-                    />
-                  }
-                  label="Create User Account"
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  <input
+                    type="checkbox"
+                    checked={formData.createUser}
+                    onChange={(e) => setFormData({ ...formData, createUser: e.target.checked })}
+                    className="rounded border-[var(--hospital-gray-300)] text-[var(--hospital-accent)] focus:ring-[var(--hospital-accent)]"
+                  />
+                  Create User Account
+                </label>
+              </div>
               {formData.createUser && (
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Password"
+                <div>
+                  <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                    Password *
+                  </label>
+                  <input
                     type="password"
                     name="password"
                     value={formData.password}
                     onChange={(e) => handleChange(e)}
-                    fullWidth
+                    className="input w-full"
                     required={formData.createUser}
-                    sx={{ mb: 2 }}
                   />
-                </Grid>
+                </div>
               )}
-              <Grid item xs={12}>
-                <Typography variant="h6" sx={{ fontWeight: 'medium', mt: 3, mb: 2 }}>
-                  Address
-                </Typography>
-              </Grid>
+              <div className="col-span-full">
+                <h2 className="text-lg font-semibold text-[var(--hospital-gray-900)] mt-4 mb-2">Address</h2>
+              </div>
               {formData.addresses.map((address, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Street"
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" key={index}>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                      Street
+                    </label>
+                    <input
+                      type="text"
                       value={address.street}
                       onChange={(e) => handleAddressChange(index, 'street', e.target.value)}
-                      fullWidth
+                      className="input w-full"
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="City"
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                      City
+                    </label>
+                    <input
+                      type="text"
                       value={address.city}
                       onChange={(e) => handleAddressChange(index, 'city', e.target.value)}
-                      fullWidth
+                      className="input w-full"
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Country"
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                      Country
+                    </label>
+                    <input
+                      type="text"
                       value={address.country}
                       onChange={(e) => handleAddressChange(index, 'country', e.target.value)}
-                      fullWidth
+                      className="input w-full"
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Postal Code"
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                      Postal Code
+                    </label>
+                    <input
+                      type="text"
                       value={address.postalCode}
                       onChange={(e) => handleAddressChange(index, 'postalCode', e.target.value)}
-                      fullWidth
+                      className="input w-full"
                     />
-                  </Grid>
-                </Grid>
+                  </div>
+                </div>
               ))}
-              <Grid item xs={12}>
-                <Typography variant="h6" sx={{ fontWeight: 'medium', mt: 3, mb: 2 }}>
-                  Next of Kin
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="First Name"
+              <div className="col-span-full">
+                <h2 className="text-lg font-semibold text-[var(--hospital-gray-900)] mt-4 mb-2">Next of Kin</h2>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  First Name
+                </label>
+                <input
+                  type="text"
                   value={formData.nextOfKin.firstName}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'firstName')}
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Last Name"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Last Name
+                </label>
+                <input
+                  type="text"
                   value={formData.nextOfKin.lastName}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'lastName')}
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Relationship"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Relationship
+                </label>
+                <input
+                  type="text"
                   value={formData.nextOfKin.relationship}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'relationship')}
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Phone"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Phone
+                </label>
+                <input
+                  type="tel"
                   value={formData.nextOfKin.phone}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'phone')}
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Email"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
                   value={formData.nextOfKin.email}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'email')}
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="h6" sx={{ fontWeight: 'medium', mt: 3, mb: 2 }}>
-                  Insurance Information
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Provider"
+              </div>
+              <div className="col-span-full">
+                <h2 className="text-lg font-semibold text-[var(--hospital-gray-900)] mt-4 mb-2">Insurance Information</h2>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Provider
+                </label>
+                <input
+                  type="text"
                   value={formData.insuranceInfo.provider}
                   onChange={(e) => handleChange(e, 'insuranceInfo', 'provider')}
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Policy Number"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Policy Number
+                </label>
+                <input
+                  type="text"
                   value={formData.insuranceInfo.policyNumber}
                   onChange={(e) => handleChange(e, 'insuranceInfo', 'policyNumber')}
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Expiry Date"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">
+                  Expiry Date
+                </label>
+                <input
                   type="date"
                   value={formData.insuranceInfo.expiryDate}
                   onChange={(e) => handleChange(e, 'insuranceInfo', 'expiryDate')}
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  sx={{ mb: 2 }}
+                  className="input w-full"
                 />
-              </Grid>
-            </Grid>
-            <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
-              <Button
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
                 type="submit"
-                variant="contained"
+                className="btn btn-primary"
                 disabled={loading}
-                sx={{ bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
               >
-                {loading ? <CircularProgress size={24} /> : (isEdit ? 'Update' : 'Create')}
-              </Button>
-              <Button
-                variant="outlined"
+                {loading ? <div className="loading-spinner !h-6 !w-6" /> : (isEdit ? 'Update' : 'Create')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline"
                 onClick={() => router.push('/patients')}
-                sx={{ borderColor: 'grey.500', color: 'grey.700' }}
               >
                 Cancel
-              </Button>
-            </Box>
+              </button>
+            </div>
           </form>
         )}
-      </Paper>
-    </Box>
+      </div>
+    </div>
   );
 }
