@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, Typography } from '@mui/material';
+import { Card, CardHeader, Typography, Box } from '@mui/material';
 import { Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -54,10 +54,10 @@ export default function AppointmentStats() {
         label: 'Appointment Status',
         data: [stats.pending, stats.confirmed, stats.cancelled, stats.completed],
         backgroundColor: [
-          'var(--hospital-warning)',
-          'var(--hospital-success)',
-          'var(--hospital-error)',
-          'var(--hospital-info)',
+          'var(--hospital-warning)', // Amber for Pending
+          'var(--hospital-success)', // Green for Confirmed
+          'var(--hospital-error)',   // Red for Cancelled
+          'var(--hospital-info)',    // Blue for Completed
         ],
         borderColor: [
           'var(--hospital-warning)',
@@ -65,20 +65,30 @@ export default function AppointmentStats() {
           'var(--hospital-error)',
           'var(--hospital-info)',
         ],
-        borderWidth: 1,
+        borderWidth: 0,
+        borderRadius: 8, // Rounded corners for bars
       },
     ],
   };
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       title: {
         display: true,
         text: 'Appointments by Status',
-        font: { size: 16, weight: 'bold' },
+        font: { size: 18, weight: '600' },
         color: 'var(--hospital-gray-900)',
+        padding: { top: 8, bottom: 16 },
+      },
+      tooltip: {
+        backgroundColor: 'var(--hospital-gray-900)',
+        titleFont: { size: 14, weight: '600' },
+        bodyFont: { size: 12 },
+        padding: 12,
+        cornerRadius: 6,
       },
     },
     scales: {
@@ -88,60 +98,72 @@ export default function AppointmentStats() {
           display: true,
           text: 'Number of Appointments',
           color: 'var(--hospital-gray-900)',
+          font: { size: 14, weight: '500' },
         },
-        grid: { color: 'var(--hospital-gray-200)' },
+        grid: { display: false }, // Remove grid lines
+        ticks: {
+          color: 'var(--hospital-gray-700)',
+          font: { size: 12 },
+        },
       },
       x: {
         title: {
           display: true,
           text: 'Status',
           color: 'var(--hospital-gray-900)',
+          font: { size: 14, weight: '500' },
         },
-        grid: { display: false },
+        grid: { display: false }, // Remove grid lines
+        ticks: {
+          color: 'var(--hospital-gray-700)',
+          font: { size: 12 },
+        },
       },
     },
   };
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-2 max-w-full mx-auto">
-      <Card className="card">
+      <Card className="card transition-all duration-300 hover:shadow-md">
         <CardHeader
-          title={<Typography className="card-title">Pending</Typography>}
-          subheader={<Typography className="card-subtitle">{stats.pending}</Typography>}
-          avatar={<Clock className="h-5 w-5 text-[var(--hospital-warning)]" />}
-          className="card-header"
+          title={<Typography className="card-title text-base font-semibold">Pending</Typography>}
+          subheader={<Typography className="card-subtitle text-2xl font-bold text-[var(--hospital-warning)]">{stats.pending}</Typography>}
+          avatar={<Clock className="h-6 w-6 text-[var(--hospital-warning)]" />}
+          className="card-header p-4"
         />
       </Card>
 
-      <Card className="card">
+      <Card className="card transition-all duration-300 hover:shadow-md">
         <CardHeader
-          title={<Typography className="card-title">Confirmed</Typography>}
-          subheader={<Typography className="card-subtitle">{stats.confirmed}</Typography>}
-          avatar={<CheckCircle className="h-5 w-5 text-[var(--hospital-success)]" />}
-          className="card-header"
+          title={<Typography className="card-title text-base font-semibold">Confirmed</Typography>}
+          subheader={<Typography className="card-subtitle text-2xl font-bold text-[var(--hospital-success)]">{stats.confirmed}</Typography>}
+          avatar={<CheckCircle className="h-6 w-6 text-[var(--hospital-success)]" />}
+          className="card-header p-4"
         />
       </Card>
 
-      <Card className="card">
+      <Card className="card transition-all duration-300 hover:shadow-md">
         <CardHeader
-          title={<Typography className="card-title">Cancelled</Typography>}
-          subheader={<Typography className="card-subtitle">{stats.cancelled}</Typography>}
-          avatar={<XCircle className="h-5 w-5 text-[var(--hospital-error)]" />}
-          className="card-header"
+          title={<Typography className="card-title text-base font-semibold">Cancelled</Typography>}
+          subheader={<Typography className="card-subtitle text-2xl font-bold text-[var(--hospital-error)]">{stats.cancelled}</Typography>}
+          avatar={<XCircle className="h-6 w-6 text-[var(--hospital-error)]" />}
+          className="card-header p-4"
         />
       </Card>
 
-      <Card className="card">
+      <Card className="card transition-all duration-300 hover:shadow-md">
         <CardHeader
-          title={<Typography className="card-title">Completed</Typography>}
-          subheader={<Typography className="card-subtitle">{stats.completed}</Typography>}
-          avatar={<Calendar className="h-5 w-5 text-[var(--hospital-info)]" />}
-          className="card-header"
+          title={<Typography className="card-title text-base font-semibold">Completed</Typography>}
+          subheader={<Typography className="card-subtitle text-2xl font-bold text-[var(--hospital-info)]">{stats.completed}</Typography>}
+          avatar={<Calendar className="h-6 w-6 text-[var(--hospital-info)]" />}
+          className="card-header p-4"
         />
       </Card>
 
       <Card className="card col-span-full p-4">
-        <Bar data={chartData} options={chartOptions} />
+        <Box className="h-[400px]">
+          <Bar data={chartData} options={chartOptions} />
+        </Box>
       </Card>
     </div>
   );
