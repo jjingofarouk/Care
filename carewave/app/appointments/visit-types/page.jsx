@@ -56,6 +56,8 @@ export default function VisitTypesPage() {
           className="btn-primary"
           startIcon={<PlusCircle />}
           onClick={() => setEditingVisitType({})}
+          component={Link}
+          href="/appointments/visit-types/new"
         >
           New Visit Type
         </Button>
