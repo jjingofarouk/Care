@@ -1,3 +1,4 @@
+// app/api/patients/[id]/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
@@ -5,7 +6,7 @@ const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const id = params.id; // Correctly access id from params
     const patient = await prisma.patient.findUnique({
       where: { id },
       include: {
@@ -33,7 +34,7 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const id = params.id; // Correctly access id from params
     const data = await request.json();
 
     if (!data.firstName || !data.lastName || !data.dateOfBirth) {
@@ -72,33 +73,41 @@ export async function PUT(request, { params }) {
         gender: data.gender || null,
         phone: data.phone || null,
         email: data.email || null,
-        addresses: data.addresses ? {
-          deleteMany: {},
-          create: data.addresses.map(addr => ({
-            street: addr.street,
-            city: addr.city,
-            country: addr.country,
-            postalCode: addr.postalCode || null,
-          })),
-        } : undefined,
-        nextOfKin: data.nextOfKin ? {
-          deleteMany: {},
-          create: {
-            firstName: data.nextOfKin.firstName,
-            lastName: data.nextOfKin.lastName,
-            relationship: data.nextOfKin.relationship,
-            phone: data.nextOfKin.phone || null,
-            email: data.nextOfKin.email || null,
-          },
-        } : undefined,
-        insuranceInfo: data.insuranceInfo ? {
-          deleteMany: {},
-          create: {
-            provider: data.insuranceInfo.provider,
-            policyNumber: data.insuranceInfo.policyNumber,
-            expiryDate: data.insuranceInfo.expiryDate ? new Date(data.insuranceInfo.expiryDate) : null,
-          },
-        } : undefined,
+        addresses: data.addresses
+          ? {
+              deleteMany: {},
+              create: data.addresses.map((addr) => ({
+                street: addr.street,
+                city: addr.city,
+                country: addr.country,
+                postalCode: addr.postalCode || null,
+              })),
+            }
+          : undefined,
+        nextOfKin: data.nextOfKin
+          ? {
+              deleteMany: {},
+              create: {
+                firstName: data.nextOfKin.firstName,
+                lastName: data.nextOfKin.lastName,
+                relationship: data.nextOfKin.relationship,
+                phone: data.nextOfKin.phone || null,
+                email: data.nextOfKin.email || null,
+              },
+            }
+          : undefined,
+        insuranceInfo: data.insuranceInfo
+          ? {
+              deleteMany: {},
+              create: {
+                provider: data.insuranceInfo.provider,
+                policyNumber: data.insuranceInfo.policyNumber,
+                expiryDate: data.insuranceInfo.expiryDate
+                  ? new Date(data.insuranceInfo.expiryDate)
+                  : null,
+              },
+            }
+          : undefined,
       },
       include: {
         addresses: true,
@@ -121,7 +130,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const id = params.id; // Correctly access id from params
     await prisma.patient.delete({
       where: { id },
     });
