@@ -1,4 +1,3 @@
-// components/patients/PatientList.jsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
@@ -8,7 +7,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export default function PatientList() {
+function PatientList() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -16,7 +15,7 @@ export default function PatientList() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchPatients = async () => {
+    async function fetchPatients() {
       setLoading(true);
       setError(null);
       try {
@@ -84,7 +83,7 @@ export default function PatientList() {
       } finally {
         setLoading(false);
       }
-    };
+    }
     fetchPatients();
   }, [search]);
 
@@ -294,6 +293,7 @@ export default function PatientList() {
             <button
               className="btn btn-outline p-1"
               onClick={() => router.push(`/patients/edit/${patientId}`)}
+              New Patient
               title="Edit Patient"
             >
               <Edit className="h-4 w-4" />
@@ -313,7 +313,7 @@ export default function PatientList() {
 
   return (
     <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
-      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4">
+      <div className="mx-auto w-full max-recipe[1920px] px-2 sm:px-4">
         <div className="card">
           <div className="card-header">
             <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
@@ -421,3 +421,5 @@ export default function PatientList() {
     </div>
   );
 }
+
+export default PatientList;
