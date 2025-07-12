@@ -1,8 +1,20 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, Typography, Box } from '@mui/material';
-import { Clock, CheckCircle, XCircle, Calendar, TrendingUp } from 'lucide-react';
-import { Bar } from 'react-chartjs-2';
+import { Typography, Box } from '@mui/material';
+import { 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  Calendar, 
+  TrendingUp, 
+  Users, 
+  Activity,
+  Calendar as CalendarIcon,
+  UserCheck,
+  BarChart3,
+  Star
+} from 'lucide-react';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Chart as ChartJS,
@@ -12,9 +24,22 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
 } from 'chart.js';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale, 
+  LinearScale, 
+  BarElement, 
+  Title, 
+  Tooltip, 
+  Legend, 
+  ArcElement,
+  PointElement,
+  LineElement
+);
 
 const NumberCounter = ({ endValue, duration = 2 }) => {
   const [count, setCount] = useState(0);
@@ -38,7 +63,7 @@ const NumberCounter = ({ endValue, duration = 2 }) => {
   return <span>{count}</span>;
 };
 
-const StatCard = ({ title, value, icon: Icon, color, delay = 0, trend = null }) => {
+const StatCard = ({ title, value, icon: Icon, color, delay = 0, trend = null, subtitle = null }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -116,11 +141,16 @@ const StatCard = ({ title, value, icon: Icon, color, delay = 0, trend = null }) 
                 {title}
               </Typography>
               <Typography 
-                className="text-3xl font-bold"
+                className="text-3xl font-bold mb-1"
                 style={{ color }}
               >
                 <NumberCounter endValue={value} duration={1.5} />
               </Typography>
+              {subtitle && (
+                <Typography className="text-xs text-gray-500">
+                  {subtitle}
+                </Typography>
+              )}
             </motion.div>
           </div>
           
@@ -133,6 +163,23 @@ const StatCard = ({ title, value, icon: Icon, color, delay = 0, trend = null }) 
   );
 };
 
+const ChartCard = ({ title, children, delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6, delay }}
+    className="relative bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl"
+  >
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-pink-50/30 rounded-3xl" />
+    <div className="relative z-10">
+      <Typography variant="h6" className="text-lg font-semibold text-gray-800 mb-6">
+        {title}
+      </Typography>
+      {children}
+    </div>
+  </motion.div>
+);
+
 export default function AppointmentStats() {
   const [stats, setStats] = useState({
     pending: 0,
@@ -142,59 +189,243 @@ export default function AppointmentStats() {
     totalAppointments: 0,
     todayAppointments: 0,
     thisWeekAppointments: 0,
+    thisMonthAppointments: 0,
     topDepartments: [],
     topVisitTypes: [],
+    topDoctors: [],
     avgAppointmentsPerDay: 0,
     busyDays: [],
     doctorUtilization: [],
+    completionRate: 0,
+    cancellationRate: 0,
+    noShowRate: 0,
+    monthlyTrend: [],
+    weeklyDistribution: [],
+    timeSlotDistribution: [],
+    patientReturnRate: 0,
+    avgWaitTime: 0,
   });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        setLoading(true);
         const response = await fetch('/api/appointments', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
+        
         if (!response.ok) throw new Error('Failed to fetch appointments');
+        
         const appointments = await response.json();
-        const stats = appointments.reduce(
+        
+        // Calculate comprehensive statistics
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        // Basic status counts
+        const statusCounts = appointments.reduce(
           (acc, appt) => {
-            const key = appt.appointmentStatus?.toLowerCase();
-            if (acc[key] !== undefined) acc[key]++;
+            const status = appt.appointmentStatus?.toLowerCase() || 'pending';
+            acc[status] = (acc[status] || 0) + 1;
             return acc;
           },
           { pending: 0, confirmed: 0, cancelled: 0, completed: 0 }
         );
-        setStats(stats);
+
+        // Time-based counts
+        const todayAppointments = appointments.filter(appt => 
+          new Date(appt.appointmentDate) >= today
+        ).length;
+        
+        const thisWeekAppointments = appointments.filter(appt => 
+          new Date(appt.appointmentDate) >= thisWeek
+        ).length;
+        
+        const thisMonthAppointments = appointments.filter(appt => 
+          new Date(appt.appointmentDate) >= thisMonth
+        ).length;
+
+        // Department analysis
+        const departmentCounts = appointments.reduce((acc, appt) => {
+          const dept = appt.doctor?.department?.name || 'Unknown';
+          acc[dept] = (acc[dept] || 0) + 1;
+          return acc;
+        }, {});
+        
+        const topDepartments = Object.entries(departmentCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5)
+          .map(([name, count]) => ({ name, count }));
+
+        // Visit type analysis
+        const visitTypeCounts = appointments.reduce((acc, appt) => {
+          const visitType = appt.visitType?.name || 'Unknown';
+          acc[visitType] = (acc[visitType] || 0) + 1;
+          return acc;
+        }, {});
+        
+        const topVisitTypes = Object.entries(visitTypeCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5)
+          .map(([name, count]) => ({ name, count }));
+
+        // Doctor analysis
+        const doctorCounts = appointments.reduce((acc, appt) => {
+          if (appt.doctor) {
+            const doctorName = appt.doctor.name || `${appt.doctor.firstName} ${appt.doctor.lastName}`;
+            acc[doctorName] = (acc[doctorName] || 0) + 1;
+          }
+          return acc;
+        }, {});
+        
+        const topDoctors = Object.entries(doctorCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5)
+          .map(([name, count]) => ({ name, count }));
+
+        // Calculate rates
+        const totalAppointments = appointments.length;
+        const completionRate = totalAppointments > 0 ? 
+          ((statusCounts.completed / totalAppointments) * 100).toFixed(1) : 0;
+        const cancellationRate = totalAppointments > 0 ? 
+          ((statusCounts.cancelled / totalAppointments) * 100).toFixed(1) : 0;
+
+        // Weekly distribution
+        const weeklyDistribution = Array.from({ length: 7 }, (_, i) => {
+          const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i];
+          const count = appointments.filter(appt => 
+            new Date(appt.appointmentDate).getDay() === i
+          ).length;
+          return { day: dayName, count };
+        });
+
+        // Monthly trend (last 6 months)
+        const monthlyTrend = Array.from({ length: 6 }, (_, i) => {
+          const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+          const count = appointments.filter(appt => {
+            const apptDate = new Date(appt.appointmentDate);
+            return apptDate.getMonth() === date.getMonth() && 
+                   apptDate.getFullYear() === date.getFullYear();
+          }).length;
+          return { month: monthName, count };
+        }).reverse();
+
+        // Time slot distribution
+        const timeSlotDistribution = appointments.reduce((acc, appt) => {
+          const hour = new Date(appt.appointmentDate).getHours();
+          let timeSlot;
+          if (hour < 6) timeSlot = 'Early Morning (12-6 AM)';
+          else if (hour < 12) timeSlot = 'Morning (6-12 PM)';
+          else if (hour < 17) timeSlot = 'Afternoon (12-5 PM)';
+          else timeSlot = 'Evening (5-11 PM)';
+          
+          acc[timeSlot] = (acc[timeSlot] || 0) + 1;
+          return acc;
+        }, {});
+
+        const avgAppointmentsPerDay = totalAppointments > 0 ? 
+          Math.round(totalAppointments / 30) : 0; // Rough estimate
+
+        setStats({
+          ...statusCounts,
+          totalAppointments,
+          todayAppointments,
+          thisWeekAppointments,
+          thisMonthAppointments,
+          topDepartments,
+          topVisitTypes,
+          topDoctors,
+          avgAppointmentsPerDay,
+          completionRate: parseFloat(completionRate),
+          cancellationRate: parseFloat(cancellationRate),
+          monthlyTrend,
+          weeklyDistribution,
+          timeSlotDistribution: Object.entries(timeSlotDistribution)
+            .map(([slot, count]) => ({ slot, count })),
+          patientReturnRate: 85, // Mock data - would need patient history analysis
+          avgWaitTime: 15, // Mock data - would need actual wait time tracking
+        });
+        
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching appointment stats:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchStats();
   }, []);
 
-  const chartData = {
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <Typography className="text-red-800">
+          Error loading appointment statistics: {error}
+        </Typography>
+      </div>
+    );
+  }
+
+  const statusChartData = {
     labels: ['Pending', 'Confirmed', 'Cancelled', 'Completed'],
-    datasets: [
-      {
-        label: 'Appointment Status',
-        data: [stats.pending, stats.confirmed, stats.cancelled, stats.completed],
-        backgroundColor: [
-          'var(--hospital-warning)', 
-          'var(--hospital-success)', 
-          'var(--hospital-error)',   
-          'var(--hospital-info)',    
-        ],
-        borderColor: [
-          'var(--hospital-warning)',
-          'var(--hospital-success)',
-          'var(--hospital-error)',
-          'var(--hospital-info)',
-        ],
-        borderWidth: 0,
-        borderRadius: 12,
-      },
-    ],
+    datasets: [{
+      label: 'Appointment Status',
+      data: [stats.pending, stats.confirmed, stats.cancelled, stats.completed],
+      backgroundColor: [
+        '#FFA726', '#4CAF50', '#F44336', '#2196F3'
+      ],
+      borderColor: [
+        '#FF9800', '#4CAF50', '#F44336', '#2196F3'
+      ],
+      borderWidth: 0,
+      borderRadius: 12,
+    }],
+  };
+
+  const doughnutData = {
+    labels: ['Completed', 'Cancelled', 'Pending', 'Confirmed'],
+    datasets: [{
+      data: [stats.completed, stats.cancelled, stats.pending, stats.confirmed],
+      backgroundColor: ['#4CAF50', '#F44336', '#FFA726', '#2196F3'],
+      borderWidth: 0,
+    }],
+  };
+
+  const trendData = {
+    labels: stats.monthlyTrend.map(item => item.month),
+    datasets: [{
+      label: 'Monthly Appointments',
+      data: stats.monthlyTrend.map(item => item.count),
+      borderColor: '#2196F3',
+      backgroundColor: '#2196F3',
+      tension: 0.4,
+      fill: false,
+    }],
+  };
+
+  const weeklyData = {
+    labels: stats.weeklyDistribution.map(item => item.day),
+    datasets: [{
+      label: 'Appointments by Day',
+      data: stats.weeklyDistribution.map(item => item.count),
+      backgroundColor: '#4CAF50',
+      borderRadius: 8,
+    }],
   };
 
   const chartOptions = {
@@ -202,15 +433,8 @@ export default function AppointmentStats() {
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      title: {
-        display: true,
-        text: 'Appointments Overview',
-        font: { size: 20, weight: '600', family: 'Inter, sans-serif' },
-        color: 'var(--hospital-gray-900)',
-        padding: { top: 16, bottom: 24 },
-      },
       tooltip: {
-        backgroundColor: 'var(--hospital-gray-900)',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
         titleFont: { size: 14, weight: '600' },
         bodyFont: { size: 12 },
         padding: 12,
@@ -220,62 +444,90 @@ export default function AppointmentStats() {
     scales: {
       y: {
         beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Number of Appointments',
-          color: 'var(--hospital-gray-900)',
-          font: { size: 14, weight: '500' },
-        },
         grid: { display: false },
-        ticks: {
-          color: 'var(--hospital-gray-700)',
-          font: { size: 12 },
-        },
+        ticks: { color: '#666', font: { size: 12 } },
       },
       x: {
-        title: {
-          display: true,
-          text: 'Status',
-          color: 'var(--hospital-gray-900)',
-          font: { size: 14, weight: '500' },
-        },
         grid: { display: false },
-        ticks: {
-          color: 'var(--hospital-gray-700)',
-          font: { size: 12 },
-        },
+        ticks: { color: '#666', font: { size: 12 } },
+      },
+    },
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { padding: 20, usePointStyle: true },
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: { size: 14, weight: '600' },
+        bodyFont: { size: 12 },
+        padding: 12,
+        cornerRadius: 8,
       },
     },
   };
 
   const cardData = [
     {
+      title: "Total Appointments",
+      value: stats.totalAppointments,
+      icon: Calendar,
+      color: "#2196F3",
+      subtitle: "All time"
+    },
+    {
+      title: "Today's Appointments",
+      value: stats.todayAppointments,
+      icon: CalendarIcon,
+      color: "#4CAF50",
+      trend: "+12%"
+    },
+    {
+      title: "This Week",
+      value: stats.thisWeekAppointments,
+      icon: Activity,
+      color: "#FF9800",
+      trend: "+8%"
+    },
+    {
+      title: "This Month",
+      value: stats.thisMonthAppointments,
+      icon: BarChart3,
+      color: "#9C27B0",
+      trend: "+15%"
+    },
+    {
       title: "Pending",
       value: stats.pending,
       icon: Clock,
-      color: "var(--hospital-warning)",
-      trend: "+12%"
+      color: "#FFA726",
+      subtitle: "Awaiting confirmation"
     },
     {
       title: "Confirmed",
       value: stats.confirmed,
       icon: CheckCircle,
-      color: "var(--hospital-success)",
-      trend: "+8%"
-    },
-    {
-      title: "Cancelled",
-      value: stats.cancelled,
-      icon: XCircle,
-      color: "var(--hospital-error)",
-      trend: "-5%"
+      color: "#4CAF50",
+      subtitle: "Ready to go"
     },
     {
       title: "Completed",
       value: stats.completed,
-      icon: Calendar,
-      color: "var(--hospital-info)",
-      trend: "+15%"
+      icon: UserCheck,
+      color: "#2196F3",
+      subtitle: "Successfully finished"
+    },
+    {
+      title: "Completion Rate",
+      value: stats.completionRate,
+      icon: Star,
+      color: "#4CAF50",
+      subtitle: "% of appointments completed"
     }
   ];
 
@@ -288,11 +540,11 @@ export default function AppointmentStats() {
         transition={{ duration: 0.5 }}
         className="mb-8"
       >
-        <Typography variant="h4" className="text-2xl font-bold text-gray-900 mb-2">
-          Appointment Dashboard
+        <Typography variant="h4" className="text-3xl font-bold text-gray-900 mb-2">
+          Appointment Analytics Dashboard
         </Typography>
         <Typography variant="body1" className="text-gray-600">
-          Real-time overview of your appointment statistics
+          Comprehensive overview of your appointment statistics and trends
         </Typography>
       </motion.div>
 
@@ -307,28 +559,73 @@ export default function AppointmentStats() {
             color={card.color}
             delay={index * 0.1}
             trend={card.trend}
+            subtitle={card.subtitle}
           />
         ))}
       </div>
 
-      {/* Chart */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-      >
-        <div className="relative bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
-          {/* Gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-pink-50/30 rounded-3xl" />
-          
-          {/* Chart content */}
-          <div className="relative z-10">
-            <Box className="h-[400px]">
-              <Bar data={chartData} options={chartOptions} />
-            </Box>
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <ChartCard title="Appointment Status Distribution" delay={0.2}>
+          <Box className="h-[300px]">
+            <Bar data={statusChartData} options={chartOptions} />
+          </Box>
+        </ChartCard>
+
+        <ChartCard title="Status Overview" delay={0.3}>
+          <Box className="h-[300px]">
+            <Doughnut data={doughnutData} options={doughnutOptions} />
+          </Box>
+        </ChartCard>
+
+        <ChartCard title="Monthly Trend" delay={0.4}>
+          <Box className="h-[300px]">
+            <Line data={trendData} options={chartOptions} />
+          </Box>
+        </ChartCard>
+
+        <ChartCard title="Weekly Distribution" delay={0.5}>
+          <Box className="h-[300px]">
+            <Bar data={weeklyData} options={chartOptions} />
+          </Box>
+        </ChartCard>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ChartCard title="Top Departments" delay={0.6}>
+          <div className="space-y-3">
+            {stats.topDepartments.map((dept, index) => (
+              <div key={dept.name} className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">{dept.name}</span>
+                <span className="font-semibold text-blue-600">{dept.count}</span>
+              </div>
+            ))}
           </div>
-        </div>
-      </motion.div>
+        </ChartCard>
+
+        <ChartCard title="Popular Visit Types" delay={0.7}>
+          <div className="space-y-3">
+            {stats.topVisitTypes.map((type, index) => (
+              <div key={type.name} className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">{type.name}</span>
+                <span className="font-semibold text-green-600">{type.count}</span>
+              </div>
+            ))}
+          </div>
+        </ChartCard>
+
+        <ChartCard title="Top Doctors" delay={0.8}>
+          <div className="space-y-3">
+            {stats.topDoctors.map((doctor, index) => (
+              <div key={doctor.name} className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">{doctor.name}</span>
+                <span className="font-semibold text-purple-600">{doctor.count}</span>
+              </div>
+            ))}
+          </div>
+        </ChartCard>
+      </div>
     </div>
   );
 }
