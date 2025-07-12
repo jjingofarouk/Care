@@ -1,3 +1,4 @@
+// components/ScheduleTable.jsx
 'use client';
 import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
@@ -50,21 +51,21 @@ export default function ScheduleTable({ schedules, onEdit, onDelete }) {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 120,
+      width: 100,
       sortable: false,
       renderCell: (params) => (
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <button
             onClick={() => onEdit(params.row)}
-            className="btn btn-outline p-2"
+            className="btn btn-outline p-1"
           >
-            <Edit className="h-5 w-5" />
+            <Edit className="h-4 w-4" />
           </button>
           <button
             onClick={() => onDelete(params.row.id)}
-            className="btn btn-danger p-2"
+            className="btn btn-danger p-1"
           >
-            <Delete className="h-5 w-5" />
+            <Delete className="h-4 w-4" />
           </button>
         </div>
       ),
@@ -72,19 +73,20 @@ export default function ScheduleTable({ schedules, onEdit, onDelete }) {
   ];
 
   return (
-    <div className="table w-full">
+    <div className="w-full overflow-x-auto">
       <DataGrid
         rows={schedules || []}
         columns={columns}
         pageSizeOptions={[5, 10, 20]}
-        className="custom-scrollbar bg-[var(--hospital-white)]"
+        className="bg-[var(--hospital-white)] custom-scrollbar"
         autoHeight
         disableRowSelectionOnClick
         sx={{
           '& .MuiDataGrid-root': {
             border: '1px solid var(--hospital-gray-200)',
-            borderRadius: '0.75rem',
+            borderRadius: '0.5rem',
             boxShadow: 'var(--shadow-sm)',
+            width: '100%',
           },
           '& .MuiDataGrid-columnHeaders': {
             backgroundColor: 'var(--hospital-gray-50)',
@@ -92,10 +94,13 @@ export default function ScheduleTable({ schedules, onEdit, onDelete }) {
             textTransform: 'uppercase',
             fontSize: '0.75rem',
             letterSpacing: '0.05em',
+            borderBottom: '1px solid var(--hospital-gray-200)',
+            padding: '0.25rem 0.75rem',
           },
           '& .MuiDataGrid-cell': {
             borderTop: '1px solid var(--hospital-gray-200)',
-            padding: '0.75rem 1.5rem',
+            padding: '0.25rem 0.75rem',
+            fontSize: '0.875rem',
           },
           '& .MuiDataGrid-row:hover': {
             backgroundColor: 'var(--hospital-gray-50)',
@@ -103,16 +108,17 @@ export default function ScheduleTable({ schedules, onEdit, onDelete }) {
           '& .MuiDataGrid-footerContainer': {
             backgroundColor: 'var(--hospital-gray-50)',
             borderTop: '1px solid var(--hospital-gray-200)',
+            padding: '0.25rem',
           },
         }}
         slots={{
           noRowsOverlay: () => (
-            <div className="flex items-center justify-center h-full py-8">
+            <div className="flex items-center justify-center h-full py-2">
               <span className="text-[var(--hospital-gray-500)]">No schedules found</span>
             </div>
           ),
           loadingOverlay: () => (
-            <div className="flex items-center justify-center h-full py-8">
+            <div className="flex items-center justify-center h-full py-2">
               <div className="loading-spinner" />
             </div>
           ),
