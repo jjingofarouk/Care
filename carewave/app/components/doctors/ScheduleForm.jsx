@@ -1,6 +1,6 @@
+'use client';
 import React from 'react';
 import { useState } from 'react';
-import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 
 export default function ScheduleForm({ schedule, doctors, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
@@ -21,73 +21,65 @@ export default function ScheduleForm({ schedule, doctors, onSubmit, onCancel }) 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <FormControl fullWidth className="select">
-        <InputLabel>Doctor</InputLabel>
-        <Select
-          name="doctorId"
-          value={formData.doctorId}
-          onChange={handleChange}
-          required
-        >
-          {doctors.map(doctor => (
-            <MenuItem key={doctor.id} value={doctor.id}>
-              {doctor.firstName} {doctor.lastName}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <TextField
-        name="startTime"
-        label="Start Time"
+    <form onSubmit={handleSubmit} className="space-y-4 w-full">
+      <select
+        name="doctorId"
+        value={formData.doctorId}
+        onChange={handleChange}
+        className="select w-full"
+        required
+      >
+        <option value="" disabled>Select Doctor</option>
+        {doctors.map(doctor => (
+          <option key={doctor.id} value={doctor.id}>
+            {doctor.firstName} {doctor.lastName}
+          </option>
+        ))}
+      </select>
+      <input
         type="time"
+        name="startTime"
+        placeholder="Start Time"
         value={formData.startTime}
         onChange={handleChange}
-        fullWidth
-        className="input"
+        className="input w-full"
         required
-        InputLabelProps={{ shrink: true }}
       />
-      <TextField
-        name="endTime"
-        label="End Time"
+      <input
         type="time"
+        name="endTime"
+        placeholder="End Time"
         value={formData.endTime}
         onChange={handleChange}
-        fullWidth
-        className="input"
+        className="input w-full"
         required
-        InputLabelProps={{ shrink: true }}
       />
-      <FormControl fullWidth className="select">
-        <InputLabel>Day of Week</InputLabel>
-        <Select
-          name="dayOfWeek"
-          value={formData.dayOfWeek}
-          onChange={handleChange}
-          required
-        >
-          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
-            <MenuItem key={day} value={day}>{day}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <div className="flex gap-4">
-        <Button
+      <select
+        name="dayOfWeek"
+        value={formData.dayOfWeek}
+        onChange={handleChange}
+        className="select w-full"
+        required
+      >
+        <option value="" disabled>Select Day of Week</option>
+        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+          <option key={day} value={day}>{day}</option>
+        ))}
+      </select>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <button
           type="submit"
-          variant="contained"
-          className="btn btn-primary"
+          className="btn btn-primary bg-[var(--role-doctor)] hover:bg-[var(--hospital-accent-dark)] w-full sm:w-auto"
         >
           {schedule ? 'Update' : 'Create'} Schedule
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          variant="outlined"
-          className="btn btn-outline"
+          className="btn btn-outline w-full sm:w-auto"
           onClick={onCancel}
         >
           Cancel
-        </Button>
+        </button>
       </div>
     </form>
   );
