@@ -1,5 +1,5 @@
 "use client";
-// app/components/patients/PatientForm.js
+
 import React, { useState, useEffect } from 'react';
 import { 
   Box, 
@@ -26,6 +26,7 @@ export default function PatientForm() {
     insuranceInfo: { provider: '', policyNumber: '', expiryDate: '' },
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const router = useRouter();
   const params = useParams();
   const isEdit = !!params.id;
@@ -34,22 +35,24 @@ export default function PatientForm() {
     if (isEdit) {
       fetchPatient();
     }
-  }, []);
+  }, [params.id]);
 
   const fetchPatient = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/patients/${params.id}?include=addresses,nextOfKin,insuranceInfo`);
+      const response = await fetch(`/api/patient/${params.id}?include=addresses,nextOfKin,insuranceInfo`);
+      if (!response.ok) throw new Error('Failed to fetch patient');
       const data = await response.json();
       setFormData({
         ...data,
-        dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '',
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
         addresses: data.addresses.length ? data.addresses : [{ street: '', city: '', country: '', postalCode: '' }],
         nextOfKin: data.nextOfKin || { firstName: '', lastName: '', relationship: '', phone: '', email: '' },
         insuranceInfo: data.insuranceInfo || { provider: '', policyNumber: '', expiryDate: '' },
       });
     } catch (error) {
       console.error('Failed to fetch patient:', error);
+      setError('Failed to load patient data');
     } finally {
       setLoading(false);
     }
@@ -58,17 +61,28 @@ export default function PatientForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     try {
       const method = isEdit ? 'PUT' : 'POST';
-      const url = isEdit ? `/api/patients/${params.id}` : '/api/patients';
-      await fetch(url, {
+      const url = isEdit ? `/api/patient/${params.id}` : '/api/patient';
+      const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          addresses: formData.addresses.filter(addr => addr.street || addr.city || addr.country || addr.postalCode),
+          nextOfKin: formData.nextOfKin.firstName || formData.nextOfKin.lastName ? formData.nextOfKin : undefined,
+          insuranceInfo: formData.insuranceInfo.provider || formData.insuranceInfo.policyNumber ? formData.insuranceInfo : undefined,
+        }),
       });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save patient');
+      }
       router.push('/patients');
     } catch (error) {
       console.error('Failed to save patient:', error);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -92,27 +106,32 @@ export default function PatientForm() {
   };
 
   return (
-    <Box className="p-6">
-      <Typography variant="h5" className="card-title mb-6">
+    <Box sx={{ p: 4, maxWidth: '100%', overflowX: 'auto' }}>
+      <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold', mb: 4 }}>
         {isEdit ? 'Edit Patient' : 'New Patient'}
       </Typography>
-      <Paper className="card p-6">
+      <Paper sx={{ p: 4, borderRadius: 2, boxShadow: 1 }}>
         {loading ? (
-          <Box className="flex justify-center p-8">
-            <CircularProgress className="loading-spinner" />
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+            <CircularProgress />
           </Box>
         ) : (
           <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
+            {error && (
+              <Typography color="error" sx={{ mb: 2 }}>
+                {error}
+              </Typography>
+            )}
+            <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="First Name"
                   name="firstName"
                   value={formData.firstName}
                   onChange={(e) => handleChange(e)}
-                  className="input"
                   fullWidth
                   required
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -121,9 +140,9 @@ export default function PatientForm() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={(e) => handleChange(e)}
-                  className="input"
                   fullWidth
                   required
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -133,10 +152,10 @@ export default function PatientForm() {
                   name="dateOfBirth"
                   value={formData.dateOfBirth}
                   onChange={(e) => handleChange(e)}
-                  className="input"
                   fullWidth
-                  InputLabelProps={{ shrink: true }}
                   required
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -146,8 +165,8 @@ export default function PatientForm() {
                   value={formData.gender}
                   onChange={(e) => handleChange(e)}
                   select
-                  className="select"
                   fullWidth
+                  sx={{ mb: 2 }}
                 >
                   <MenuItem value="Male">Male</MenuItem>
                   <MenuItem value="Female">Female</MenuItem>
@@ -160,8 +179,8 @@ export default function PatientForm() {
                   name="phone"
                   value={formData.phone}
                   onChange={(e) => handleChange(e)}
-                  className="input"
                   fullWidth
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -170,23 +189,24 @@ export default function PatientForm() {
                   name="email"
                   value={formData.email}
                   onChange={(e) => handleChange(e)}
-                  className="input"
                   fullWidth
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               
               {/* Address Section */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="card-subtitle mt-4 mb-2">Address</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 'medium', mt: 3, mb: 2 }}>
+                  Address
+                </Typography>
               </Grid>
               {formData.addresses.map((address, index) => (
-                <Grid container spacing={3} key={index}>
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
                   <Grid item xs={12} sm={6}>
                     <TextField
                       label="Street"
                       value={address.street}
                       onChange={(e) => handleAddressChange(index, 'street', e.target.value)}
-                      className="input"
                       fullWidth
                     />
                   </Grid>
@@ -195,7 +215,6 @@ export default function PatientForm() {
                       label="City"
                       value={address.city}
                       onChange={(e) => handleAddressChange(index, 'city', e.target.value)}
-                      className="input"
                       fullWidth
                     />
                   </Grid>
@@ -204,7 +223,6 @@ export default function PatientForm() {
                       label="Country"
                       value={address.country}
                       onChange={(e) => handleAddressChange(index, 'country', e.target.value)}
-                      className="input"
                       fullWidth
                     />
                   </Grid>
@@ -213,7 +231,6 @@ export default function PatientForm() {
                       label="Postal Code"
                       value={address.postalCode}
                       onChange={(e) => handleAddressChange(index, 'postalCode', e.target.value)}
-                      className="input"
                       fullWidth
                     />
                   </Grid>
@@ -222,15 +239,17 @@ export default function PatientForm() {
 
               {/* Next of Kin Section */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="card-subtitle mt-4 mb-2">Next of Kin</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 'medium', mt: 3, mb: 2 }}>
+                  Next of Kin
+                </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="First Name"
                   value={formData.nextOfKin.firstName}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'firstName')}
-                  className="input"
                   fullWidth
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -238,8 +257,8 @@ export default function PatientForm() {
                   label="Last Name"
                   value={formData.nextOfKin.lastName}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'lastName')}
-                  className="input"
                   fullWidth
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -247,8 +266,8 @@ export default function PatientForm() {
                   label="Relationship"
                   value={formData.nextOfKin.relationship}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'relationship')}
-                  className="input"
                   fullWidth
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -256,8 +275,8 @@ export default function PatientForm() {
                   label="Phone"
                   value={formData.nextOfKin.phone}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'phone')}
-                  className="input"
                   fullWidth
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -265,22 +284,24 @@ export default function PatientForm() {
                   label="Email"
                   value={formData.nextOfKin.email}
                   onChange={(e) => handleChange(e, 'nextOfKin', 'email')}
-                  className="input"
                   fullWidth
+                  sx={{ mb: 2 }}
                 />
               </Grid>
 
               {/* Insurance Section */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="card-subtitle mt-4 mb-2">Insurance Information</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 'medium', mt: 3, mb: 2 }}>
+                  Insurance Information
+                </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Provider"
                   value={formData.insuranceInfo.provider}
                   onChange={(e) => handleChange(e, 'insuranceInfo', 'provider')}
-                  className="input"
                   fullWidth
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -288,8 +309,8 @@ export default function PatientForm() {
                   label="Policy Number"
                   value={formData.insuranceInfo.policyNumber}
                   onChange={(e) => handleChange(e, 'insuranceInfo', 'policyNumber')}
-                  className="input"
                   fullWidth
+                  sx={{ mb: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -298,23 +319,25 @@ export default function PatientForm() {
                   type="date"
                   value={formData.insuranceInfo.expiryDate}
                   onChange={(e) => handleChange(e, 'insuranceInfo', 'expiryDate')}
-                  className="input"
                   fullWidth
                   InputLabelProps={{ shrink: true }}
+                  sx={{ mb: 2 }}
                 />
               </Grid>
             </Grid>
-            <Box className="flex gap-4 mt-6">
+            <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
               <Button
                 type="submit"
-                className="btn btn-primary"
+                variant="contained"
                 disabled={loading}
+                sx={{ bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
               >
-                {loading ? <CircularProgress size={24} className="loading-spinner" /> : (isEdit ? 'Update' : 'Create')}
+                {loading ? <CircularProgress size={24} /> : (isEdit ? 'Update' : 'Create')}
               </Button>
               <Button
-                className="btn btn-secondary"
+                variant="outlined"
                 onClick={() => router.push('/patients')}
+                sx={{ borderColor: 'grey.500', color: 'grey.700' }}
               >
                 Cancel
               </Button>

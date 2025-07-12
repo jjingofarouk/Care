@@ -1,6 +1,5 @@
 "use client";
 
-// app/components/patients/PatientList.js
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { TextField, Button, Box, Typography, CircularProgress, IconButton } from '@mui/material';
@@ -20,9 +19,13 @@ export default function PatientList() {
   const fetchPatients = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/patients?search=${search}&include=addresses,nextOfKin,insuranceInfo`);
+      const response = await fetch(`/api/patient?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
+      if (!response.ok) throw new Error('Failed to fetch patients');
       const data = await response.json();
-      setPatients(data);
+      setPatients(data.map(patient => ({
+        ...patient,
+        id: patient.id,
+      })));
     } catch (error) {
       console.error('Failed to fetch patients:', error);
     } finally {
@@ -31,9 +34,10 @@ export default function PatientList() {
   };
 
   const handleDelete = async (id) => {
-    if (confirm('Are you sure you want to delete this patient?')) {
+    if (window.confirm('Are you sure you want to delete this patient?')) {
       try {
-        await fetch(`/api/patients/${id}`, { method: 'DELETE' });
+        const response = await fetch(`/api/patient/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete patient');
         fetchPatients();
       } catch (error) {
         console.error('Failed to delete patient:', error);
@@ -42,37 +46,65 @@ export default function PatientList() {
   };
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 100 },
-    { field: 'firstName', headerName: 'First Name', width: 150 },
-    { field: 'lastName', headerName: 'Last Name', width: 150 },
-    { field: 'email', headerName: 'Email', width: 200 },
+    { field: 'id', headerName: 'ID', width: 120, flex: 0.5 },
+    { field: 'firstName', headerName: 'First Name', width: 150, flex: 1 },
+    { field: 'lastName', headerName: 'Last Name', width: 150, flex: 1 },
+    { field: 'email', headerName: 'Email', width: 200, flex: 1.5 },
     { 
       field: 'age', 
       headerName: 'Age', 
       width: 100,
-      valueGetter: (params) => {
-        const dob = new Date(params.row.dateOfBirth);
-        const age = Math.floor((new Date() - dob) / (365.25 * 24 * 60 * 60 * 1000));
-        return age;
+      flex: 0.5,
+      valueGetter: ({ row }) => {
+        const dob = new Date(row.dateOfBirth);
+        return Math.floor((Date.now() - dob) / (365.25 * 24 * 60 * 60 * 1000));
       }
     },
-    { field: 'gender', headerName: 'Gender', width: 100 },
+    { field: 'gender', headerName: 'Gender', width: 100, flex: 0.5 },
     { 
       field: 'address', 
       headerName: 'Address', 
       width: 200,
-      valueGetter: (params) => params.row.addresses?.[0]?.city || '-'
+      flex: 1.5,
+      valueGetter: ({ row }) => {
+        const addr = row.addresses?.[0];
+        return addr ? `${addr.street}, ${addr.city}, ${addr.country}` : '-';
+      }
+    },
+    { 
+      field: 'nextOfKin', 
+      headerName: 'Next of Kin', 
+      width: 150,
+      flex: 1,
+      valueGetter: ({ row }) => row.nextOfKin ? `${row.nextOfKin.firstName} ${row.nextOfKin.lastName}` : '-'
+    },
+    { 
+      field: 'insurance', 
+      headerName: 'Insurance', 
+      width: 150,
+      flex: 1,
+      valueGetter: ({ row }) => row.insuranceInfo ? row.insuranceInfo.provider : '-'
     },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 150,
-      renderCell: (params) => (
-        <Box>
-          <IconButton onClick={() => router.push(`/patients/edit/${params.row.id}`)}>
+      width: 120,
+      flex: 0.5,
+      sortable: false,
+      renderCell: ({ row }) => (
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <IconButton 
+            color="primary" 
+            onClick={() => router.push(`/patients/edit/${row.id}`)}
+            size="small"
+          >
             <Edit />
           </IconButton>
-          <IconButton onClick={() => handleDelete(params.row.id)}>
+          <IconButton 
+            color="error" 
+            onClick={() => handleDelete(row.id)}
+            size="small"
+          >
             <Delete />
           </IconButton>
         </Box>
@@ -81,41 +113,52 @@ export default function PatientList() {
   ];
 
   return (
-    <Box className="p-6">
-      <Box className="flex justify-between items-center mb-6">
-        <Typography variant="h5" className="card-title">Patients</Typography>
+    <Box sx={{ p: 4, maxWidth: '100%', overflowX: 'auto' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
+          Patients
+        </Typography>
         <Button 
-          className="btn btn-primary"
+          variant="contained"
           startIcon={<Add />}
-          onClick={() => router.push('/patient/new')}
+          onClick={() => router.push('/patients/new')}
+          sx={{ bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
         >
           New Patient
         </Button>
       </Box>
-      <Box className="flex gap-4 mb-6">
+      <Box sx={{ mb: 4 }}>
         <TextField
-          className="input"
+          fullWidth
           placeholder="Search patients..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{
-            startAdornment: <Search className="mr-2" />,
+            startAdornment: <Search sx={{ mr: 1, color: 'action.active' }} />,
           }}
+          sx={{ maxWidth: 400 }}
         />
       </Box>
-      <Box className="card">
+      <Box sx={{ bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1 }}>
         {loading ? (
-          <Box className="flex justify-center p-8">
-            <CircularProgress className="loading-spinner" />
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+            <CircularProgress />
           </Box>
         ) : (
           <DataGrid
             rows={patients}
             columns={columns}
-            pageSize={10}
-            rowsPerPageOptions={[10, 25, 50]}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10 } },
+            }}
+            pageSizeOptions={[10, 25, 50]}
             autoHeight
-            className="table"
+            disableRowSelectionOnClick
+            sx={{
+              '& .MuiDataGrid-cell': { py: 1 },
+              '& .MuiDataGrid-columnHeaders': { bgcolor: 'grey.100' },
+              '& .MuiDataGrid-row:hover': { bgcolor: 'grey.50' },
+            }}
           />
         )}
       </Box>
