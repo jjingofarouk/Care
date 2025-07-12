@@ -13,7 +13,10 @@ export default function DoctorTable({ doctors, onEdit, onDelete }) {
       field: 'department',
       headerName: 'Department',
       flex: 1,
-      valueGetter: (params) => params.row.department?.name || '',
+      valueGetter: (params) => {
+        // Add null safety check
+        return params.row?.department?.name || 'No Department';
+      },
     },
     {
       field: 'specializations',
@@ -21,11 +24,15 @@ export default function DoctorTable({ doctors, onEdit, onDelete }) {
       flex: 1,
       renderCell: (params) => (
         <div className="flex gap-2">
-          {params.row.specializations?.map(spec => (
-            <span key={spec.id} className="badge badge-info">
-              {spec.specialization.name}
-            </span>
-          ))}
+          {params.row?.specializations?.length > 0 ? (
+            params.row.specializations.map(spec => (
+              <span key={spec.id} className="badge badge-info">
+                {spec.specialization?.name || 'Unknown'}
+              </span>
+            ))
+          ) : (
+            <span className="text-gray-500">No specializations</span>
+          )}
         </div>
       ),
     },
@@ -55,11 +62,17 @@ export default function DoctorTable({ doctors, onEdit, onDelete }) {
   return (
     <div className="table" style={{ height: 400, width: '100%' }}>
       <DataGrid
-        rows={doctors}
+        rows={doctors || []}
         columns={columns}
         pageSize={5}
         rowsPerPageOptions={[5, 10, 20]}
         className="custom-scrollbar"
+        loading={!doctors}
+        noRowsOverlay={() => (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">No doctors found</p>
+          </div>
+        )}
       />
     </div>
   );
