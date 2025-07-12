@@ -23,7 +23,7 @@ export default function PatientList() {
       const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
       if (!response.ok) throw new Error(`Failed to fetch patients: ${response.status}`);
       const data = await response.json();
-      console.log('Fetched patients:', data);
+      console.log('Fetched patients:', JSON.stringify(data, null, 2));
       if (!Array.isArray(data)) {
         throw new Error('API response is not an array');
       }
@@ -31,6 +31,9 @@ export default function PatientList() {
         data.map((patient) => ({
           ...patient,
           id: patient.id || '',
+          addresses: patient.addresses || [],
+          nextOfKin: patient.nextOfKin || null,
+          insuranceInfo: patient.insuranceInfo || null,
         }))
       );
     } catch (error) {
@@ -67,7 +70,7 @@ export default function PatientList() {
       width: 100,
       flex: 0.5,
       valueGetter: ({ row }) => {
-        if (!row || !row.dateOfBirth) return '-';
+        if (!row?.dateOfBirth) return '-';
         const dob = new Date(row.dateOfBirth);
         if (isNaN(dob.getTime())) return '-';
         return Math.floor((Date.now() - dob) / (365.25 * 24 * 60 * 60 * 1000));
@@ -80,9 +83,11 @@ export default function PatientList() {
       width: 200,
       flex: 1.5,
       valueGetter: ({ row }) => {
-        if (!row || !row.addresses || !Array.isArray(row.addresses) || row.addresses.length === 0) return '-';
+        if (!row?.addresses || !Array.isArray(row.addresses) || row.addresses.length === 0) return '-';
         const addr = row.addresses[0];
-        return addr ? `${addr.street || ''}, ${addr.city || ''}, ${addr.country || ''}` : '-';
+        return addr && addr.street && addr.city && addr.country
+          ? `${addr.street}, ${addr.city}, ${addr.country}`
+          : '-';
       },
     },
     {
@@ -91,8 +96,8 @@ export default function PatientList() {
       width: 150,
       flex: 1,
       valueGetter: ({ row }) => {
-        if (!row || !row.nextOfKin) return '-';
-        return `${row.nextOfKin.firstName || ''} ${row.nextOfKin.lastName || ''}`;
+        if (!row?.nextOfKin || !row.nextOfKin.firstName || !row.nextOfKin.lastName) return '-';
+        return `${row.nextOfKin.firstName} ${row.nextOfKin.lastName}`;
       },
     },
     {
@@ -101,8 +106,8 @@ export default function PatientList() {
       width: 150,
       flex: 1,
       valueGetter: ({ row }) => {
-        if (!row || !row.insuranceInfo) return '-';
-        return row.insuranceInfo.provider || '-';
+        if (!row?.insuranceInfo || !row.insuranceInfo.provider) return '-';
+        return row.insuranceInfo.provider;
       },
     },
     {
@@ -112,7 +117,7 @@ export default function PatientList() {
       flex: 0.5,
       sortable: false,
       renderCell: ({ row }) => {
-        if (!row || !row.id) return null;
+        if (!row?.id) return null;
         return (
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton
