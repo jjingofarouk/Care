@@ -22,6 +22,16 @@ export async function getDepartment(id) {
   }
 }
 
+export async function getUnit(id) {
+  try {
+    const response = await axios.get(`${BASE_URL}/units/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching unit:', error);
+    throw error;
+  }
+}
+
 export async function createDepartment(data) {
   try {
     const response = await axios.post(BASE_URL, data);
