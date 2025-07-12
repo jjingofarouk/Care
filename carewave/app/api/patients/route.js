@@ -28,23 +28,54 @@ export async function GET(request) {
       includeFields.forEach(field => {
         switch (field.trim()) {
           case 'addresses':
-            includeObj.addresses = true;
+            includeObj.addresses = {
+              select: {
+                id: true,
+                street: true,
+                city: true,
+                country: true,
+                postalCode: true,
+              }
+            };
             break;
           case 'nextOfKin':
-            includeObj.nextOfKin = true;
+            includeObj.nextOfKin = {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                relationship: true,
+                phone: true,
+                email: true,
+              }
+            };
             break;
           case 'insuranceInfo':
-            includeObj.insuranceInfo = true;
+            includeObj.insuranceInfo = {
+              select: {
+                id: true,
+                provider: true,
+                policyNumber: true,
+                expiryDate: true,
+              }
+            };
             break;
         }
       });
     }
 
-    const patients = await prisma.patient.findMany({
+    // Use either include OR select, but not both
+    const queryOptions = {
       where,
       orderBy: { createdAt: 'desc' },
-      include: includeObj,
-      select: {
+    };
+
+    // If we have relations to include, use include
+    if (Object.keys(includeObj).length > 0) {
+      queryOptions.include = includeObj;
+    } else {
+      // If no relations requested, use select for better performance
+      queryOptions.select = {
         id: true,
         firstName: true,
         lastName: true,
@@ -55,42 +86,10 @@ export async function GET(request) {
         createdAt: true,
         updatedAt: true,
         userId: true,
-        // Include related data if requested
-        ...(includeObj.addresses && {
-          addresses: {
-            select: {
-              id: true,
-              street: true,
-              city: true,
-              country: true,
-              postalCode: true,
-            }
-          }
-        }),
-        ...(includeObj.nextOfKin && {
-          nextOfKin: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              relationship: true,
-              phone: true,
-              email: true,
-            }
-          }
-        }),
-        ...(includeObj.insuranceInfo && {
-          insuranceInfo: {
-            select: {
-              id: true,
-              provider: true,
-              policyNumber: true,
-              expiryDate: true,
-            }
-          }
-        }),
-      },
-    });
+      };
+    }
+
+    const patients = await prisma.patient.findMany(queryOptions);
 
     return NextResponse.json(patients);
   } catch (error) {
