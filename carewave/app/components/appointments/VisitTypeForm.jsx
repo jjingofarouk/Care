@@ -34,6 +34,7 @@ export default function VisitTypeForm({ visitType, onSubmit, onCancel }) {
       if (!response.ok) throw new Error('Failed to save visit type');
       onSubmit();
       onCancel();
+      router.push('/appointments/visit-types');
     } catch (err) {
       setError(err.message);
     } finally {
