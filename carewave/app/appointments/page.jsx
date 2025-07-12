@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Typography, Button, Box } from '@mui/material';
 import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
-import AppointmentFilter from '@/components/appointments/AppointmentFilter';
 import AppointmentTable from '@/components/appointments/AppointmentTable';
 import AppointmentStats from '@/components/appointments/AppointmentStats';
 
@@ -12,11 +11,10 @@ export default function AppointmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchAppointments = async (filters = {}) => {
+  const fetchAppointments = async () => {
     setLoading(true);
     try {
-      const query = new URLSearchParams(filters).toString();
-      const response = await fetch(`/api/appointments?${query}`, {
+      const response = await fetch('/api/appointments', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       if (!response.ok) throw new Error('Failed to fetch appointments');
@@ -42,7 +40,7 @@ export default function AppointmentsPage() {
         <Link href="/appointments/new">
           <Button 
             variant="contained" 
-            className="btn-primary px-4 py-2"
+            className="btn-primary bg-[var(--hospital-accent)] hover:bg-[var(--hospital-accent-dark)] text-[var(--hospital-white)] px-4 py-2"
             startIcon={<PlusCircle className="h-5 w-5" />}
           >
             New Appointment
@@ -50,7 +48,6 @@ export default function AppointmentsPage() {
         </Link>
       </Box>
       <AppointmentStats />
-      <AppointmentFilter onFilterChange={fetchAppointments} />
       {error && (
         <div className="alert alert-error mb-4 rounded-lg">
           <span>{error}</span>
