@@ -68,16 +68,16 @@ export default function DoctorsPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-50">
-      <div className="mx-auto w-full max-w-[1920px] px-4 sm:px-6 lg:px-8 py-6">
-        <div className="rounded-lg bg-white shadow-sm">
-          <div className="px-6 py-4">
-            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-              <h1 className="text-2xl font-semibold text-blue-700">
+    <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
+      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4 lg:px-6 py-2">
+        <div className="card">
+          <div className="card-header">
+            <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+              <h1 className="card-title text-[var(--role-doctor)]">
                 Doctors Management
               </h1>
               <button
-                className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors sm:w-auto"
+                className="btn btn-primary bg-[var(--role-doctor)] hover:bg-[var(--hospital-accent-dark)] w-full sm:w-auto"
                 onClick={() => setOpen(true)}
               >
                 Add Doctor
@@ -86,15 +86,15 @@ export default function DoctorsPage() {
           </div>
           
           {error && (
-            <div className="mx-4 my-2 rounded-md bg-red-50 p-4 text-red-700">
+            <div className="alert alert-error m-2">
               {error}
             </div>
           )}
           
-          <div className="p-4">
+          <div className="p-2">
             {loading ? (
-              <div className="flex items-center justify-center p-8">
-                <div className="h-8 w-8 animate-spin rounded-full border-3 border-gray-200 border-t-blue-500" />
+              <div className="flex items-center justify-center p-4">
+                <div className="loading-spinner" />
               </div>
             ) : (
               <DoctorTable
@@ -106,16 +106,16 @@ export default function DoctorsPage() {
           </div>
         </div>
 
-        <div className={`fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+        <div className={`fixed inset-0 bg-[var(--hospital-gray-900)] bg-opacity-50 transition-opacity ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
              onClick={() => setOpen(false)}>
-          <div className={`fixed left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white shadow-xl transition-all duration-300 ${open ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+          <div className={`fixed left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-[var(--hospital-white)] shadow-xl transition-all duration-[var(--transition-normal)] ${open ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
                onClick={(e) => e.stopPropagation()}>
-            <div className="rounded-t-lg bg-gray-50 px-6 py-4">
-              <h2 className="text-lg font-semibold text-blue-700">
+            <div className="rounded-t-lg bg-[var(--hospital-gray-50)] px-4 py-2">
+              <h2 className="text-base font-semibold text-[var(--role-doctor)]">
                 Add Doctor
               </h2>
             </div>
-            <div className="p-6">
+            <div className="p-4">
               <DoctorForm
                 doctor={selectedDoctor}
                 onSubmit={handleSubmit}
