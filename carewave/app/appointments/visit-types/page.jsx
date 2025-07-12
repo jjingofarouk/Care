@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { Typography, Button, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from '@mui/material';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
