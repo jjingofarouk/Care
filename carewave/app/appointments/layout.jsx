@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Tabs, Tab, Box } from '@mui/material';
+import { Calendar, FileText, Clock } from 'lucide-react';
 
 const AppointmentsLayout = ({ children }) => {
   const router = useRouter();
@@ -30,52 +31,7 @@ const AppointmentsLayout = ({ children }) => {
   return (
     <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
       <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4">
-        <Box sx={{
-          borderBottom: '1px solid var(--hospital-gray-200)',
-          mb: 1,
-          '& .MuiTabs-root': {
-            backgroundColor: 'var(--hospital-white)',
-            borderRadius: '0.5rem',
-            boxShadow: 'var(--shadow-sm)',
-            overflowX: 'auto',
-          },
-          '& .MuiTabs-flexContainer': {
-            flexWrap: 'nowrap',
-          },
-          '& .MuiTab-root': {
-            color: 'var(--hospital-gray-700)',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            padding: '0.25rem 0.75rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            transition: 'all var(--transition-normal)',
-            minWidth: '100px',
-            whiteSpace: 'nowrap',
-          },
-          '& .MuiTab-root.Mui-selected': {
-            color: 'var(--hospital-accent)',
-            backgroundColor: 'var(--hospital-gray-50)',
-          },
-          '& .MuiTabs-indicator': {
-            backgroundColor: 'var(--hospital-accent)',
-            height: '3px',
-            borderRadius: '3px 3px 0 0',
-          },
-          '& .MuiTabs-scroller': {
-            overflowX: 'auto !important',
-            '&::-webkit-scrollbar': {
-              height: '8px',
-            },
-            '&::-webkit-scrollbar-track': {
-              backgroundColor: 'var(--hospital-gray-50)',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: 'var(--hospital-gray-200)',
-              borderRadius: '4px',
-            },
-          },
-        }}>
+        <Box className="mb-2">
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
@@ -83,10 +39,35 @@ const AppointmentsLayout = ({ children }) => {
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile
+            className="card rounded-lg overflow-x-auto custom-scrollbar"
           >
-            <Tab label="Appointments" />
-            <Tab label="Visit Types" />
-            <Tab label="Status History" />
+            <Tab 
+              label={
+                <span className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Appointments
+                </span>
+              }
+              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+            />
+            <Tab 
+              label={
+                <span className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Visit Types
+                </span>
+              }
+              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+            />
+            <Tab 
+              label={
+                <span className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Status History
+                </span>
+              }
+              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+            />
           </Tabs>
         </Box>
         {children}
