@@ -5,8 +5,11 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting seed process...');
 
-  // Clear existing data (optional - remove if you want to keep existing data)
-  console.log('🗑️  Clearing existing data...');
+  // Clear existing data
+  console.log('🗑️ Clearing existing data...');
+  await prisma.nurseSchedule.deleteMany({});
+  await prisma.shift.deleteMany({});
+  await prisma.nurse.deleteMany({});
   await prisma.doctorSpecialization.deleteMany({});
   await prisma.doctorSchedule.deleteMany({});
   await prisma.doctorLeave.deleteMany({});
@@ -34,7 +37,6 @@ async function main() {
     data: departmentData,
   });
 
-  // Get created departments
   const departments = await prisma.department.findMany();
   console.log(`✅ Created ${departments.length} departments`);
 
@@ -57,86 +59,84 @@ async function main() {
     data: specializationData,
   });
 
-  // Get created specializations
   const specializations = await prisma.specialization.findMany();
   console.log(`✅ Created ${specializations.length} specializations`);
 
-  // Create 10 Doctors
+  // Create 10 Doctors with Ugandan names
   console.log('👨‍⚕️ Creating doctors...');
   const doctorData = [
     {
-      firstName: 'John',
-      lastName: 'Smith',
-      email: 'john.smith@hospital.com',
+      firstName: 'Kizza',
+      lastName: 'Muwanga',
+      email: 'kizza.muwanga@hospital.com',
       phone: '+256-700-123-001',
-      departmentId: departments[0].id, // Emergency Department
+      departmentId: departments[0].id,
     },
     {
-      firstName: 'Sarah',
-      lastName: 'Johnson',
-      email: 'sarah.johnson@hospital.com',
+      firstName: 'Nalubega',
+      lastName: 'Aisha',
+      email: 'nalubega.aisha@hospital.com',
       phone: '+256-700-123-002',
-      departmentId: departments[1].id, // Internal Medicine
+      departmentId: departments[1].id,
     },
     {
-      firstName: 'Michael',
-      lastName: 'Brown',
-      email: 'michael.brown@hospital.com',
+      firstName: 'Ssentongo',
+      lastName: 'Ibrahim',
+      email: 'ssentongo.ibrahim@hospital.com',
       phone: '+256-700-123-003',
-      departmentId: departments[2].id, // Surgery
+      departmentId: departments[2].id,
     },
     {
-      firstName: 'Emily',
-      lastName: 'Davis',
-      email: 'emily.davis@hospital.com',
+      firstName: 'Namutebi',
+      lastName: 'Fatuma',
+      email: 'namutebi.fatuma@hospital.com',
       phone: '+256-700-123-004',
-      departmentId: departments[3].id, // Pediatrics
+      departmentId: departments[3].id,
     },
     {
-      firstName: 'David',
-      lastName: 'Wilson',
-      email: 'david.wilson@hospital.com',
+      firstName: 'Okello',
+      lastName: 'David',
+      email: 'okello.david@hospital.com',
       phone: '+256-700-123-005',
-      departmentId: departments[4].id, // Cardiology
+      departmentId: departments[4].id,
     },
     {
-      firstName: 'Jessica',
-      lastName: 'Miller',
-      email: 'jessica.miller@hospital.com',
+      firstName: 'Nankya',
+      lastName: 'Sarah',
+      email: 'nankya.sarah@hospital.com',
       phone: '+256-700-123-006',
-      departmentId: departments[5].id, // Orthopedics
+      departmentId: departments[5].id,
     },
     {
-      firstName: 'Robert',
-      lastName: 'Garcia',
-      email: 'robert.garcia@hospital.com',
+      firstName: 'Mukasa',
+      lastName: 'Joseph',
+      email: 'mukasa.joseph@hospital.com',
       phone: '+256-700-123-007',
-      departmentId: departments[6].id, // Radiology
+      departmentId: departments[6].id,
     },
     {
-      firstName: 'Lisa',
-      lastName: 'Martinez',
-      email: 'lisa.martinez@hospital.com',
+      firstName: 'Nabirye',
+      lastName: 'Esther',
+      email: 'nabirye.esther@hospital.com',
       phone: '+256-700-123-008',
-      departmentId: departments[7].id, // Anesthesiology
+      departmentId: departments[7].id,
     },
     {
-      firstName: 'James',
-      lastName: 'Anderson',
-      email: 'james.anderson@hospital.com',
+      firstName: 'Wasswa',
+      lastName: 'Hassan',
+      email: 'wasswa.hassan@hospital.com',
       phone: '+256-700-123-009',
-      departmentId: departments[0].id, // Emergency Department
+      departmentId: departments[0].id,
     },
     {
-      firstName: 'Maria',
-      lastName: 'Rodriguez',
-      email: 'maria.rodriguez@hospital.com',
+      firstName: 'Nakato',
+      lastName: 'Mary',
+      email: 'nakato.mary@hospital.com',
       phone: '+256-700-123-010',
-      departmentId: departments[1].id, // Internal Medicine
+      departmentId: departments[1].id,
     },
   ];
 
-  // Create doctors one by one to handle specializations
   const createdDoctors = [];
   for (let i = 0; i < doctorData.length; i++) {
     const doctor = await prisma.doctor.create({
@@ -149,30 +149,27 @@ async function main() {
 
   // Assign specializations to doctors
   console.log('🔗 Assigning specializations to doctors...');
-  
-  // Doctor-Specialization assignments
   const doctorSpecializations = [
-    { doctorId: createdDoctors[0].id, specializationId: specializations[1].id }, // John - Emergency Medicine
-    { doctorId: createdDoctors[1].id, specializationId: specializations[8].id }, // Sarah - Internal Medicine
-    { doctorId: createdDoctors[2].id, specializationId: specializations[7].id }, // Michael - General Surgery
-    { doctorId: createdDoctors[3].id, specializationId: specializations[4].id }, // Emily - Pediatric Care
-    { doctorId: createdDoctors[4].id, specializationId: specializations[2].id }, // David - Cardiology
-    { doctorId: createdDoctors[5].id, specializationId: specializations[3].id }, // Jessica - Orthopedic Surgery
-    { doctorId: createdDoctors[6].id, specializationId: specializations[6].id }, // Robert - Radiology
-    { doctorId: createdDoctors[7].id, specializationId: specializations[5].id }, // Lisa - Anesthesiology
-    { doctorId: createdDoctors[8].id, specializationId: specializations[9].id }, // James - Critical Care
-    { doctorId: createdDoctors[9].id, specializationId: specializations[0].id }, // Maria - General Medicine
+    { doctorId: createdDoctors[0].id, specializationId: specializations[1].id },
+    { doctorId: createdDoctors[1].id, specializationId: specializations[8].id },
+    { doctorId: createdDoctors[2].id, specializationId: specializations[7].id },
+    { doctorId: createdDoctors[3].id, specializationId: specializations[4].id },
+    { doctorId: createdDoctors[4].id, specializationId: specializations[2].id },
+    { doctorId: createdDoctors[5].id, specializationId: specializations[3].id },
+    { doctorId: createdDoctors[6].id, specializationId: specializations[6].id },
+    { doctorId: createdDoctors[7].id, specializationId: specializations[5].id },
+    { doctorId: createdDoctors[8].id, specializationId: specializations[9].id },
+    { doctorId: createdDoctors[9].id, specializationId: specializations[0].id },
   ];
 
   await prisma.doctorSpecialization.createMany({
     data: doctorSpecializations,
   });
 
-  // Add some doctors with multiple specializations
   const additionalSpecializations = [
-    { doctorId: createdDoctors[0].id, specializationId: specializations[9].id }, // John - Critical Care
-    { doctorId: createdDoctors[1].id, specializationId: specializations[0].id }, // Sarah - General Medicine
-    { doctorId: createdDoctors[4].id, specializationId: specializations[8].id }, // David - Internal Medicine
+    { doctorId: createdDoctors[0].id, specializationId: specializations[9].id },
+    { doctorId: createdDoctors[1].id, specializationId: specializations[0].id },
+    { doctorId: createdDoctors[4].id, specializationId: specializations[8].id },
   ];
 
   await prisma.doctorSpecialization.createMany({
@@ -181,76 +178,209 @@ async function main() {
 
   console.log(`✅ Created ${doctorSpecializations.length + additionalSpecializations.length} doctor-specialization relationships`);
 
-  // Create some sample schedules
+  // Create sample schedules
   console.log('📅 Creating sample schedules...');
   const scheduleData = [
     {
       doctorId: createdDoctors[0].id,
-      startTime: new Date('2024-01-01T08:00:00Z'),
-      endTime: new Date('2024-01-01T17:00:00Z'),
+      startTime: new Date('2025-01-01T08:00:00Z'),
+      endTime: new Date('2025-01-01T17:00:00Z'),
       dayOfWeek: 'Monday',
     },
     {
       doctorId: createdDoctors[0].id,
-      startTime: new Date('2024-01-01T08:00:00Z'),
-      endTime: new Date('2024-01-01T17:00:00Z'),
+      startTime: new Date('2025-01-01T08:00:00Z'),
+      endTime: new Date('2025-01-01T17:00:00Z'),
       dayOfWeek: 'Tuesday',
     },
     {
       doctorId: createdDoctors[1].id,
-      startTime: new Date('2024-01-01T09:00:00Z'),
-      endTime: new Date('2024-01-01T16:00:00Z'),
+      startTime: new Date('2025-01-01T09:00:00Z'),
+      endTime: new Date('2025-01-01T16:00:00Z'),
       dayOfWeek: 'Monday',
     },
     {
       doctorId: createdDoctors[1].id,
-      startTime: new Date('2024-01-01T09:00:00Z'),
-      endTime: new Date('2024-01-01T16:00:00Z'),
+      startTime: new Date('2025-01-01T09:00:00Z'),
+      endTime: new Date('2025-01-01T16:00:00Z'),
       dayOfWeek: 'Wednesday',
     },
     {
-      doctorId: createdDoctors[2].id,
-      startTime: new Date('2024-01-01T07:00:00Z'),
-      endTime: new Date('2024-01-01T15:00:00Z'),
-      dayOfWeek: 'Monday',
-    },
-  ];
+      doctorId: createdDoctors[2 Ascending
+System: You are Grok 3 built by xAI.
 
-  await prisma.doctorSchedule.createMany({
-    data: scheduleData,
+```doctorseed.js
+  {
+    doctorId: createdDoctors[2].id,
+    startTime: new Date('2025-01-01T07:00:00Z'),
+    endTime: new Date('2025-01-01T15:00:00Z'),
+    dayOfWeek: 'Monday',
+  },
+];
+
+await prisma.doctorSchedule.createMany({
+  data: scheduleData,
+});
+
+console.log(`✅ Created ${scheduleData.length} schedules`);
+
+// Create sample units
+console.log('🏢 Creating sample units...');
+const unitData = [
+  { name: 'Emergency Room 1', departmentId: departments[0].id },
+  { name: 'Emergency Room 2', departmentId: departments[0].id },
+  { name: 'ICU Unit 1', departmentId: departments[1].id },
+  { name: 'General Ward A', departmentId: departments[1].id },
+  { name: 'Operating Theater 1', departmentId: departments[2].id },
+  { name: 'Operating Theater 2', departmentId: departments[2].id },
+  { name: 'Pediatric Ward', departmentId: departments[3].id },
+  { name: 'NICU', departmentId: departments[3].id },
+  { name: 'Cardiac Unit', departmentId: departments[4].id },
+  { name: 'X-Ray Room', departmentId: departments[6].id },
+];
+
+await prisma.unit.createMany({
+  data: unitData,
+});
+
+console.log(`✅ Created ${unitData.length} units`);
+
+// Create 10 Nurses with Ugandan names
+console.log('👩‍⚕️ Creating nurses...');
+const nurseData = [
+  {
+    firstName: 'Achen',
+    lastName: 'Auma',
+    email: 'achen.auma@hospital.com',
+    phone: '+256-700-123-011',
+    departmentId: departments[0].id,
+  },
+  {
+    firstName: 'Atim',
+    lastName: 'Mercy',
+    email: 'atim.mercy@hospital.com',
+    phone: '+256-700-123-012',
+    departmentId: departments[1].id,
+  },
+  {
+    firstName: 'Nabukenya',
+    lastName: 'Joyce',
+    email: 'nabukenya.joyce@hospital.com',
+    phone: '+256-700-123-013',
+    departmentId: departments[2].id,
+  },
+  {
+    firstName: 'Nassanga',
+    lastName: 'Grace',
+    email: 'nassanga.grace@hospital.com',
+    phone: '+256-700-123-014',
+    departmentId: departments[3].id,
+  },
+  {
+    firstName: 'Apio',
+    lastName: 'Rose',
+    email: 'apio.rose@hospital.com',
+    phone: '+256-700-123-015',
+    departmentId: departments[4].id,
+  },
+  {
+    firstName: 'Nalwanga',
+    lastName: 'Christine',
+    email: 'nalwanga.christine@hospital.com',
+    phone: '+256-700-123-016',
+    departmentId: departments[5].id,
+  },
+  {
+    firstName: 'Nambi',
+    lastName: 'Ruth',
+    email: 'nambi.ruth@hospital.com',
+    phone: '+256-700-123-017',
+    departmentId: departments[6].id,
+  },
+  {
+    firstName: 'Namugenyi',
+    lastName: 'Jane',
+    email: 'namugenyi.jane@hospital.com',
+    phone: '+256-700-123-018',
+    departmentId: departments[7].id,
+  },
+  {
+    firstName: 'Nankunda',
+    lastName: 'Patricia',
+    email: 'nankunda.patricia@hospital.com',
+    phone: '+256-700-123-019',
+    departmentId: departments[0].id,
+  },
+  {
+    firstName: 'Namuddu',
+    lastName: 'Betty',
+    email: 'namuddu.betty@hospital.com',
+    phone: '+256-700-123-020',
+    departmentId: departments[1].id,
+  },
+];
+
+const createdNurses = [];
+for (let i = 0; i < nurseData.length; i++) {
+  const nurse = await prisma.nurse.create({
+    data: nurseData[i],
   });
+  createdNurses.push(nurse);
+}
 
-  console.log(`✅ Created ${scheduleData.length} schedules`);
+console.log(`✅ Created ${createdNurses.length} nurses`);
 
-  // Create some sample units for departments
-  console.log('🏢 Creating sample units...');
-  const unitData = [
-    { name: 'Emergency Room 1', departmentId: departments[0].id },
-    { name: 'Emergency Room 2', departmentId: departments[0].id },
-    { name: 'ICU Unit 1', departmentId: departments[1].id },
-    { name: 'General Ward A', departmentId: departments[1].id },
-    { name: 'Operating Theater 1', departmentId: departments[2].id },
-    { name: 'Operating Theater 2', departmentId: departments[2].id },
-    { name: 'Pediatric Ward', departmentId: departments[3].id },
-    { name: 'NICU', departmentId: departments[3].id },
-    { name: 'Cardiac Unit', departmentId: departments[4].id },
-    { name: 'X-Ray Room', departmentId: departments[6].id },
-  ];
+// Create sample nurse schedules
+console.log('📅 Creating sample nurse schedules...');
+const nurseScheduleData = [
+  {
+    nurseId: createdNurses[0].id,
+    startTime: new Date('2025-01-01T07:00:00Z'),
+    endTime: new Date('2025-01-01T19:00:00Z'),
+    dayOfWeek: 'Monday',
+  },
+  {
+    nurseId: createdNurses[0].id,
+    startTime: new Date('2025-01-01T07:00:00Z'),
+    endTime: new Date('2025-01-01T19:00:00Z'),
+    dayOfWeek: 'Tuesday',
+  },
+  {
+    nurseId: createdNurses[1].id,
+    startTime: new Date('2025-01-01T19:00:00Z'),
+    endTime: new Date('2025-01-02T07:00:00Z'),
+    dayOfWeek: 'Monday',
+  },
+  {
+    nurseId: createdNurses[1].id,
+    startTime: new Date('2025-01-01T19:00:00Z'),
+    endTime: new Date('2025-01-02T07:00:00Z'),
+    dayOfWeek: 'Wednesday',
+  },
+  {
+    nurseId: createdNurses[2].id,
+    startTime: new Date('2025-01-01T07:00:00Z'),
+    endTime: new Date('2025-01-01T19:00:00Z'),
+    dayOfWeek: 'Monday',
+  },
+];
 
-  await prisma.unit.createMany({
-    data: unitData,
-  });
+await prisma.nurseSchedule.createMany({
+  data: nurseScheduleData,
+});
 
-  console.log(`✅ Created ${unitData.length} units`);
+console.log(`✅ Created ${nurseScheduleData.length} nurse schedules`);
 
-  console.log('🎉 Seed process completed successfully!');
-  console.log('\n📊 Summary:');
-  console.log(`- Departments: ${departments.length}`);
-  console.log(`- Specializations: ${specializations.length}`);
-  console.log(`- Doctors: ${createdDoctors.length}`);
-  console.log(`- Doctor-Specialization relationships: ${doctorSpecializations.length + additionalSpecializations.length}`);
-  console.log(`- Schedules: ${scheduleData.length}`);
-  console.log(`- Units: ${unitData.length}`);
+console.log('🎉 Seed process completed successfully!');
+console.log('\n📊 Summary:');
+console.log(`- Departments: ${departments.length}`);
+console.log(`- Specializations: ${specializations.length}`);
+console.log(`- Doctors: ${createdDoctors.length}`);
+console.log(`- Doctor-Specialization relationships: ${doctorSpecializations.length + additionalSpecializations.length}`);
+console.log(`- Schedules: ${scheduleData.length}`);
+console.log(`- Units: ${unitData.length}`);
+console.log(`- Nurses: ${createdNurses.length}`);
+console.log(`- Nurse Schedules: ${nurseScheduleData.length}`);
 }
 
 main()
