@@ -10,6 +10,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
+    const include = searchParams.get('include');
 
     const where = {};
     if (search) {
@@ -20,9 +21,29 @@ export async function GET(request) {
       ];
     }
 
+    // Build include object based on query parameter
+    const includeObj = {};
+    if (include) {
+      const includeFields = include.split(',');
+      includeFields.forEach(field => {
+        switch (field.trim()) {
+          case 'addresses':
+            includeObj.addresses = true;
+            break;
+          case 'nextOfKin':
+            includeObj.nextOfKin = true;
+            break;
+          case 'insuranceInfo':
+            includeObj.insuranceInfo = true;
+            break;
+        }
+      });
+    }
+
     const patients = await prisma.patient.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      include: includeObj,
       select: {
         id: true,
         firstName: true,
@@ -34,6 +55,40 @@ export async function GET(request) {
         createdAt: true,
         updatedAt: true,
         userId: true,
+        // Include related data if requested
+        ...(includeObj.addresses && {
+          addresses: {
+            select: {
+              id: true,
+              street: true,
+              city: true,
+              country: true,
+              postalCode: true,
+            }
+          }
+        }),
+        ...(includeObj.nextOfKin && {
+          nextOfKin: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              relationship: true,
+              phone: true,
+              email: true,
+            }
+          }
+        }),
+        ...(includeObj.insuranceInfo && {
+          insuranceInfo: {
+            select: {
+              id: true,
+              provider: true,
+              policyNumber: true,
+              expiryDate: true,
+            }
+          }
+        }),
       },
     });
 
@@ -92,6 +147,7 @@ export async function POST(request) {
       );
     }
 
+    // Create patient with related data
     const patient = await prisma.patient.create({
       data: {
         id,
@@ -102,18 +158,44 @@ export async function POST(request) {
         phone: data.phone || null,
         email: data.email || null,
         userId,
+        // Create addresses if provided
+        ...(data.addresses && data.addresses.length > 0 && {
+          addresses: {
+            create: data.addresses.map(address => ({
+              street: address.street || '',
+              city: address.city || '',
+              country: address.country || '',
+              postalCode: address.postalCode || null,
+            }))
+          }
+        }),
+        // Create next of kin if provided
+        ...(data.nextOfKin && (data.nextOfKin.firstName || data.nextOfKin.lastName) && {
+          nextOfKin: {
+            create: {
+              firstName: data.nextOfKin.firstName || '',
+              lastName: data.nextOfKin.lastName || '',
+              relationship: data.nextOfKin.relationship || '',
+              phone: data.nextOfKin.phone || null,
+              email: data.nextOfKin.email || null,
+            }
+          }
+        }),
+        // Create insurance info if provided
+        ...(data.insuranceInfo && (data.insuranceInfo.provider || data.insuranceInfo.policyNumber) && {
+          insuranceInfo: {
+            create: {
+              provider: data.insuranceInfo.provider || '',
+              policyNumber: data.insuranceInfo.policyNumber || '',
+              expiryDate: data.insuranceInfo.expiryDate ? new Date(data.insuranceInfo.expiryDate) : null,
+            }
+          }
+        }),
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        dateOfBirth: true,
-        gender: true,
-        phone: true,
-        email: true,
-        createdAt: true,
-        updatedAt: true,
-        userId: true,
+      include: {
+        addresses: true,
+        nextOfKin: true,
+        insuranceInfo: true,
       },
     });
 
