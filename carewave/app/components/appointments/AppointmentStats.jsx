@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, Typography, Box } from '@mui/material';
 import { Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Chart as ChartJS,
   CategoryScale,
