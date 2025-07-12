@@ -1,12 +1,11 @@
 'use client';
 import React from 'react';
-import { Box } from '@mui/material';
 
 const DoctorsLayout = ({ children }) => {
   return (
-    <Box className="min-h-screen bg-[var(--hospital-gray-50)] flex flex-col w-full max-w-full p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-[var(--hospital-gray-50)] flex flex-col w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
       {children}
-    </Box>
+    </div>
   );
 };
 
