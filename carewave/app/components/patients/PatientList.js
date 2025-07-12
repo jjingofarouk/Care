@@ -19,7 +19,7 @@ export default function PatientList() {
   const fetchPatients = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/patient?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
+      const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
       if (!response.ok) throw new Error('Failed to fetch patients');
       const data = await response.json();
       setPatients(data.map(patient => ({
@@ -36,7 +36,7 @@ export default function PatientList() {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this patient?')) {
       try {
-        const response = await fetch(`/api/patient/${id}`, { method: 'DELETE' });
+        const response = await fetch(`/api/patients/${id}`, { method: 'DELETE' });
         if (!response.ok) throw new Error('Failed to delete patient');
         fetchPatients();
       } catch (error) {

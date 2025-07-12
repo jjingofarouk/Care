@@ -5,7 +5,7 @@ import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
 import OutPatientRecords from './OutPatientRecords';
 import InpatientRecords from './InpatientRecords';
 import EmergencyRecords from './EmergencyRecords';
-import { getPatients } from '../patient/patientService';
+import { getPatients } from '../patients/patientService';
 import styles from './ClinicalPage.module.css';
 
 export default function ClinicalPage() {
