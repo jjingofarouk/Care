@@ -20,22 +20,19 @@ export default function PatientList() {
   const fetchPatients = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
+      const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}`);
       if (!response.ok) throw new Error(`Failed to fetch patients: ${response.status}`);
       const data = await response.json();
-      console.log('Fetched patients:', JSON.stringify(data, null, 2));
-      if (!Array.isArray(data)) {
-        throw new Error('API response is not an array');
-      }
-      setPatients(
-        data.map((patient) => ({
-          ...patient,
-          id: patient.id || '',
-          addresses: patient.addresses || [],
-          nextOfKin: patient.nextOfKin || null,
-          insuranceInfo: patient.insuranceInfo || null,
-        }))
-      );
+      if (!Array.isArray(data)) throw new Error('API response is not an array');
+      setPatients(data.map((patient) => ({
+        id: patient.id || '',
+        firstName: patient.firstName || '',
+        lastName: patient.lastName || '',
+        email: patient.email || '',
+        dateOfBirth: patient.dateOfBirth || '',
+        gender: patient.gender || '',
+        phone: patient.phone || ''
+      })));
     } catch (error) {
       console.error('Failed to fetch patients:', error);
     } finally {
@@ -44,10 +41,7 @@ export default function PatientList() {
   };
 
   const handleDelete = async (id) => {
-    if (!id) {
-      console.error('Delete attempted with invalid ID');
-      return;
-    }
+    if (!id) return;
     if (window.confirm('Are you sure you want to delete this patient?')) {
       try {
         const response = await fetch(`/api/patients/${id}`, { method: 'DELETE' });
@@ -60,83 +54,46 @@ export default function PatientList() {
   };
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 120, flex: 0.5 },
-    { field: 'firstName', headerName: 'First Name', width: 150, flex: 1 },
-    { field: 'lastName', headerName: 'Last Name', width: 150, flex: 1 },
-    { field: 'email', headerName: 'Email', width: 200, flex: 1.5 },
+    { field: 'id', headerName: 'ID', width: 120 },
+    { field: 'firstName', headerName: 'First Name', width: 150 },
+    { field: 'lastName', headerName: 'Last Name', width: 150 },
+    { field: 'email', headerName: 'Email', width: 200 },
     {
       field: 'age',
       headerName: 'Age',
       width: 100,
-      flex: 0.5,
       valueGetter: ({ row }) => {
-        if (!row?.dateOfBirth) return '-';
+        if (!row.dateOfBirth) return '-';
         const dob = new Date(row.dateOfBirth);
         if (isNaN(dob.getTime())) return '-';
         return Math.floor((Date.now() - dob) / (365.25 * 24 * 60 * 60 * 1000));
       },
     },
-    { field: 'gender', headerName: 'Gender', width: 100, flex: 0.5 },
-    {
-      field: 'address',
-      headerName: 'Address',
-      width: 200,
-      flex: 1.5,
-      valueGetter: ({ row }) => {
-        if (!row?.addresses || !Array.isArray(row.addresses) || row.addresses.length === 0) return '-';
-        const addr = row.addresses[0];
-        return addr && addr.street && addr.city && addr.country
-          ? `${addr.street}, ${addr.city}, ${addr.country}`
-          : '-';
-      },
-    },
-    {
-      field: 'nextOfKin',
-      headerName: 'Next of Kin',
-      width: 150,
-      flex: 1,
-      valueGetter: ({ row }) => {
-        if (!row?.nextOfKin || !row.nextOfKin.firstName || !row.nextOfKin.lastName) return '-';
-        return `${row.nextOfKin.firstName} ${row.nextOfKin.lastName}`;
-      },
-    },
-    {
-      field: 'insurance',
-      headerName: 'Insurance',
-      width: 150,
-      flex: 1,
-      valueGetter: ({ row }) => {
-        if (!row?.insuranceInfo || !row.insuranceInfo.provider) return '-';
-        return row.insuranceInfo.provider;
-      },
-    },
+    { field: 'gender', headerName: 'Gender', width: 100 },
+    { field: 'phone', headerName: 'Phone', width: 150 },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 120,
-      flex: 0.5,
       sortable: false,
-      renderCell: ({ row }) => {
-        if (!row?.id) return null;
-        return (
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <IconButton
-              color="primary"
-              onClick={() => router.push(`/patients/edit/${row.id}`)}
-              size="small"
-            >
-              <Edit />
-            </IconButton>
-            <IconButton
-              color="error"
-              onClick={() => handleDelete(row.id)}
-              size="small"
-            >
-              <Delete />
-            </IconButton>
-          </Box>
-        );
-      },
+      renderCell: ({ row }) => (
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <IconButton
+            color="primary"
+            onClick={() => router.push(`/patients/edit/${row.id}`)}
+            size="small"
+          >
+            <Edit />
+          </IconButton>
+          <IconButton
+            color="error"
+            onClick={() => handleDelete(row.id)}
+            size="small"
+          >
+            <Delete />
+          </IconButton>
+        </Box>
+      ),
     },
   ];
 
