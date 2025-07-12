@@ -69,7 +69,7 @@ export default function DoctorsPage() {
 
   return (
     <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
-      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4 lg:px-6 py-2">
+<div className="mx-auto w-full max-w-[1920px] px-1 sm:px-2 lg:px-4 py-1">
         <div className="card">
           <div className="card-header">
             <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
