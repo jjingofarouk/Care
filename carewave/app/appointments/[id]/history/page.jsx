@@ -1,32 +1,42 @@
-import React from 'react';
-import { getStatusHistory } from '@/services/appointmentService';
-import { Table, TableBody, TableCell, TableHead, TableRow, Chip } from '@mui/material';
-import { Clock } from 'lucide-react';
-import { Typography } from '@mui/material';
+'use client';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { Typography, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 
-export default async function AppointmentHistoryPage({ params }) {
-  const history = await getStatusHistory(params.id);
+export default function StatusHistoryPage() {
+  const { id } = useParams();
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'PENDING':
-        return <Chip label="Pending" className="badge-warning" icon={<Clock size={16} />} />;
-      case 'CONFIRMED':
-        return <Chip label="Confirmed" className="badge-success" icon={<Clock size={16} />} />;
-      case 'CANCELLED':
-        return <Chip label="Cancelled" className="badge-error" icon={<Clock size={16} />} />;
-      case 'COMPLETED':
-        return <Chip label="Completed" className="badge-info" icon={<Clock size={16} />} />;
-      default:
-        return <Chip label={status} className="badge-neutral" />;
-    }
-  };
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await fetch(`/api/appointments?resource=statusHistory&appointmentId=${id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch status history');
+        const data = await response.json();
+        setHistory(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHistory();
+  }, [id]);
 
   return (
-    <div className="p-6">
-      <Typography variant="h4" className="text-[var(--hospital-gray-900)] mb-6">
+    <div className="p-2 sm:p-4">
+      <Typography variant="h4" className="text-[var(--hospital-gray-900)] mb-2">
         Appointment Status History
       </Typography>
+      {error && (
+        <div className="alert alert-error mb-2">
+          <span>{error}</span>
+        </div>
+      )}
       <div className="card">
         <Table className="table">
           <TableHead>
@@ -36,12 +46,22 @@ export default async function AppointmentHistoryPage({ params }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {history.map((record) => (
-              <TableRow key={record.id}>
-                <TableCell>{getStatusBadge(record.status)}</TableCell>
-                <TableCell>{new Date(record.changedAt).toLocaleString()}</TableCell>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={2}><div className="loading-spinner mx-auto"></div></TableCell>
               </TableRow>
-            ))}
+            ) : history.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={2}>No status history available</TableCell>
+              </TableRow>
+            ) : (
+              history.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell>{record.status}</TableCell>
+                  <TableCell>{new Date(record.changedAt).toLocaleString()}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
