@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableRow, Chip, IconButton, Menu, MenuItem, Box } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { Chip, IconButton, Menu, MenuItem, Box } from '@mui/material';
 import { Edit, Trash2, MoreHorizontal, Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -92,65 +93,123 @@ export default function AppointmentTable({ appointments, loading, onAppointmentD
     }
   };
 
+  const columns = [
+    { 
+      field: 'patient', 
+      headerName: 'Patient', 
+      width: 200,
+      renderCell: (params) => params.row.patient?.name || 'N/A',
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+    { 
+      field: 'doctor', 
+      headerName: 'Doctor', 
+      width: 200,
+      renderCell: (params) => params.row.doctor?.name ? `Dr. ${params.row.doctor.name}` : 'N/A',
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+    { 
+      field: 'department', 
+      headerName: 'Department', 
+      width: 180,
+      renderCell: (params) => params.row.doctor?.department?.name || 'N/A',
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+    { 
+      field: 'visitType', 
+      headerName: 'Visit Type', 
+      width: 150,
+      renderCell: (params) => params.row.visitType?.name || 'N/A',
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+    { 
+      field: 'appointmentDate', 
+      headerName: 'Date', 
+      width: 180,
+      renderCell: (params) => formatDate(params.row.appointmentDate),
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+    { 
+      field: 'appointmentStatus', 
+      headerName: 'Status', 
+      width: 150,
+      renderCell: (params) => getStatusBadge(params.row.appointmentStatus),
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+    { 
+      field: 'actions', 
+      headerName: 'Actions', 
+      width: 120,
+      renderCell: (params) => (
+        <Box className="flex gap-2">
+          <Link href={`/appointments/${params.row.id}/edit`}>
+            <IconButton className="btn-outline" size="small">
+              <Edit className="h-4 w-4" />
+            </IconButton>
+          </Link>
+          <IconButton 
+            className="btn-outline" 
+            size="small"
+            onClick={(e) => handleMenuClick(e, params.row.id)}
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </IconButton>
+        </Box>
+      ),
+      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+    },
+  ];
+
   return (
-    <div className="card max-w-full mx-auto">
-      <Table className="table w-full">
-        <TableHead>
-          <TableRow>
-            <TableCell className="font-semibold">Patient</TableCell>
-            <TableCell className="font-semibold">Doctor</TableCell>
-            <TableCell className="font-semibold">Department</TableCell>
-            <TableCell className="font-semibold">Visit Type</TableCell>
-            <TableCell className="font-semibold">Date</TableCell>
-            <TableCell className="font-semibold">Status</TableCell>
-            <TableCell className="font-semibold">Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {loading ? (
-            <TableRow>
-              <TableCell colSpan={7} className="text-center py-8">
-                <div className="loading-spinner mx-auto"></div>
-              </TableCell>
-            </TableRow>
-          ) : !appointments || appointments.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={7} className="text-center py-8 text-[var(--hospital-gray-500)]">
-                No appointments found
-              </TableCell>
-            </TableRow>
-          ) : (
-            appointments.map((appt) => (
-              <TableRow key={appt.id} className="hover:bg-[var(--hospital-gray-50)]">
-                <TableCell>{appt.patient?.name || 'N/A'}</TableCell>
-                <TableCell>
-                  {appt.doctor?.name ? `Dr. ${appt.doctor.name}` : 'N/A'}
-                </TableCell>
-                <TableCell>{appt.doctor?.department?.name || 'N/A'}</TableCell>
-                <TableCell>{appt.visitType?.name || 'N/A'}</TableCell>
-                <TableCell>{formatDate(appt.appointmentDate)}</TableCell>
-                <TableCell>{getStatusBadge(appt.appointmentStatus)}</TableCell>
-                <TableCell>
-                  <Box className="flex gap-2">
-                    <Link href={`/appointments/${appt.id}/edit`}>
-                      <IconButton className="btn-outline" size="small">
-                        <Edit className="h-4 w-4" />
-                      </IconButton>
-                    </Link>
-                    <IconButton 
-                      className="btn-outline" 
-                      size="small"
-                      onClick={(e) => handleMenuClick(e, appt.id)}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </IconButton>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+    <div className="card w-full max-w-7xl mx-auto">
+      <div style={{ height: 600, width: '100%' }} className="overflow-x-auto custom-scrollbar">
+        <DataGrid
+          rows={loading ? [] : appointments}
+          columns={columns}
+          pageSize={10}
+          rowsPerPageOptions={[10, 20, 50]}
+          loading={loading}
+          disableSelectionOnClick
+          autoHeight={false}
+          sx={{
+            '& .MuiDataGrid-root': {
+              border: 'none',
+              backgroundColor: 'var(--hospital-white)',
+              borderRadius: '0.5rem',
+              boxShadow: 'var(--shadow-sm)',
+            },
+            '& .MuiDataGrid-cell': {
+              borderTop: '1px solid var(--hospital-gray-200)',
+              color: 'var(--hospital-gray-900)',
+              padding: '0.75rem 1.5rem',
+            },
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: 'var(--hospital-gray-50)',
+            },
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: 'var(--hospital-gray-50)',
+            },
+            '& .MuiDataGrid-footerContainer': {
+              backgroundColor: 'var(--hospital-gray-50)',
+              borderTop: '1px solid var(--hospital-gray-200)',
+            },
+            '& .MuiDataGrid-overlay': {
+              backgroundColor: 'var(--hospital-white)',
+            },
+          }}
+          components={{
+            NoRowsOverlay: () => (
+              <Box className="flex justify-center items-center h-full text-[var(--hospital-gray-500)]">
+                {loading ? (
+                  <div className="loading-spinner"></div>
+                ) : (
+                  'No appointments found'
+                )}
+              </Box>
+            ),
+          }}
+        />
+      </div>
       
       <Menu
         anchorEl={anchorEl}
