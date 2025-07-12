@@ -12,7 +12,6 @@ import {
   Button, 
   CircularProgress, 
   Alert,
-  Divider,
   IconButton,
   Paper
 } from '@mui/material';
