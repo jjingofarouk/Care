@@ -1,5 +1,5 @@
 'use client';
-
+import React from 'react';
 import { useState, useEffect } from 'react';
 import LeaveTable from '../../components/doctors/LeaveTable';
 import LeaveForm from '../../components/doctors/LeaveForm';
