@@ -1,3 +1,4 @@
+// page.jsx
 import React from 'react';
 import { getAllAppointments } from '@/services/appointmentService';
 import AppointmentTable from '@/components/appointments/AppointmentTable';
