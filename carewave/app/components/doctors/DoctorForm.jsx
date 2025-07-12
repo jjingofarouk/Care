@@ -1,6 +1,5 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Chip, Box } from '@mui/material';
 import { getDepartments } from '../../services/departmentService';
 import { getSpecializations } from '../../services/doctorService';
 
@@ -59,112 +58,93 @@ export default function DoctorForm({ doctor, onSubmit, onCancel }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p>Loading form data...</p>
+        <div className="loading-spinner" />
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <TextField
+    <form onSubmit={handleSubmit} className="space-y-4 w-full">
+      <input
+        type="text"
         name="firstName"
-        label="First Name"
+        placeholder="First Name"
         value={formData.firstName}
         onChange={handleChange}
-        fullWidth
-        className="input"
+        className="input w-full"
         required
       />
-      <TextField
+      <input
+        type="text"
         name="lastName"
-        label="Last Name"
+        placeholder="Last Name"
         value={formData.lastName}
         onChange={handleChange}
-        fullWidth
-        className="input"
+        className="input w-full"
         required
       />
-      <TextField
-        name="email"
-        label="Email"
+      <input
         type="email"
+        name="email"
+        placeholder="Email"
         value={formData.email}
         onChange={handleChange}
-        fullWidth
-        className="input"
+        className="input w-full"
         required
       />
-      <TextField
+      <input
+        type="tel"
         name="phone"
-        label="Phone"
+        placeholder="Phone"
         value={formData.phone}
         onChange={handleChange}
-        fullWidth
-        className="input"
+        className="input w-full"
       />
-      <FormControl fullWidth className="select">
-        <InputLabel>Department</InputLabel>
-        <Select
-          name="departmentId"
-          value={formData.departmentId}
-          onChange={handleChange}
-          required
-        >
-          {departments.length > 0 ? (
-            departments.map(dept => (
-              <MenuItem key={dept.id} value={dept.id}>{dept.name}</MenuItem>
-            ))
-          ) : (
-            <MenuItem disabled>No departments available</MenuItem>
-          )}
-        </Select>
-      </FormControl>
-      <FormControl fullWidth className="select">
-        <InputLabel>Specializations</InputLabel>
-        <Select
-          multiple
-          value={formData.specializationIds}
-          onChange={handleSpecializationChange}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => {
-                const spec = specializations.find(s => s.id === value);
-                return (
-                  <Chip
-                    key={value}
-                    label={spec?.name || 'Unknown'}
-                  />
-                );
-              })}
-            </Box>
-          )}
-        >
-          {specializations.length > 0 ? (
-            specializations.map(spec => (
-              <MenuItem key={spec.id} value={spec.id}>{spec.name}</MenuItem>
-            ))
-          ) : (
-            <MenuItem disabled>No specializations available</MenuItem>
-          )}
-        </Select>
-      </FormControl>
-      <div className="flex gap-4">
-        <Button
+      <select
+        name="departmentId"
+        value={formData.departmentId}
+        onChange={handleChange}
+        className="select w-full"
+        required
+      >
+        <option value="" disabled>Select Department</option>
+        {departments.length > 0 ? (
+          departments.map(dept => (
+            <option key={dept.id} value={dept.id}>{dept.name}</option>
+          ))
+        ) : (
+          <option disabled>No departments available</option>
+        )}
+      </select>
+      <select
+        multiple
+        value={formData.specializationIds}
+        onChange={handleSpecializationChange}
+        className="select w-full"
+      >
+        {specializations.length > 0 ? (
+          specializations.map(spec => (
+            <option key={spec.id} value={spec.id}>{spec.name}</option>
+          ))
+        ) : (
+          <option disabled>No specializations available</option>
+        )}
+      </select>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <button
           type="submit"
-          variant="contained"
-          className="btn btn-primary"
+          className="btn btn-primary bg-[var(--role-doctor)] hover:bg-[var(--hospital-accent-dark)] w-full sm:w-auto"
           disabled={!formData.firstName || !formData.lastName || !formData.email || !formData.departmentId}
         >
           {doctor ? 'Update' : 'Create'} Doctor
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          variant="outlined"
-          className="btn btn-outline"
+          className="btn btn-outline w-full sm:w-auto"
           onClick={onCancel}
         >
           Cancel
-        </Button>
+        </button>
       </div>
     </form>
   );
