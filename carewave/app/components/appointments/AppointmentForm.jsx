@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { TextField, Select, MenuItem, Button, FormControl, InputLabel, Box, Typography, Autocomplete } from '@mui/material';
-import { Calendar, User, Stethoscope } from 'lucide-react';
+import { Calendar, User, Stethoscope, X, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function AppointmentForm({ appointment }) {
@@ -10,8 +9,9 @@ export default function AppointmentForm({ appointment }) {
     patientId: appointment?.patientId || '',
     doctorId: appointment?.doctorId || '',
     visitTypeId: appointment?.visitTypeId || '',
-    appointmentDate: appointment?.appointmentDate ? 
-      new Date(appointment.appointmentDate).toISOString().slice(0, 16) : '',
+    appointmentDate: appointment?.appointmentDate
+      ? new Date(appointment.appointmentDate).toISOString().slice(0, 16)
+      : '',
     status: appointment?.appointmentStatus || 'PENDING',
   });
   const [patients, setPatients] = useState([]);
@@ -24,9 +24,7 @@ export default function AppointmentForm({ appointment }) {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
+        if (!token) throw new Error('No authentication token found');
 
         const [patientRes, doctorRes, visitTypeRes] = await Promise.all([
           fetch('/api/appointments?resource=patients', {
@@ -40,9 +38,8 @@ export default function AppointmentForm({ appointment }) {
           }),
         ]);
 
-        if (!patientRes.ok || !doctorRes.ok || !visitTypeRes.ok) {
+        if (!patientRes.ok || !doctorRes.ok || !visitTypeRes.ok)
           throw new Error('Failed to fetch data');
-        }
 
         const [patientData, doctorData, visitTypeData] = await Promise.all([
           patientRes.json(),
@@ -77,15 +74,13 @@ export default function AppointmentForm({ appointment }) {
 
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
+      if (!token) throw new Error('No authentication token found');
 
       const method = appointment?.id ? 'PUT' : 'POST';
       const url = '/api/appointments';
       
-      const body = appointment?.id 
-        ? { 
+      const body = appointment?.id
+        ? {
             id: appointment.id,
             patientId: formData.patientId,
             doctorId: formData.doctorId,
@@ -93,7 +88,7 @@ export default function AppointmentForm({ appointment }) {
             appointmentDate: formData.appointmentDate,
             status: formData.status,
           }
-        : { 
+        : {
             resource: 'appointment',
             patientId: formData.patientId,
             doctorId: formData.doctorId,
@@ -127,161 +122,135 @@ export default function AppointmentForm({ appointment }) {
 
   if (error && !patients.length && !doctors.length && !visitTypes.length) {
     return (
-      <div className="card p-4">
+      <div className="card max-w-full p-2">
         <div className="alert alert-error mb-2">
           <span>Error loading form data: {error}</span>
         </div>
-        <Button 
-          variant="outlined" 
+        <button
+          className="btn btn-secondary"
           onClick={() => window.location.reload()}
-          className="btn-secondary"
         >
+          <Check className="w-4 h-4 mr-2" />
           Retry
-        </Button>
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="card p-4">
-      <Typography variant="h5" className="card-title mb-4">
+    <div className="card max-w-full p-2">
+      <h2 className="card-title">
         {appointment?.id ? 'Edit Appointment' : 'New Appointment'}
-      </Typography>
+      </h2>
       
       {error && (
-        <div className="alert alert-error mb-4">
+        <div className="alert alert-error mb-2">
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <FormControl fullWidth>
-          <Autocomplete
-            options={patients}
-            getOptionLabel={(option) => option.name || ''}
-            onChange={(e, value) => handleAutocompleteChange('patientId', value)}
-            value={patients.find(p => p.id === formData.patientId) || null}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Patient"
-                required
-                className="input"
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <User className="mr-2" size={16} />
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                }}
-              />
-            )}
-          />
-        </FormControl>
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <div className="relative">
+          <select
+            className="select w-full"
+            value={formData.patientId}
+            onChange={(e) => handleAutocompleteChange('patientId', patients.find(p => p.id === e.target.value))}
+            required
+          >
+            <option value="">Select Patient</option>
+            {patients.map((patient) => (
+              <option key={patient.id} value={patient.id}>
+                {patient.name}
+              </option>
+            ))}
+          </select>
+          <User className="absolute left-3 top-3.5 w-4 h-4 text-[var(--hospital-gray-500)]" />
+        </div>
 
-        <FormControl fullWidth>
-          <Autocomplete
-            options={doctors}
-            getOptionLabel={(option) => 
-              option.department?.name 
-                ? `Dr. ${option.name} (${option.department.name})`
-                : `Dr. ${option.name}`
-            }
-            onChange={(e, value) => handleAutocompleteChange('doctorId', value)}
-            value={doctors.find(d => d.id === formData.doctorId) || null}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Doctor"
-                required
-                className="input"
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <Stethoscope className="mr-2" size={16} />
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                }}
-              />
-            )}
-          />
-        </FormControl>
+        <div className="relative">
+          <select
+            className="select w-full"
+            value={formData.doctorId}
+            onChange={(e) => handleAutocompleteChange('doctorId', doctors.find(d => d.id === e.target.value))}
+            required
+          >
+            <option value="">Select Doctor</option>
+            {doctors.map((doctor) => (
+              <option key={doctor.id} value={doctor.id}>
+                {doctor.department?.name ? `Dr. ${doctor.name} (${doctor.department.name})` : `Dr. ${doctor.name}`}
+              </option>
+            ))}
+          </select>
+          <Stethoscope className="absolute left-3 top-3.5 w-4 h-4 text-[var(--hospital-gray-500)]" />
+        </div>
 
-        <FormControl fullWidth>
-          <InputLabel>Visit Type</InputLabel>
-          <Select
+        <div className="relative">
+          <select
             name="visitTypeId"
+            className="select w-full"
             value={formData.visitTypeId}
             onChange={handleChange}
-            label="Visit Type"
-            className="select"
             required
           >
-            <MenuItem value="">Select Visit Type</MenuItem>
+            <option value="">Select Visit Type</option>
             {visitTypes.map((type) => (
-              <MenuItem key={type.id} value={type.id}>
+              <option key={type.id} value={type.id}>
                 {type.name}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
+          </select>
+        </div>
 
-        <TextField
-          name="appointmentDate"
-          label="Appointment Date"
-          type="datetime-local"
-          value={formData.appointmentDate}
-          onChange={handleChange}
-          className="input"
-          fullWidth
-          required
-          InputLabelProps={{
-            shrink: true,
-          }}
-          InputProps={{
-            startAdornment: <Calendar className="mr-2" size={16} />,
-          }}
-        />
+        <div className="relative">
+          <input
+            type="datetime-local"
+            name="appointmentDate"
+            className="input w-full"
+            value={formData.appointmentDate}
+            onChange={handleChange}
+            required
+          />
+          <Calendar className="absolute left-3 top-3.5 w-4 h-4 text-[var(--hospital-gray-500)]" />
+        </div>
 
-        <FormControl fullWidth>
-          <InputLabel>Status</InputLabel>
-          <Select
+        <div className="relative">
+          <select
             name="status"
+            className="select w-full"
             value={formData.status}
             onChange={handleChange}
-            label="Status"
-            className="select"
             required
           >
-            <MenuItem value="PENDING">Pending</MenuItem>
-            <MenuItem value="CONFIRMED">Confirmed</MenuItem>
-            <MenuItem value="CANCELLED">Cancelled</MenuItem>
-            <MenuItem value="COMPLETED">Completed</MenuItem>
-          </Select>
-        </FormControl>
+            <option value="PENDING">Pending</option>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="CANCELLED">Cancelled</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+        </div>
 
-        <Box className="flex justify-end gap-2 mt-6">
-          <Button
-            variant="outlined"
-            className="btn-secondary"
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            type="button"
+            className="btn btn-secondary"
             onClick={() => router.push('/appointments')}
             disabled={loading}
           >
+            <X className="w-4 h-4 mr-2" />
             Cancel
-          </Button>
-          <Button
-            variant="contained"
-            className="btn-primary"
+          </button>
+          <button
             type="submit"
+            className="btn btn-primary"
             disabled={loading}
           >
-            {loading ? 'Saving...' : (appointment?.id ? 'Update' : 'Create')}
-          </Button>
-        </Box>
+            {loading ? (
+              <div className="loading-spinner mr-2"></div>
+            ) : (
+              <Check className="w-4 h-4 mr-2" />
+            )}
+            {appointment?.id ? 'Update' : 'Create'}
+          </button>
+        </div>
       </form>
     </div>
   );
