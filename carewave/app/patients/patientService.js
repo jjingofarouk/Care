@@ -6,7 +6,7 @@ const { BASE_URL, API_ROUTES } = api;
 
 export async function getPatients() {
   try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}?include=addresses,nextOfKin,insuranceInfo`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`);
     if (!Array.isArray(response.data)) {
       throw new Error('API response is not an array');
     }
