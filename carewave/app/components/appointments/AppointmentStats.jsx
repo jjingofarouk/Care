@@ -111,3 +111,8 @@ export default function AppointmentStats() {
             }
           }
         }
+        ```
+      </Card>
+    </div>
+  );
+}
