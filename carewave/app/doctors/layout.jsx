@@ -1,4 +1,4 @@
-// DoctorsLayout.jsx
+// app/doctors/layout.jsx
 'use client';
 import React from 'react';
 import { useState } from 'react';
@@ -28,22 +28,50 @@ const DoctorsLayout = ({ children }) => {
         router.push('/doctors/specializations');
         break;
       case 3:
-        router.push('/doctors/leaves');
+        router.push('/25
         break;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[var(--hospital-gray-50)] flex flex-col w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="doctor management tabs">
-          <Tab label="Doctors" />
-          <Tab label="Schedules" />
-          <Tab label="Specializations" />
-          <Tab label="Leaves" />
-        </Tabs>
-      </Box>
-      {children}
+    <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
+      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4 lg:px-6">
+        <Box sx={{
+          borderBottom: '1px solid var(--hospital-gray-200)',
+          mb: 2,
+          '& .MuiTabs-root': {
+            backgroundColor: 'var(--hospital-white)',
+            borderRadius: '0.5rem',
+            boxShadow: 'var(--shadow-sm)',
+          },
+          '& .MuiTab-root': {
+            color: 'var(--hospital-gray-700)',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            padding: '0.5rem 1rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            transition: 'all var(--transition-normal)',
+          },
+          '& .MuiTab-root.Mui-selected': {
+            color: 'var(--role-doctor)',
+            backgroundColor: 'var(--hospital-gray-50)',
+          },
+          '& .MuiTabs-indicator': {
+            backgroundColor: 'var(--role-doctor)',
+            height: '3px',
+            borderRadius: '3px 3px 0 0',
+          },
+        }}>
+          <Tabs value={tabValue} onChange={handleTabChange} aria-label="doctor management tabs">
+            <Tab label="Doctors" />
+            <Tab label="Schedules" />
+            <Tab label="Specializations" />
+            <Tab label="Leaves" />
+          </Tabs>
+        </Box>
+        {children}
+      </div>
     </div>
   );
 };
