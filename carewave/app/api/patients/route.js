@@ -1,3 +1,4 @@
+// app/api/patients/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
@@ -66,7 +67,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const data = await request.json();
-    
+
     if (!data.firstName || !data.lastName || !data.dateOfBirth) {
       return NextResponse.json(
         { error: 'First name, last name, and date of birth are required' },
@@ -104,36 +105,44 @@ export async function POST(request) {
         gender: data.gender || null,
         phone: data.phone || null,
         email: data.email || null,
-        addresses: data.addresses ? {
-          create: data.addresses.map(addr => ({
-            street: addr.street,
-            city: addr.city,
-            country: addr.country,
-            postalCode: addr.postalCode || null,
-          }))
-        } : undefined,
-        nextOfKin: data.nextOfKin ? {
-          create: {
-            firstName: data.nextOfKin.firstName,
-            lastName: data.nextOfKin.lastName,
-            relationship: data.nextOfKin.relationship,
-            phone: data.nextOfKin.phone || null,
-            email: data.nextOfKin.email || null,
-          }
-        } : undefined,
-        insuranceInfo: data.insuranceInfo ? {
-          create: {
-            provider: data.insuranceInfo.provider,
-            policyNumber: data.insuranceInfo.policyNumber,
-            expiryDate: data.insuranceInfo.expiryDate ? new Date(data.insuranceInfo.expiryDate) : null,
-          }
-        } : undefined,
+        addresses: data.addresses
+          ? {
+              create: data.addresses.map((addr) => ({
+                street: addr.street,
+                city: addr.city,
+                country: addr.country,
+                postalCode: addr.postalCode || null,
+              })),
+            }
+          : undefined,
+        nextOfKin: data.nextOfKin
+          ? {
+              create: {
+                firstName: data.nextOfKin.firstName,
+                lastName: data.nextOfKin.lastName,
+                relationship: data.nextOfKin.relationship,
+                phone: data.nextOfKin.phone || null,
+                email: data.nextOfKin.email || null,
+              },
+            }
+          : undefined,
+        insuranceInfo: data.insuranceInfo
+          ? {
+              create: {
+                provider: data.insuranceInfo.provider,
+                policyNumber: data.insuranceInfo.policyNumber,
+                expiryDate: data.insuranceInfo.expiryDate
+                  ? new Date(data.insuranceInfo.expiryDate)
+                  : null,
+              },
+            }
+          : undefined,
       },
       include: {
         addresses: true,
         nextOfKin: true,
         insuranceInfo: true,
-      }
+      },
     });
 
     return NextResponse.json(patient, { status: 201 });
