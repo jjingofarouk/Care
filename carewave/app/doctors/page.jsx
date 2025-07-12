@@ -1,75 +1,80 @@
 'use client';
-import React, { useState } from 'react';
-import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
-import DoctorList from './DoctorList';
-import DoctorForm from './DoctorForm';
-import ErrorBoundary from '../components/ErrorBoundary';
-import styles from './page.module.css';
 
-const DoctorPage = () => {
-  const [tabValue, setTabValue] = useState(0);
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import DoctorTable from '../components/doctors/DoctorTable';
+import DoctorForm from '../components/doctors/DoctorForm';
+import { getDoctors, createDoctor, deleteDoctor } from '../services/doctorService';
+import { Button, Dialog, DialogTitle, DialogContent } from '@mui/material';
+
+export default function DoctorsPage() {
+  const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-    if (newValue !== 1) {
-      setSelectedDoctor(null);
-    }
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      const data = await getDoctors();
+      setDoctors(data);
+    };
+    fetchDoctors();
+  }, []);
+
+  const handleSubmit = async (formData) => {
+    await createDoctor(formData);
+    setOpen(false);
+    setSelectedDoctor(null);
+    const data = await getDoctors();
+    setDoctors(data);
+  };
+
+  const handleDelete = async (id) => {
+    await deleteDoctor(id);
+    const data = await getDoctors();
+    setDoctors(data);
   };
 
   const handleEdit = (doctor) => {
-    setSelectedDoctor(doctor);
-    setTabValue(1);
-  };
-
-  const handleDoctorSelect = (doctorId) => {
-    console.log('Selected doctor ID:', doctorId);
+    router.push(`/doctors/${doctor.id}`);
   };
 
   return (
-    <ErrorBoundary>
-      <Container maxWidth="xl" className={styles.container}>
-        <Typography variant="h4" gutterBottom className={styles.title}>
-          Doctor Management
-        </Typography>
-        <Paper elevation={3} className={styles.paper}>
-          <Box className={styles.tabsWrapper}>
-            <Tabs
-              value={tabValue}
-              onChange={handleTabChange}
-              variant="scrollable"
-              scrollButtons="auto"
-              className={styles.tabs}
-              sx={{
-                '& .MuiTabs-flexContainer': {
-                  flexWrap: 'nowrap',
-                },
-                '& .MuiTab-root': {
-                  minWidth: { xs: 100, sm: 120 },
-                  fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                },
-              }}
+    <div className="container mx-auto p-6">
+      <div className="card bg-[var(--hospital-white)] shadow-md rounded-lg">
+        <div className="card-header p-4 border-b border-[var(--hospital-gray-200)]">
+          <div className="flex justify-between items-center">
+            <h1 className="card-title text-2xl font-bold text-[var(--hospital-primary)]">Doctors Management</h1>
+            <Button
+              variant="contained"
+              className="btn btn-primary bg-[var(--hospital-accent)] hover:bg-[var(--hospital-accent-dark)]"
+              onClick={() => setOpen(true)}
             >
-              <Tab label="Doctor List" />
-              <Tab label={selectedDoctor ? 'Edit Doctor' : 'Add Doctor'} />
-            </Tabs>
-          </Box>
-          <Box className={styles.tabContent}>
-            {tabValue === 0 && (
-              <DoctorList onEdit={handleEdit} onSelect={handleDoctorSelect} />
-            )}
-            {tabValue === 1 && (
-              <DoctorForm
-                doctor={selectedDoctor}
-                onSave={() => setTabValue(0)}
-                onCancel={() => setTabValue(0)}
-              />
-            )}
-          </Box>
-        </Paper>
-      </Container>
-    </ErrorBoundary>
-  );
-};
+              Add Doctor
+            </Button>
+          </div>
+        </div>
+        <div className="p-4">
+          <DoctorTable
+            doctors={doctors}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
+      </div>
 
-export default DoctorPage;
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle className="bg-[var(--hospital-gray-50)] text-[var(--hospital-primary)]">
+          Add Doctor
+        </DialogTitle>
+        <DialogContent className="p-6">
+          <DoctorForm
+            doctor={selectedDoctor}
+            onSubmit={handleSubmit}
+            onCancel={() => setOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
