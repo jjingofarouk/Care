@@ -8,7 +8,6 @@ const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
-    console.log('GET /api/patients/[id] params:', params);
     const id = params?.id;
     if (!id) {
       return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
@@ -16,10 +15,17 @@ export async function GET(request, { params }) {
 
     const patient = await prisma.patient.findUnique({
       where: { id },
-      include: {
-        addresses: true,
-        nextOfKin: true,
-        insuranceInfo: true,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        dateOfBirth: true,
+        gender: true,
+        phone: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        userId: true,
       },
     });
 
@@ -41,7 +47,6 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
-    console.log('PUT /api/patients/[id] params:', params);
     const id = params?.id;
     if (!id) {
       return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
@@ -64,7 +69,7 @@ export async function PUT(request, { params }) {
     }
 
     let userId = null;
-    if (data.email) {
+    if (data.email && data.createUser && data.password) {
       const existingUser = await prisma.userRegistration.findUnique({
         where: { email: data.email },
       });
@@ -76,7 +81,7 @@ export async function PUT(request, { params }) {
       }
       if (existingUser) {
         userId = existingUser.id;
-      } else if (data.createUser && data.password) {
+      } else {
         const passwordHash = await bcrypt.hash(data.password, 10);
         const newUser = await prisma.userRegistration.create({
           data: {
@@ -102,46 +107,18 @@ export async function PUT(request, { params }) {
         phone: data.phone || null,
         email: data.email || null,
         userId,
-        addresses: {
-          deleteMany: {},
-          create: data.addresses?.length
-            ? data.addresses.map((addr) => ({
-                street: addr.street || '',
-                city: addr.city || '',
-                country: addr.country || '',
-                postalCode: addr.postalCode || null,
-              }))
-            : [],
-        },
-        nextOfKin: data.nextOfKin?.firstName || data.nextOfKin?.lastName
-          ? {
-              deleteMany: {},
-              create: {
-                firstName: data.nextOfKin.firstName || '',
-                lastName: data.nextOfKin.lastName || '',
-                relationship: data.nextOfKin.relationship || '',
-                phone: data.nextOfKin.phone || null,
-                email: data.nextOfKin.email || null,
-              },
-            }
-          : undefined,
-        insuranceInfo: data.insuranceInfo?.provider || data.insuranceInfo?.policyNumber
-          ? {
-              deleteMany: {},
-              create: {
-                provider: data.insuranceInfo.provider || '',
-                policyNumber: data.insuranceInfo.policyNumber || '',
-                expiryDate: data.insuranceInfo.expiryDate
-                  ? new Date(data.insuranceInfo.expiryDate)
-                  : null,
-              },
-            }
-          : undefined,
       },
-      include: {
-        addresses: true,
-        nextOfKin: true,
-        insuranceInfo: true,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        dateOfBirth: true,
+        gender: true,
+        phone: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        userId: true,
       },
     });
 
@@ -159,7 +136,6 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    console.log('DELETE /api/patients/[id] params:', params);
     const id = params?.id;
     if (!id) {
       return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
