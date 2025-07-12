@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { TextField, Button, Box, Typography, CircularProgress, IconButton, Chip } from '@mui/material';
 import { Search, Add, Edit, Delete, Visibility } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
@@ -22,14 +21,12 @@ export default function PatientList() {
     setLoading(true);
     setError(null);
     try {
-      // Include related data in the API call
       const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
       if (!response.ok) {
         throw new Error(`Failed to fetch patients: ${response.status} ${response.statusText}`);
       }
       const data = await response.json();
       
-      // Check if response has error property
       if (data.error) {
         throw new Error(data.error);
       }
@@ -38,14 +35,12 @@ export default function PatientList() {
         throw new Error('API response is not an array');
       }
       
-      // Map and validate patient data with additional fields
       const validatedPatients = data.map((patient) => {
         if (!patient || typeof patient !== 'object') {
           console.warn('Invalid patient data:', patient);
           return null;
         }
         
-        // Get primary address
         const primaryAddress = patient.addresses?.[0];
         
         return {
@@ -59,34 +54,31 @@ export default function PatientList() {
           createdAt: patient.createdAt || '',
           updatedAt: patient.updatedAt || '',
           userId: patient.userId || null,
-          // Address information
           address: primaryAddress ? {
             street: primaryAddress.street || '',
             city: primaryAddress.city || '',
             country: primaryAddress.country || '',
             postalCode: primaryAddress.postalCode || ''
           } : null,
-          // Next of kin information
           nextOfKin: patient.nextOfKin ? {
             name: `${patient.nextOfKin.firstName || ''} ${patient.nextOfKin.lastName || ''}`.trim(),
             relationship: patient.nextOfKin.relationship || '',
             phone: patient.nextOfKin.phone || '',
             email: patient.nextOfKin.email || ''
           } : null,
-          // Insurance information
           insurance: patient.insuranceInfo ? {
             provider: patient.insuranceInfo.provider || '',
             policyNumber: patient.insuranceInfo.policyNumber || '',
             expiryDate: patient.insuranceInfo.expiryDate || null
           } : null
         };
-      }).filter(Boolean); // Remove null entries
+      }).filter(Boolean);
       
       setPatients(validatedPatients);
     } catch (error) {
       console.error('Failed to fetch patients:', error);
       setError(error.message);
-      setPatients([]); // Reset to empty array on error
+      setPatients([]);
     } finally {
       setLoading(false);
     }
@@ -107,7 +99,6 @@ export default function PatientList() {
           throw new Error(errorData.error || `Failed to delete patient: ${response.status}`);
         }
         
-        // Remove patient from local state instead of refetching
         setPatients(prevPatients => prevPatients.filter(patient => patient.id !== id));
       } catch (error) {
         console.error('Failed to delete patient:', error);
@@ -149,84 +140,89 @@ export default function PatientList() {
       field: 'id', 
       headerName: 'ID', 
       width: 120,
-      sortable: true 
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell'
     },
     { 
       field: 'firstName', 
       headerName: 'First Name', 
       width: 130,
-      sortable: true 
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell'
     },
     { 
       field: 'lastName', 
       headerName: 'Last Name', 
       width: 130,
-      sortable: true 
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell'
     },
     { 
       field: 'email', 
       headerName: 'Email', 
       width: 180,
-      sortable: true 
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell'
     },
     {
       field: 'age',
       headerName: 'Age',
       width: 80,
       sortable: true,
-      valueGetter: (params) => {
-        const row = params?.row || params;
-        return calculateAge(row?.dateOfBirth);
-      },
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      valueGetter: (params) => calculateAge(params?.row?.dateOfBirth),
     },
     { 
       field: 'gender', 
       headerName: 'Gender', 
       width: 100,
-      sortable: true 
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell'
     },
     { 
       field: 'phone', 
       headerName: 'Phone', 
       width: 130,
-      sortable: true 
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell'
     },
     {
       field: 'address',
       headerName: 'Address',
       width: 200,
       sortable: false,
-      renderCell: (params) => {
-        const row = params?.row || params;
-        return (
-          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-            {formatAddress(row?.address)}
-          </Typography>
-        );
-      },
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) => (
+        <span className="text-[var(--hospital-gray-700)] text-sm">{formatAddress(params?.row?.address)}</span>
+      ),
     },
     {
       field: 'nextOfKin',
       headerName: 'Next of Kin',
       width: 150,
       sortable: false,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
       renderCell: (params) => {
-        const row = params?.row || params;
-        const nextOfKin = row?.nextOfKin;
+        const nextOfKin = params?.row?.nextOfKin;
         
         if (!nextOfKin || !nextOfKin.name) {
-          return <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'grey.500' }}>-</Typography>;
+          return <span className="text-[var(--hospital-gray-500)] text-sm">-</span>;
         }
         
         return (
-          <Box>
-            <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 'medium' }}>
-              {nextOfKin.name}
-            </Typography>
-            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'grey.600' }}>
-              {nextOfKin.relationship}
-            </Typography>
-          </Box>
+          <div className="flex flex-col">
+            <span className="font-medium text-[var(--hospital-gray-900)] text-sm">{nextOfKin.name}</span>
+            <span className="text-[var(--hospital-gray-600)] text-xs">{nextOfKin.relationship}</span>
+          </div>
         );
       },
     },
@@ -235,33 +231,25 @@ export default function PatientList() {
       headerName: 'Insurance',
       width: 150,
       sortable: false,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
       renderCell: (params) => {
-        const row = params?.row || params;
-        const insurance = row?.insurance;
+        const insurance = params?.row?.insurance;
         
         if (!insurance || !insurance.provider) {
-          return <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'grey.500' }}>-</Typography>;
+          return <span className="text-[var(--hospital-gray-500)] text-sm">-</span>;
         }
         
         const isExpired = insurance.expiryDate && new Date(insurance.expiryDate) < new Date();
         
         return (
-          <Box>
-            <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 'medium' }}>
-              {insurance.provider}
-            </Typography>
-            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'grey.600' }}>
-              {insurance.policyNumber}
-            </Typography>
+          <div className="flex flex-col">
+            <span className="font-medium text-[var(--hospital-gray-900)] text-sm">{insurance.provider}</span>
+            <span className="text-[var(--hospital-gray-600)] text-xs">{insurance.policyNumber}</span>
             {isExpired && (
-              <Chip 
-                label="Expired" 
-                size="small" 
-                color="error" 
-                sx={{ fontSize: '0.6rem', height: '16px', mt: 0.5 }}
-              />
+              <span className="badge badge-error mt-1">Expired</span>
             )}
-          </Box>
+          </div>
         );
       },
     },
@@ -270,17 +258,15 @@ export default function PatientList() {
       headerName: 'User Account',
       width: 120,
       sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
       renderCell: (params) => {
-        const row = params?.row || params;
-        const hasAccount = !!row?.userId;
+        const hasAccount = !!params?.row?.userId;
         
         return (
-          <Chip
-            label={hasAccount ? 'Yes' : 'No'}
-            size="small"
-            color={hasAccount ? 'success' : 'default'}
-            sx={{ fontSize: '0.75rem' }}
-          />
+          <span className={`badge ${hasAccount ? 'badge-success' : 'badge-neutral'}`}>
+            {hasAccount ? 'Yes' : 'No'}
+          </span>
         );
       },
     },
@@ -290,95 +276,87 @@ export default function PatientList() {
       width: 150,
       sortable: false,
       filterable: false,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
       renderCell: (params) => {
-        const row = params?.row || params;
-        const patientId = row?.id;
+        const patientId = params?.row?.id;
         
-        if (!patientId) {
-          return null;
-        }
+        if (!patientId) return null;
         
         return (
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <IconButton
-              color="info"
+          <div className="flex gap-1">
+            <button
+              className="btn btn-outline !p-2"
               onClick={() => router.push(`/patients/${patientId}`)}
-              size="small"
               title="View Patient"
             >
-              <Visibility />
-            </IconButton>
-            <IconButton
-              color="primary"
+              <Visibility className="w-4 h-4" />
+            </button>
+            <button
+              className="btn btn-outline !p-2"
               onClick={() => router.push(`/patients/edit/${patientId}`)}
-              size="small"
               title="Edit Patient"
             >
-              <Edit />
-            </IconButton>
-            <IconButton
-              color="error"
+              <Edit className="w-4 h-4" />
+            </button>
+            <button
+              className="btn btn-outline !p-2 text-[var(--hospital-error)] border-[var(--hospital-error)] hover:bg-[var(--hospital-error)] hover:text-[var(--hospital-white)]"
               onClick={() => handleDelete(patientId)}
-              size="small"
               title="Delete Patient"
             >
-              <Delete />
-            </IconButton>
-          </Box>
+              <Delete className="w-4 h-4" />
+            </button>
+          </div>
         );
       },
     },
   ];
 
   return (
-    <Box sx={{ p: 4, maxWidth: '100%', overflowX: 'auto' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
-          Patients
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
+    <div className="card p-4 max-w-[100vw] overflow-x-auto min-h-screen">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="card-title">Patients</h1>
+        <button
+          className="btn btn-primary"
           onClick={() => router.push('/patients/new')}
-          sx={{ bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
         >
+          <Add className="w-5 h-5" />
           New Patient
-        </Button>
-      </Box>
+        </button>
+      </div>
       
-      <Box sx={{ mb: 4 }}>
-        <TextField
-          fullWidth
-          placeholder="Search patients..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{
-            startAdornment: <Search sx={{ mr: 1, color: 'action.active' }} />,
-          }}
-          sx={{ maxWidth: 400 }}
-        />
-      </Box>
+      <div className="mb-4 max-w-md">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--hospital-gray-400)]" />
+          <input
+            type="text"
+            placeholder="Search patients..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input pl-10 w-full"
+          />
+        </div>
+      </div>
       
       {error && (
-        <Box sx={{ mb: 2 }}>
-          <Typography color="error" variant="body2">
-            Error: {error}
-          </Typography>
-          <Button 
-            variant="outlined" 
+        <div className="alert alert-error mb-4">
+          <div className="flex-1">
+            <span>Error: {error}</span>
+          </div>
+          <button 
+            className="btn btn-outline"
             onClick={() => fetchPatients()}
-            sx={{ mt: 1 }}
           >
             Retry
-          </Button>
-        </Box>
+          </button>
+        </div>
       )}
       
-      <Box sx={{ bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1 }}>
+      <div className="table w-full">
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
-          </Box>
+          <div className="flex justify-center p-4">
+            <div className="loading-spinner" />
+          </div>
         ) : (
           <DataGrid
             rows={patients}
@@ -390,20 +368,19 @@ export default function PatientList() {
             autoHeight
             disableRowSelectionOnClick
             getRowId={(row) => row.id}
-            sx={{
-              '& .MuiDataGrid-cell': { py: 1 },
-              '& .MuiDataGrid-columnHeaders': { bgcolor: 'grey.100' },
-              '& .MuiDataGrid-row:hover': { bgcolor: 'grey.50' },
-              minHeight: 400,
+            classes={{
+              root: 'table',
+              columnHeaders: 'bg-[var(--hospital-gray-50)]',
+              row: 'hover:bg-[var(--hospital-gray-50)]',
+              cell: 'py-2'
             }}
-            loading={loading}
             localeText={{
               noRowsLabel: 'No patients found',
               errorOverlayDefaultLabel: 'An error occurred while loading patients',
             }}
           />
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
