@@ -23,22 +23,52 @@ export async function GET(request, { params }) {
       includeFields.forEach(field => {
         switch (field.trim()) {
           case 'addresses':
-            includeObj.addresses = true;
+            includeObj.addresses = {
+              select: {
+                id: true,
+                street: true,
+                city: true,
+                country: true,
+                postalCode: true,
+              }
+            };
             break;
           case 'nextOfKin':
-            includeObj.nextOfKin = true;
+            includeObj.nextOfKin = {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                relationship: true,
+                phone: true,
+                email: true,
+              }
+            };
             break;
           case 'insuranceInfo':
-            includeObj.insuranceInfo = true;
+            includeObj.insuranceInfo = {
+              select: {
+                id: true,
+                provider: true,
+                policyNumber: true,
+                expiryDate: true,
+              }
+            };
             break;
         }
       });
     }
 
-    const patient = await prisma.patient.findUnique({
+    const queryOptions = {
       where: { id },
-      include: includeObj,
-    });
+    };
+
+    // Add include if we have relations to include
+    if (Object.keys(includeObj).length > 0) {
+      queryOptions.include = includeObj;
+    }
+
+    const patient = await prisma.patient.findUnique(queryOptions);
 
     if (!patient) {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
