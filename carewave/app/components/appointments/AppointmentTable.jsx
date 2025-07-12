@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
+import { Table, TableBody, TableCell, TableHead, TableRow, Chip, IconButton, Menu, MenuItem, Box } from '@mui/material';
 import { Edit, Trash2, MoreHorizontal, Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -27,7 +27,9 @@ export default function AppointmentTable({ appointments, loading, onAppointmentD
     setDeleteLoading(true);
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('No authentication token found');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       const response = await fetch(`/api/appointments?id=${selectedAppointment}`, {
         method: 'DELETE',
@@ -63,31 +65,15 @@ export default function AppointmentTable({ appointments, loading, onAppointmentD
   const getStatusBadge = (status) => {
     switch (status) {
       case 'PENDING':
-        return (
-          <span className="badge badge-warning">
-            <Clock className="w-3 h-3 mr-1" /> Pending
-          </span>
-        );
+        return <Chip label="Pending" className="badge-warning" icon={<Clock className="h-4 w-4" />} />;
       case 'CONFIRMED':
-        return (
-          <span className="badge badge-success">
-            <CheckCircle className="w-3 h-3 mr-1" /> Confirmed
-          </span>
-        );
+        return <Chip label="Confirmed" className="badge-success" icon={<CheckCircle className="h-4 w-4" />} />;
       case 'CANCELLED':
-        return (
-          <span className="badge badge-error">
-            <XCircle className="w-3 h-3 mr-1" /> Cancelled
-          </span>
-        );
+        return <Chip label="Cancelled" className="badge-error" icon={<XCircle className="h-4 w-4" />} />;
       case 'COMPLETED':
-        return (
-          <span className="badge badge-info">
-            <Calendar className="w-3 h-3 mr-1" /> Completed
-          </span>
-        );
+        return <Chip label="Completed" className="badge-info" icon={<Calendar className="h-4 w-4" />} />;
       default:
-        return <span className="badge badge-neutral">{status}</span>;
+        return <Chip label={status} className="badge-neutral" />;
     }
   };
 
@@ -106,108 +92,87 @@ export default function AppointmentTable({ appointments, loading, onAppointmentD
     }
   };
 
-  const columns = [
-    { 
-      field: 'patient', 
-      headerName: 'Patient', 
-      flex: 1,
-      valueGetter: (params) => params.row.patient?.name || 'N/A'
-    },
-    { 
-      field: 'doctor', 
-      headerName: 'Doctor', 
-      flex: 1,
-      valueGetter: (params) => params.row.doctor?.name ? `Dr. ${params.row.doctor.name}` : 'N/A'
-    },
-    { 
-      field: 'department', 
-      headerName: 'Department', 
-      flex: 1,
-      valueGetter: (params) => params.row.doctor?.department?.name || 'N/A'
-    },
-    { 
-      field: 'visitType', 
-      headerName: 'Visit Type', 
-      flex: 1,
-      valueGetter: (params) => params.row.visitType?.name || 'N/A'
-    },
-    { 
-      field: 'appointmentDate', 
-      headerName: 'Date', 
-      flex: 1,
-      valueGetter: (params) => formatDate(params.row.appointmentDate)
-    },
-    { 
-      field: 'appointmentStatus', 
-      headerName: 'Status', 
-      flex: 1,
-      renderCell: (params) => getStatusBadge(params.value)
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      flex: 1,
-      renderCell: (params) => (
-        <div className="flex gap-1">
-          <Link href={`/appointments/${params.row.id}/edit`}>
-            <button className="btn btn-outline btn-sm">
-              <Edit className="w-4 h-4" />
-            </button>
-          </Link>
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={(e) => handleMenuClick(e, params.row.id)}
-          >
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-        </div>
-      )
-    }
-  ];
-
   return (
-    <div className="card max-w-full">
-      <div style={{ height: 400, width: '100%' }}>
-        <DataGrid
-          rows={appointments}
-          columns={columns}
-          loading={loading}
-          getRowId={(row) => row.id}
-          disableSelectionOnClick
-          className="table"
-          components={{
-            NoRowsOverlay: () => (
-              <div className="flex items-center justify-center h-full">
-                {loading ? (
-                  <div className="loading-spinner mx-auto"></div>
-                ) : (
-                  <span>No appointments found</span>
-                )}
-              </div>
-            )
-          }}
-        />
-      </div>
-
-      <div
-        className={`dropdown-menu ${anchorEl ? 'block' : 'hidden'}`}
+    <div className="card max-w-full mx-auto">
+      <Table className="table w-full">
+        <TableHead>
+          <TableRow>
+            <TableCell className="font-semibold">Patient</TableCell>
+            <TableCell className="font-semibold">Doctor</TableCell>
+            <TableCell className="font-semibold">Department</TableCell>
+            <TableCell className="font-semibold">Visit Type</TableCell>
+            <TableCell className="font-semibold">Date</TableCell>
+            <TableCell className="font-semibold">Status</TableCell>
+            <TableCell className="font-semibold">Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center py-8">
+                <div className="loading-spinner mx-auto"></div>
+              </TableCell>
+            </TableRow>
+          ) : !appointments || appointments.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center py-8 text-[var(--hospital-gray-500)]">
+                No appointments found
+              </TableCell>
+            </TableRow>
+          ) : (
+            appointments.map((appt) => (
+              <TableRow key={appt.id} className="hover:bg-[var(--hospital-gray-50)]">
+                <TableCell>{appt.patient?.name || 'N/A'}</TableCell>
+                <TableCell>
+                  {appt.doctor?.name ? `Dr. ${appt.doctor.name}` : 'N/A'}
+                </TableCell>
+                <TableCell>{appt.doctor?.department?.name || 'N/A'}</TableCell>
+                <TableCell>{appt.visitType?.name || 'N/A'}</TableCell>
+                <TableCell>{formatDate(appt.appointmentDate)}</TableCell>
+                <TableCell>{getStatusBadge(appt.appointmentStatus)}</TableCell>
+                <TableCell>
+                  <Box className="flex gap-2">
+                    <Link href={`/appointments/${appt.id}/edit`}>
+                      <IconButton className="btn-outline" size="small">
+                        <Edit className="h-4 w-4" />
+                      </IconButton>
+                    </Link>
+                    <IconButton 
+                      className="btn-outline" 
+                      size="small"
+                      onClick={(e) => handleMenuClick(e, appt.id)}
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </IconButton>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+      
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        className="dropdown-menu"
       >
-        <button
-          onClick={handleDelete}
+        <MenuItem 
+          onClick={handleDelete} 
           className="dropdown-item"
           disabled={deleteLoading}
         >
-          <Trash2 className="w-3 h-3 mr-2" />
+          <Trash2 className="h-4 w-4 mr-2" /> 
           {deleteLoading ? 'Deleting...' : 'Delete'}
-        </button>
-        <button
+        </MenuItem>
+        <MenuItem 
           onClick={handleViewHistory}
           className="dropdown-item"
         >
-          <Clock className="w-3 h-3 mr-2" />
-          View Status History
-        </button>
-      </div>
+          <Clock className="h-4 w-4 mr-2" /> View Status History
+        </MenuItem>
+      </Menu>
     </div>
   );
 }
