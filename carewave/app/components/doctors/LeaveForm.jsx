@@ -1,6 +1,6 @@
+'use client';
 import React from 'react';
 import { useState } from 'react';
-import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 
 export default function LeaveForm({ leave, doctors, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
@@ -21,70 +21,61 @@ export default function LeaveForm({ leave, doctors, onSubmit, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <FormControl fullWidth className="select">
-        <InputLabel>Doctor</InputLabel>
-        <Select
-          name="doctorId"
-          value={formData.doctorId}
-          onChange={handleChange}
-          required
-        >
-          {doctors.map(doctor => (
-            <MenuItem key={doctor.id} value={doctor.id}>
-              {doctor.firstName} {doctor.lastName}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <TextField
-        name="startDate"
-        label="Start Date"
+    <form onSubmit={handleSubmit} className="space-y-4 w-full">
+      <select
+        name="doctorId"
+        value={formData.doctorId}
+        onChange={handleChange}
+        className="select w-full"
+        required
+      >
+        <option value="" disabled>Select Doctor</option>
+        {doctors.map(doctor => (
+          <option key={doctor.id} value={doctor.id}>
+            {doctor.firstName} {doctor.lastName}
+          </option>
+        ))}
+      </select>
+      <input
         type="date"
+        name="startDate"
+        placeholder="Start Date"
         value={formData.startDate}
         onChange={handleChange}
-        fullWidth
-        className="input"
+        className="input w-full"
         required
-        InputLabelProps={{ shrink: true }}
       />
-      <TextField
-        name="endDate"
-        label="End Date"
+      <input
         type="date"
+        name="endDate"
+        placeholder="End Date"
         value={formData.endDate}
         onChange={handleChange}
-        fullWidth
-        className="input"
+        className="input w-full"
         required
-        InputLabelProps={{ shrink: true }}
       />
-      <TextField
+      <textarea
         name="reason"
-        label="Reason"
+        placeholder="Reason"
         value={formData.reason}
         onChange={handleChange}
-        fullWidth
-        className="input"
-        multiline
+        className="textarea w-full"
         rows={4}
       />
-      <div className="flex gap-4">
-        <Button
+      <div className="flex flex-col sm:flex-row gap-4">
+        <button
           type="submit"
-          variant="contained"
-          className="btn btn-primary"
+          className="btn btn-primary bg-[var(--role-doctor)] hover:bg-[var(--hospital-accent-dark)] w-full sm:w-auto"
         >
           {leave ? 'Update' : 'Create'} Leave
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          variant="outlined"
-          className="btn btn-outline"
+          className="btn btn-outline w-full sm:w-auto"
           onClick={onCancel}
         >
           Cancel
-        </Button>
+        </button>
       </div>
     </form>
   );
