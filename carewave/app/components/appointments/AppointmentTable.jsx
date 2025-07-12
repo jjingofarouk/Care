@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import { DataGrid } from '@mui/x-data-grid';
 import { Edit, Trash2, MoreHorizontal, Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -105,62 +106,88 @@ export default function AppointmentTable({ appointments, loading, onAppointmentD
     }
   };
 
+  const columns = [
+    { 
+      field: 'patient', 
+      headerName: 'Patient', 
+      flex: 1,
+      valueGetter: (params) => params.row.patient?.name || 'N/A'
+    },
+    { 
+      field: 'doctor', 
+      headerName: 'Doctor', 
+      flex: 1,
+      valueGetter: (params) => params.row.doctor?.name ? `Dr. ${params.row.doctor.name}` : 'N/A'
+    },
+    { 
+      field: 'department', 
+      headerName: 'Department', 
+      flex: 1,
+      valueGetter: (params) => params.row.doctor?.department?.name || 'N/A'
+    },
+    { 
+      field: 'visitType', 
+      headerName: 'Visit Type', 
+      flex: 1,
+      valueGetter: (params) => params.row.visitType?.name || 'N/A'
+    },
+    { 
+      field: 'appointmentDate', 
+      headerName: 'Date', 
+      flex: 1,
+      valueGetter: (params) => formatDate(params.row.appointmentDate)
+    },
+    { 
+      field: 'appointmentStatus', 
+      headerName: 'Status', 
+      flex: 1,
+      renderCell: (params) => getStatusBadge(params.value)
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      renderCell: (params) => (
+        <div className="flex gap-1">
+          <Link href={`/appointments/${params.row.id}/edit`}>
+            <button className="btn btn-outline btn-sm">
+              <Edit className="w-4 h-4" />
+            </button>
+          </Link>
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={(e) => handleMenuClick(e, params.row.id)}
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="card max-w-full">
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Patient</th>
-            <th>Doctor</th>
-            <th>Department</th>
-            <th>Visit Type</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td colSpan={7} className="text-center py-8">
-                <div className="loading-spinner mx-auto"></div>
-              </td>
-            </tr>
-          ) : !appointments || appointments.length === 0 ? (
-            <tr>
-              <td colSpan={7} className="text-center py-8">
-                No appointments found
-              </td>
-            </tr>
-          ) : (
-            appointments.map((appt) => (
-              <tr key={appt.id}>
-                <td>{appt.patient?.name || 'N/A'}</td>
-                <td>{appt.doctor?.name ? `Dr. ${appt.doctor.name}` : 'N/A'}</td>
-                <td>{appt.doctor?.department?.name || 'N/A'}</td>
-                <td>{appt.visitType?.name || 'N/A'}</td>
-                <td>{formatDate(appt.appointmentDate)}</td>
-                <td>{getStatusBadge(appt.appointmentStatus)}</td>
-                <td>
-                  <div className="flex gap-1">
-                    <Link href={`/appointments/${appt.id}/edit`}>
-                      <button className="btn btn-outline btn-sm">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    </Link>
-                    <button
-                      className="btn btn-outline btn-sm"
-                      onClick={(e) => handleMenuClick(e, appt.id)}
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+      <div style={{ height: 400, width: '100%' }}>
+        <DataGrid
+          rows={appointments}
+          columns={columns}
+          loading={loading}
+          getRowId={(row) => row.id}
+          disableSelectionOnClick
+          className="table"
+          components={{
+            NoRowsOverlay: () => (
+              <div className="flex items-center justify-center h-full">
+                {loading ? (
+                  <div className="loading-spinner mx-auto"></div>
+                ) : (
+                  <span>No appointments found</span>
+                )}
+              </div>
+            )
+          }}
+        />
+      </div>
 
       <div
         className={`dropdown-menu ${anchorEl ? 'block' : 'hidden'}`}
