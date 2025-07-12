@@ -40,7 +40,7 @@ export default function PatientForm() {
   const fetchPatient = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/patient/${params.id}?include=addresses,nextOfKin,insuranceInfo`);
+      const response = await fetch(`/api/patients/${params.id}?include=addresses,nextOfKin,insuranceInfo`);
       if (!response.ok) throw new Error('Failed to fetch patient');
       const data = await response.json();
       setFormData({
@@ -64,7 +64,7 @@ export default function PatientForm() {
     setError(null);
     try {
       const method = isEdit ? 'PUT' : 'POST';
-      const url = isEdit ? `/api/patient/${params.id}` : '/api/patient';
+      const url = isEdit ? `/api/patients/${params.id}` : '/api/patients';
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
