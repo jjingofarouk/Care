@@ -139,6 +139,14 @@ export default function AppointmentStats() {
     confirmed: 0,
     cancelled: 0,
     completed: 0,
+    totalAppointments: 0,
+    todayAppointments: 0,
+    thisWeekAppointments: 0,
+    topDepartments: [],
+    topVisitTypes: [],
+    avgAppointmentsPerDay: 0,
+    busyDays: [],
+    doctorUtilization: [],
   });
 
   useEffect(() => {
