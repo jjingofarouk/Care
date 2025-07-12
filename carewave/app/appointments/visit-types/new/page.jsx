@@ -12,7 +12,7 @@ export default function NewVisitTypePage() {
   };
 
   return (
-    <div className="p-2 sm:p-4">
+    <div className="max-w-full mx-auto p-2 sm:p-4">
       <VisitTypeForm
         visitType={{}}
         onSubmit={handleSubmit}
