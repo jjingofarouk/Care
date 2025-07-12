@@ -1,32 +1,7 @@
-// app/patients/[id]/page.js
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
-  Grid, 
-  Chip, 
-  Button, 
-  CircularProgress, 
-  Alert,
-  IconButton,
-  Paper
-} from '@mui/material';
-import { 
-  Edit, 
-  ArrowBack, 
-  Person, 
-  Email, 
-  Phone, 
-  LocationOn, 
-  ContactEmergency, 
-  HealthAndSafety,
-  AccountBox,
-  CalendarMonth
-} from '@mui/icons-material';
+import { Edit, ArrowBack, Person, Email, Phone, LocationOn, ContactEmergency, HealthAndSafety, AccountBox, CalendarMonth } from '@mui/icons-material';
 import { useRouter, useParams } from 'next/navigation';
 
 export default function PatientDetailPage() {
@@ -124,369 +99,237 @@ export default function PatientDetailPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <CircularProgress size={48} />
-      </Box>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="loading-spinner !h-12 !w-12" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-        <Button 
-          variant="outlined" 
+      <div className="card p-4 max-w-[1200px] mx-auto">
+        <div className="alert alert-error mb-4">
+          <span>{error}</span>
+        </div>
+        <button 
+          className="btn btn-outline"
           onClick={() => router.push('/patients')}
-          startIcon={<ArrowBack />}
         >
+          <ArrowBack className="w-4 h-4 mr-2" />
           Back to Patients
-        </Button>
-      </Box>
+        </button>
+      </div>
     );
   }
 
   if (!patient) {
     return (
-      <Box sx={{ p: 4 }}>
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          Patient not found
-        </Alert>
-        <Button 
-          variant="outlined" 
+      <div className="card p-4 max-w-[1200px] mx-auto">
+        <div className="alert alert-warning mb-4">
+          <span>Patient not found</span>
+        </div>
+        <button 
+          className="btn btn-outline"
           onClick={() => router.push('/patients')}
-          startIcon={<ArrowBack />}
         >
+          <ArrowBack className="w-4 h-4 mr-2" />
           Back to Patients
-        </Button>
-      </Box>
+        </button>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ p: 4, maxWidth: 1200, mx: 'auto' }}>
+    <div className="card p-4 max-w-[1200px] mx-auto">
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton 
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2">
+          <button 
+            className="btn btn-outline !p-2"
             onClick={() => router.push('/patients')}
-            sx={{ mr: 1 }}
           >
-            <ArrowBack />
-          </IconButton>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-            Patient Details
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          startIcon={<Edit />}
+            <ArrowBack className="w-4 h-4" />
+          </button>
+          <h1 className="card-title">Patient Details</h1>
+        </div>
+        <button
+          className="btn btn-primary"
           onClick={() => router.push(`/patients/edit/${patient.id}`)}
-          sx={{ bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
         >
+          <Edit className="w-4 h-4 mr-2" />
           Edit Patient
-        </Button>
-      </Box>
+        </button>
+      </div>
 
-      <Grid container spacing={3}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Personal Information */}
-        <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Person sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-                  Personal Information
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Patient ID
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                    {patient.id}
-                  </Typography>
-                </Box>
-                
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Full Name
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    {patient.firstName} {patient.lastName}
-                  </Typography>
-                </Box>
-                
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Date of Birth
-                    </Typography>
-                    <Typography variant="body1">
-                      {formatDate(patient.dateOfBirth)}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Age
-                    </Typography>
-                    <Typography variant="body1">
-                      {calculateAge(patient.dateOfBirth)}
-                    </Typography>
-                  </Grid>
-                </Grid>
-                
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Gender
-                  </Typography>
-                  <Typography variant="body1">
-                    {patient.gender || 'Not specified'}
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+        <div className="card">
+          <div className="card-header flex items-center gap-2">
+            <Person className="w-5 h-5 text-[var(--hospital-accent)]" />
+            <h2 className="card-title">Personal Information</h2>
+          </div>
+          <div className="p-4 space-y-4">
+            <div>
+              <span className="card-subtitle">Patient ID</span>
+              <p className="font-medium text-[var(--hospital-gray-900)]">{patient.id}</p>
+            </div>
+            <div>
+              <span className="card-subtitle">Full Name</span>
+              <p className="text-lg font-bold text-[var(--hospital-gray-900)]">{patient.firstName} {patient.lastName}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <span className="card-subtitle">Date of Birth</span>
+                <p className="text-[var(--hospital-gray-900)]">{formatDate(patient.dateOfBirth)}</p>
+              </div>
+              <div>
+                <span className="card-subtitle">Age</span>
+                <p className="text-[var(--hospital-gray-900)]">{calculateAge(patient.dateOfBirth)}</p>
+              </div>
+            </div>
+            <div>
+              <span className="card-subtitle">Gender</span>
+              <p className="text-[var(--hospital-gray-900)]">{patient.gender || 'Not specified'}</p>
+            </div>
+          </div>
+        </div>
 
         {/* Contact Information */}
-        <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Phone sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-                  Contact Information
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Email Address
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Email sx={{ fontSize: 16, color: 'text.secondary' }} />
-                    <Typography variant="body1">
-                      {patient.email || 'No email provided'}
-                    </Typography>
-                  </Box>
-                </Box>
-                
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Phone Number
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Phone sx={{ fontSize: 16, color: 'text.secondary' }} />
-                    <Typography variant="body1">
-                      {patient.phone || 'No phone number provided'}
-                    </Typography>
-                  </Box>
-                </Box>
-                
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    User Account Status
-                  </Typography>
-                  <Chip
-                    icon={<AccountBox />}
-                    label={patient.userId ? 'Has User Account' : 'No User Account'}
-                    color={patient.userId ? 'success' : 'default'}
-                    size="small"
-                  />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+        <div className="card">
+          <div className="card-header flex items-center gap-2">
+            <Phone className="w-5 h-5 text-[var(--hospital-accent)]" />
+            <h2 className="card-title">Contact Information</h2>
+          </div>
+          <div className="p-4 space-y-4">
+            <div>
+              <span className="card-subtitle">Email Address</span>
+              <div className="flex items-center gap-2">
+                <Email className="w-4 h-4 text-[var(--hospital-gray-500)]" />
+                <p className="text-[var(--hospital-gray-900)]">{patient.email || 'No email provided'}</p>
+              </div>
+            </div>
+            <div>
+              <span className="card-subtitle">Phone Number</span>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-[var(--hospital-gray-500)]" />
+                <p className="text-[var(--hospital-gray-900)]">{patient.phone || 'No phone number provided'}</p>
+              </div>
+            </div>
+            <div>
+              <span className="card-subtitle">User Account Status</span>
+              <span className={`badge ${patient.userId ? 'badge-success' : 'badge-neutral'} mt-1`}>
+                <AccountBox className="w-4 h-4 mr-1" />
+                {patient.userId ? 'Has User Account' : 'No User Account'}
+              </span>
+            </div>
+          </div>
+        </div>
 
         {/* Address Information */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <LocationOn sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-                  Address Information
-                </Typography>
-              </Box>
-              
-              {patient.addresses && patient.addresses.length > 0 ? (
-                <Grid container spacing={2}>
-                  {patient.addresses.map((address, index) => (
-                    <Grid item xs={12} md={6} key={address.id || index}>
-                      <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
-                        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                          {patient.addresses.length > 1 ? `Address ${index + 1}` : 'Primary Address'}
-                        </Typography>
-                        <Typography variant="body1">
-                          {formatAddress(address)}
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              ) : (
-                <Typography variant="body1" color="text.secondary">
-                  No address information available
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
+        <div className="card md:col-span-2">
+          <div className="card-header flex items-center gap-2">
+            <LocationOn className="w-5 h-5 text-[var(--hospital-accent)]" />
+            <h2 className="card-title">Address Information</h2>
+          </div>
+          <div className="p-4">
+            {patient.addresses && patient.addresses.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {patient.addresses.map((address, index) => (
+                  <div key={address.id || index} className="bg-[var(--hospital-gray-50)] rounded-lg p-2">
+                    <span className="card-subtitle">{patient.addresses.length > 1 ? `Address ${index + 1}` : 'Primary Address'}</span>
+                    <p className="text-[var(--hospital-gray-900)]">{formatAddress(address)}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[var(--hospital-gray-500)]">No address information available</p>
+            )}
+          </div>
+        </div>
 
         {/* Emergency Contact */}
-        <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <ContactEmergency sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-                  Emergency Contact
-                </Typography>
-              </Box>
-              
-              {patient.nextOfKin ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Name
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                      {patient.nextOfKin.firstName} {patient.nextOfKin.lastName}
-                    </Typography>
-                  </Box>
-                  
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Relationship
-                    </Typography>
-                    <Typography variant="body1">
-                      {patient.nextOfKin.relationship || 'Not specified'}
-                    </Typography>
-                  </Box>
-                  
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Phone
-                    </Typography>
-                    <Typography variant="body1">
-                      {patient.nextOfKin.phone || 'No phone provided'}
-                    </Typography>
-                  </Box>
-                  
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Email
-                    </Typography>
-                    <Typography variant="body1">
-                      {patient.nextOfKin.email || 'No email provided'}
-                    </Typography>
-                  </Box>
-                </Box>
-              ) : (
-                <Typography variant="body1" color="text.secondary">
-                  No emergency contact information available
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
+        <div className="card">
+          <div className="card-header flex items-center gap-2">
+            <ContactEmergency className="w-5 h-5 text-[var(--hospital-accent)]" />
+            <h2 className="card-title">Emergency Contact</h2>
+          </div>
+          <div className="p-4 space-y-4">
+            {patient.nextOfKin ? (
+              <>
+                <div>
+                  <span className="card-subtitle">Name</span>
+                  <p className="font-medium text-[var(--hospital-gray-900)]">{patient.nextOfKin.firstName} {patient.nextOfKin.lastName}</p>
+                </div>
+                <div>
+                  <span className="card-subtitle">Relationship</span>
+                  <p className="text-[var(--hospital-gray-900)]">{patient.nextOfKin.relationship || 'Not specified'}</p>
+                </div>
+                <div>
+                  <span className="card-subtitle">Phone</span>
+                  <p className="text-[var(--hospital-gray-900)]">{patient.nextOfKin.phone || 'No phone provided'}</p>
+                </div>
+                <div>
+                  <span className="card-subtitle">Email</span>
+                  <p className="text-[var(--hospital-gray-900)]">{patient.nextOfKin.email || 'No email provided'}</p>
+                </div>
+              </>
+            ) : (
+              <p className="text-[var(--hospital-gray-500)]">No emergency contact information available</p>
+            )}
+          </div>
+        </div>
 
         {/* Insurance Information */}
-        <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <HealthAndSafety sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-                  Insurance Information
-                </Typography>
-              </Box>
-              
-              {patient.insuranceInfo ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Insurance Provider
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                      {patient.insuranceInfo.provider || 'Not specified'}
-                    </Typography>
-                  </Box>
-                  
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Policy Number
-                    </Typography>
-                    <Typography variant="body1">
-                      {patient.insuranceInfo.policyNumber || 'Not specified'}
-                    </Typography>
-                  </Box>
-                  
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Expiry Date
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CalendarMonth sx={{ fontSize: 16, color: 'text.secondary' }} />
-                      <Typography variant="body1">
-                        {formatDate(patient.insuranceInfo.expiryDate)}
-                      </Typography>
-                      {patient.insuranceInfo.expiryDate && isInsuranceExpired(patient.insuranceInfo.expiryDate) && (
-                        <Chip 
-                          label="Expired" 
-                          color="error" 
-                          size="small"
-                          sx={{ ml: 1 }}
-                        />
-                      )}
-                    </Box>
-                  </Box>
-                </Box>
-              ) : (
-                <Typography variant="body1" color="text.secondary">
-                  No insurance information available
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
+        <div className="card">
+          <div className="card-header flex items-center gap-2">
+            <HealthAndSafety className="w-5 h-5 text-[var(--hospital-accent)]" />
+            <h2 className="card-title">Insurance Information</h2>
+          </div>
+          <div className="p-4 space-y-4">
+            {patient.insuranceInfo ? (
+              <>
+                <div>
+                  <span className="card-subtitle">Insurance Provider</span>
+                  <p className="font-medium text-[var(--hospital-gray-900)]">{patient.insuranceInfo.provider || 'Not specified'}</p>
+                </div>
+                <div>
+                  <span className="card-subtitle">Policy Number</span>
+                  <p className="text-[var(--hospital-gray-900)]">{patient.insuranceInfo.policyNumber || 'Not specified'}</p>
+                </div>
+                <div>
+                  <span className="card-subtitle">Expiry Date</span>
+                  <div className="flex items-center gap-2">
+                    <CalendarMonth className="w-4 h-4 text-[var(--hospital-gray-500)]" />
+                    <p className="text-[var(--hospital-gray-900)]">{formatDate(patient.insuranceInfo.expiryDate)}</p>
+                    {patient.insuranceInfo.expiryDate && isInsuranceExpired(patient.insuranceInfo.expiryDate) && (
+                      <span className="badge badge-error">Expired</span>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-[var(--hospital-gray-500)]">No insurance information available</p>
+            )}
+          </div>
+        </div>
 
         {/* System Information */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', mb: 2 }}>
-                System Information
-              </Typography>
-              
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Created Date
-                  </Typography>
-                  <Typography variant="body1">
-                    {formatDate(patient.createdAt)}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Last Updated
-                  </Typography>
-                  <Typography variant="body1">
-                    {formatDate(patient.updatedAt)}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Box>
+        <div className="card md:col-span-2">
+          <div className="card-header">
+            <h2 className="card-title">System Information</h2>
+          </div>
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <span className="card-subtitle">Created Date</span>
+              <p className="text-[var(--hospital-gray-900)]">{formatDate(patient.createdAt)}</p>
+            </div>
+            <div>
+              <span className="card-subtitle">Last Updated</span>
+              <p className="text-[var(--hospital-gray-900)]">{formatDate(patient.updatedAt)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
