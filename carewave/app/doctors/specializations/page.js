@@ -1,5 +1,5 @@
 'use client';
-
+import React from 'react';
 import { useState, useEffect } from 'react';
 import SpecializationTable from '../../components/doctors/SpecializationTable';
 import SpecializationForm from '../../components/doctors/SpecializationForm';
