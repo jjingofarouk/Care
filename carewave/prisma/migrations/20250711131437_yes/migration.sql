@@ -1,0 +1,17 @@
+-- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('PATIENT', 'DOCTOR', 'NURSE', 'LAB_TECHNICIAN', 'PHARMACIST', 'RECEPTIONIST', 'RADIOLOGIST', 'SURGEON', 'ADMIN', 'STAFF', 'ACCOUNTANT', 'BILLING_OFFICER', 'HOSPITAL_MANAGER', 'IT_SUPPORT', 'CLEANING_STAFF', 'SECURITY');
+
+-- AlterTable
+ALTER TABLE "LoginAttempt" ADD COLUMN     "userAgent" TEXT;
+
+-- AlterTable
+ALTER TABLE "Session" ADD COLUMN     "isActive" BOOLEAN NOT NULL DEFAULT true;
+
+-- AlterTable
+ALTER TABLE "UserLogin" ADD COLUMN     "lastLoginAt" TIMESTAMP(3);
+
+-- AlterTable
+ALTER TABLE "UserRegistration" ADD COLUMN     "role" "UserRole" NOT NULL DEFAULT 'PATIENT';
+
+-- AddForeignKey
+ALTER TABLE "UserRegistration" ADD CONSTRAINT "UserRegistration_email_fkey" FOREIGN KEY ("email") REFERENCES "UserLogin"("email") ON DELETE CASCADE ON UPDATE CASCADE;
