@@ -1,14 +1,13 @@
-"use client";
+'use client';
 import React from 'react';
 import { Box } from '@mui/material';
-import styles from './layout.module.css';
 
-const DoctorLayout = ({ children }) => {
+const DoctorsLayout = ({ children }) => {
   return (
-    <Box className={styles.container}>
+    <Box className="min-h-screen bg-[var(--hospital-gray-50)] flex flex-col w-full max-w-full p-4 sm:p-6 lg:p-8">
       {children}
     </Box>
   );
 };
 
-export default DoctorLayout;
+export default DoctorsLayout;
