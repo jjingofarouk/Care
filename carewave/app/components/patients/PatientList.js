@@ -1,3 +1,4 @@
+// components/patients/PatientList.js
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -50,40 +51,40 @@ export default function PatientList() {
     { field: 'firstName', headerName: 'First Name', width: 150, flex: 1 },
     { field: 'lastName', headerName: 'Last Name', width: 150, flex: 1 },
     { field: 'email', headerName: 'Email', width: 200, flex: 1.5 },
-    { 
-      field: 'age', 
-      headerName: 'Age', 
+    {
+      field: 'age',
+      headerName: 'Age',
       width: 100,
       flex: 0.5,
       valueGetter: ({ row }) => {
         const dob = new Date(row.dateOfBirth);
         return Math.floor((Date.now() - dob) / (365.25 * 24 * 60 * 60 * 1000));
-      }
+      },
     },
     { field: 'gender', headerName: 'Gender', width: 100, flex: 0.5 },
-    { 
-      field: 'address', 
-      headerName: 'Address', 
+    {
+      field: 'address',
+      headerName: 'Address',
       width: 200,
       flex: 1.5,
       valueGetter: ({ row }) => {
         const addr = row.addresses?.[0];
         return addr ? `${addr.street}, ${addr.city}, ${addr.country}` : '-';
-      }
+      },
     },
-    { 
-      field: 'nextOfKin', 
-      headerName: 'Next of Kin', 
+    {
+      field: 'nextOfKin',
+      headerName: 'Next of Kin',
       width: 150,
       flex: 1,
-      valueGetter: ({ row }) => row.nextOfKin ? `${row.nextOfKin.firstName} ${row.nextOfKin.lastName}` : '-'
+      valueGetter: ({ row }) => (row.nextOfKin ? `${row.nextOfKin.firstName} ${row.nextOfKin.lastName}` : '-'),
     },
-    { 
-      field: 'insurance', 
-      headerName: 'Insurance', 
+    {
+      field: 'insurance',
+      headerName: 'Insurance',
       width: 150,
       flex: 1,
-      valueGetter: ({ row }) => row.insuranceInfo ? row.insuranceInfo.provider : '-'
+      valueGetter: ({ row }) => (row.insuranceInfo ? row.insuranceInfo.provider : '-'),
     },
     {
       field: 'actions',
@@ -93,15 +94,15 @@ export default function PatientList() {
       sortable: false,
       renderCell: ({ row }) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton 
-            color="primary" 
+          <IconButton
+            color="primary"
             onClick={() => router.push(`/patients/edit/${row.id}`)}
             size="small"
           >
             <Edit />
           </IconButton>
-          <IconButton 
-            color="error" 
+          <IconButton
+            color="error"
             onClick={() => handleDelete(row.id)}
             size="small"
           >
@@ -118,7 +119,7 @@ export default function PatientList() {
         <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
           Patients
         </Typography>
-        <Button 
+        <Button
           variant="contained"
           startIcon={<Add />}
           onClick={() => router.push('/patients/new')}
