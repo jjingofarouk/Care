@@ -1,3 +1,4 @@
+// services/patientService.js
 import axios from 'axios';
 import api from '../api';
 
@@ -5,7 +6,7 @@ const { BASE_URL, API_ROUTES } = api;
 
 export async function getPatients() {
   try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}?include=medicalRecords`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}?include=addresses,nextOfKin,insuranceInfo`);
     return response.data;
   } catch (error) {
     console.error('Error fetching patients:', error);
