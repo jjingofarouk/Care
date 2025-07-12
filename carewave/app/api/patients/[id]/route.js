@@ -1,13 +1,15 @@
 // app/api/patients/[id]/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
-export async function GET(request, context) {
+export async function GET(request, { params }) {
   try {
-    console.log('GET /api/patients/[id] params:', context);
-    const id = context.params?.id;
+    console.log('GET /api/patients/[id] params:', params);
+    const id = params?.id;
     if (!id) {
       return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
     }
@@ -37,10 +39,10 @@ export async function GET(request, context) {
   }
 }
 
-export async function PUT(request, context) {
+export async function PUT(request, { params }) {
   try {
-    console.log('PUT /api/patients/[id] params:', context);
-    const id = context.params?.id;
+    console.log('PUT /api/patients/[id] params:', params);
+    const id = params?.id;
     if (!id) {
       return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
     }
@@ -72,7 +74,22 @@ export async function PUT(request, context) {
           { status: 409 }
         );
       }
-      userId = existingUser ? existingUser.id : null;
+      if (existingUser) {
+        userId = existingUser.id;
+      } else if (data.createUser && data.password) {
+        const passwordHash = await bcrypt.hash(data.password, 10);
+        const newUser = await prisma.userRegistration.create({
+          data: {
+            id: `U-${uuidv4().slice(0, 8)}`,
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            role: 'PATIENT',
+            passwordHash,
+          },
+        });
+        userId = newUser.id;
+      }
     }
 
     const patient = await prisma.patient.update({
@@ -85,35 +102,35 @@ export async function PUT(request, context) {
         phone: data.phone || null,
         email: data.email || null,
         userId,
-        addresses: data.addresses
-          ? {
-              deleteMany: {},
-              create: data.addresses.map((addr) => ({
-                street: addr.street,
-                city: addr.city,
-                country: addr.country,
+        addresses: {
+          deleteMany: {},
+          create: data.addresses?.length
+            ? data.addresses.map((addr) => ({
+                street: addr.street || '',
+                city: addr.city || '',
+                country: addr.country || '',
                 postalCode: addr.postalCode || null,
-              })),
-            }
-          : undefined,
-        nextOfKin: data.nextOfKin
+              }))
+            : [],
+        },
+        nextOfKin: data.nextOfKin?.firstName || data.nextOfKin?.lastName
           ? {
               deleteMany: {},
               create: {
-                firstName: data.nextOfKin.firstName,
-                lastName: data.nextOfKin.lastName,
-                relationship: data.nextOfKin.relationship,
+                firstName: data.nextOfKin.firstName || '',
+                lastName: data.nextOfKin.lastName || '',
+                relationship: data.nextOfKin.relationship || '',
                 phone: data.nextOfKin.phone || null,
                 email: data.nextOfKin.email || null,
               },
             }
           : undefined,
-        insuranceInfo: data.insuranceInfo
+        insuranceInfo: data.insuranceInfo?.provider || data.insuranceInfo?.policyNumber
           ? {
               deleteMany: {},
               create: {
-                provider: data.insuranceInfo.provider,
-                policyNumber: data.insuranceInfo.policyNumber,
+                provider: data.insuranceInfo.provider || '',
+                policyNumber: data.insuranceInfo.policyNumber || '',
                 expiryDate: data.insuranceInfo.expiryDate
                   ? new Date(data.insuranceInfo.expiryDate)
                   : null,
@@ -140,10 +157,10 @@ export async function PUT(request, context) {
   }
 }
 
-export async function DELETE(request, context) {
+export async function DELETE(request, { params }) {
   try {
-    console.log('DELETE /api/patients/[id] params:', context);
-    const id = context.params?.id;
+    console.log('DELETE /api/patients/[id] params:', params);
+    const id = params?.id;
     if (!id) {
       return NextResponse.json({ error: 'Missing patient ID' }, { status: 400 });
     }
