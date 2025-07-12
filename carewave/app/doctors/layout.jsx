@@ -43,6 +43,10 @@ const DoctorsLayout = ({ children }) => {
             backgroundColor: 'var(--hospital-white)',
             borderRadius: '0.5rem',
             boxShadow: 'var(--shadow-sm)',
+            overflowX: 'auto',
+          },
+          '& .MuiTabs-flexContainer': {
+            flexWrap: 'nowrap',
           },
           '& .MuiTab-root': {
             color: 'var(--hospital-gray-700)',
@@ -52,6 +56,8 @@ const DoctorsLayout = ({ children }) => {
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
             transition: 'all var(--transition-normal)',
+            minWidth: '100px',
+            whiteSpace: 'nowrap',
           },
           '& .MuiTab-root.Mui-selected': {
             color: 'var(--role-doctor)',
@@ -62,8 +68,28 @@ const DoctorsLayout = ({ children }) => {
             height: '3px',
             borderRadius: '3px 3px 0 0',
           },
+          '& .MuiTabs-scroller': {
+            overflowX: 'auto !important',
+            '&::-webkit-scrollbar': {
+              height: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: 'var(--hospital-gray-50)',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: 'var(--hospital-gray-200)',
+              borderRadius: '4px',
+            },
+          },
         }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="doctor management tabs">
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            aria-label="doctor management tabs"
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
             <Tab label="Doctors" />
             <Tab label="Schedules" />
             <Tab label="Specializations" />
