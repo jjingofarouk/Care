@@ -1,4 +1,3 @@
-// app/api/patients/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,22 +7,19 @@ const prisma = new PrismaClient();
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const includeParam = searchParams.get('include');
+    const includeParam = searchParams.get('include')?.split(',') || [];
     const search = searchParams.get('search');
     const gender = searchParams.get('gender');
     const minAge = searchParams.get('minAge');
     const maxAge = searchParams.get('maxAge');
     const city = searchParams.get('city');
-    
-    const includeRelations = includeParam?.split(',') || [];
-    const validRelations = ['addresses', 'nextOfKin', 'insuranceInfo', 'userAccount'];
-    
-    const include = validRelations.reduce((acc, relation) => {
-      if (includeRelations.includes(relation)) {
-        return { ...acc, [relation]: true };
-      }
-      return acc;
-    }, {});
+
+    const include = {
+      addresses: includeParam.includes('addresses'),
+      nextOfKin: includeParam.includes('nextOfKin'),
+      insuranceInfo: includeParam.includes('insuranceInfo'),
+      userAccount: includeParam.includes('userAccount'),
+    };
 
     const where = {};
     if (search) {
@@ -34,9 +30,7 @@ export async function GET(request) {
       ];
     }
     if (gender) where.gender = gender;
-    if (city) {
-      where.addresses = { some: { city: { contains: city, mode: 'insensitive' } } };
-    }
+    if (city) where.addresses = { some: { city: { contains: city, mode: 'insensitive' } } };
     if (minAge || maxAge) {
       where.dateOfBirth = {};
       if (minAge) {
@@ -54,7 +48,7 @@ export async function GET(request) {
     const patients = await prisma.patient.findMany({
       where,
       include,
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json(patients);
