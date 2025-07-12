@@ -4,10 +4,8 @@ import { Typography, Box } from '@mui/material';
 import { 
   Clock, 
   CheckCircle, 
-  XCircle, 
   Calendar, 
   TrendingUp, 
-  Users, 
   Activity,
   Calendar as CalendarIcon,
   UserCheck,
@@ -550,14 +548,14 @@ export default function AppointmentStats() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {cardData.map((card, index) => (
+        {cardData.map((card, cardIndex) => (
           <StatCard
             key={card.title}
             title={card.title}
             value={card.value}
             icon={card.icon}
             color={card.color}
-            delay={index * 0.1}
+            delay={cardIndex * 0.1}
             trend={card.trend}
             subtitle={card.subtitle}
           />
@@ -595,7 +593,7 @@ export default function AppointmentStats() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ChartCard title="Top Departments" delay={0.6}>
           <div className="space-y-3">
-            {stats.topDepartments.map((dept, index) => (
+            {stats.topDepartments.map((dept) => (
               <div key={dept.name} className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{dept.name}</span>
                 <span className="font-semibold text-blue-600">{dept.count}</span>
@@ -606,7 +604,7 @@ export default function AppointmentStats() {
 
         <ChartCard title="Popular Visit Types" delay={0.7}>
           <div className="space-y-3">
-            {stats.topVisitTypes.map((type, index) => (
+            {stats.topVisitTypes.map((type) => (
               <div key={type.name} className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{type.name}</span>
                 <span className="font-semibold text-green-600">{type.count}</span>
@@ -617,7 +615,7 @@ export default function AppointmentStats() {
 
         <ChartCard title="Top Doctors" delay={0.8}>
           <div className="space-y-3">
-            {stats.topDoctors.map((doctor, index) => (
+            {stats.topDoctors.map((doctor) => (
               <div key={doctor.name} className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{doctor.name}</span>
                 <span className="font-semibold text-purple-600">{doctor.count}</span>
