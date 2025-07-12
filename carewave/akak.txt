@@ -1,0 +1,7 @@
+Unknown command: "run:seed"
+
+Did you mean this?
+    npm run db:seed # run the "db:seed" package script
+
+To see a list of supported npm commands, run:
+  npm help

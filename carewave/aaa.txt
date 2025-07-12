@@ -1,0 +1,258 @@
+
+> hospital-management-system@1.0.3 db:seed
+> npm run schema:build && npx prisma db seed -- --seed-file prisma/seed.js
+
+
+> hospital-management-system@1.0.3 schema:build
+> node prisma/scripts/build-schema.js
+
+🔨 Building Prisma schema from modules...
+📄 Processing: dashboard.prisma
+📄 Processing: home.prisma
+📄 Processing: login.prisma
+📄 Processing: register.prisma
+📄 Processing: doctor.prisma
+📄 Processing: nursing.prisma
+📄 Processing: system-admin.prisma
+📄 Processing: social-service.prisma
+📄 Processing: incentive.prisma
+📄 Processing: patients.prisma
+📄 Processing: medical-records.prisma
+📄 Processing: adt.prisma
+📄 Processing: queue-mgmt.prisma
+📄 Processing: clinical.prisma
+📄 Processing: appointments.prisma
+📄 Processing: emergency.prisma
+📄 Processing: maternity.prisma
+📄 Processing: vaccination.prisma
+📄 Processing: operation-theatre.prisma
+📄 Processing: laboratory.prisma
+📄 Processing: radiology.prisma
+📄 Processing: pharmacy.prisma
+📄 Processing: dispensary.prisma
+📄 Processing: cssd.prisma
+📄 Processing: helpdesk.prisma
+📄 Processing: utilities.prisma
+📄 Processing: settings.prisma
+📄 Processing: verification.prisma
+📄 Processing: billing.prisma
+📄 Processing: accounting.prisma
+📄 Processing: claim-mgmt.prisma
+📄 Processing: nhif.prisma
+📄 Processing: inventory.prisma
+📄 Processing: procurement.prisma
+📄 Processing: substore.prisma
+📄 Processing: fixed-assets.prisma
+📄 Processing: departments.prisma
+📄 Processing: reports.prisma
+📄 Processing: dynamic-report.prisma
+📄 Processing: mkt-referral.prisma
+✅ Schema built successfully!
+📊 Processed 40 modules
+📏 Total lines: 1852
+💾 Output: /project/workspace/carewave/prisma/schema.prisma
+Environment variables loaded from .env
+Running seed command `node prisma/seed.js --seed-file prisma/seed.js` ...
+✓ Cleared FixedAsset
+✓ Cleared Department
+✓ Cleared Doctor
+✓ Cleared Admission
+✓ Cleared Discharge
+✓ Cleared Appointment
+✓ Cleared Invoice
+✓ Cleared MedicalRecord
+✓ Cleared Patient
+✓ Cleared Supplier
+✓ Cleared PurchaseOrder
+✓ Cleared Prescription
+✓ Cleared Ward
+✓ Cleared KPI
+✓ Cleared Notification
+✓ Cleared News
+✓ Cleared Highlight
+✓ Cleared Ambulance
+✓ Cleared Pharmacist
+✓ Cleared ElectricityLog
+✓ Cleared WaterLog
+✓ Cleared BackupGeneratorStatus
+✓ Cleared SystemSetting
+✓ Cleared FeatureToggle
+✓ Cleared ThemeSetting
+✓ Cleared AuditLog
+✓ Cleared DashboardStats
+✓ Cleared Widget
+✓ Cleared HomepageConfig
+✓ Cleared HeroSection
+✓ Cleared UserLogin
+✓ Cleared LoginAttempt
+✓ Cleared Session
+✓ Cleared UserRegistration
+✓ Cleared EmailVerificationToken
+✓ Cleared Specialization
+✓ Cleared Role
+✓ Cleared SystemAdmin
+✓ Cleared AdminLog
+✓ Cleared SocialWorker
+✓ Cleared PatientSupportCase
+✓ Cleared IncentiveProgram
+✓ Cleared IncentiveRecord
+✓ Cleared PatientAddress
+✓ Cleared NextOfKin
+✓ Cleared InsuranceInfo
+✓ Cleared Bed
+✓ Cleared ServiceCounter
+✓ Cleared QueueStatus
+✓ Cleared ClinicalTask
+✓ Cleared VisitType
+✓ Cleared Triage
+✓ Cleared MaternityCase
+✓ Cleared Vaccine
+✓ Cleared ImmunizationSchedule
+✓ Cleared VaccinationRecord
+✓ Cleared Theatre
+✓ Cleared SurgicalTeam
+✓ Cleared PreOpAssessment
+✓ Cleared LabTest
+✓ Cleared Sample
+✓ Cleared LabRequest
+✓ Cleared RadiologyTest
+✓ Cleared Drug
+✓ Cleared PharmacyItem
+✓ Cleared Dispensary
+✓ Cleared DispensaryStock
+✓ Cleared CSSDItem
+✓ Cleared SterilizationCycle
+✓ Cleared InstrumentRequest
+✓ Cleared SupportAgent
+✓ Cleared HelpTicket
+✓ Cleared VerificationToken
+✓ Cleared UserVerificationStatus
+✓ Cleared Account
+✓ Cleared Ledger
+✓ Cleared JournalEntry
+✓ Cleared TrialBalance
+✓ Cleared ClaimBatch
+✓ Cleared ClaimStatus
+✓ Cleared Claim
+✓ Cleared NHIFBenefit
+✓ Cleared NHIFClaim
+✓ Cleared Item
+✓ Cleared Inventory
+✓ Cleared StockMovement
+✓ Cleared ExpiryAlert
+✓ Cleared GoodsReceivedNote
+✓ Cleared Substore
+✓ Cleared SubstoreTransfer
+✓ Cleared Requisition
+✓ Cleared Unit
+✓ Cleared ReportTemplate
+✓ Cleared Report
+✓ Cleared ReportSchedule
+✓ Cleared CustomReport
+✓ Cleared ReportField
+✓ Cleared ReportFilter
+✓ Cleared ReferringDoctor
+✓ Cleared ReferralSource
+✓ Cleared Permission
+✓ Cleared _RolePermissions
+✓ Cleared DoctorSpecialization
+✓ Cleared DoctorSchedule
+✓ Cleared DoctorLeave
+✓ Cleared Nurse
+✓ Cleared NurseSchedule
+✓ Cleared Shift
+✓ Cleared Allergy
+✓ Cleared Diagnosis
+✓ Cleared Room
+✓ Cleared QueueEntry
+✓ Cleared ClinicalNote
+✓ Cleared ProgressNote
+✓ Cleared SOAPNote
+✓ Cleared EmergencyCase
+✓ Cleared Surgery
+✓ Cleared ImagingOrder
+✓ Cleared DispenseRecord
+✓ Cleared DepreciationSchedule
+✓ Cleared AssetAudit
+✓ Cleared Referral
+✓ Cleared VitalSign
+✓ Cleared Transfer
+✓ Cleared AppointmentStatus
+✓ Cleared EmergencyLog
+✓ Cleared DeliveryRecord
+✓ Cleared ANCVisit
+✓ Cleared PNCVisit
+✓ Cleared LabResult
+✓ Cleared RadiologyResult
+✓ Cleared ScanImage
+✓ Cleared Payment
+✓ Cleared BillingItem
+✓ Cleared ClaimSubmission
+✓ Cleared NHIFSubmission
+✔ Database cleared successfully
+🌱 Starting database seeding...
+Error seeding database: PrismaClientValidationError: 
+Invalid `prisma.claim.create()` invocation in
+/project/workspace/carewave/prisma/seed.js:1167:37
+
+  1164 });
+  1165 
+  1166 // Create claims
+→ 1167 const claim1 = await prisma.claim.create({
+         data: {
+           patientId: "fdc68cdd-e10c-4467-b9ef-37d104a1c919",
+           claimBatchId: "c5db8fdf-4354-40a2-ad4e-5fb0e5b12643",
+           amount: 15000,
+           submittedAt: new Date("2025-07-11T03:39:31.114Z"),
+       +   patient: {
+       +     create: PatientCreateWithoutClaimsInput | PatientUncheckedCreateWithoutClaimsInput,
+       +     connectOrCreate: PatientCreateOrConnectWithoutClaimsInput,
+       +     connect: PatientWhereUniqueInput
+       +   }
+         }
+       })
+
+Argument `patient` is missing.
+    at wn (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at $n.handleRequestError (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:121:6958)
+    at $n.handleAndLogRequestError (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async seedDatabase (/project/workspace/carewave/prisma/seed.js:1167:18)
+    at async main (/project/workspace/carewave/prisma/seed.js:1662:5) {
+  clientVersion: '5.22.0'
+}
+❌ Seeding failed: PrismaClientValidationError: 
+Invalid `prisma.claim.create()` invocation in
+/project/workspace/carewave/prisma/seed.js:1167:37
+
+  1164 });
+  1165 
+  1166 // Create claims
+→ 1167 const claim1 = await prisma.claim.create({
+         data: {
+           patientId: "fdc68cdd-e10c-4467-b9ef-37d104a1c919",
+           claimBatchId: "c5db8fdf-4354-40a2-ad4e-5fb0e5b12643",
+           amount: 15000,
+           submittedAt: new Date("2025-07-11T03:39:31.114Z"),
+       +   patient: {
+       +     create: PatientCreateWithoutClaimsInput | PatientUncheckedCreateWithoutClaimsInput,
+       +     connectOrCreate: PatientCreateOrConnectWithoutClaimsInput,
+       +     connect: PatientWhereUniqueInput
+       +   }
+         }
+       })
+
+Argument `patient` is missing.
+    at wn (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at $n.handleRequestError (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:121:6958)
+    at $n.handleAndLogRequestError (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async seedDatabase (/project/workspace/carewave/prisma/seed.js:1167:18)
+    at async main (/project/workspace/carewave/prisma/seed.js:1662:5) {
+  clientVersion: '5.22.0'
+}
+
+An error occurred while running the seed command:
+Error: Command failed with exit code 1: node prisma/seed.js --seed-file prisma/seed.js
