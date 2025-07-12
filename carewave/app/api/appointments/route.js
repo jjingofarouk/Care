@@ -26,6 +26,8 @@ export async function GET(request) {
   const doctorId = searchParams.get('doctorId');
   const patientId = searchParams.get('patientId');
   const resource = searchParams.get('resource');
+  const id = searchParams.get('id');
+  const appointmentId = searchParams.get('appointmentId');
 
   try {
     if (resource === 'patients') {
@@ -36,8 +38,7 @@ export async function GET(request) {
     }
     if (resource === 'doctors') {
       const doctors = await prisma.doctor.findMany({
-        select: { id: true, name: true, departmentId: true },
-        include: { department: { select: { name: true } } },
+        select: { id: true, name: true, department: { select: { name: true } } },
       });
       return NextResponse.json(doctors);
     }
@@ -47,16 +48,25 @@ export async function GET(request) {
       });
       return NextResponse.json(visitTypes);
     }
-    if (resource === 'statusHistory') {
-      const appointmentId = searchParams.get('appointmentId');
-      if (!appointmentId) {
-        return NextResponse.json({ error: 'Appointment ID required' }, { status: 400 });
-      }
+    if (resource === 'statusHistory' && appointmentId) {
       const history = await prisma.appointmentStatus.findMany({
         where: { appointmentId },
         orderBy: { changedAt: 'desc' },
       });
       return NextResponse.json(history);
+    }
+    if (id) {
+      const appointment = await prisma.appointment.findUnique({
+        where: { id },
+        include: {
+          patient: { select: { name: true } },
+          doctor: { select: { name: true, department: { select: { name: true } } } },
+          visitType: { select: { name: true } },
+          appointmentStatusRecords: { orderBy: { changedAt: 'desc' } },
+        },
+      });
+      if (!appointment) return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
+      return NextResponse.json(appointment);
     }
 
     const appointments = await prisma.appointment.findMany({
@@ -135,6 +145,16 @@ export async function PUT(request) {
 
   try {
     const data = await request.json();
+    if (data.resource === 'visitType') {
+      const visitType = await prisma.visitType.update({
+        where: { id: data.id },
+        data: {
+          name: data.name,
+          description: data.description,
+        },
+      });
+      return NextResponse.json(visitType);
+    }
     const appointment = await prisma.appointment.update({
       where: { id: data.id },
       data: {
@@ -169,9 +189,16 @@ export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    if (!id) {
-      return NextResponse.json({ error: 'Appointment ID required' }, { status: 400 });
+    const resource = searchParams.get('resource');
+    if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
+    if (resource === 'visitType') {
+      await prisma.visitType.delete({
+        where: { id },
+      });
+      return NextResponse.json({ message: 'Visit type deleted' });
     }
+
     await prisma.appointment.delete({
       where: { id },
     });
