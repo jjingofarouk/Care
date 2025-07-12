@@ -1,3 +1,4 @@
+// appointmentService.js
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -16,7 +17,7 @@ export async function getAllAppointments(filters) {
       }),
     },
     include: {
-      patient: { select: { name: true } },
+      patient: { select: { firstName: true, lastName: true } },
       doctor: { select: { name: true, department: { select: { name: true } } } },
       visitType: { select: { name: true } },
       appointmentStatusRecords: true,
@@ -29,7 +30,7 @@ export async function getAppointmentById(id) {
   return prisma.appointment.findUnique({
     where: { id },
     include: {
-      patient: { select: { name: true } },
+      patient: { select: { firstName: true, lastName: true } },
       doctor: { select: { name: true, department: { select: { name: true } } } },
       visitType: { select: { name: true } },
       appointmentStatusRecords: { orderBy: { changedAt: 'desc' } },
@@ -53,7 +54,7 @@ export async function createAppointment(data) {
       },
     },
     include: {
-      patient: { select: { name: true } },
+      patient: { select: { firstName: true, lastName: true } },
       doctor: { select: { name: true, department: { select: { name: true } } } },
       visitType: { select: { name: true } },
     },
@@ -79,7 +80,7 @@ export async function updateAppointment(id, data) {
       }),
     },
     include: {
-      patient: { select: { name: true } },
+      patient: { select: { firstName: true, lastName: true } },
       doctor: { select: { name: true, department: { select: { name: true } } } },
       visitType: { select: { name: true } },
     },
@@ -94,7 +95,7 @@ export async function deleteAppointment(id) {
 
 export async function getPatients() {
   return prisma.patient.findMany({
-    select: { id: true, name: true },
+    select: { id: true, firstName: true, lastName: true },
   });
 }
 
