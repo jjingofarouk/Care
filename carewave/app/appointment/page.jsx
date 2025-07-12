@@ -2,7 +2,7 @@ import React from 'react';
 import { getAllAppointments } from '@/services/appointmentService';
 import AppointmentTable from '@/components/appointments/AppointmentTable';
 import AppointmentFilter from '@/components/appointments/AppointmentFilter';
-import AppointmentStats from '@/components/appoitments/AppointmentStats';
+import AppointmentStats from '@/components/appointments/AppointmentStats';
 import { Button, Typography } from '@mui/material';
 import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';

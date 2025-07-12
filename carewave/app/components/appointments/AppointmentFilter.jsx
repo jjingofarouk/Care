@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TextField, Select, MenuItem, Button, FormControl, InputLabel, Box } from '@mui/material';
 import { Filter, X } from 'lucide-react';
 
