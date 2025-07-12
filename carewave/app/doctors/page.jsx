@@ -1,4 +1,4 @@
-// DoctorsPage.jsx
+// app/doctors/page.jsx
 'use client';
 import React from 'react';
 import { useState, useEffect } from 'react';
