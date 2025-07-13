@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import medicalRecordsService from '@/services/medicalRecordsService';
 import { User } from 'lucide-react';
 
+// Prevent static generation
+export const dynamic = 'force-dynamic';
+
 export default function MedicalRecordsPage() {
   const router = useRouter();
   const [patients, setPatients] = useState([]);
