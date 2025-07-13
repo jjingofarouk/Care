@@ -1,79 +1,84 @@
+'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import DiagnosisForm from '../../components/medical-records/DiagnosisForm';
-import DiagnosisList from '../../components/medical-records/DiagnosisList';
+import { DataGrid } from '@mui/x-data-grid';
+import { IconButton } from '@mui/material';
+import { Edit, Trash2 } from 'lucide-react';
+import medicalRecordsService from '@/services/medicalRecordsService';
 
 const DiagnosesPage = () => {
   const [diagnoses, setDiagnoses] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedDiagnosis, setSelectedDiagnosis] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock fetch function - replace with actual API call
   useEffect(() => {
     const fetchDiagnoses = async () => {
-      // Simulate API call
-      const mockDiagnoses = [
-        { id: 1, medicalRecordId: 1, code: 'J45', description: 'Asthma', diagnosedAt: '2025-06-01' },
-      ];
-      setDiagnoses(mockDiagnoses);
+      try {
+        setLoading(true);
+        const data = await medicalRecordsService.getDiagnoses();
+        setDiagnoses(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchDiagnoses();
   }, []);
 
-  const handleSubmit = (formData) => {
-    // Simulate API call to save diagnosis
-    const newDiagnosis = { ...formData, id: diagnoses.length + 1 };
-    setDiagnoses([...diagnoses, newDiagnosis]);
-    setShowForm(false);
-    setSelectedDiagnosis(null);
+  const handleDelete = async (id) => {
+    try {
+      await medicalRecordsService.deleteDiagnosis(id);
+      setDiagnoses(diagnoses.filter(diagnosis => diagnosis.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleEdit = (diagnosis) => {
-    setSelectedDiagnosis(diagnosis);
-    setShowForm(true);
-  };
-
-  const handleDelete = (id) => {
-    setDiagnoses(diagnoses.filter((diagnosis) => diagnosis.id !== id));
-  };
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'code', headerName: 'Code', width: 150 },
+    { field: 'description', headerName: 'Description', width: 300 },
+    { field: 'diagnosedAt', headerName: 'Diagnosed At', width: 150, type: 'date', valueGetter: (params) => new Date(params.row.diagnosedAt) },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      renderCell: (params) => (
+        <div className="flex gap-2">
+          <IconButton onClick={() => console.log('Edit', params.row.id)} className="text-[var(--hospital-accent)]">
+            <Edit size={20} />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)} className="text-[var(--hospital-error)]">
+            <Trash2 size={20} />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Box className="p-6 max-w-7xl mx-auto">
-      <Typography variant="h4" className="mb-6 text-hospital-gray-900">
-        Diagnoses
-      </Typography>
-      
-      <Box className="mb-6">
-        <Button
-          variant="contained"
-          startIcon={<Plus />}
-          className="btn-primary"
-          onClick={() => {
-            setSelectedDiagnosis(null);
-            setShowForm(true);
-          }}
-        >
-          Add New Diagnosis
-        </Button>
-      </Box>
-
-      {showForm && (
-        <Box className="mb-6">
-          <DiagnosisForm
-            initialData={selectedDiagnosis || {}}
-            onSubmit={handleSubmit}
-            medicalRecords={[{ id: 1, patient: { name: 'John Doe' } }]} // Mock records
-          />
-        </Box>
+    <div className="w-full">
+      {error && (
+        <div className="alert alert-error mb-4">
+          {error}
+        </div>
       )}
-
-      <DiagnosisList
-        diagnoses={diagnoses}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    </Box>
+      {loading ? (
+        <div className="loading-spinner mx-auto" />
+      ) : (
+        <div className="table">
+          <DataGrid
+            rows={diagnoses}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 20, 50]}
+            className="w-full"
+            autoHeight
+            disableSelectionOnClick
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

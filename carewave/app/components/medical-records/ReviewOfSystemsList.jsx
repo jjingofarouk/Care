@@ -3,22 +3,11 @@ import { DataGrid } from '@mui/x-data-grid';
 import { Button, Box, Typography } from '@mui/material';
 import { Trash2, Edit } from 'lucide-react';
 
-const MedicalRecordList = ({ records = [], onEdit, onDelete }) => {
+const ReviewOfSystemsList = ({ reviews = [], onEdit, onDelete }) => {
   const columns = [
     { field: 'id', headerName: 'ID', width: 100 },
-    { 
-      field: 'patientName', 
-      headerName: 'Patient', 
-      width: 200,
-      valueGetter: (params) => params.row.patient?.name || 'N/A'
-    },
-    { 
-      field: 'recordDate', 
-      headerName: 'Record Date', 
-      width: 150,
-      type: 'date',
-      valueGetter: (params) => new Date(params.row.recordDate)
-    },
+    { field: 'system', headerName: 'System', width: 200 },
+    { field: 'findings', headerName: 'Findings', width: 300 },
     {
       field: 'actions',
       headerName: 'Actions',
@@ -50,10 +39,10 @@ const MedicalRecordList = ({ records = [], onEdit, onDelete }) => {
 
   return (
     <Box className="card p-6">
-      <Typography variant="h6" className="card-title mb-4">Medical Records</Typography>
+      <Typography variant="h6" className="card-title mb-4">Review of Systems</Typography>
       <Box sx={{ height: 400, width: '100%' }}>
         <DataGrid
-          rows={records}
+          rows={reviews}
           columns={columns}
           pageSize={10}
           rowsPerPageOptions={[10, 25, 50]}
@@ -65,4 +54,4 @@ const MedicalRecordList = ({ records = [], onEdit, onDelete }) => {
   );
 };
 
-export default MedicalRecordList;
+export default ReviewOfSystemsList;

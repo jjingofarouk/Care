@@ -1,79 +1,85 @@
+'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import SurgicalHistoryForm from '../../components/medical-records/SurgicalHistoryForm';
-import SurgicalHistoryList from '../../components/medical-records/SurgicalHistoryList';
+import { DataGrid } from '@mui/x-data-grid';
+import { IconButton } from '@mui/material';
+import { Edit, Trash2 } from 'lucide-react';
+import medicalRecordsService from '@/services/medicalRecordsService';
 
 const SurgicalHistoryPage = () => {
-  const [surgicalHistory, setSurgicalHistory] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedSurgery, setSelectedSurgery] = useState(null);
+  const [surgeries, setSurgeries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock fetch function - replace with actual API call
   useEffect(() => {
-    const fetchSurgicalHistory = async () => {
-      // Simulate API call
-      const mockSurgicalHistory = [
-        { id: 1, medicalRecordId: 1, procedure: 'Appendectomy', datePerformed: '2018-03-15', outcome: 'Successful', notes: 'No complications' },
-      ];
-      setSurgicalHistory(mockSurgicalHistory);
+    const fetchSurgeries = async () => {
+      try {
+        setLoading(true);
+        const data = await medicalRecordsService.getSurgicalHistory();
+        setSurgeries(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchSurgicalHistory();
+    fetchSurgeries();
   }, []);
 
-  const handleSubmit = (formData) => {
-    // Simulate API call to save surgery
-    const newSurgery = { ...formData, id: surgicalHistory.length + 1 };
-    setSurgicalHistory([...surgicalHistory, newSurgery]);
-    setShowForm(false);
-    setSelectedSurgery(null);
+  const handleDelete = async (id) => {
+    try {
+      await medicalRecordsService.deleteSurgicalHistory(id);
+      setSurgeries(surgeries.filter(surgery => surgery.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleEdit = (surgery) => {
-    setSelectedSurgery(surgery);
-    setShowForm(true);
-  };
-
-  const handleDelete = (id) => {
-    setSurgicalHistory(surgicalHistory.filter((surgery) => surgery.id !== id));
-  };
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'procedure', headerName: 'Procedure', width: 200 },
+    { field: 'datePerformed', headerName: 'Date Performed', width: 150, type: 'date', valueGetter: (params) => params.row.datePerformed ? new Date(params.row.datePerformed) : null },
+    { field: 'outcome', headerName: 'Outcome', width: 150 },
+    { field: 'notes', headerName: 'Notes', width: 300 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      renderCell: (params) => (
+        <div className="flex gap-2">
+          <IconButton onClick={() => console.log('Edit', params.row.id)} className="text-[var(--hospital-accent)]">
+            <Edit size={20} />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)} className="text-[var(--hospital-error)]">
+            <Trash2 size={20} />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Box className="p-6 max-w-7xl mx-auto">
-      <Typography variant="h4" className="mb-6 text-hospital-gray-900">
-        Surgical History
-      </Typography>
-      
-      <Box className="mb-6">
-        <Button
-          variant="contained"
-          startIcon={<Plus />}
-          className="btn-primary"
-          onClick={() => {
-            setSelectedSurgery(null);
-            setShowForm(true);
-          }}
-        >
-          Add New Surgery
-        </Button>
-      </Box>
-
-      {showForm && (
-        <Box className="mb-6">
-          <SurgicalHistoryForm
-            initialData={selectedSurgery || {}}
-            onSubmit={handleSubmit}
-            medicalRecords={[{ id: 1, patient: { name: 'John Doe' } }]} // Mock records
-          />
-        </Box>
+    <div className="w-full">
+      {error && (
+        <div className="alert alert-error mb-4">
+          {error}
+        </div>
       )}
-
-      <SurgicalHistoryList
-        surgicalHistory={surgicalHistory}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    </Box>
+      {loading ? (
+        <div className="loading-spinner mx-auto" />
+      ) : (
+        <div className="table">
+          <DataGrid
+            rows={surgeries}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 20, 50]}
+            className="w-full"
+            autoHeight
+            disableSelectionOnClick
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

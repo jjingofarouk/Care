@@ -1,79 +1,85 @@
+'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import ChiefComplaintForm from '../../components/medical-records/ChiefComplaintForm';
-import ChiefComplaintList from '../../components/medical-records/ChiefComplaintList';
+import { DataGrid } from '@mui/x-data-grid';
+import { IconButton } from '@mui/material';
+import { Edit, Trash2 } from 'lucide-react';
+import medicalRecordsService from '@/services/medicalRecordsService';
 
 const ChiefComplaintsPage = () => {
   const [complaints, setComplaints] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock fetch function - replace with actual API call
   useEffect(() => {
     const fetchComplaints = async () => {
-      // Simulate API call
-      const mockComplaints = [
-        { id: 1, medicalRecordId: 1, description: 'Chest pain', duration: '2 days', onset: 'Sudden' },
-      ];
-      setComplaints(mockComplaints);
+      try {
+        setLoading(true);
+        const data = await medicalRecordsService.getChiefComplaints();
+        setComplaints(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchComplaints();
   }, []);
 
-  const handleSubmit = (formData) => {
-    // Simulate API call to save complaint
-    const newComplaint = { ...formData, id: complaints.length + 1 };
-    setComplaints([...complaints, newComplaint]);
-    setShowForm(false);
-    setSelectedComplaint(null);
+  const handleDelete = async (id) => {
+    try {
+      await medicalRecordsService.deleteChiefComplaint(id);
+      setComplaints(complaints.filter(complaint => complaint.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleEdit = (complaint) => {
-    setSelectedComplaint(complaint);
-    setShowForm(true);
-  };
-
-  const handleDelete = (id) => {
-    setComplaints(complaints.filter((complaint) => complaint.id !== id));
-  };
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'description', headerName: 'Description', width: 300 },
+    { field: 'duration', headerName: 'Duration', width: 150 },
+    { field: 'onset', headerName: 'Onset', width: 150 },
+    { field: 'createdAt', headerName: 'Created', width: 150, type: 'date', valueGetter: (params) => new Date(params.row.createdAt) },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      renderCell: (params) => (
+        <div className="flex gap-2">
+          <IconButton onClick={() => console.log('Edit', params.row.id)} className="text-[var(--hospital-accent)]">
+            <Edit size={20} />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)} className="text-[var(--hospital-error)]">
+            <Trash2 size={20} />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Box className="p-6 max-w-7xl mx-auto">
-      <Typography variant="h4" className="mb-6 text-hospital-gray-900">
-        Chief Complaints
-      </Typography>
-      
-      <Box className="mb-6">
-        <Button
-          variant="contained"
-          startIcon={<Plus />}
-          className="btn-primary"
-          onClick={() => {
-            setSelectedComplaint(null);
-            setShowForm(true);
-          }}
-        >
-          Add New Complaint
-        </Button>
-      </Box>
-
-      {showForm && (
-        <Box className="mb-6">
-          <ChiefComplaintForm
-            initialData={selectedComplaint || {}}
-            onSubmit={handleSubmit}
-            medicalRecords={[{ id: 1, patient: { name: 'John Doe' } }]} // Mock records
-          />
-        </Box>
+    <div className="w-full">
+      {error && (
+        <div className="alert alert-error mb-4">
+          {error}
+        </div>
       )}
-
-      <ChiefComplaintList
-        complaints={complaints}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    </Box>
+      {loading ? (
+        <div className="loading-spinner mx-auto" />
+      ) : (
+        <div className="table">
+          <DataGrid
+            rows={complaints}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 20, 50]}
+            className="w-full"
+            autoHeight
+            disableSelectionOnClick
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

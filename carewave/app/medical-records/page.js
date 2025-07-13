@@ -1,93 +1,84 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import MedicalRecordForm from '../components/medical-records/MedicalRecordForm';
-import MedicalRecordList from '../components/medical-records/MedicalRecordList';
-import MedicalRecordSummary from '../components/medical-records/MedicalRecordSummary';
+'use client';
+import React from 'react';
+import { useState, useEffect } from 'react';
+import medicalRecordsService from '@/services/medicalRecordsService';
+import MedicalRecordList from '@/components/medical-records/MedicalRecordList';
+import MedicalRecordFilter from '@/components/medical-records/MedicalRecordFilter';
+import MedicalRecordStats from '@/components/medical-records/MedicalRecordStats';
 
-const MedicalRecordsPage = () => {
+export default function MedicalRecordsPage() {
   const [records, setRecords] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [filters, setFilters] = useState({
+    patientId: '',
+    dateFrom: '',
+    dateTo: ''
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock fetch function - replace with actual API call
   useEffect(() => {
-    const fetchRecords = async () => {
-      // Simulate API call
-      const mockRecords = [
-        {
-          id: 1,
-          patient: { id: 1, name: 'John Doe' },
-          recordDate: '2025-07-01',
-          allergies: [{ id: 1, name: 'Penicillin', severity: 'Severe' }],
-          diagnoses: [{ id: 1, code: 'J45', description: 'Asthma', diagnosedAt: '2025-06-01' }],
-          vitalSigns: [{ id: 1, bloodPressure: '120/80', heartRate: 72, temperature: 36.6 }],
-        },
-      ];
-      setRecords(mockRecords);
-    };
     fetchRecords();
-  }, []);
+    fetchStats();
+  }, [filters]);
 
-  const handleSubmit = (formData) => {
-    // Simulate API call to save record
-    const newRecord = { ...formData, id: records.length + 1, patient: { id: formData.patientId, name: 'New Patient' } };
-    setRecords([...records, newRecord]);
-    setShowForm(false);
+  const fetchRecords = async () => {
+    try {
+      setLoading(true);
+      const data = await medicalRecordsService.getAllMedicalRecords(filters);
+      setRecords(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEdit = (record) => {
-    setSelectedRecord(record);
-    setShowForm(true);
+  const fetchStats = async () => {
+    try {
+      const data = await medicalRecordsService.getMedicalRecordStats(filters);
+      setStats(data);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleDelete = (id) => {
-    setRecords(records.filter((record) => record.id !== id));
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await medicalRecordsService.deleteMedicalRecord(id);
+      fetchRecords();
+      fetchStats();
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
-    <Box className="p-6 max-w-7xl mx-auto">
-      <Typography variant="h4" className="mb-6 text-hospital-gray-900">
-        Medical Records
-      </Typography>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Medical Records Overview</h1>
       
-      <Box className="mb-6">
-        <Button
-          variant="contained"
-          startIcon={<Plus />}
-          className="btn-primary"
-          onClick={() => {
-            setSelectedRecord(null);
-            setShowForm(true);
-          }}
-        >
-          Add New Record
-        </Button>
-      </Box>
-
-      {showForm && (
-        <Box className="mb-6">
-          <MedicalRecordForm
-            initialData={selectedRecord || {}}
-            onSubmit={handleSubmit}
-            patients={[{ id: 1, name: 'John Doe' }, { id: 2, name: 'Jane Smith' }]} // Mock patients
-          />
-        </Box>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
       )}
 
-      <MedicalRecordList
-        records={records}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-
-      {selectedRecord && (
-        <Box className="mt-6">
-          <MedicalRecordSummary record={selectedRecord} />
-        </Box>
+      <MedicalRecordFilter onFilterChange={handleFilterChange} />
+      
+      {stats && <MedicalRecordStats stats={stats} />}
+      
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <MedicalRecordList 
+          records={records} 
+          onDelete={handleDelete}
+        />
       )}
-    </Box>
+    </div>
   );
-};
-
-export default MedicalRecordsPage;
+}

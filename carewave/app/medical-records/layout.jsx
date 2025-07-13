@@ -1,10 +1,10 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Tabs, Tab, Box, Button, Drawer, Divider } from '@mui/material';
+import { Tabs, Tab, Box, Button, Drawer, Divider, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
-import MedicalRecordForm from '../components/medical-records/MedicalRecordForm';
-import MedicalRecordSummary from '../components/medical-records/MedicalRecordSummary';
+import MedicalRecordForm from '@/components/medical-records/MedicalRecordForm';
+import medicalRecordsService from '@/services/medicalRecordsService';
 
 const MedicalRecordsLayout = ({ children }) => {
   const router = useRouter();
@@ -15,7 +15,7 @@ const MedicalRecordsLayout = ({ children }) => {
     if (pathname.includes('/medical-records/vital-signs')) return 3;
     if (pathname.includes('/medical-records/chief-complaints')) return 4;
     if (pathname.includes('/medical-records/present-illnesses')) return 5;
-    if (pathname.includes('/medical-records/past-medical-conditions')) return 6;
+    if (pathname.includes('/medical-records/past-conditions')) return 6;
     if (pathname.includes('/medical-records/surgical-history')) return 7;
     if (pathname.includes('/medical-records/family-history')) return 8;
     if (pathname.includes('/medical-records/medication-history')) return 9;
@@ -37,7 +37,7 @@ const MedicalRecordsLayout = ({ children }) => {
       case 3: router.push('/medical-records/vital-signs'); break;
       case 4: router.push('/medical-records/chief-complaints'); break;
       case 5: router.push('/medical-records/present-illnesses'); break;
-      case 6: router.push('/medical-records/past-medical-conditions'); break;
+      case 6: router.push('/medical-records/past-conditions'); break;
       case 7: router.push('/medical-records/surgical-history'); break;
       case 8: router.push('/medical-records/family-history'); break;
       case 9: router.push('/medical-records/medication-history'); break;
@@ -53,9 +53,18 @@ const MedicalRecordsLayout = ({ children }) => {
     setDrawerOpen(true);
   };
 
-  const handleSubmit = (formData) => {
-    // Simulate API call to save record
-    setDrawerOpen(false);
+  const handleSubmit = async (data) => {
+    try {
+      if (selectedRecord) {
+        await medicalRecordsService.updateMedicalRecord(selectedRecord.id, data);
+      } else {
+        await medicalRecordsService.createMedicalRecord(data);
+      }
+      setDrawerOpen(false);
+      router.refresh();
+    } catch (error) {
+      console.error('Error submitting record:', error);
+    }
   };
 
   return (
@@ -164,17 +173,10 @@ const MedicalRecordsLayout = ({ children }) => {
               <MedicalRecordForm
                 initialData={selectedRecord || {}}
                 onSubmit={handleSubmit}
-                patients={[{ id: 1, name: 'John Doe' }, { id: 2, name: 'Jane Smith' }]}
               />
             </Box>
           </Drawer>
         </Box>
-
-        {selectedRecord && (
-          <Box sx={{ mt: 2 }}>
-            <MedicalRecordSummary record={selectedRecord} />
-          </Box>
-        )}
       </div>
     </div>
   );

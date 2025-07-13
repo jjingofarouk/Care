@@ -1,87 +1,86 @@
+'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import SocialHistoryForm from '../../components/medical-records/SocialHistoryForm';
-import SocialHistoryList from '../../components/medical-records/SocialHistoryList';
+import { DataGrid } from '@mui/x-data-grid';
+import { IconButton } from '@mui/material';
+import { Edit, Trash2 } from 'lucide-react';
+import medicalRecordsService from '@/services/medicalRecordsService';
 
 const SocialHistoryPage = () => {
   const [socialHistory, setSocialHistory] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedSocialHistory, setSelectedSocialHistory] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock fetch function - replace with actual API call
   useEffect(() => {
     const fetchSocialHistory = async () => {
-      // Simulate API call
-      const mockSocialHistory = [
-        {
-          id: 1,
-          medicalRecordId: 1,
-          smokingStatus: 'Non-smoker',
-          alcoholUse: 'Occasional',
-          occupation: 'Teacher',
-          maritalStatus: 'Married',
-          livingSituation: 'Lives with family',
-        },
-      ];
-      setSocialHistory(mockSocialHistory);
+      try {
+        setLoading(true);
+        const data = await medicalRecordsService.getSocialHistory();
+        setSocialHistory(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchSocialHistory();
   }, []);
 
-  const handleSubmit = (formData) => {
-    // Simulate API call to save social history
-    const newSocialHistory = { ...formData, id: socialHistory.length + 1 };
-    setSocialHistory([...socialHistory, newSocialHistory]);
-    setShowForm(false);
-    setSelectedSocialHistory(null);
+  const handleDelete = async (id) => {
+    try {
+      await medicalRecordsService.deleteSocialHistory(id);
+      setSocialHistory(socialHistory.filter(history => history.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleEdit = (socialHistory) => {
-    setSelectedSocialHistory(socialHistory);
-    setShowForm(true);
-  };
-
-  const handleDelete = (id) => {
-    setSocialHistory(socialHistory.filter((history) => history.id !== id));
-  };
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'smokingStatus', headerName: 'Smoking Status', width: 150 },
+    { field: 'alcoholUse', headerName: 'Alcohol Use', width: 150 },
+    { field: 'occupation', headerName: 'Occupation', width: 200 },
+    { field: 'maritalStatus', headerName: 'Marital Status', width: 150 },
+    { field: 'livingSituation', headerName: 'Living Situation', width: 200 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      renderCell: (params) => (
+        <div className="flex gap-2">
+          <IconButton onClick={() => console.log('Edit', params.row.id)} className="text-[var(--hospital-accent)]">
+            <Edit size={20} />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)} className="text-[var(--hospital-error)]">
+            <Trash2 size={20} />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Box className="p-6 max-w-7xl mx-auto">
-      <Typography variant="h4" className="mb-6 text-hospital-gray-900">
-        Social History
-      </Typography>
-      
-      <Box className="mb-6">
-        <Button
-          variant="contained"
-          startIcon={<Plus />}
-          className="btn-primary"
-          onClick={() => {
-            setSelectedSocialHistory(null);
-            setShowForm(true);
-          }}
-        >
-          Add New Social History
-        </Button>
-      </Box>
-
-      {showForm && (
-        <Box className="mb-6">
-          <SocialHistoryForm
-            initialData={selectedSocialHistory || {}}
-            onSubmit={handleSubmit}
-            medicalRecords={[{ id: 1, patient: { name: 'John Doe' } }]} // Mock records
-          />
-        </Box>
+    <div className="w-full">
+      {error && (
+        <div className="alert alert-error mb-4">
+          {error}
+        </div>
       )}
-
-      <SocialHistoryList
-        socialHistory={socialHistory}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    </Box>
+      {loading ? (
+        <div className="loading-spinner mx-auto" />
+      ) : (
+        <div className="table">
+          <DataGrid
+            rows={socialHistory}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 20, 50]}
+            className="w-full"
+            autoHeight
+            disableSelectionOnClick
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

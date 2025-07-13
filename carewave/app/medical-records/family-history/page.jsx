@@ -1,79 +1,85 @@
+'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import FamilyHistoryForm from '../../components/medical-records/FamilyHistoryForm';
-import FamilyHistoryList from '../../components/medical-records/FamilyHistoryList';
+import { DataGrid } from '@mui/x-data-grid';
+import { IconButton } from '@mui/material';
+import { Edit, Trash2 } from 'lucide-react';
+import medicalRecordsService from '@/services/medicalRecordsService';
 
 const FamilyHistoryPage = () => {
   const [familyHistory, setFamilyHistory] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedFamilyHistory, setSelectedFamilyHistory] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock fetch function - replace with actual API call
   useEffect(() => {
     const fetchFamilyHistory = async () => {
-      // Simulate API call
-      const mockFamilyHistory = [
-        { id: 1, medicalRecordId: 1, relative: 'Mother', condition: 'Diabetes', ageAtDiagnosis: 45, notes: 'Type 2' },
-      ];
-      setFamilyHistory(mockFamilyHistory);
+      try {
+        setLoading(true);
+        const data = await medicalRecordsService.getFamilyHistory();
+        setFamilyHistory(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchFamilyHistory();
   }, []);
 
-  const handleSubmit = (formData) => {
-    // Simulate API call to save family history
-    const newFamilyHistory = { ...formData, id: familyHistory.length + 1 };
-    setFamilyHistory([...familyHistory, newFamilyHistory]);
-    setShowForm(false);
-    setSelectedFamilyHistory(null);
+  const handleDelete = async (id) => {
+    try {
+      await medicalRecordsService.deleteFamilyHistory(id);
+      setFamilyHistory(familyHistory.filter(history => history.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleEdit = (familyHistory) => {
-    setSelectedFamilyHistory(familyHistory);
-    setShowForm(true);
-  };
-
-  const handleDelete = (id) => {
-    setFamilyHistory(familyHistory.filter((history) => history.id !== id));
-  };
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'relative', headerName: 'Relative', width: 150 },
+    { field: 'condition', headerName: 'Condition', width: 200 },
+    { field: 'ageAtDiagnosis', headerName: 'Age at Diagnosis', width: 150 },
+    { field: 'notes', headerName: 'Notes', width: 300 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      renderCell: (params) => (
+        <div className="flex gap-2">
+          <IconButton onClick={() => console.log('Edit', params.row.id)} className="text-[var(--hospital-accent)]">
+            <Edit size={20} />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)} className="text-[var(--hospital-error)]">
+            <Trash2 size={20} />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Box className="p-6 max-w-7xl mx-auto">
-      <Typography variant="h4" className="mb-6 text-hospital-gray-900">
-        Family History
-      </Typography>
-      
-      <Box className="mb-6">
-        <Button
-          variant="contained"
-          startIcon={<Plus />}
-          className="btn-primary"
-          onClick={() => {
-            setSelectedFamilyHistory(null);
-            setShowForm(true);
-          }}
-        >
-          Add New Family History
-        </Button>
-      </Box>
-
-      {showForm && (
-        <Box className="mb-6">
-          <FamilyHistoryForm
-            initialData={selectedFamilyHistory || {}}
-            onSubmit={handleSubmit}
-            medicalRecords={[{ id: 1, patient: { name: 'John Doe' } }]} // Mock records
-          />
-        </Box>
+    <div className="w-full">
+      {error && (
+        <div className="alert alert-error mb-4">
+          {error}
+        </div>
       )}
-
-      <FamilyHistoryList
-        familyHistory={familyHistory}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    </Box>
+      {loading ? (
+        <div className="loading-spinner mx-auto" />
+      ) : (
+        <div className="table">
+          <DataGrid
+            rows={familyHistory}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 20, 50]}
+            className="w-full"
+            autoHeight
+            disableSelectionOnClick
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

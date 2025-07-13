@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Chip } from '@mui/material';
-import { Calendar, User, Heart } from 'lucide-react';
+import { Calendar, User } from 'lucide-react';
 
 const MedicalRecordSummary = ({ record }) => {
   return (

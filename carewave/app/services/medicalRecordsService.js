@@ -1,96 +1,212 @@
-import { PrismaClient } from '@prisma/client';
+import axios from 'axios';
 
-const prisma = new PrismaClient();
+// Configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_ROUTES = {
+  MEDICAL_RECORDS: '/api/medical-records',
+  STATS: '/api/medical-records/stats',
+  RECENT: '/api/medical-records/recent',
+  BULK: '/api/medical-records/bulk'
+};
 
+// Create axios instance with default config
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor for logging
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Response Error:', error);
+    if (error.response) {
+      const { status, data } = error.response;
+      throw new Error(data?.error || `Server error: ${status}`);
+    } else if (error.request) {
+      throw new Error('No response from server. Please check your connection.');
+    } else {
+      throw new Error(error.message || 'An unexpected error occurred');
+    }
+  }
+);
+
+// Validation functions
+function validateMedicalRecordData(data) {
+  if (!data) throw new Error('No medical record data provided');
+  if (!data.patientId || !data.recordDate) {
+    throw new Error('Patient ID and record date are required');
+  }
+  const recordDate = new Date(data.recordDate);
+  if (isNaN(recordDate.getTime())) {
+    throw new Error('Invalid date format for record date');
+  }
+  return true;
+}
+
+function validateAllergyData(data) {
+  if (!data.medicalRecordId || !data.name || !data.severity) {
+    throw new Error('Medical record ID, name, and severity are required for allergy');
+  }
+  return true;
+}
+
+function validateDiagnosisData(data) {
+  if (!data.medicalRecordId || !data.code || !data.description || !data.diagnosedAt) {
+    throw new Error('Medical record ID, code, description, and diagnosed date are required for diagnosis');
+  }
+  if (isNaN(new Date(data.diagnosedAt).getTime())) {
+    throw new Error('Invalid date format for diagnosedAt');
+  }
+  return true;
+}
+
+function validateVitalSignData(data) {
+  if (!data.medicalRecordId || !data.recordedAt) {
+    throw new Error('Medical record ID and recorded date are required for vital sign');
+  }
+  if (isNaN(new Date(data.recordedAt).getTime())) {
+    throw new Error('Invalid date format for recordedAt');
+  }
+  return true;
+}
+
+function validateChiefComplaintData(data) {
+  if (!data.medicalRecordId || !data.description || !data.duration) {
+    throw new Error('Medical record ID, description, and duration are required for chief complaint');
+  }
+  return true;
+}
+
+function validatePresentIllnessData(data) {
+  if (!data.medicalRecordId || !data.narrative) {
+    throw new Error('Medical record ID and narrative are required for present illness');
+  }
+  return true;
+}
+
+function validatePastConditionData(data) {
+  if (!data.medicalRecordId || !data.condition) {
+    throw new Error('Medical record ID and condition are required for past condition');
+  }
+  if (data.diagnosisDate && isNaN(new Date(data.diagnosisDate).getTime())) {
+    throw new Error('Invalid date format for diagnosisDate');
+  }
+  return true;
+}
+
+function validateSurgicalHistoryData(data) {
+  if (!data.medicalRecordId || !data.procedure) {
+    throw new Error('Medical record ID and procedure are required for surgical history');
+  }
+  if (data.datePerformed && isNaN(new Date(data.datePerformed).getTime())) {
+    throw new Error('Invalid date format for datePerformed');
+  }
+  return true;
+}
+
+function validateFamilyHistoryData(data) {
+  if (!data.medicalRecordId || !data.relative || !data.condition) {
+    throw new Error('Medical record ID, relative, and condition are required for family history');
+  }
+  if (data.ageAtDiagnosis && isNaN(data.ageAtDiagnosis)) {
+    throw new Error('Invalid ageAtDiagnosis format');
+  }
+  return true;
+}
+
+function validateMedicationHistoryData(data) {
+  if (!data.medicalRecordId || !data.medicationName || !data.dosage || !data.frequency) {
+    throw new Error('Medical record ID, medication name, dosage, and frequency are required for medication history');
+  }
+  if (data.startDate && isNaN(new Date(data.startDate).getTime())) {
+    throw new Error('Invalid date format for startDate');
+  }
+  if (data.endDate && isNaN(new Date(data.endDate).getTime())) {
+    throw new Error('Invalid date format for endDate');
+  }
+  return true;
+}
+
+function validateSocialHistoryData(data) {
+  if (!data.medicalRecordId) {
+    throw new Error('Medical record ID is required for social history');
+  }
+  return true;
+}
+
+function validateReviewOfSystemsData(data) {
+  if (!data.medicalRecordId || !data.system || !data.findings) {
+    throw new Error('Medical record ID, system, and findings are required for review of systems');
+  }
+  return true;
+}
+
+function validateImmunizationData(data) {
+  if (!data.medicalRecordId || !data.vaccine || !data.dateGiven) {
+    throw new Error('Medical record ID, vaccine, and date given are required for immunization');
+  }
+  if (isNaN(new Date(data.dateGiven).getTime())) {
+    throw new Error('Invalid date format for dateGiven');
+  }
+  return true;
+}
+
+function validateTravelHistoryData(data) {
+  if (!data.medicalRecordId || !data.countryVisited) {
+    throw new Error('Medical record ID and country visited are required for travel history');
+  }
+  if (data.dateFrom && isNaN(new Date(data.dateFrom).getTime())) {
+    throw new Error('Invalid date format for dateFrom');
+  }
+  if (data.dateTo && isNaN(new Date(data.dateTo).getTime())) {
+    throw new Error('Invalid date format for dateTo');
+  }
+  return true;
+}
+
+// Medical record service functions
 export async function getAllMedicalRecords(filters = {}) {
   try {
-    const medicalRecords = await prisma.medicalRecord.findMany({
-      where: {
-        ...(filters.patientId && { patientId: filters.patientId }),
-        ...(filters.dateFrom && filters.dateTo && {
-          recordDate: {
-            gte: new Date(filters.dateFrom),
-            lte: new Date(filters.dateTo),
-          },
-        }),
-      },
-      include: {
-        patient: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
-        },
-        allergies: true,
-        diagnoses: true,
-        vitalSigns: true,
-        chiefComplaint: true,
-        presentIllness: true,
-        pastConditions: true,
-        surgicalHistory: true,
-        familyHistory: true,
-        medicationHistory: true,
-        socialHistory: true,
-        reviewOfSystems: true,
-        immunizations: true,
-        travelHistory: true
-      },
-      orderBy: { recordDate: 'desc' }
-    });
+    const params = new URLSearchParams();
+    if (filters.patientId) params.append('patientId', filters.patientId);
+    if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
+    if (filters.dateTo) params.append('dateTo', filters.dateTo);
+    if (filters.resource) params.append('resource', filters.resource);
 
-    return medicalRecords.map(record => ({
-      ...record,
-      patient: record.patient ? {
-        ...record.patient,
-        name: `${record.patient.firstName} ${record.patient.lastName}`
-      } : null
-    }));
+    const response = await apiClient.get(`${API_ROUTES.MEDICAL_RECORDS}?${params.toString()}`);
+    if (!Array.isArray(response.data)) {
+      throw new Error('Invalid response format: expected array');
+    }
+    return response.data;
   } catch (error) {
     console.error('Error fetching medical records:', error);
     throw error;
   }
 }
 
-export async function getMedicalRecordById(id) {
+export async function getMedicalRecordById(id, resource = '') {
   try {
-    const medicalRecord = await prisma.medicalRecord.findUnique({
-      where: { id },
-      include: {
-        patient: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
-        },
-        allergies: true,
-        diagnoses: true,
-        vitalSigns: true,
-        chiefComplaint: true,
-        presentIllness: true,
-        pastConditions: true,
-        surgicalHistory: true,
-        familyHistory: true,
-        medicationHistory: true,
-        socialHistory: true,
-        reviewOfSystems: true,
-        immunizations: true,
-        travelHistory: true
-      }
-    });
-
-    if (!medicalRecord) {
-      throw new Error('Medical record not found');
-    }
-
-    return {
-      ...medicalRecord,
-      patient: medicalRecord.patient ? {
-        ...medicalRecord.patient,
-        name: `${medicalRecord.patient.firstName} ${medicalRecord.patient.lastName}`
-      } : null
-    };
+    if (!id) throw new Error('Medical record ID is required');
+    const params = resource ? `?resource=${resource}` : '';
+    const response = await apiClient.get(`${API_ROUTES.MEDICAL_RECORDS}/${id}${params}`);
+    if (!response.data) throw new Error('Medical record not found');
+    return response.data;
   } catch (error) {
     console.error('Error fetching medical record:', error);
     throw error;
@@ -99,29 +215,13 @@ export async function getMedicalRecordById(id) {
 
 export async function createMedicalRecord(data) {
   try {
-    const medicalRecord = await prisma.medicalRecord.create({
-      data: {
-        patientId: data.patientId,
-        recordDate: new Date(data.recordDate),
-      },
-      include: {
-        patient: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
-        }
-      }
+    validateMedicalRecordData(data);
+    const response = await apiClient.post(API_ROUTES.MEDICAL_RECORDS, {
+      resource: 'medicalRecord',
+      ...data
     });
-
-    return {
-      ...medicalRecord,
-      patient: medicalRecord.patient ? {
-        ...medicalRecord.patient,
-        name: `${medicalRecord.patient.firstName} ${medicalRecord.patient.lastName}`
-      } : null
-    };
+    if (!response.data) throw new Error('Failed to create medical record: no response data');
+    return response.data;
   } catch (error) {
     console.error('Error creating medical record:', error);
     throw error;
@@ -130,29 +230,14 @@ export async function createMedicalRecord(data) {
 
 export async function updateMedicalRecord(id, data) {
   try {
-    const medicalRecord = await prisma.medicalRecord.update({
-      where: { id },
-      data: {
-        recordDate: new Date(data.recordDate)
-      },
-      include: {
-        patient: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
-        }
-      }
+    if (!id) throw new Error('Medical record ID is required');
+    validateMedicalRecordData(data);
+    const response = await apiClient.put(`${API_ROUTES.MEDICAL_RECORDS}/${id}`, {
+      resource: 'medicalRecord',
+      ...data
     });
-
-    return {
-      ...medicalRecord,
-      patient: medicalRecord.patient ? {
-        ...medicalRecord.patient,
-        name: `${medicalRecord.patient.firstName} ${medicalRecord.patient.lastName}`
-      } : null
-    };
+    if (!response.data) throw new Error('Failed to update medical record: no response data');
+    return response.data;
   } catch (error) {
     console.error('Error updating medical record:', error);
     throw error;
@@ -161,1010 +246,161 @@ export async function updateMedicalRecord(id, data) {
 
 export async function deleteMedicalRecord(id) {
   try {
-    return await prisma.medicalRecord.delete({
-      where: { id }
-    });
+    if (!id) throw new Error('Medical record ID is required');
+    const response = await apiClient.delete(`${API_ROUTES.MEDICAL_RECORDS}/${id}`);
+    return response.data;
   } catch (error) {
     console.error('Error deleting medical record:', error);
     throw error;
   }
 }
 
-export async function getAllergies(patientId) {
-  try {
-    return await prisma.allergy.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching allergies:', error);
-    throw error;
-  }
-}
+// Resource-specific functions
+const resourceTypes = [
+  { name: 'allergy', validator: validateAllergyData },
+  { name: 'diagnosis', validator: validateDiagnosisData },
+  { name: 'vitalSign', validator: validateVitalSignData },
+  { name: 'chiefComplaint', validator: validateChiefComplaintData },
+  { name: 'presentIllness', validator: validatePresentIllnessData },
+  { name: 'pastCondition', validator: validatePastConditionData },
+  { name: 'surgicalHistory', validator: validateSurgicalHistoryData },
+  { name: 'familyHistory', validator: validateFamilyHistoryData },
+  { name: 'medicationHistory', validator: validateMedicationHistoryData },
+  { name: 'socialHistory', validator: validateSocialHistoryData },
+  { name: 'reviewOfSystems', validator: validateReviewOfSystemsData },
+  { name: 'immunization', validator: validateImmunizationData },
+  { name: 'travelHistory', validator: validateTravelHistoryData }
+];
 
-export async function getAllergyById(id) {
-  try {
-    const allergy = await prisma.allergy.findUnique({
-      where: { id }
-    });
-    if (!allergy) {
-      throw new Error('Allergy not found');
+resourceTypes.forEach(({ name, validator }) => {
+  // Get all resources for patient
+  exports[`get${name.charAt(0).toUpperCase() + name.slice(1)}s`] = async (patientId) => {
+    try {
+      if (!patientId) throw new Error('Patient ID is required');
+      const response = await apiClient.get(API_ROUTES.MEDICAL_RECORDS, {
+        params: { patientId, resource: name + 's' }
+      });
+      if (!Array.isArray(response.data)) {
+        throw new Error(`Invalid response format for ${name}s: expected array`);
+      }
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching ${name}s:`, error);
+      throw error;
     }
-    return allergy;
-  } catch (error) {
-    console.error('Error fetching allergy:', error);
-    throw error;
-  }
-}
+  };
 
-export async function createAllergy(data) {
-  try {
-    return await prisma.allergy.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        name: data.name,
-        severity: data.severity
-      }
-    });
-  } catch (error) {
-    console.error('Error creating allergy:', error);
-    throw error;
-  }
-}
-
-export async function updateAllergy(id, data) {
-  try {
-    return await prisma.allergy.update({
-      where: { id },
-      data: {
-        name: data.name,
-        severity: data.severity
-      }
-    });
-  } catch (error) {
-    console.error('Error updating allergy:', error);
-    throw error;
-  }
-}
-
-export async function deleteAllergy(id) {
-  try {
-    return await prisma.allergy.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting allergy:', error);
-    throw error;
-  }
-}
-
-export async function getDiagnoses(patientId) {
-  try {
-    return await prisma.diagnosis.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { diagnosedAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching diagnoses:', error);
-    throw error;
-  }
-}
-
-export async function getDiagnosisById(id) {
-  try {
-    const diagnosis = await prisma.diagnosis.findUnique({
-      where: { id }
-    });
-    if (!diagnosis) {
-      throw new Error('Diagnosis not found');
+  // Get resource by ID
+  exports[`get${name.charAt(0).toUpperCase() + name.slice(1)}ById`] = async (id) => {
+    try {
+      if (!id) throw new Error(`${name} ID is required`);
+      const response = await apiClient.get(`${API_ROUTES.MEDICAL_RECORDS}/${id}?resource=${name}`);
+      if (!response.data) throw new Error(`${name} not found`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching ${name}:`, error);
+      throw error;
     }
-    return diagnosis;
-  } catch (error) {
-    console.error('Error fetching diagnosis:', error);
-    throw error;
-  }
-}
+  };
 
-export async function createDiagnosis(data) {
-  try {
-    return await prisma.diagnosis.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        code: data.code,
-        description: data.description,
-        diagnosedAt: new Date(data.diagnosedAt)
-      }
-    });
-  } catch (error) {
-    console.error('Error creating diagnosis:', error);
-    throw error;
-  }
-}
-
-export async function updateDiagnosis(id, data) {
-  try {
-    return await prisma.diagnosis.update({
-      where: { id },
-      data: {
-        code: data.code,
-        description: data.description,
-        diagnosedAt: new Date(data.diagnosedAt)
-      }
-    });
-  } catch (error) {
-    console.error('Error updating diagnosis:', error);
-    throw error;
-  }
-}
-
-export async function deleteDiagnosis(id) {
-  try {
-    return await prisma.diagnosis.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting diagnosis:', error);
-    throw error;
-  }
-}
-
-export async function getVitalSigns(patientId) {
-  try {
-    return await prisma.vitalSign.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { recordedAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching vital signs:', error);
-    throw error;
-  }
-}
-
-export async function getVitalSignById(id) {
-  try {
-    const vitalSign = await prisma.vitalSign.findUnique({
-      where: { id }
-    });
-    if (!vitalSign) {
-      throw new Error('Vital sign not found');
+  // Create resource
+  exports[`create${name.charAt(0).toUpperCase() + name.slice(1)}`] = async (data) => {
+    try {
+      validator(data);
+      const response = await apiClient.post(API_ROUTES.MEDICAL_RECORDS, {
+        resource: name,
+        ...data
+      });
+      if (!response.data) throw new Error(`Failed to create ${name}: no response data`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error creating ${name}:`, error);
+      throw error;
     }
-    return vitalSign;
-  } catch (error) {
-    console.error('Error fetching vital sign:', error);
-    throw error;
-  }
-}
+  };
 
-export async function createVitalSign(data) {
-  try {
-    return await prisma.vitalSign.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        bloodPressure: data.bloodPressure,
-        heartRate: data.heartRate,
-        temperature: data.temperature,
-        respiratoryRate: data.respiratoryRate,
-        oxygenSaturation: data.oxygenSaturation,
-        recordedAt: new Date(data.recordedAt)
-      }
-    });
-  } catch (error) {
-    console.error('Error creating vital sign:', error);
-    throw error;
-  }
-}
-
-export async function updateVitalSign(id, data) {
-  try {
-    return await prisma.vitalSign.update({
-      where: { id },
-      data: {
-        bloodPressure: data.bloodPressure,
-        heartRate: data.heartRate,
-        temperature: data.temperature,
-        respiratoryRate: data.respiratoryRate,
-        oxygenSaturation: data.oxygenSaturation,
-        recordedAt: new Date(data.recordedAt)
-      }
-    });
-  } catch (error) {
-    console.error('Error updating vital sign:', error);
-    throw error;
-  }
-}
-
-export async function deleteVitalSign(id) {
-  try {
-    return await prisma.vitalSign.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting vital sign:', error);
-    throw error;
-  }
-}
-
-export async function getChiefComplaints(patientId) {
-  try {
-    return await prisma.chiefComplaint.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching chief complaints:', error);
-    throw error;
-  }
-}
-
-export async function getChiefComplaintById(id) {
-  try {
-    const chiefComplaint = await prisma.chiefComplaint.findUnique({
-      where: { id }
-    });
-    if (!chiefComplaint) {
-      throw new Error('Chief complaint not found');
+  // Update resource
+  exports[`update${name.charAt(0).toUpperCase() + name.slice(1)}`] = async (id, data) => {
+    try {
+      if (!id) throw new Error(`${name} ID is required`);
+      validator(data);
+      const response = await apiClient.put(`${API_ROUTES.MEDICAL_RECORDS}/${id}`, {
+        resource: name,
+        ...data
+      });
+      if (!response.data) throw new Error(`Failed to update ${name}: no response data`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating ${name}:`, error);
+      throw error;
     }
-    return chiefComplaint;
-  } catch (error) {
-    console.error('Error fetching chief complaint:', error);
-    throw error;
-  }
-}
+  };
 
-export async function createChiefComplaint(data) {
-  try {
-    return await prisma.chiefComplaint.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        description: data.description,
-        duration: data.duration,
-        onset: data.onset
-      }
-    });
-  } catch (error) {
-    console.error('Error creating chief complaint:', error);
-    throw error;
-  }
-}
-
-export async function updateChiefComplaint(id, data) {
-  try {
-    return await prisma.chiefComplaint.update({
-      where: { id },
-      data: {
-        description: data.description,
-        duration: data.duration,
-        onset: data.onset
-      }
-    });
-  } catch (error) {
-    console.error('Error updating chief complaint:', error);
-    throw error;
-  }
-}
-
-export async function deleteChiefComplaint(id) {
-  try {
-    return await prisma.chiefComplaint.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting chief complaint:', error);
-    throw error;
-  }
-}
-
-export async function getPresentIllnesses(patientId) {
-  try {
-    return await prisma.presentIllness.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching present illnesses:', error);
-    throw error;
-  }
-}
-
-export async function getPresentIllnessById(id) {
-  try {
-    const presentIllness = await prisma.presentIllness.findUnique({
-      where: { id }
-    });
-    if (!presentIllness) {
-      throw new Error('Present illness not found');
+  // Delete resource
+  exports[`delete${name.charAt(0).toUpperCase() + name.slice(1)}`] = async (id) => {
+    try {
+      if (!id) throw new Error(`${name} ID is required`);
+      const response = await apiClient.delete(`${API_ROUTES.MEDICAL_RECORDS}/${id}?resource=${name}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting ${name}:`, error);
+      throw error;
     }
-    return presentIllness;
-  } catch (error) {
-    console.error('Error fetching present illness:', error);
-    throw error;
-  }
-}
-
-export async function createPresentIllness(data) {
-  try {
-    return await prisma.presentIllness.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        narrative: data.narrative,
-        severity: data.severity,
-        progress: data.progress,
-        associatedSymptoms: data.associatedSymptoms
-      }
-    });
-  } catch (error) {
-    console.error('Error creating present illness:', error);
-    throw error;
-  }
-}
-
-export async function updatePresentIllness(id, data) {
-  try {
-    return await prisma.presentIllness.update({
-      where: { id },
-      data: {
-        narrative: data.narrative,
-        severity: data.severity,
-        progress: data.progress,
-        associatedSymptoms: data.associatedSymptoms
-      }
-    });
-  } catch (error) {
-    console.error('Error updating present illness:', error);
-    throw error;
-  }
-}
-
-export async function deletePresentIllness(id) {
-  try {
-    return await prisma.presentIllness.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting present illness:', error);
-    throw error;
-  }
-}
-
-export async function getPastConditions(patientId) {
-  try {
-    return await prisma.pastMedicalCondition.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching past conditions:', error);
-    throw error;
-  }
-}
-
-export async function getPastConditionById(id) {
-  try {
-    const pastCondition = await prisma.pastMedicalCondition.findUnique({
-      where: { id }
-    });
-    if (!pastCondition) {
-      throw new Error('Past condition not found');
-    }
-    return pastCondition;
-  } catch (error) {
-    console.error('Error fetching past condition:', error);
-    throw error;
-  }
-}
-
-export async function createPastCondition(data) {
-  try {
-    return await prisma.pastMedicalCondition.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        condition: data.condition,
-        diagnosisDate: data.diagnosisDate ? new Date(data.diagnosisDate) : null,
-        notes: data.notes
-      }
-    });
-  } catch (error) {
-    console.error('Error creating past condition:', error);
-    throw error;
-  }
-}
-
-export async function updatePastCondition(id, data) {
-  try {
-    return await prisma.pastMedicalCondition.update({
-      where: { id },
-      data: {
-        condition: data.condition,
-        diagnosisDate: data.diagnosisDate ? new Date(data.diagnosisDate) : null,
-        notes: data.notes
-      }
-    });
-  } catch (error) {
-    console.error('Error updating past condition:', error);
-    throw error;
-  }
-}
-
-export async function deletePastCondition(id) {
-  try {
-    return await prisma.pastMedicalCondition.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting past condition:', error);
-    throw error;
-  }
-}
-
-export async function getSurgicalHistory(patientId) {
-  try {
-    return await prisma.surgicalHistory.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { datePerformed: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching surgical history:', error);
-    throw error;
-  }
-}
-
-export async function getSurgicalHistoryById(id) {
-  try {
-    const surgicalHistory = await prisma.surgicalHistory.findUnique({
-      where: { id }
-    });
-    if (!surgicalHistory) {
-      throw new Error('Surgical history not found');
-    }
-    return surgicalHistory;
-  } catch (error) {
-    console.error('Error fetching surgical history:', error);
-    throw error;
-  }
-}
-
-export async function createSurgicalHistory(data) {
-  try {
-    return await prisma.surgicalHistory.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        procedure: data.procedure,
-        datePerformed: data.datePerformed ? new Date(data.datePerformed) : null,
-        outcome: data.outcome,
-        notes: data.notes
-      }
-    });
-  } catch (error) {
-    console.error('Error creating surgical history:', error);
-    throw error;
-  }
-}
-
-export async function updateSurgicalHistory(id, data) {
-  try {
-    return await prisma.surgicalHistory.update({
-      where: { id },
-      data: {
-        procedure: data.procedure,
-        datePerformed: data.datePerformed ? new Date(data.datePerformed) : null,
-        outcome: data.outcome,
-        notes: data.notes
-      }
-    });
-  } catch (error) {
-    console.error('Error updating surgical history:', error);
-    throw error;
-  }
-}
-
-export async function deleteSurgicalHistory(id) {
-  try {
-    return await prisma.surgicalHistory.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting surgical history:', error);
-    throw error;
-  }
-}
-
-export async function getFamilyHistory(patientId) {
-  try {
-    return await prisma.familyHistory.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching family history:', error);
-    throw error;
-  }
-}
-
-export async function getFamilyHistoryById(id) {
-  try {
-    const familyHistory = await prisma.familyHistory.findUnique({
-      where: { id }
-    });
-    if (!familyHistory) {
-      throw new Error('Family history not found');
-    }
-    return familyHistory;
-  } catch (error) {
-    console.error('Error fetching family history:', error);
-    throw error;
-  }
-}
-
-export async function createFamilyHistory(data) {
-  try {
-    return await prisma.familyHistory.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        relative: data.relative,
-        condition: data.condition,
-        ageAtDiagnosis: data.ageAtDiagnosis,
-        notes: data.notes
-      }
-    });
-  } catch (error) {
-    console.error('Error creating family history:', error);
-    throw error;
-  }
-}
-
-export async function updateFamilyHistory(id, data) {
-  try {
-    return await prisma.familyHistory.update({
-      where: { id },
-      data: {
-        relative: data.relative,
-        condition: data.condition,
-        ageAtDiagnosis: data.ageAtDiagnosis,
-        notes: data.notes
-      }
-    });
-  } catch (error) {
-    console.error('Error updating family history:', error);
-    throw error;
-  }
-}
-
-export async function deleteFamilyHistory(id) {
-  try {
-    return await prisma.familyHistory.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting family history:', error);
-    throw error;
-  }
-}
-
-export async function getMedicationHistory(patientId) {
-  try {
-    return await prisma.medicationHistory.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching medication history:', error);
-    throw error;
-  }
-}
-
-export async function getMedicationHistoryById(id) {
-  try {
-    const medicationHistory = await prisma.medicationHistory.findUnique({
-      where: { id }
-    });
-    if (!medicationHistory) {
-      throw new Error('Medication history not found');
-    }
-    return medicationHistory;
-  } catch (error) {
-    console.error('Error fetching medication history:', error);
-    throw error;
-  }
-}
-
-export async function createMedicationHistory(data) {
-  try {
-    return await prisma.medicationHistory.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        medicationName: data.medicationName,
-        dosage: data.dosage,
-        frequency: data.frequency,
-        startDate: data.startDate ? new Date(data.startDate) : null,
-        endDate: data.endDate ? new Date(data.endDate) : null,
-        isCurrent: data.isCurrent
-      }
-    });
-  } catch (error) {
-    console.error('Error creating medication history:', error);
-    throw error;
-  }
-}
-
-export async function updateMedicationHistory(id, data) {
-  try {
-    return await prisma.medicationHistory.update({
-      where: { id },
-      data: {
-        medicationName: data.medicationName,
-        dosage: data.dosage,
-        frequency: data.frequency,
-        startDate: data.startDate ? new Date(data.startDate) : null,
-        endDate: data.endDate ? new Date(data.endDate) : null,
-        isCurrent: data.isCurrent
-      }
-    });
-  } catch (error) {
-    console.error('Error updating medication history:', error);
-    throw error;
-  }
-}
-
-export async function deleteMedicationHistory(id) {
-  try {
-    return await prisma.medicationHistory.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting medication history:', error);
-    throw error;
-  }
-}
-
-export async function getSocialHistory(patientId) {
-  try {
-    return await prisma.socialHistory.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching social history:', error);
-    throw error;
-  }
-}
-
-export async function getSocialHistoryById(id) {
-  try {
-    const socialHistory = await prisma.socialHistory.findUnique({
-      where: { id }
-    });
-    if (!socialHistory) {
-      throw new Error('Social history not found');
-    }
-    return socialHistory;
-  } catch (error) {
-    console.error('Error fetching social history:', error);
-    throw error;
-  }
-}
-
-export async function createSocialHistory(data) {
-  try {
-    return await prisma.socialHistory.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        smokingStatus: data.smokingStatus,
-        alcoholUse: data.alcoholUse,
-        occupation: data.occupation,
-        maritalStatus: data.maritalStatus,
-        livingSituation: data.livingSituation
-      }
-    });
-  } catch (error) {
-    console.error('Error creating social history:', error);
-    throw error;
-  }
-}
-
-export async function updateSocialHistory(id, data) {
-  try {
-    return await prisma.socialHistory.update({
-      where: { id },
-      data: {
-        smokingStatus: data.smokingStatus,
-        alcoholUse: data.alcoholUse,
-        occupation: data.occupation,
-        maritalStatus: data.maritalStatus,
-        livingSituation: data.livingSituation
-      }
-    });
-  } catch (error) {
-    console.error('Error updating social history:', error);
-    throw error;
-  }
-}
-
-export async function deleteSocialHistory(id) {
-  try {
-    return await prisma.socialHistory.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting social history:', error);
-    throw error;
-  }
-}
-
-export async function getReviewOfSystems(patientId) {
-  try {
-    return await prisma.reviewOfSystems.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching review of systems:', error);
-    throw error;
-  }
-}
-
-export async function getReviewOfSystemsById(id) {
-  try {
-    const reviewOfSystems = await prisma.reviewOfSystems.findUnique({
-      where: { id }
-    });
-    if (!reviewOfSystems) {
-      throw new Error('Review of systems not found');
-    }
-    return reviewOfSystems;
-  } catch (error) {
-    console.error('Error fetching review of systems:', error);
-    throw error;
-  }
-}
-
-export async function createReviewOfSystems(data) {
-  try {
-    return await prisma.reviewOfSystems.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        system: data.system,
-        findings: data.findings
-      }
-    });
-  } catch (error) {
-    console.error('Error creating review of systems:', error);
-    throw error;
-  }
-}
-
-export async function updateReviewOfSystems(id, data) {
-  try {
-    return await prisma.reviewOfSystems.update({
-      where: { id },
-      data: {
-        system: data.system,
-        findings: data.findings
-      }
-    });
-  } catch (error) {
-    console.error('Error updating review of systems:', error);
-    throw error;
-  }
-}
-
-export async function deleteReviewOfSystems(id) {
-  try {
-    return await prisma.reviewOfSystems.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting review of systems:', error);
-    throw error;
-  }
-}
-
-export async function getImmunizations(patientId) {
-  try {
-    return await prisma.immunization.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { dateGiven: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching immunizations:', error);
-    throw error;
-  }
-}
-
-export async function getImmunizationById(id) {
-  try {
-    const immunization = await prisma.immunization.findUnique({
-      where: { id }
-    });
-    if (!immunization) {
-      throw new Error('Immunization not found');
-    }
-    return immunization;
-  } catch (error) {
-    console.error('Error fetching immunization:', error);
-    throw error;
-  }
-}
-
-export async function createImmunization(data) {
-  try {
-    return await prisma.immunization.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        vaccine: data.vaccine,
-        dateGiven: new Date(data.dateGiven),
-        administeredBy: data.administeredBy,
-        notes: data.notes
-      }
-    });
-  } catch (error) {
-    console.error('Error creating immunization:', error);
-    throw error;
-  }
-}
-
-export async function updateImmunization(id, data) {
-  try {
-    return await prisma.immunization.update({
-      where: { id },
-      data: {
-        vaccine: data.vaccine,
-        dateGiven: new Date(data.dateGiven),
-        administeredBy: data.administeredBy,
-        notes: data.notes
-      }
-    });
-  } catch (error) {
-    console.error('Error updating immunization:', error);
-    throw error;
-  }
-}
-
-export async function deleteImmunization(id) {
-  try {
-    return await prisma.immunization.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting immunization:', error);
-    throw error;
-  }
-}
-
-export async function getTravelHistory(patientId) {
-  try {
-    return await prisma.travelHistory.findMany({
-      where: { medicalRecord: { patientId } },
-      orderBy: { dateFrom: 'desc' }
-    });
-  } catch (error) {
-    console.error('Error fetching travel history:', error);
-    throw error;
-  }
-}
-
-export async function getTravelHistoryById(id) {
-  try {
-    const travelHistory = await prisma.travelHistory.findUnique({
-      where: { id }
-    });
-    if (!travelHistory) {
-      throw new Error('Travel history not found');
-    }
-    return travelHistory;
-  } catch (error) {
-    console.error('Error fetching travel history:', error);
-    throw error;
-  }
-}
-
-export async function createTravelHistory(data) {
-  try {
-    return await prisma.travelHistory.create({
-      data: {
-        medicalRecordId: data.medicalRecordId,
-        countryVisited: data.countryVisited,
-        dateFrom: data.dateFrom ? new Date(data.dateFrom) : null,
-        dateTo: data.dateTo ? new Date(data.dateTo) : null,
-        purpose: data.purpose,
-        travelNotes: data.travelNotes
-      }
-    });
-  } catch (error) {
-    console.error('Error creating travel history:', error);
-    throw error;
-  }
-}
-
-export async function updateTravelHistory(id, data) {
-  try {
-    return await prisma.travelHistory.update({
-      where: { id },
-      data: {
-        countryVisited: data.countryVisited,
-        dateFrom: data.dateFrom ? new Date(data.dateFrom) : null,
-        dateTo: data.dateTo ? new Date(data.dateTo) : null,
-        purpose: data.purpose,
-        travelNotes: data.travelNotes
-      }
-    });
-  } catch (error) {
-    console.error('Error updating travel history:', error);
-    throw error;
-  }
-}
-
-export async function deleteTravelHistory(id) {
-  try {
-    return await prisma.travelHistory.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error deleting travel history:', error);
-    throw error;
-  }
-}
+  };
+});
 
 export async function bulkCreateMedicalRecords(records) {
   try {
-    const createdRecords = await prisma.$transaction(
-      records.map(record =>
-        prisma.medicalRecord.create({
-          data: {
-            patientId: record.patientId,
-            recordDate: new Date(record.recordDate),
-          },
-          include: {
-            patient: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true
-              }
-            }
-          }
-        })
-      )
-    );
-
-    return createdRecords.map(record => ({
-      ...record,
-      patient: record.patient ? {
-        ...record.patient,
-        name: `${record.patient.firstName} ${record.patient.lastName}`
-      } : null
-    }));
+    if (!Array.isArray(records) || records.length === 0) {
+      throw new Error('Records array is required');
+    }
+    records.forEach(validateMedicalRecordData);
+    
+    const response = await apiClient.post(API_ROUTES.BULK, records);
+    if (!response.data) throw new Error('Failed to bulk create medical records');
+    
+    return response.data;
   } catch (error) {
-    console.error('Error bulk creating medical records:', error);
+    console.error('Error in bulk create medical records:', error);
+    throw error;
+  }
+}
+
+export async function bulkDeleteMedicalRecords(ids) {
+  try {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      throw new Error('Medical record IDs array is required');
+    }
+    
+    const deletePromises = ids.map(id => deleteMedicalRecord(id));
+    const results = await Promise.allSettled(deletePromises);
+    
+    const successful = results.filter(result => result.status === 'fulfilled').length;
+    const failed = results.filter(result => result.status === 'rejected').length;
+    
+    return {
+      successful,
+      failed,
+      total: ids.length,
+      errors: results
+        .filter(result => result.status === 'rejected')
+        .map(result => result.reason.message)
+    };
+  } catch (error) {
+    console.error('Error in bulk delete medical records:', error);
     throw error;
   }
 }
 
 export async function getMedicalRecordStats(filters = {}) {
   try {
-    const where = {
-      ...(filters.patientId && { patientId: filters.patientId }),
-      ...(filters.dateFrom && filters.dateTo && {
-        recordDate: {
-          gte: new Date(filters.dateFrom),
-          lte: new Date(filters.dateTo),
-        },
-      }),
-    };
-
-    const [totalRecords, totalAllergies, totalDiagnoses, totalVitalSigns] = await Promise.all([
-      prisma.medicalRecord.count({ where }),
-      prisma.allergy.count({ where: { medicalRecord: where } }),
-      prisma.diagnosis.count({ where: { medicalRecord: where } }),
-      prisma.vitalSign.count({ where: { medicalRecord: where } }),
-    ]);
-
-    return {
-      totalRecords,
-      totalAllergies,
-      totalDiagnoses,
-      totalVitalSigns,
-      averageRecordsPerPatient: totalRecords > 0 ? totalRecords / await prisma.patient.count() : 0
-    };
+    const params = new URLSearchParams();
+    if (filters.patientId) params.append('patientId', filters.patientId);
+    if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
+    if (filters.dateTo) params.append('dateTo', filters.dateTo);
+    
+    const response = await apiClient.get(`${API_ROUTES.STATS}?${params.toString()}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching medical record stats:', error);
     throw error;
@@ -1173,112 +409,37 @@ export async function getMedicalRecordStats(filters = {}) {
 
 export async function getRecentMedicalRecords(limit = 10) {
   try {
-    const medicalRecords = await prisma.medicalRecord.findMany({
-      where: {
-        recordDate: {
-          gte: new Date(new Date().setMonth(new Date().getMonth() - 1))
-        }
-      },
-      include: {
-        patient: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
-        }
-      },
-      orderBy: { recordDate: 'desc' },
-      take: limit
-    });
-
-    return medicalRecords.map(record => ({
-      ...record,
-      patient: record.patient ? {
-        ...record.patient,
-        name: `${record.patient.firstName} ${record.patient.lastName}`
-      } : null
-    }));
+    const params = new URLSearchParams({ limit: limit.toString() });
+    const response = await apiClient.get(`${API_ROUTES.RECENT}?${params.toString()}`);
+    if (!Array.isArray(response.data)) {
+      throw new Error('Invalid response format: expected array');
+    }
+    return response.data;
   } catch (error) {
     console.error('Error fetching recent medical records:', error);
     throw error;
   }
 }
 
+// Export default service object
 const medicalRecordsService = {
   getAllMedicalRecords,
   getMedicalRecordById,
   createMedicalRecord,
   updateMedicalRecord,
   deleteMedicalRecord,
-  getAllergies,
-  getAllergyById,
-  createAllergy,
-  updateAllergy,
-  deleteAllergy,
-  getDiagnoses,
-  getDiagnosisById,
-  createDiagnosis,
-  updateDiagnosis,
-  deleteDiagnosis,
-  getVitalSigns,
-  getVitalSignById,
-  createVitalSign,
-  updateVitalSign,
-  deleteVitalSign,
-  getChiefComplaints,
-  getChiefComplaintById,
-  createChiefComplaint,
-  updateChiefComplaint,
-  deleteChiefComplaint,
-  getPresentIllnesses,
-  getPresentIllnessById,
-  createPresentIllness,
-  updatePresentIllness,
-  deletePresentIllness,
-  getPastConditions,
-  getPastConditionById,
-  createPastCondition,
-  updatePastCondition,
-  deletePastCondition,
-  getSurgicalHistory,
-  getSurgicalHistoryById,
-  createSurgicalHistory,
-  updateSurgicalHistory,
-  deleteSurgicalHistory,
-  getFamilyHistory,
-  getFamilyHistoryById,
-  createFamilyHistory,
-  updateFamilyHistory,
-  deleteFamilyHistory,
-  getMedicationHistory,
-  getMedicationHistoryById,
-  createMedicationHistory,
-  updateMedicationHistory,
-  deleteMedicationHistory,
-  getSocialHistory,
-  getSocialHistoryById,
-  createSocialHistory,
-  updateSocialHistory,
-  deleteSocialHistory,
-  getReviewOfSystems,
-  getReviewOfSystemsById,
-  createReviewOfSystems,
-  updateReviewOfSystems,
-  deleteReviewOfSystems,
-  getImmunizations,
-  getImmunizationById,
-  createImmunization,
-  updateImmunization,
-  deleteImmunization,
-  getTravelHistory,
-  getTravelHistoryById,
-  createTravelHistory,
-  updateTravelHistory,
-  deleteTravelHistory,
   bulkCreateMedicalRecords,
+  bulkDeleteMedicalRecords,
   getMedicalRecordStats,
-  getRecentMedicalRecords
+  getRecentMedicalRecords,
+  ...resourceTypes.reduce((acc, { name }) => ({
+    ...acc,
+    [`get${name.charAt(0).toUpperCase() + name.slice(1)}s`]: exports[`get${name.charAt(0).toUpperCase() + name.slice(1)}s`],
+    [`get${name.charAt(0).toUpperCase() + name.slice(1)}ById`]: exports[`get${name.charAt(0).toUpperCase() + name.slice(1)}ById`],
+    [`create${name.charAt(0).toUpperCase() + name.slice(1)}`]: exports[`create${name.charAt(0).toUpperCase() + name.slice(1)}`],
+    [`update${name.charAt(0).toUpperCase() + name.slice(1)}`]: exports[`update${name.charAt(0).toUpperCase() + name.slice(1)}`],
+    [`delete${name.charAt(0).toUpperCase() + name.slice(1)}`]: exports[`delete${name.charAt(0).toUpperCase() + name.slice(1)}`],
+  }), {})
 };
 
 export default medicalRecordsService;
