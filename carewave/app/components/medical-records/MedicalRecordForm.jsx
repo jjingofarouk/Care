@@ -1,323 +1,758 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, MenuItem, Select, InputLabel, FormControl, Box, Autocomplete, Typography } from '@mui/material';
-import { X, Save, Stethoscope } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import {
+  Box, Button, TextField, Select, MenuItem, FormControl, InputLabel,
+  Typography, Grid, Paper, IconButton, FormHelperText
+} from '@mui/material';
+import { Add, Delete } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { format } from 'date-fns';
 
-const MedicalRecordForm = ({ initialData, medicalRecord, token }) => {
+export default function MedicalRecordForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState(initialData || {});
-  const [resourceType, setResourceType] = useState(medicalRecord?.resource || 'medicalRecord');
+  const params = useParams();
+  const [formData, setFormData] = useState({
+    patientId: '',
+    recordDate: new Date(),
+    chiefComplaint: { description: '', duration: '', onset: '' },
+    presentIllness: { narrative: '', severity: '', progress: '', associatedSymptoms: '' },
+    pastConditions: [{ condition: '', diagnosisDate: null, notes: '' }],
+    surgicalHistory: [{ procedure: '', datePerformed: null, outcome: '', notes: '' }],
+    familyHistory: [{ relative: '', condition: '', ageAtDiagnosis: '', notes: '' }],
+    medicationHistory: [{ medicationName: '', dosage: '', frequency: '', startDate: null, endDate: null, isCurrent: false }],
+    socialHistory: { smokingStatus: '', alcoholUse: '', occupation: '', maritalStatus: '', livingSituation: '' },
+    reviewOfSystems: [{ system: '', findings: '' }],
+    immunizations: [{ vaccine: '', dateGiven: new Date(), administeredBy: '', notes: '' }],
+    travelHistory: [{ countryVisited: '', dateFrom: null, dateTo: null, purpose: '', travelNotes: '' }],
+    allergies: [{ name: '', severity: '' }],
+    diagnoses: [{ code: '', description: '', diagnosedAt: new Date() }],
+    vitalSigns: [{ bloodPressure: '', heartRate: '', temperature: '', respiratoryRate: '', oxygenSaturation: '', recordedAt: new Date() }],
+  });
   const [patients, setPatients] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchPatients() {
       try {
-        if (!token) throw new Error('No authentication token provided');
-
-        const [patientRes, doctorRes] = await Promise.all([
-          fetch('/api/medical-records?resource=patients', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('/api/medical-records?resource=doctors', { headers: { Authorization: `Bearer ${token}` } })
-        ]);
-
-        if (!patientRes.ok || !doctorRes.ok) throw new Error('Failed to fetch data');
-
-        const [patientData, doctorData] = await Promise.all([patientRes.json(), doctorRes.json()]);
-        setPatients(patientData);
-        setDoctors(doctorData);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError(err.message);
+        const response = await fetch('/api/patients');
+        const data = await response.json();
+        setPatients(data);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
       }
-    };
-    fetchData();
-  }, [token]);
+    }
+    fetchPatients();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (params.id) {
+      async function fetchMedicalRecord() {
+        try {
+          const response = await fetch(`/api/medical-records/${params.id}?include=chiefComplaint,presentIllness,pastConditions,surgicalHistory,familyHistory,medicationHistory,socialHistory,reviewOfSystems,immunizations,travelHistory,allergies,diagnoses,vitalSigns`);
+          const data = await response.json();
+          setFormData({
+            ...data,
+            recordDate: new Date(data.recordDate),
+            pastConditions: data.pastConditions.map(c => ({ ...c, diagnosisDate: c.diagnosisDate ? new Date(c.diagnosisDate) : null })),
+            surgicalHistory: data.surgicalHistory.map(s => ({ ...s, datePerformed: s.datePerformed ? new Date(s.datePerformed) : null })),
+            medicationHistory: data.medicationHistory.map(m => ({
+              ...m,
+              startDate: m.startDate ? new Date(m.startDate) : null,
+              endDate: m.endDate ? new Date(m.endDate) : null,
+            })),
+            immunizations: data.immunizations.map(i => ({ ...i, dateGiven: new Date(i.dateGiven) })),
+            travelHistory: data.travelHistory.map(t => ({
+              ...t,
+              dateFrom: t.dateFrom ? new Date(t.dateFrom) : null,
+              dateTo: t.dateTo ? new Date(t.dateTo) : null,
+            })),
+            diagnoses: data.diagnoses.map(d => ({ ...d, diagnosedAt: new Date(d.diagnosedAt) })),
+            vitalSigns: data.vitalSigns.map(v => ({ ...v, recordedAt: new Date(v.recordedAt) })),
+          });
+        } catch (error) {
+          console.error('Error fetching medical record:', error);
+        }
+      }
+      fetchMedicalRecord();
+    }
+  }, [params.id]);
+
+  const handleInputChange = (section, field, value, index = null) => {
+    if (index !== null) {
+      setFormData(prev => ({
+        ...prev,
+        [section]: prev[section].map((item, i) => i === index ? { ...item, [field]: value } : item),
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [section]: { ...prev[section], [field]: value },
+      }));
+    }
   };
 
-  const handleAutocompleteChange = (name, value) => {
-    setFormData({ ...formData, [name]: value ? value.id : '' });
+  const handleAddItem = (section) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: [...prev[section], section === 'immunizations' || section === 'diagnoses' || section === 'vitalSigns' ?
+        { ...prev[section][0], dateGiven: new Date(), diagnosedAt: new Date(), recordedAt: new Date() } :
+        { ...prev[section][0] }],
+    }));
+  };
+
+  const handleRemoveItem = (section, index) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: prev[section].filter((_, i) => i !== index),
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.patientId) newErrors.patientId = 'Patient is required';
+    if (!formData.recordDate) newErrors.recordDate = 'Record date is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    if (!validateForm()) return;
 
     try {
-      if (!token) throw new Error('No authentication token provided');
-
-      const method = medicalRecord?.id ? 'PUT' : 'POST';
-      const url = medicalRecord?.id ? `/api/medical-records/${medicalRecord.id}` : '/api/medical-records';
-      const body = medicalRecord?.id ? { id: medicalRecord.id, resource: resourceType, ...formData } : { resource: resourceType, ...formData };
-
+      const method = params.id ? 'PUT' : 'POST';
+      const url = params.id ? `/api/medical-records/${params.id}` : '/api/medical-records';
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(body)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          recordDate: format(formData.recordDate, 'yyyy-MM-dd'),
+          pastConditions: formData.pastConditions.map(c => ({
+            ...c,
+            diagnosisDate: c.diagnosisDate ? format(c.diagnosisDate, 'yyyy-MM-dd') : null,
+          })),
+          surgicalHistory: formData.surgicalHistory.map(s => ({
+            ...s,
+            datePerformed: s.datePerformed ? format(s.datePerformed, 'yyyy-MM-dd') : null,
+          })),
+          medicationHistory: formData.medicationHistory.map(m => ({
+            ...m,
+            startDate: m.startDate ? format(m.startDate, 'yyyy-MM-dd') : null,
+            endDate: m.endDate ? format(m.endDate, 'yyyy-MM-dd') : null,
+          })),
+          immunizations: formData.immunizations.map(i => ({
+            ...i,
+            dateGiven: format(i.dateGiven, 'yyyy-MM-dd'),
+          })),
+          travelHistory: formData.travelHistory.map(t => ({
+            ...t,
+            dateFrom: t.dateFrom ? format(t.dateFrom, 'yyyy-MM-dd') : null,
+            dateTo: t.dateTo ? format(t.dateTo, 'yyyy-MM-dd') : null,
+          })),
+          diagnoses: formData.diagnoses.map(d => ({
+            ...d,
+            diagnosedAt: format(d.diagnosedAt, 'yyyy-MM-dd'),
+          })),
+          vitalSigns: formData.vitalSigns.map(v => ({
+            ...v,
+            recordedAt: format(v.recordedAt, 'yyyy-MM-dd'),
+          })),
+        }),
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        router.push('/medical-records');
+      } else {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save record');
+        setErrors({ submit: errorData.error || 'Failed to save medical record' });
       }
-
-      router.push('/medical-records');
-    } catch (err) {
-      console.error('Error saving record:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      setErrors({ submit: 'An error occurred while saving the record' });
+      console.error('Error submitting form:', error);
     }
   };
 
-  const resourceFields = {
-    medicalRecord: (
-      <>
-        <FormControl fullWidth className="mb-4">
-          <Autocomplete
-            options={patients}
-            getOptionLabel={(option) => option.name || ''}
-            onChange={(e, value) => handleAutocompleteChange('patientId', value)}
-            value={patients.find(p => p.id === formData.patientId) || null}
-            renderInput={(params) => (
-              <TextField {...params} label="Patient" required className="input" />
-            )}
-          />
-        </FormControl>
-        <FormControl fullWidth className="mb-4">
-          <Autocomplete
-            options={doctors}
-            getOptionLabel={(option) => `Dr. ${option.name} (${option.department?.name || 'N/A'})`}
-            onChange={(e, value) => handleAutocompleteChange('doctorId', value)}
-            value={doctors.find(d => d.id === formData.doctorId) || null}
-            renderInput={(params) => (
-              <TextField {...params} label="Doctor" required className="input" InputProps={{ ...params.InputProps, startAdornment: <Stethoscope className="h-4 w-4 mr-2" /> }} />
-            )}
-          />
-        </FormControl>
-        <TextField
-          label="Record Date"
-          name="recordDate"
-          type="date"
-          value={formData.recordDate || ''}
-          onChange={handleChange}
-          fullWidth
-          className="input mb-4"
-          InputLabelProps={{ shrink: true }}
-          required
-        />
-      </>
-    ),
-    allergy: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Allergy Name" name="name" value={formData.name || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <FormControl fullWidth className="mb-4">
-          <InputLabel>Severity</InputLabel>
-          <Select name="severity" value={formData.severity || ''} onChange={handleChange} className="input" required>
-            <MenuItem value="mild">Mild</MenuItem>
-            <MenuItem value="moderate">Moderate</MenuItem>
-            <MenuItem value="severe">Severe</MenuItem>
-          </Select>
-        </FormControl>
-      </>
-    ),
-    diagnosis: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Code" name="code" value={formData.code || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Description" name="description" value={formData.description || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Diagnosed At" name="diagnosedAt" type="date" value={formData.diagnosedAt || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} required />
-      </>
-    ),
-    vitalSign: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Blood Pressure" name="bloodPressure" value={formData.bloodPressure || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Heart Rate" name="heartRate" type="number" value={formData.heartRate || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Temperature" name="temperature" type="number" value={formData.temperature || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Respiratory Rate" name="respiratoryRate" type="number" value={formData.respiratoryRate || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Oxygen Saturation" name="oxygenSaturation" type="number" value={formData.oxygenSaturation || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Recorded At" name="recordedAt" type="date" value={formData.recordedAt || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} required />
-      </>
-    ),
-    chiefComplaint: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Description" name="description" value={formData.description || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Duration" name="duration" value={formData.duration || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Onset" name="onset" value={formData.onset || ''} onChange={handleChange} fullWidth className="input mb-4" />
-      </>
-    ),
-    presentIllness: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Narrative" name="narrative" value={formData.narrative || ''} onChange={handleChange} fullWidth multiline rows={4} className="input mb-4" required />
-        <FormControl fullWidth className="mb-4">
-          <InputLabel>Severity</InputLabel>
-          <Select name="severity" value={formData.severity || ''} onChange={handleChange} className="input">
-            <MenuItem value="mild">Mild</MenuItem>
-            <MenuItem value="moderate">Moderate</MenuItem>
-            <MenuItem value="severe">Severe</MenuItem>
-          </Select>
-        </FormControl>
-        <TextField label="Progress" name="progress" value={formData.progress || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Associated Symptoms" name="associatedSymptoms" value={formData.associatedSymptoms || ''} onChange={handleChange} fullWidth className="input mb-4" />
-      </>
-    ),
-    pastCondition: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Condition" name="condition" value={formData.condition || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Diagnosis Date" name="diagnosisDate" type="date" value={formData.diagnosisDate || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} />
-        <TextField label="Notes" name="notes" value={formData.notes || ''} onChange={handleChange} fullWidth multiline rows={4} className="input mb-4" />
-      </>
-    ),
-    surgicalHistory: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Procedure" name="procedure" value={formData.procedure || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Date Performed" name="datePerformed" type="date" value={formData.datePerformed || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} />
-        <TextField label="Outcome" name="outcome" value={formData.outcome || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Notes" name="notes" value={formData.notes || ''} onChange={handleChange} fullWidth multiline rows={4} className="input mb-4" />
-      </>
-    ),
-    familyHistory: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Relative" name="relative" value={formData.relative || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Condition" name="condition" value={formData.condition || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Age at Diagnosis" name="ageAtDiagnosis" type="number" value={formData.ageAtDiagnosis || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Notes" name="notes" value={formData.notes || ''} onChange={handleChange} fullWidth multiline rows={4} className="input mb-4" />
-      </>
-    ),
-    medicationHistory: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Medication Name" name="medicationName" value={formData.medicationName || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Dosage" name="dosage" value={formData.dosage || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Frequency" name="frequency" value={formData.frequency || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Start Date" name="startDate" type="date" value={formData.startDate || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} />
-        <TextField label="End Date" name="endDate" type="date" value={formData.endDate || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} />
-        <FormControl fullWidth className="mb-4">
-          <InputLabel>Current</InputLabel>
-          <Select name="isCurrent" value={formData.isCurrent || false} onChange={handleChange} className="input">
-            <MenuItem value={true}>Yes</MenuItem>
-            <MenuItem value={false}>No</MenuItem>
-          </Select>
-        </FormControl>
-      </>
-    ),
-    socialHistory: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <FormControl fullWidth className="mb-4">
-          <InputLabel>Smoking Status</InputLabel>
-          <Select name="smokingStatus" value={formData.smokingStatus || ''} onChange={handleChange} className="input">
-            <MenuItem value="never">Never</MenuItem>
-            <MenuItem value="former">Former</MenuItem>
-            <MenuItem value="current">Current</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl fullWidth className="mb-4">
-          <InputLabel>Alcohol Use</InputLabel>
-          <Select name="alcoholUse" value={formData.alcoholUse || ''} onChange={handleChange} className="input">
-            <MenuItem value="none">None</MenuItem>
-            <MenuItem value="occasional">Occasional</MenuItem>
-            <MenuItem value="regular">Regular</MenuItem>
-          </Select>
-        </FormControl>
-        <TextField label="Occupation" name="occupation" value={formData.occupation || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <FormControl fullWidth className="mb-4">
-          <InputLabel>Marital Status</InputLabel>
-          <Select name="maritalStatus" value={formData.maritalStatus || ''} onChange={handleChange} className="input">
-            <MenuItem value="single">Single</MenuItem>
-            <MenuItem value="married">Married</MenuItem>
-            <MenuItem value="divorced">Divorced</MenuItem>
-            <MenuItem value="widowed">Widowed</MenuItem>
-          </Select>
-        </FormControl>
-        <TextField label="Living Situation" name="livingSituation" value={formData.livingSituation || ''} onChange={handleChange} fullWidth className="input mb-4" />
-      </>
-    ),
-    reviewOfSystems: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="System" name="system" value={formData.system || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Findings" name="findings" value={formData.findings || ''} onChange={handleChange} fullWidth multiline rows={4} className="input mb-4" required />
-      </>
-    ),
-    immunization: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Vaccine" name="vaccine" value={formData.vaccine || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Date Given" name="dateGiven" type="date" value={formData.dateGiven || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} required />
-        <TextField label="Administered By" name="administeredBy" value={formData.administeredBy || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Notes" name="notes" value={formData.notes || ''} onChange={handleChange} fullWidth multiline rows={4} className="input mb-4" />
-      </>
-    ),
-    travelHistory: (
-      <>
-        <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Country Visited" name="countryVisited" value={formData.countryVisited || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Date From" name="dateFrom" type="date" value={formData.dateFrom || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} />
-        <TextField label="Date To" name="dateTo" type="date" value={formData.dateTo || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} />
-        <TextField label="Purpose" name="purpose" value={formData.purpose || ''} onChange={handleChange} fullWidth className="input mb-4" />
-        <TextField label="Notes" name="travelNotes" value={formData.travelNotes || ''} onChange={handleChange} fullWidth multiline rows={4} className="input mb-4" />
-      </>
-    )
-  };
-
-  if (error && !patients.length && !doctors.length) {
-    return (
-      <Box className="card max-w-full mx-auto p-4">
-        <div className="alert alert-error mb-2">{error}</div>
-        <Button variant="outlined" onClick={() => router.refresh()} className="btn-secondary">Retry</Button>
-      </Box>
-    );
-  }
-
   return (
-    <Box className="card max-w-full mx-auto p-4">
-      <Typography variant="h5" className="card-title mb-4 font-bold">{medicalRecord?.id ? 'Edit Record' : 'New Record'}</Typography>
-      {error && <div className="alert alert-error mb-4">{error}</div>}
-      <Box component="form" onSubmit={handleSubmit} className="space-y-4">
-        <FormControl fullWidth className="mb-4">
-          <InputLabel>Record Type</InputLabel>
-          <Select value={resourceType} onChange={(e) => setResourceType(e.target.value)} className="input" required>
-            <MenuItem value="medicalRecord">Medical Record</MenuItem>
-            <MenuItem value="allergy">Allergy</MenuItem>
-            <MenuItem value="diagnosis">Diagnosis</MenuItem>
-            <MenuItem value="vitalSign">Vital Sign</MenuItem>
-            <MenuItem value="chiefComplaint">Chief Complaint</MenuItem>
-            <MenuItem value="presentIllness">Present Illness</MenuItem>
-            <MenuItem value="pastCondition">Past Condition</MenuItem>
-            <MenuItem value="surgicalHistory">Surgical History</MenuItem>
-            <MenuItem value="familyHistory">Family History</MenuItem>
-            <MenuItem value="medicationHistory">Medication History</MenuItem>
-            <MenuItem value="socialHistory">Social History</MenuItem>
-            <MenuItem value="reviewOfSystems">Review of Systems</MenuItem>
-            <MenuItem value="immunization">Immunization</MenuItem>
-            <MenuItem value="travelHistory">Travel History</MenuItem>
-          </Select>
-        </FormControl>
-        {resourceFields[resourceType]}
-        <Box className="flex gap-2">
-          <Button type="submit" variant="contained" className="btn-primary flex-1" startIcon={<Save />} disabled={loading}>
-            {loading ? 'Saving...' : (medicalRecord?.id ? 'Update' : 'Create')}
-          </Button>
-          <Button variant="outlined" className="btn-outline" onClick={() => setFormData({})} startIcon={<X />}>Clear</Button>
-        </Box>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
+        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h5" gutterBottom>Medical Record Form</Typography>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.patientId}>
+                <InputLabel>Patient</InputLabel>
+                <Select
+                  value={formData.patientId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, patientId: e.target.value }))}
+                  label="Patient"
+                >
+                  {patients.map(patient => (
+                    <MenuItem key={patient.id} value={patient.id}>
+                      {patient.firstName} {patient.lastName}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.patientId && <FormHelperText>{errors.patientId}</FormHelperText>}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <DatePicker
+                label="Record Date"
+                value={formData.recordDate}
+                onChange={(date) => setFormData(prev => ({ ...prev, recordDate: date }))}
+                renderInput={(params) => <TextField {...params} fullWidth error={!!errors.recordDate} helperText={errors.recordDate} />}
+              />
+            </Grid>
+            {/* Chief Complaint */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Chief Complaint</Typography>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Description"
+                value={formData.chiefComplaint.description}
+                onChange={(e) => handleInputChange('chiefComplaint', 'description', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Duration"
+                value={formData.chiefComplaint.duration}
+                onChange={(e) => handleInputChange('chiefComplaint', 'duration', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Onset"
+                value={formData.chiefComplaint.onset}
+                onChange={(e) => handleInputChange('chiefComplaint', 'onset', e.target.value)}
+              />
+            </Grid>
+            {/* Present Illness */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Present Illness</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Narrative"
+                value={formData.presentIllness.narrative}
+                onChange={(e) => handleInputChange('presentIllness', 'narrative', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Severity"
+                value={formData.presentIllness.severity}
+                onChange={(e) => handleInputChange('presentIllness', 'severity', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Progress"
+                value={formData.presentIllness.progress}
+                onChange={(e) => handleInputChange('presentIllness', 'progress', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Associated Symptoms"
+                value={formData.presentIllness.associatedSymptoms}
+                onChange={(e) => handleInputChange('presentIllness', 'associatedSymptoms', e.target.value)}
+              />
+            </Grid>
+            {/* Past Conditions */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Past Medical Conditions</Typography>
+              {formData.pastConditions.map((condition, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Condition"
+                      value={condition.condition}
+                      onChange={(e) => handleInputChange('pastConditions', 'condition', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <DatePicker
+                      label="Diagnosis Date"
+                      value={condition.diagnosisDate}
+                      onChange={(date) => handleInputChange('pastConditions', 'diagnosisDate', date, index)}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Notes"
+                      value={condition.notes}
+                      onChange={(e) => handleInputChange('pastConditions', 'notes', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <IconButton onClick={() => handleRemoveItem('pastConditions', index)} disabled={formData.pastConditions.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('pastConditions')}>
+                Add Past Condition
+              </Button>
+            </Grid>
+            {/* Surgical History */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Surgical History</Typography>
+              {formData.surgicalHistory.map((surgery, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Procedure"
+                      value={surgery.procedure}
+                      onChange={(e) => handleInputChange('surgicalHistory', 'procedure', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <DatePicker
+                      label="Date Performed"
+                      value={surgery.datePerformed}
+                      onChange={(date) => handleInputChange('surgicalHistory', 'datePerformed', date, index)}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Outcome"
+                      value={surgery.outcome}
+                      onChange={(e) => handleInputChange('surgicalHistory', 'outcome', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <IconButton onClick={() => handleRemoveItem('surgicalHistory', index)} disabled={formData.surgicalHistory.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('surgicalHistory')}>
+                Add Surgical History
+              </Button>
+            </Grid>
+            {/* Family History */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Family History</Typography>
+              {formData.familyHistory.map((family, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Relative"
+                      value={family.relative}
+                      onChange={(e) => handleInputChange('familyHistory', 'relative', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Condition"
+                      value={family.condition}
+                      onChange={(e) => handleInputChange('familyHistory', 'condition', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Age at Diagnosis"
+                      type="number"
+                      value={family.ageAtDiagnosis}
+                      onChange={(e) => handleInputChange('familyHistory', 'ageAtDiagnosis', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <IconButton onClick={() => handleRemoveItem('familyHistory', index)} disabled={formData.familyHistory.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('familyHistory')}>
+                Add Family History
+              </Button>
+            </Grid>
+            {/* Medication History */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Medication History</Typography>
+              {formData.medicationHistory.map((medication, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      fullWidth
+                      label="Medication Name"
+                      value={medication.medicationName}
+                      onChange={(e) => handleInputChange('medicationHistory', 'medicationName', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      fullWidth
+                      label="Dosage"
+                      value={medication.dosage}
+                      onChange={(e) => handleInputChange('medicationHistory', 'dosage', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      fullWidth
+                      label="Frequency"
+                      value={medication.frequency}
+                      onChange={(e) => handleInputChange('medicationHistory', 'frequency', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <DatePicker
+                      label="Start Date"
+                      value={medication.startDate}
+                      onChange={(date) => handleInputChange('medicationHistory', 'startDate', date, index)}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <DatePicker
+                      label="End Date"
+                      value={medication.endDate}
+                      onChange={(date) => handleInputChange('medicationHistory', 'endDate', date, index)}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <IconButton onClick={() => handleRemoveItem('medicationHistory', index)} disabled={formData.medicationHistory.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('medicationHistory')}>
+                Add Medication
+              </Button>
+            </Grid>
+            {/* Social History */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Social History</Typography>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Smoking Status"
+                value={formData.socialHistory.smokingStatus}
+                onChange={(e) => handleInputChange('socialHistory', 'smokingStatus', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Alcohol Use"
+                value={formData.socialHistory.alcoholUse}
+                onChange={(e) => handleInputChange('socialHistory', 'alcoholUse', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Occupation"
+                value={formData.socialHistory.occupation}
+                onChange={(e) => handleInputChange('socialHistory', 'occupation', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Marital Status"
+                value={formData.socialHistory.maritalStatus}
+                onChange={(e) => handleInputChange('socialHistory', 'maritalStatus', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Living Situation"
+                value={formData.socialHistory.livingSituation}
+                onChange={(e) => handleInputChange('socialHistory', 'livingSituation', e.target.value)}
+              />
+            </Grid>
+            {/* Review of Systems */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Review of Systems</Typography>
+              {formData.reviewOfSystems.map((review, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={5}>
+                    <TextField
+                      fullWidth
+                      label="System"
+                      value={review.system}
+                      onChange={(e) => handleInputChange('reviewOfSystems', 'system', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={5}>
+                    <TextField
+                      fullWidth
+                      label="Findings"
+                      value={review.findings}
+                      onChange={(e) => handleInputChange('reviewOfSystems', 'findings', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <IconButton onClick={() => handleRemoveItem('reviewOfSystems', index)} disabled={formData.reviewOfSystems.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('reviewOfSystems')}>
+                Add Review of System
+              </Button>
+            </Grid>
+            {/* Immunizations */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Immunizations</Typography>
+              {formData.immunizations.map((immunization, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Vaccine"
+                      value={immunization.vaccine}
+                      onChange={(e) => handleInputChange('immunizations', 'vaccine', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <DatePicker
+                      label="Date Given"
+                      value={immunization.dateGiven}
+                      onChange={(date) => handleInputChange('immunizations', 'dateGiven', date, index)}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Administered By"
+                      value={immunization.administeredBy}
+                      onChange={(e) => handleInputChange('immunizations', 'administeredBy', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <IconButton onClick={() => handleRemoveItem('immunizations', index)} disabled={formData.immunizations.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('immunizations')}>
+                Add Immunization
+              </Button>
+            </Grid>
+            {/* Travel History */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Travel History</Typography>
+              {formData.travelHistory.map((travel, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Country Visited"
+                      value={travel.countryVisited}
+                      onChange={(e) => handleInputChange('travelHistory', 'countryVisited', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <DatePicker
+                      label="Date From"
+                      value={travel.dateFrom}
+                      onChange={(date) => handleInputChange('travelHistory', 'dateFrom', date, index)}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <DatePicker
+                      label="Date To"
+                      value={travel.dateTo}
+                      onChange={(date) => handleInputChange('travelHistory', 'dateTo', date, index)}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Purpose"
+                      value={travel.purpose}
+                      onChange={(e) => handleInputChange('travelHistory', 'purpose', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <IconButton onClick={() => handleRemoveItem('travelHistory', index)} disabled={formData.travelHistory.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('travelHistory')}>
+                Add Travel History
+              </Button>
+            </Grid>
+            {/* Allergies */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Allergies</Typography>
+              {formData.allergies.map((allergy, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={5}>
+                    <TextField
+                      fullWidth
+                      label="Allergy Name"
+                      value={allergy.name}
+                      onChange={(e) => handleInputChange('allergies', 'name', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={5}>
+                    <TextField
+                      fullWidth
+                      label="Severity"
+                      value={allergy.severity}
+                      onChange={(e) => handleInputChange('allergies', 'severity', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <IconButton onClick={() => handleRemoveItem('allergies', index)} disabled={formData.allergies.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('allergies')}>
+                Add Allergy
+              </Button>
+            </Grid>
+            {/* Diagnoses */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Diagnoses</Typography>
+              {formData.diagnoses.map((diagnosis, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Code"
+                      value={diagnosis.code}
+                      onChange={(e) => handleInputChange('diagnoses', 'code', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="Description"
+                      value={diagnosis.description}
+                      onChange={(e) => handleInputChange('diagnoses', 'description', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <DatePicker
+                      label="Diagnosed At"
+                      value={diagnosis.diagnosedAt}
+                      onChange={(date) => handleInputChange('diagnoses', 'diagnosedAt', date, index)}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <IconButton onClick={() => handleRemoveItem('diagnoses', index)} disabled={formData.diagnoses.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('diagnoses')}>
+                Add Diagnosis
+              </Button>
+            </Grid>
+            {/* Vital Signs */}
+            <Grid item xs={12}>
+              <Typography variant="h6">Vital Signs</Typography>
+              {formData.vitalSigns.map((vital, index) => (
+                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      fullWidth
+                      label="Blood Pressure"
+                      value={vital.bloodPressure}
+                      onChange={(e) => handleInputChange('vitalSigns', 'bloodPressure', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      fullWidth
+                      label="Heart Rate"
+                      type="number"
+                      value={vital.heartRate}
+                      onChange={(e) => handleInputChange('vitalSigns', 'heartRate', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      fullWidth
+                      label="Temperature"
+                      type="number"
+                      value={vital.temperature}
+                      onChange={(e) => handleInputChange('vitalSigns', 'temperature', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      fullWidth
+                      label="Respiratory Rate"
+                      type="number"
+                      value={vital.respiratoryRate}
+                      onChange={(e) => handleInputChange('vitalSigns', 'respiratoryRate', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      fullWidth
+                      label="Oxygen Saturation"
+                      type="number"
+                      value={vital.oxygenSaturation}
+                      onChange={(e) => handleInputChange('vitalSigns', 'oxygenSaturation', e.target.value, index)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <IconButton onClick={() => handleRemoveItem('vitalSigns', index)} disabled={formData.vitalSigns.length === 1}>
+                      <Delete />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<Add />} onClick={() => handleAddItem('vitalSigns')}>
+                Add Vital Sign
+              </Button>
+            </Grid>
+            <Grid item xs={12}>
+              {errors.submit && <Typography color="error">{errors.submit}</Typography>}
+              <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+                {params.id ? 'Update' : 'Create'} Medical Record
+              </Button>
+            </Grid>
+          </Grid>
+        </Paper>
       </Box>
-    </Box>
+    </LocalizationProvider>
   );
-};
-
-export default MedicalRecordForm;
+}
