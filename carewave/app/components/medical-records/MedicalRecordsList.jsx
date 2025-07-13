@@ -1,3 +1,5 @@
+'use client';
+import React from 'react';
 import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, Button, IconButton } from '@mui/material';
 import { Edit, Trash2 } from 'lucide-react';
