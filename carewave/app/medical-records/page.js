@@ -1,84 +1,128 @@
 'use client';
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Autocomplete, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Typography, Box } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import medicalRecordsService from '@/services/medicalRecordsService';
-import MedicalRecordList from '@/components/medical-records/MedicalRecordList';
-import MedicalRecordFilter from '@/components/medical-records/MedicalRecordFilter';
-import MedicalRecordStats from '@/components/medical-records/MedicalRecordStats';
+import { User } from 'lucide-react';
 
 export default function MedicalRecordsPage() {
+  const router = useRouter();
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const [records, setRecords] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [filters, setFilters] = useState({
-    patientId: '',
-    dateFrom: '',
-    dateTo: ''
-  });
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const patientData = await medicalRecordsService.getPatients();
+        setPatients(patientData);
+      } catch (err) {
+        setError('Failed to load patients');
+      }
+    };
+    fetchPatients();
+  }, []);
+
+  useEffect(() => {
+    const fetchRecords = async () => {
+      if (selectedPatient) {
+        setLoading(true);
+        try {
+          const recordData = await medicalRecordsService.getAllMedicalRecords({ patientId: selectedPatient.id });
+          setRecords(recordData);
+        } catch (err) {
+          setError('Failed to load medical records');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
     fetchRecords();
-    fetchStats();
-  }, [filters]);
+  }, [selectedPatient]);
 
-  const fetchRecords = async () => {
-    try {
-      setLoading(true);
-      const data = await medicalRecordsService.getAllMedicalRecords(filters);
-      setRecords(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  const handleViewDetails = (recordId) => {
+    router.push(`/medical-records/${recordId}`);
   };
 
-  const fetchStats = async () => {
-    try {
-      const data = await medicalRecordsService.getMedicalRecordStats(filters);
-      setStats(data);
-    } catch (err) {
-      setError(err.message);
-    }
+  const getSummary = (record) => {
+    if (record.chiefComplaint) return record.chiefComplaint.description;
+    if (record.diagnoses?.length) return record.diagnoses[0].description;
+    if (record.vitalSigns?.length) return `Vital Signs Recorded: ${record.vitalSigns[0].recordedAt}`;
+    return 'No summary available';
   };
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await medicalRecordsService.deleteMedicalRecord(id);
-      fetchRecords();
-      fetchStats();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+  if (error && !patients.length) {
+    return (
+      <Box className="card max-w-full mx-auto p-4">
+        <Typography color="error">{error}</Typography>
+        <Button variant="outlined" onClick={() => window.location.reload()}>Retry</Button>
+      </Box>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Medical Records Overview</h1>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      <MedicalRecordFilter onFilterChange={handleFilterChange} />
-      
-      {stats && <MedicalRecordStats stats={stats} />}
-      
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <MedicalRecordList 
-          records={records} 
-          onDelete={handleDelete}
+    <Box className="container mx-auto p-4">
+      <Typography variant="h4" className="mb-4">Medical Records</Typography>
+      <Box className="mb-4">
+        <Autocomplete
+          options={patients}
+          getOptionLabel={(option) => option.name || ''}
+          onChange={(e, value) => setSelectedPatient(value)}
+          value={selectedPatient}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Search Patient"
+              className="input"
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: <User className="h-4 w-4 mr-2" />,
+              }}
+            />
+          )}
         />
+      </Box>
+      {selectedPatient && (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Record Date</TableCell>
+                <TableCell>Doctor</TableCell>
+                <TableCell>Summary</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4}>Loading...</TableCell>
+                </TableRow>
+              ) : records.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4}>No records found</TableCell>
+                </TableRow>
+              ) : (
+                records.map((record) => (
+                  <TableRow key={record.id}>
+                    <TableCell>{new Date(record.recordDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{record.doctor?.name || 'N/A'}</TableCell>
+                    <TableCell>{getSummary(record)}</TableCell>
+                    <TableCell>
+                      <Button variant="contained" onClick={() => handleViewDetails(record.id)}>View Details</Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-    </div>
+      <Box className="mt-4">
+        <Button variant="contained" onClick={() => router.push('/medical-records/new')}>New Record</Button>
+      </Box>
+    </Box>
   );
 }
