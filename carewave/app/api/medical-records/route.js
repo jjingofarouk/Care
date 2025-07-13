@@ -166,7 +166,9 @@ export async function POST(request) {
         data: {
           medicalRecordId: recordData.medicalRecordId,
           name: recordData.name,
-          severity: recordData.severity
+          severity: recordData.severity,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       diagnosis: () => prisma.diagnosis.create({
@@ -174,7 +176,9 @@ export async function POST(request) {
           medicalRecordId: recordData.medicalRecordId,
           code: recordData.code,
           description: recordData.description,
-          diagnosedAt: new Date(recordData.diagnosedAt)
+          diagnosedAt: new Date(recordData.diagnosedAt),
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       vitalSign: () => prisma.vitalSign.create({
@@ -185,7 +189,9 @@ export async function POST(request) {
           temperature: recordData.temperature,
           respiratoryRate: recordData.respiratoryRate,
           oxygenSaturation: recordData.oxygenSaturation,
-          recordedAt: new Date(recordData.recordedAt)
+          recordedAt: new Date(recordData.recordedAt),
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       chiefComplaint: () => prisma.chiefComplaint.create({
@@ -193,7 +199,9 @@ export async function POST(request) {
           medicalRecordId: recordData.medicalRecordId,
           description: recordData.description,
           duration: recordData.duration,
-          onset: recordData.onset
+          onset: recordData.onset,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       presentIllness: () => prisma.presentIllness.create({
@@ -202,7 +210,9 @@ export async function POST(request) {
           narrative: recordData.narrative,
           severity: recordData.severity,
           progress: recordData.progress,
-          associatedSymptoms: recordData.associatedSymptoms
+          associatedSymptoms: recordData.associatedSymptoms,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       pastCondition: () => prisma.pastMedicalCondition.create({
@@ -210,7 +220,9 @@ export async function POST(request) {
           medicalRecordId: recordData.medicalRecordId,
           condition: recordData.condition,
           diagnosisDate: recordData.diagnosisDate ? new Date(recordData.diagnosisDate) : null,
-          notes: recordData.notes
+          notes: recordData.notes,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       surgicalHistory: () => prisma.surgicalHistory.create({
@@ -219,7 +231,9 @@ export async function POST(request) {
           procedure: recordData.procedure,
           datePerformed: recordData.datePerformed ? new Date(recordData.datePerformed) : null,
           outcome: recordData.outcome,
-          notes: recordData.notes
+          notes: recordData.notes,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       familyHistory: () => prisma.familyHistory.create({
@@ -228,7 +242,9 @@ export async function POST(request) {
           relative: recordData.relative,
           condition: recordData.condition,
           ageAtDiagnosis: recordData.ageAtDiagnosis,
-          notes: recordData.notes
+          notes: recordData.notes,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       medicationHistory: () => prisma.medicationHistory.create({
@@ -239,7 +255,9 @@ export async function POST(request) {
           frequency: recordData.frequency,
           startDate: recordData.startDate ? new Date(recordData.startDate) : null,
           endDate: recordData.endDate ? new Date(recordData.endDate) : null,
-          isCurrent: recordData.isCurrent
+          isCurrent: recordData.isCurrent,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       socialHistory: () => prisma.socialHistory.create({
@@ -249,14 +267,18 @@ export async function POST(request) {
           alcoholUse: recordData.alcoholUse,
           occupation: recordData.occupation,
           maritalStatus: recordData.maritalStatus,
-          livingSituation: recordData.livingSituation
+          livingSituation: recordData.livingSituation,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       reviewOfSystems: () => prisma.reviewOfSystems.create({
         data: {
           medicalRecordId: recordData.medicalRecordId,
           system: recordData.system,
-          findings: recordData.findings
+          findings: recordData.findings,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       immunization: () => prisma.immunization.create({
@@ -265,7 +287,9 @@ export async function POST(request) {
           vaccine: recordData.vaccine,
           dateGiven: new Date(recordData.dateGiven),
           administeredBy: recordData.administeredBy,
-          notes: recordData.notes
+          notes: recordData.notes,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       }),
       travelHistory: () => prisma.travelHistory.create({
@@ -275,7 +299,9 @@ export async function POST(request) {
           dateFrom: recordData.dateFrom ? new Date(recordData.dateFrom) : null,
           dateTo: recordData.dateTo ? new Date(recordData.dateTo) : null,
           purpose: recordData.purpose,
-          travelNotes: recordData.travelNotes
+          travelNotes: recordData.travelNotes,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       })
     };
