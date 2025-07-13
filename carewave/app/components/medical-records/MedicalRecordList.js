@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box, Button, TextField, IconButton, Typography, Alert } from '@mui/material';
 import { Edit, Delete, Visibility } from '@mui/icons-material';
-import medicalRecordsService from '@/services/medicalRecordsService';
 
 export default function MedicalRecordList() {
   const router = useRouter();
