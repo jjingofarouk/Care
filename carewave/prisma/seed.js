@@ -1,111 +1,114 @@
-// seed.js
 const { PrismaClient } = require('@prisma/client');
 const { v4: uuidv4 } = require('uuid');
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Starting database seeding...');
+  console.log('Starting database seeding for additional patients...');
 
-  // Generate UUIDs for patients first
-  const patientIds = Array.from({ length: 10 }, () => uuidv4());
+  // Get the count of existing patients to continue the ID sequence
+  const existingPatientsCount = await prisma.patient.count();
+  const startIndex = existingPatientsCount + 1;
 
-  // Seed Patients with Ugandan names
-  const patients = [
+  // Generate new patient IDs in the format P-XXXXX
+  const newPatientIds = Array.from({ length: 10 }, (_, i) => `P-${(startIndex + i).toString().padStart(5, '0')}`);
+
+  // Seed 10 new Patients with Ugandan names
+  const newPatients = [
     {
-      id: patientIds[0],
-      firstName: 'Elizabeth',
-      lastName: 'Aber',
-      dateOfBirth: new Date('1985-03-15'),
+      id: newPatientIds[0],
+      firstName: 'Grace',
+      lastName: 'Nabirye',
+      dateOfBirth: new Date('1992-02-10'),
       gender: 'Female',
-      phone: '+256701234567',
-      email: 'elizabeth.aber@example.com',
+      phone: '+256720123456',
+      email: 'grace.nabirye@example.com',
     },
     {
-      id: patientIds[1],
-      firstName: 'Michael',
-      lastName: 'Abaasa',
-      dateOfBirth: new Date('1990-07-22'),
+      id: newPatientIds[1],
+      firstName: 'Joseph',
+      lastName: 'Okello',
+      dateOfBirth: new Date('1983-06-17'),
       gender: 'Male',
-      phone: '+256702345678',
-      email: 'michael.abaasa@example.com',
+      phone: '+256721234567',
+      email: 'joseph.okello@example.com',
     },
     {
-      id: patientIds[2],
-      firstName: 'Robinah',
-      lastName: 'Abamukama',
-      dateOfBirth: new Date('1978-11-08'),
+      id: newPatientIds[2],
+      firstName: 'Mercy',
+      lastName: 'Namutebi',
+      dateOfBirth: new Date('1996-09-25'),
       gender: 'Female',
-      phone: '+256703456789',
-      email: 'robinah.abamukama@example.com',
+      phone: '+256722345678',
+      email: 'mercy.namutebi@example.com',
     },
     {
-      id: patientIds[3],
-      firstName: 'Gideon',
-      lastName: 'Ahimbisibwe',
-      dateOfBirth: new Date('1995-09-12'),
+      id: newPatientIds[3],
+      firstName: 'Samuel',
+      lastName: 'Mukasa',
+      dateOfBirth: new Date('1989-12-01'),
       gender: 'Male',
-      phone: '+256704567890',
-      email: 'gideon.ahimbisibwe@example.com',
+      phone: '+256723456789',
+      email: 'samuel.mukasa@example.com',
     },
     {
-      id: patientIds[4],
-      firstName: 'Rachael',
-      lastName: 'Ainembabazi',
-      dateOfBirth: new Date('1988-05-30'),
+      id: newPatientIds[4],
+      firstName: 'Lillian',
+      lastName: 'Atuhaire',
+      dateOfBirth: new Date('1994-04-05'),
       gender: 'Female',
-      phone: '+256705678901',
-      email: 'rachael.ainembabazi@example.com',
+      phone: '+256724567890',
+      email: 'lillian.atuhaire@example.com',
     },
     {
-      id: patientIds[5],
-      firstName: 'Ambrose',
-      lastName: 'Agona',
-      dateOfBirth: new Date('1982-12-03'),
+      id: newPatientIds[5],
+      firstName: 'Patrick',
+      lastName: 'Ojok',
+      dateOfBirth: new Date('1980-08-13'),
       gender: 'Male',
-      phone: '+256706789012',
-      email: 'ambrose.agona@example.com',
+      phone: '+256725678901',
+      email: 'patrick.ojok@example.com',
     },
     {
-      id: patientIds[6],
-      firstName: 'Barbra',
-      lastName: 'Ainomugisha',
-      dateOfBirth: new Date('1993-04-18'),
+      id: newPatientIds[6],
+      firstName: 'Agnes',
+      lastName: 'Nankya',
+      dateOfBirth: new Date('1997-03-20'),
       gender: 'Female',
-      phone: '+256707890123',
-      email: 'barbra.ainomugisha@example.com',
+      phone: '+256726789012',
+      email: 'agnes.nankya@example.com',
     },
     {
-      id: patientIds[7],
-      firstName: 'Edward',
-      lastName: 'Arinaitwe',
-      dateOfBirth: new Date('1987-08-25'),
+      id: newPatientIds[7],
+      firstName: 'David',
+      lastName: 'Ssentongo',
+      dateOfBirth: new Date('1986-11-11'),
       gender: 'Male',
-      phone: '+256708901234',
-      email: 'edward.arinaitwe@example.com',
+      phone: '+256727890123',
+      email: 'david.ssentongo@example.com',
     },
     {
-      id: patientIds[8],
-      firstName: 'Joanita',
-      lastName: 'Akampa',
-      dateOfBirth: new Date('1991-01-14'),
+      id: newPatientIds[8],
+      firstName: 'Esther',
+      lastName: 'Nakitende',
+      dateOfBirth: new Date('1990-07-30'),
       gender: 'Female',
-      phone: '+256709012345',
-      email: 'joanita.akampa@example.com',
+      phone: '+256728901234',
+      email: 'esther.nakitende@example.com',
     },
     {
-      id: patientIds[9],
-      firstName: 'Allan',
-      lastName: 'Ayiekoh',
-      dateOfBirth: new Date('1986-10-07'),
+      id: newPatientIds[9],
+      firstName: 'Simon',
+      lastName: 'Kiwanuka',
+      dateOfBirth: new Date('1984-05-15'),
       gender: 'Male',
-      phone: '+256700123456',
-      email: 'allan.ayiekoh@example.com',
+      phone: '+256729012345',
+      email: 'simon.kiwanuka@example.com',
     },
   ];
 
-  console.log('Seeding patients...');
-  for (const patient of patients) {
+  console.log('Seeding new patients...');
+  for (const patient of newPatients) {
     await prisma.patient.upsert({
       where: { email: patient.email },
       update: {},
@@ -118,81 +121,81 @@ async function main() {
   const addresses = [
     {
       id: uuidv4(),
-      patientId: patientIds[0],
-      street: 'Plot 15, Bukoto Street',
+      patientId: newPatientIds[0],
+      street: 'Lugogo Bypass, Nakawa',
       city: 'Kampala',
       country: 'Uganda',
       postalCode: '00256',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[1],
-      street: 'Masaka Road, Kibuye',
-      city: 'Entebbe',
+      patientId: newPatientIds[1],
+      street: 'Arua Road, Arua',
+      city: 'Arua',
       country: 'Uganda',
       postalCode: '00256',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[2],
-      street: 'Bombo Road, Kawempe',
+      patientId: newPatientIds[2],
+      street: 'Hoima Road, Hoima',
+      city: 'Hoima',
+      country: 'Uganda',
+      postalCode: '00256',
+    },
+    {
+      id: uuidv4(),
+      patientId: newPatientIds[3],
+      street: 'Kira Road, Kamwokya',
       city: 'Kampala',
       country: 'Uganda',
       postalCode: '00256',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[3],
-      street: 'Jinja Road, Nakawa',
-      city: 'Kampala',
+      patientId: newPatientIds[4],
+      street: 'Tororo Road, Tororo',
+      city: 'Tororo',
       country: 'Uganda',
       postalCode: '00256',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[4],
-      street: 'Main Street, Mukono',
-      city: 'Mukono',
+      patientId: newPatientIds[5],
+      street: 'Lira Road, Gulu',
+      city: 'Gulu',
       country: 'Uganda',
       postalCode: '00256',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[5],
-      street: 'Gulu Road, Lira',
-      city: 'Lira',
+      patientId: newPatientIds[6],
+      street: 'Mityana Road, Mityana',
+      city: 'Mityana',
       country: 'Uganda',
       postalCode: '00256',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[6],
-      street: 'Mbale Road, Soroti',
-      city: 'Soroti',
+      patientId: newPatientIds[7],
+      street: 'Bushenyi Road, Bushenyi',
+      city: 'Bushenyi',
       country: 'Uganda',
       postalCode: '00256',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[7],
-      street: 'Mbarara Road, Masaka',
-      city: 'Masaka',
+      patientId: newPatientIds[8],
+      street: 'Iganga Road, Iganga',
+      city: 'Iganga',
       country: 'Uganda',
       postalCode: '00256',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[8],
-      street: 'Fort Portal Road, Kasese',
-      city: 'Kasese',
-      country: 'Uganda',
-      postalCode: '00256',
-    },
-    {
-      id: uuidv4(),
-      patientId: patientIds[9],
-      street: 'Kabale Road, Mbarara',
-      city: 'Mbarara',
+      patientId: newPatientIds[9],
+      street: 'Kasese Road, Fort Portal',
+      city: 'Fort Portal',
       country: 'Uganda',
       postalCode: '00256',
     },
@@ -216,94 +219,93 @@ async function main() {
   const nextOfKins = [
     {
       id: uuidv4(),
-      patientId: patientIds[0],
-      firstName: 'Charles',
-      lastName: 'Bukomeko',
-      relationship: 'Father',
-      phone: '+256711234567',
-      email: 'charles.bukomeko@example.com',
+      patientId: newPatientIds[0],
+      firstName: 'Robert',
+      lastName: 'Musinguzi',
+      relationship: 'Husband',
+      phone: '+256730123456',
+      email: 'robert.musinguzi@example.com',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[1],
-      firstName: 'Sheba',
-      lastName: 'Babirye',
+      patientId: newPatientIds[1],
+      firstName: 'Joyce',
+      lastName: 'Acen',
       relationship: 'Wife',
-      phone: '+256712345678',
-      email: 'sheba.babirye@example.com',
+      phone: '+256731234567',
+      email: 'joyce.acen@example.com',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[2],
-      firstName: 'Daniel',
-      lastName: 'Mugabe',
-      relationship: 'Husband',
-      phone: '+256713456789',
-      email: 'daniel.mugabe@example.com',
+      patientId: newPatientIds[2],
+      firstName: 'Peter',
+      lastName: 'Waiswa',
+      relationship: 'Father',
+      phone: '+256732345678',
+      email: 'peter.waiswa@example.com',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[3],
-      firstName: 'Cynthia',
-      lastName: 'Letaru',
+      patientId: newPatientIds[3],
+      firstName: 'Christine',
+      lastName: 'Nassali',
       relationship: 'Sister',
-      phone: '+256714567890',
-      email: 'cynthia.letaru@example.com',
+      phone: '+256733456789',
+      email: 'christine.nassali@example.com',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[4],
-      firstName: 'Fred',
-      lastName: 'Dratia',
+      patientId: newPatientIds[4],
+      firstName: 'Moses',
+      lastName: 'Tumwesigye',
       relationship: 'Brother',
-      phone: '+256715678901',
-      email: 'fred.dratia@example.com',
+      phone: '+256734567890',
+      email: 'moses.tumwesigye@example.com',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[5],
-      firstName: 'Esther',
-      lastName: 'Nalwoga',
-      relationship: 'Daughter',
-      phone: '+256716789012',
-      email: 'esther.nalwoga@example.com',
+      patientId: newPatientIds[5],
+      firstName: 'Mary',
+      lastName: 'Auma',
+      relationship: 'Mother',
+      phone: '+256735678901',
+      email: 'mary.auma@example.com',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[6],
-      firstName: 'Mark',
-      lastName: 'Ishimwe',
-      relationship: 'Father',
-      phone: '+256717890123',
-      email: 'mark.ishimwe@example.com',
-    },
-    {
-      id: uuidv4(),
-      patientId: patientIds[7],
-      firstName: 'Farouk',
-      lastName: 'Jjingo',
-      relationship: 'Brother',
-      phone: '+256718901234',
-      email: 'farouk.jjingo@example.com',
-    },
-    {
-      id: uuidv4(),
-      patientId: patientIds[8],
-      firstName: 'Ismail',
-      lastName: 'Jjuuko',
+      patientId: newPatientIds[6],
+      firstName: 'James',
+      lastName: 'Lubega',
       relationship: 'Husband',
-      phone: '+256719012345',
-      email: 'ismail.jjuuko@example.com',
+      phone: '+256736789012',
+      email: 'james.lubega@example.com',
     },
     {
       id: uuidv4(),
-      patientId: patientIds[9],
-      firstName: 'Joshua',
-wamy: 'Opio',
-      lastName: 'Ekwamu',
+      patientId: newPatientIds[7],
+      firstName: 'Sarah',
+      lastName: 'Nalubega',
+      relationship: 'Wife',
+      phone: '+256737890123',
+      email: 'sarah.nalubega@example.com',
+    },
+    {
+      id: uuidv4(),
+      patientId: newPatientIds[8],
+      firstName: 'Thomas',
+      lastName: 'Kato',
       relationship: 'Father',
-      phone: '+256710123456',
-      email: 'joshua.opio@example.com',
+      phone: '+256738901234',
+      email: 'thomas.kato@example.com',
+    },
+    {
+      id: uuidv4(),
+      patientId: newPatientIds[9],
+      firstName: 'Beatrice',
+      lastName: 'Namuganza',
+      relationship: 'Mother',
+      phone: '+256739012345',
+      email: 'beatrice.namuganza@example.com',
     },
   ];
 
@@ -325,73 +327,73 @@ wamy: 'Opio',
   const insuranceInfos = [
     {
       id: uuidv4(),
-      patientId: patientIds[0],
+      patientId: newPatientIds[0],
       provider: 'UAP Old Mutual',
-      policyNumber: 'UAP123456',
-      expiryDate: new Date('2026-12-31'),
+      policyNumber: 'UAP654321',
+      expiryDate: new Date('2027-10-31'),
     },
     {
       id: uuidv4(),
-      patientId: patientIds[1],
+      patientId: newPatientIds[1],
       provider: 'Jubilee Insurance',
-      policyNumber: 'JUB789012',
-      expiryDate: new Date('2027-06-30'),
+      policyNumber: 'JUB210987',
+      expiryDate: new Date('2028-03-15'),
     },
     {
       id: uuidv4(),
-      patientId: patientIds[2],
+      patientId: newPatientIds[2],
       provider: 'AIG Uganda',
-      policyNumber: 'AIG456789',
-      expiryDate: new Date('2026-08-15'),
+      policyNumber: 'AIG987654',
+      expiryDate: new Date('2027-07-20'),
     },
     {
       id: uuidv4(),
-      patientId: patientIds[3],
+      patientId: newPatientIds[3],
       provider: 'Stanbic General Insurance',
-      policyNumber: 'STA987654',
-      expiryDate: new Date('2027-03-20'),
+      policyNumber: 'STA456123',
+      expiryDate: new Date('2028-01-10'),
     },
     {
       id: uuidv4(),
-      patientId: patientIds[4],
+      patientId: newPatientIds[4],
       provider: 'National Insurance Corporation',
-      policyNumber: 'NIC234567',
-      expiryDate: new Date('2026-11-10'),
+      policyNumber: 'NIC789456',
+      expiryDate: new Date('2027-09-25'),
     },
     {
       id: uuidv4(),
-      patientId: patientIds[5],
+      patientId: newPatientIds[5],
       provider: 'Goldstar Insurance',
-      policyNumber: 'GSI345678',
-      expiryDate: new Date('2027-01-25'),
+      policyNumber: 'GSI123789',
+      expiryDate: new Date('2028-02-05'),
     },
     {
       id: uuidv4(),
-      patientId: patientIds[6],
+      patientId: newPatientIds[6],
       provider: 'ICEA LION',
-      policyNumber: 'ICE567890',
-      expiryDate: new Date('2026-09-05'),
+      policyNumber: 'ICE456321',
+      expiryDate: new Date('2027-11-15'),
     },
     {
       id: uuidv4(),
-      patientId: patientIds[7],
+      patientId: newPatientIds[7],
       provider: 'Orient Insurance',
-      policyNumber: 'ORI678901',
-      expiryDate: new Date('2027-04-12'),
+      policyNumber: 'ORI789654',
+      expiryDate: new Date('2028-04-30'),
     },
     {
       id: uuidv4(),
-      patientId: patientIds[8],
+      patientId: newPatientIds[8],
       provider: 'Prudential Uganda',
-      policyNumber: 'PRU789012',
-      expiryDate: new Date('2026-07-18'),
+      policyNumber: 'PRU321987',
+      expiryDate: new Date('2027-08-12'),
     },
     {
       id: uuidv4(),
-      patientId: patientIds[9],
+      patientId: newPatientIds[9],
       provider: 'Chartis Uganda',
-      policyNumber: 'CHA890123',
-      expiryDate: new Date('2027-02-28'),
+      policyNumber: 'CHA654987',
+      expiryDate: new Date('2028-06-28'),
     },
   ];
 
@@ -409,11 +411,238 @@ wamy: 'Opio',
     }
   }
 
+  // Seed Medical Records and related clinical data
+  const medicalRecords = newPatientIds.map((patientId, index) => ({
+    id: uuidv4(),
+    patientId,
+    recordDate: new Date(`2025-07-${10 + index}`),
+  }));
+
+  console.log('Seeding medical records...');
+  for (const record of medicalRecords) {
+    try {
+      await prisma.medicalRecord.upsert({
+        where: { id: record.id },
+        update: {},
+        create: record,
+      });
+      console.log(`Created medical record for patient: ${record.patientId}`);
+    } catch (error) {
+      console.error(`Error creating medical record for patient ${record.patientId}:`, error.message);
+    }
+  }
+
+  // Seed Allergies (example: 1-2 allergies per patient)
+  const allergies = medicalRecords.flatMap((record, index) => [
+    {
+      id: uuidv4(),
+      medicalRecordId: record.id,
+      name: index % 2 === 0 ? 'Penicillin' : 'Peanuts',
+      severity: index % 2 === 0 ? 'Moderate' : 'Severe',
+    },
+  ]);
+
+  console.log('Seeding allergies...');
+  for (const allergy of allergies) {
+    try {
+      await prisma.allergy.upsert({
+        where: { id: allergy.id },
+        update: {},
+        create: allergy,
+      });
+      console.log(`Created allergy: ${allergy.name}`);
+    } catch (error) {
+      console.error(`Error creating allergy for medical record ${allergy.medicalRecordId}:`, error.message);
+    }
+  }
+
+  // Seed Diagnoses (example: 1 diagnosis per patient)
+  const diagnoses = medicalRecords.map((record, index) => ({
+    id: uuidv4(),
+    medicalRecordId: record.id,
+    code: `ICD10-${100 + index}`,
+    description: index % 2 === 0 ? 'Hypertension' : 'Type 2 Diabetes',
+    diagnosedAt: new Date(`2025-07-${10 + index}`),
+  }));
+
+  console.log('Seeding diagnoses...');
+  for (const diagnosis of diagnoses) {
+    try {
+      await prisma.diagnosis.upsert({
+        where: { id: diagnosis.id },
+        update: {},
+        create: diagnosis,
+      });
+      console.log(`Created diagnosis: ${diagnosis.description}`);
+    } catch (error) {
+      console.error(`Error creating diagnosis for medical record ${diagnosis.medicalRecordId}:`, error.message);
+    }
+  }
+
+  // Seed Vital Signs (example: 1 vital sign record per patient)
+  const vitalSigns = medicalRecords.map((record, index) => ({
+    id: uuidv4(),
+    medicalRecordId: record.id,
+    bloodPressure: index % 2 === 0 ? '120/80' : '140/90',
+    heartRate: 70 + (index % 5) * 5,
+    temperature: 36.5 + (index % 3) * 0.5,
+    respiratoryRate: 16 + (index % 4),
+    oxygenSaturation: 95 + (index % 5),
+    recordedAt: new Date(`2025-07-${10 + index}`),
+  }));
+
+  console.log('Seeding vital signs...');
+  for (const vitalSign of vitalSigns) {
+    try {
+      await prisma.vitalSign.upsert({
+        where: { id: vitalSign.id },
+        update: {},
+        create: vitalSign,
+      });
+      console.log(`Created vital sign for medical record: ${vitalSign.medicalRecordId}`);
+    } catch (error) {
+      console.error(`Error creating vital sign for medical record ${vitalSign.medicalRecordId}:`, error.message);
+    }
+  }
+
+  // Seed Chief Complaint (1 per medical record)
+  const chiefComplaints = medicalRecords.map((record, index) => ({
+    id: uuidv4(),
+    medicalRecordId: record.id,
+    description: index % 2 === 0 ? 'Persistent headache' : 'Chest pain',
+    duration: '2 weeks',
+    onset: 'Gradual',
+  }));
+
+  console.log('Seeding chief complaints...');
+  for (const complaint of chiefComplaints) {
+    try {
+      await prisma.chiefComplaint.upsert({
+        where: { id: complaint.id },
+        update: {},
+        create: complaint,
+      });
+      console.log(`Created chief complaint for medical record: ${complaint.medicalRecordId}`);
+    } catch (error) {
+      console.error(`Error creating chief complaint for medical record ${complaint.medicalRecordId}:`, error.message);
+    }
+  }
+
+  // Seed Present Illness (1 per medical record)
+  const presentIllnesses = medicalRecords.map((record, index) => ({
+    id: uuidv4(),
+    medicalRecordId: record.id,
+    narrative: index % 2 === 0 ? 'Patient reports persistent headaches with occasional dizziness.' : 'Patient experiences chest pain radiating to the left arm.',
+    severity: 'Moderate',
+    progress: 'Stable',
+    associatedSymptoms: index % 2 === 0 ? 'Nausea' : 'Shortness of breath',
+  }));
+
+  console.log('Seeding present illnesses...');
+  for (const illness of presentIllnesses) {
+    try {
+      await prisma.presentIllness.upsert({
+        where: { id: illness.id },
+        update: {},
+        create: illness,
+      });
+      console.log(`Created present illness for medical record: ${illness.medicalRecordId}`);
+    } catch (error) {
+      console.error(`Error creating present illness for medical record ${illness.medicalRecordId}:`, error.message);
+    }
+  }
+
+  // Seed Past Medical Conditions (1-2 per patient)
+  const pastMedicalConditions = medicalRecords.flatMap((record, index) => [
+    {
+      id: uuidv4(),
+      medicalRecordId: record.id,
+      condition: index % 2 === 0 ? 'Asthma' : 'Malaria',
+      diagnosisDate: new Date(`2020-05-${10 + index}`),
+      notes: 'Managed with medication',
+    },
+  ]);
+
+  console.log('Seeding past medical conditions...');
+  for (const condition of pastMedicalConditions) {
+    try {
+      await prisma.pastMedicalCondition.upsert({
+        where: { id: condition.id },
+        update: {},
+        create: condition,
+      });
+      console.log(`Created past medical condition: ${condition.condition}`);
+    } catch (error) {
+      console.error(`Error creating past medical condition for medical record ${condition.medicalRecordId}:`, error.message);
+    }
+  }
+
+  // Seed Medication History (1-2 per patient)
+  const medicationHistories = medicalRecords.flatMap((record, index) => [
+    {
+      id: uuidv4(),
+      medicalRecordId: record.id,
+      medicationName: index % 2 === 0 ? 'Amlodipine' : 'Metformin',
+      dosage: '5mg',
+      frequency: 'Once daily',
+      startDate: new Date(`2023-01-${10 + index}`),
+      isCurrent: true,
+    },
+  ]);
+
+  console.log('Seeding medication histories...');
+  for (const medication of medicationHistories) {
+    try {
+      await prisma.medicationHistory.upsert({
+        where: { id: medication.id },
+        update: {},
+        create: medication,
+      });
+      console.log(`Created medication history: ${medication.medicationName}`);
+    } catch (error) {
+      console.error(`Error creating medication history for medical record ${medication.medicalRecordId}:`, error.message);
+    }
+  }
+
+  // Seed Social History (1 per medical record)
+  const socialHistories = medicalRecords.map((record, index) => ({
+    id: uuidv4(),
+    medicalRecordId: record.id,
+    smokingStatus: index % 2 === 0 ? 'Non-smoker' : 'Former smoker',
+    alcoholUse: 'Occasional',
+    occupation: index % 2 === 0 ? 'Teacher' : 'Farmer',
+    maritalStatus: 'Married',
+    livingSituation: 'Lives with family',
+  }));
+
+  console.log('Seeding social histories...');
+  for (const history of socialHistories) {
+    try {
+      await prisma.socialHistory.upsert({
+        where: { id: history.id },
+        update: {},
+        create: history,
+      });
+      console.log(`Created social history for medical record: ${history.medicalRecordId}`);
+    } catch (error) {
+      console.error(`Error creating social history for medical record ${history.medicalRecordId}:`, error.message);
+    }
+  }
+
   console.log('Database seeding completed successfully!');
-  console.log(`Total patients created: ${patients.length}`);
+  console.log(`Total new patients created: ${newPatients.length}`);
   console.log(`Total addresses created: ${addresses.length}`);
   console.log(`Total next of kin created: ${nextOfKins.length}`);
   console.log(`Total insurance records created: ${insuranceInfos.length}`);
+  console.log(`Total medical records created: ${medicalRecords.length}`);
+  console.log(`Total allergies created: ${allergies.length}`);
+  console.log(`Total diagnoses created: ${diagnoses.length}`);
+  console.log(`Total vital signs created: ${vitalSigns.length}`);
+  console.log(`Total chief complaints created: ${chiefComplaints.length}`);
+  console.log(`Total present illnesses created: ${presentIllnesses.length}`);
+  console.log(`Total past medical conditions created: ${pastMedicalConditions.length}`);
+  console.log(`Total medication histories created: ${medicationHistories.length}`);
+  console.log(`Total social histories created: ${socialHistories.length}`);
 }
 
 main()
