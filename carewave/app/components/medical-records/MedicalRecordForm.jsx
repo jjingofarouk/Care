@@ -10,6 +10,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { format } from 'date-fns';
+import { getMedicalRecord, createMedicalRecord, updateMedicalRecord } from '../services/medicalRecordsService';
 
 export default function MedicalRecordForm() {
   const router = useRouter();
@@ -19,17 +20,17 @@ export default function MedicalRecordForm() {
     recordDate: new Date(),
     chiefComplaint: { description: '', duration: '', onset: '' },
     presentIllness: { narrative: '', severity: '', progress: '', associatedSymptoms: '' },
-    pastConditions: [{ condition: '', diagnosisDate: null, notes: '' }],
-    surgicalHistory: [{ procedure: '', datePerformed: null, outcome: '', notes: '' }],
-    familyHistory: [{ relative: '', condition: '', ageAtDiagnosis: '', notes: '' }],
-    medicationHistory: [{ medicationName: '', dosage: '', frequency: '', startDate: null, endDate: null, isCurrent: false }],
+    pastConditions: [],
+    surgicalHistory: [],
+    familyHistory: [],
+    medicationHistory: [],
     socialHistory: { smokingStatus: '', alcoholUse: '', occupation: '', maritalStatus: '', livingSituation: '' },
-    reviewOfSystems: [{ system: '', findings: '' }],
-    immunizations: [{ vaccine: '', dateGiven: new Date(), administeredBy: '', notes: '' }],
-    travelHistory: [{ countryVisited: '', dateFrom: null, dateTo: null, purpose: '', travelNotes: '' }],
-    allergies: [{ name: '', severity: '' }],
-    diagnoses: [{ code: '', description: '', diagnosedAt: new Date() }],
-    vitalSigns: [{ bloodPressure: '', heartRate: '', temperature: '', respiratoryRate: '', oxygenSaturation: '', recordedAt: new Date() }],
+    reviewOfSystems: [],
+    immunizations: [],
+    travelHistory: [],
+    allergies: [],
+    diagnoses: [],
+    vitalSigns: [],
   });
   const [patients, setPatients] = useState([]);
   const [errors, setErrors] = useState({});
@@ -47,29 +48,57 @@ export default function MedicalRecordForm() {
   const fetchMedicalRecord = async () => {
     if (!params.id) return;
     try {
-      const response = await fetch(`/api/medical-records/${params.id}?include=chiefComplaint,presentIllness,pastConditions,surgicalHistory,familyHistory,medicationHistory,socialHistory,reviewOfSystems,immunizations,travelHistory,allergies,diagnoses,vitalSigns`);
-      const data = await response.json();
+      const data = await getMedicalRecord(params.id, true);
       setFormData({
-        ...data,
+        patientId: data.patientId || '',
         recordDate: new Date(data.recordDate),
-        pastConditions: data.pastConditions.map(c => ({ ...c, diagnosisDate: c.diagnosisDate ? new Date(c.diagnosisDate) : null })),
-        surgicalHistory: data.surgicalHistory.map(s => ({ ...s, datePerformed: s.datePerformed ? new Date(s.datePerformed) : null })),
-        medicationHistory: data.medicationHistory.map(m => ({
+        chiefComplaint: data.chiefComplaint || { description: '', duration: '', onset: '' },
+        presentIllness: data.presentIllness || { narrative: '', severity: '', progress: '', associatedSymptoms: '' },
+        pastConditions: data.pastConditions?.map((c) => ({
+          ...c,
+          diagnosisDate: c.diagnosisDate ? new Date(c.diagnosisDate) : null,
+        })) || [],
+        surgicalHistory: data.surgicalHistory?.map((s) => ({
+          ...s,
+          datePerformed: s.datePerformed ? new Date(s.datePerformed) : null,
+        })) || [],
+        familyHistory: data.familyHistory?.map((f) => ({
+          ...f,
+          ageAtDiagnosis: f.ageAtDiagnosis || '',
+        })) || [],
+        medicationHistory: data.medicationHistory?.map((m) => ({
           ...m,
           startDate: m.startDate ? new Date(m.startDate) : null,
           endDate: m.endDate ? new Date(m.endDate) : null,
-        })),
-        immunizations: data.immunizations.map(i => ({ ...i, dateGiven: new Date(i.dateGiven) })),
-        travelHistory: data.travelHistory.map(t => ({
+        })) || [],
+        socialHistory: data.socialHistory || { smokingStatus: '', alcoholUse: '', occupation: '', maritalStatus: '', livingSituation: '' },
+        reviewOfSystems: data.reviewOfSystems || [],
+        immunizations: data.immunizations?.map((i) => ({
+          ...i,
+          dateGiven: new Date(i.dateGiven),
+        })) || [],
+        travelHistory: data.travelHistory?.map((t) => ({
           ...t,
           dateFrom: t.dateFrom ? new Date(t.dateFrom) : null,
           dateTo: t.dateTo ? new Date(t.dateTo) : null,
-        })),
-        diagnoses: data.diagnoses.map(d => ({ ...d, diagnosedAt: new Date(d.diagnosedAt) })),
-        vitalSigns: data.vitalSigns.map(v => ({ ...v, recordedAt: new Date(v.recordedAt) })),
+        })) || [],
+        allergies: data.allergies || [],
+        diagnoses: data.diagnoses?.map((d) => ({
+          ...d,
+          diagnosedAt: new Date(d.diagnosedAt),
+        })) || [],
+        vitalSigns: data.vitalSigns?.map((v) => ({
+          ...v,
+          recordedAt: new Date(v.recordedAt),
+          heartRate: v.heartRate || '',
+          temperature: v.temperature || '',
+          respiratoryRate: v.respiratoryRate || '',
+          oxygenSaturation: v.oxygenSaturation || '',
+        })) || [],
       });
     } catch (error) {
       console.error('Error fetching medical record:', error);
+      setErrors({ submit: 'Failed to load medical record' });
     }
   };
 
@@ -80,12 +109,12 @@ export default function MedicalRecordForm() {
 
   const handleInputChange = (section, field, value, index = null) => {
     if (index !== null) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [section]: prev[section].map((item, i) => i === index ? { ...item, [field]: value } : item),
+        [section]: prev[section].map((item, i) => (i === index ? { ...item, [field]: value } : item)),
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [section]: { ...prev[section], [field]: value },
       }));
@@ -93,16 +122,37 @@ export default function MedicalRecordForm() {
   };
 
   const handleAddItem = (section) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [section]: [...prev[section], section === 'immunizations' || section === 'diagnoses' || section === 'vitalSigns' ?
-        { ...prev[section][0], dateGiven: new Date(), diagnosedAt: new Date(), recordedAt: new Date() } :
-        { ...prev[section][0] }],
+      [section]: [
+        ...prev[section],
+        section === 'immunizations'
+          ? { vaccine: '', dateGiven: new Date(), administeredBy: '', notes: '' }
+          : section === 'diagnoses'
+          ? { code: '', description: '', diagnosedAt: new Date() }
+          : section === 'vitalSigns'
+          ? { bloodPressure: '', heartRate: '', temperature: '', respiratoryRate: '', oxygenSaturation: '', recordedAt: new Date() }
+          : section === 'pastConditions'
+          ? { condition: '', diagnosisDate: null, notes: '' }
+          : section === 'surgicalHistory'
+          ? { procedure: '', datePerformed: null, outcome: '', notes: '' }
+          : section === 'familyHistory'
+          ? { relative: '', condition: '', ageAtDiagnosis: '', notes: '' }
+          : section === 'medicationHistory'
+          ? { medicationName: '', dosage: '', frequency: '', startDate: null, endDate: null, isCurrent: false }
+          : section === 'reviewOfSystems'
+          ? { system: '', findings: '' }
+          : section === 'travelHistory'
+          ? { countryVisited: '', dateFrom: null, dateTo: null, purpose: '', travelNotes: '' }
+          : section === 'allergies'
+          ? { name: '', severity: '' }
+          : {},
+      ],
     }));
   };
 
   const handleRemoveItem = (section, index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [section]: prev[section].filter((_, i) => i !== index),
     }));
@@ -112,6 +162,8 @@ export default function MedicalRecordForm() {
     const newErrors = {};
     if (!formData.patientId) newErrors.patientId = 'Patient is required';
     if (!formData.recordDate) newErrors.recordDate = 'Record date is required';
+    if (formData.chiefComplaint.description && !formData.chiefComplaint.duration)
+      newErrors.chiefComplaint = 'Chief complaint duration is required if description is provided';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -121,55 +173,57 @@ export default function MedicalRecordForm() {
     if (!validateForm()) return;
 
     try {
-      const method = params.id ? 'PUT' : 'POST';
-      const url = params.id ? `/api/medical-records/${params.id}` : '/api/medical-records';
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          recordDate: format(formData.recordDate, 'yyyy-MM-dd'),
-          pastConditions: formData.pastConditions.map(c => ({
-            ...c,
-            diagnosisDate: c.diagnosisDate ? format(c.diagnosisDate, 'yyyy-MM-dd') : null,
-          })),
-          surgicalHistory: formData.surgicalHistory.map(s => ({
-            ...s,
-            datePerformed: s.datePerformed ? format(s.datePerformed, 'yyyy-MM-dd') : null,
-          })),
-          medicationHistory: formData.medicationHistory.map(m => ({
-            ...m,
-            startDate: m.startDate ? format(m.startDate, 'yyyy-MM-dd') : null,
-            endDate: m.endDate ? format(m.endDate, 'yyyy-MM-dd') : null,
-          })),
-          immunizations: formData.immunizations.map(i => ({
-            ...i,
-            dateGiven: format(i.dateGiven, 'yyyy-MM-dd'),
-          })),
-          travelHistory: formData.travelHistory.map(t => ({
-            ...t,
-            dateFrom: t.dateFrom ? format(t.dateFrom, 'yyyy-MM-dd') : null,
-            dateTo: t.dateTo ? format(t.dateTo, 'yyyy-MM-dd') : null,
-          })),
-          diagnoses: formData.diagnoses.map(d => ({
-            ...d,
-            diagnosedAt: format(d.diagnosedAt, 'yyyy-MM-dd'),
-          })),
-          vitalSigns: formData.vitalSigns.map(v => ({
-            ...v,
-            recordedAt: format(v.recordedAt, 'yyyy-MM-dd'),
-          })),
-        }),
-      });
+      const dataToSend = {
+        ...formData,
+        recordDate: format(formData.recordDate, 'yyyy-MM-dd'),
+        pastConditions: formData.pastConditions.map((c) => ({
+          ...c,
+          diagnosisDate: c.diagnosisDate ? format(c.diagnosisDate, 'yyyy-MM-dd') : null,
+        })),
+        surgicalHistory: formData.surgicalHistory.map((s) => ({
+          ...s,
+          datePerformed: s.datePerformed ? format(s.datePerformed, 'yyyy-MM-dd') : null,
+        })),
+        familyHistory: formData.familyHistory.map((f) => ({
+          ...f,
+          ageAtDiagnosis: f.ageAtDiagnosis ? parseInt(f.ageAtDiagnosis, 10) : null,
+        })),
+        medicationHistory: formData.medicationHistory.map((m) => ({
+          ...m,
+          startDate: m.startDate ? format(m.startDate, 'yyyy-MM-dd') : null,
+          endDate: m.endDate ? format(m.endDate, 'yyyy-MM-dd') : null,
+        })),
+        immunizations: formData.immunizations.map((i) => ({
+          ...i,
+          dateGiven: format(i.dateGiven, 'yyyy-MM-dd'),
+        })),
+        travelHistory: formData.travelHistory.map((t) => ({
+          ...t,
+          dateFrom: t.dateFrom ? format(t.dateFrom, 'yyyy-MM-dd') : null,
+          dateTo: t.dateTo ? format(t.dateTo, 'yyyy-MM-dd') : null,
+        })),
+        diagnoses: formData.diagnoses.map((d) => ({
+          ...d,
+          diagnosedAt: format(d.diagnosedAt, 'yyyy-MM-dd'),
+        })),
+        vitalSigns: formData.vitalSigns.map((v) => ({
+          ...v,
+          recordedAt: format(v.recordedAt, 'yyyy-MM-dd'),
+          heartRate: v.heartRate ? parseInt(v.heartRate, 10) : null,
+          temperature: v.temperature ? parseFloat(v.temperature) : null,
+          respiratoryRate: v.respiratoryRate ? parseInt(v.respiratoryRate, 10) : null,
+          oxygenSaturation: v.oxygenSaturation ? parseFloat(v.oxygenSaturation) : null,
+        })),
+      };
 
-      if (response.ok) {
-        router.push('/medical-records');
+      if (params.id) {
+        await updateMedicalRecord(params.id, dataToSend);
       } else {
-        const errorData = await response.json();
-        setErrors({ submit: errorData.error || 'Failed to save medical record' });
+        await createMedicalRecord(dataToSend);
       }
+      router.push('/medical-records');
     } catch (error) {
-      setErrors({ submit: 'An error occurred while saving the record' });
+      setErrors({ submit: error.message || 'An error occurred while saving the record' });
       console.error('Error submitting form:', error);
     }
   };
@@ -178,17 +232,19 @@ export default function MedicalRecordForm() {
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h5" gutterBottom>Medical Record Form</Typography>
+          <Typography variant="h5" gutterBottom>
+            Medical Record Form
+          </Typography>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.patientId}>
                 <InputLabel>Patient</InputLabel>
                 <Select
                   value={formData.patientId}
-                  onChange={(e) => setFormData(prev => ({ ...prev, patientId: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, patientId: e.target.value }))}
                   label="Patient"
                 >
-                  {patients.map(patient => (
+                  {patients.map((patient) => (
                     <MenuItem key={patient.id} value={patient.id}>
                       {patient.firstName} {patient.lastName}
                     </MenuItem>
@@ -201,12 +257,15 @@ export default function MedicalRecordForm() {
               <DatePicker
                 label="Record Date"
                 value={formData.recordDate}
-                onChange={(date) => setFormData(prev => ({ ...prev, recordDate: date }))}
-                renderInput={(params) => <TextField {...params} fullWidth error={!!errors.recordDate} helperText={errors.recordDate} />}
+                onChange={(date) => setFormData((prev) => ({ ...prev, recordDate: date }))}
+                renderInput={(params) => (
+                  <TextField {...params} fullWidth error={!!errors.recordDate} helperText={errors.recordDate} />
+                )}
               />
             </Grid>
             <Grid item xs={12}>
               <Typography variant="h6">Chief Complaint</Typography>
+              {errors.chiefComplaint && <Typography color="error">{errors.chiefComplaint}</Typography>}
             </Grid>
             <Grid item xs={12} sm={4}>
               <TextField
@@ -298,7 +357,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton onClick={() => handleRemoveItem('pastConditions', index)} disabled={formData.pastConditions.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('pastConditions', index)}
+                      disabled={formData.pastConditions.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
@@ -337,7 +399,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton onClick={() => handleRemoveItem('surgicalHistory', index)} disabled={formData.surgicalHistory.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('surgicalHistory', index)}
+                      disabled={formData.surgicalHistory.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
@@ -377,7 +442,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton onClick={() => handleRemoveItem('familyHistory', index)} disabled={formData.familyHistory.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('familyHistory', index)}
+                      disabled={formData.familyHistory.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
@@ -432,7 +500,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton onClick={() => handleRemoveItem('medicationHistory', index)} disabled={formData.medicationHistory.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('medicationHistory', index)}
+                      disabled={formData.medicationHistory.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
@@ -506,7 +577,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton onClick={() => handleRemoveItem('reviewOfSystems', index)} disabled={formData.reviewOfSystems.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('reviewOfSystems', index)}
+                      disabled={formData.reviewOfSystems.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
@@ -545,7 +619,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton onClick={() => handleRemoveItem('immunizations', index)} disabled={formData.immunizations.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('immunizations', index)}
+                      disabled={formData.immunizations.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
@@ -592,7 +669,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton onClick={() => handleRemoveItem('travelHistory', index)} disabled={formData.travelHistory.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('travelHistory', index)}
+                      disabled={formData.travelHistory.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
@@ -623,7 +703,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton onClick={() => handleRemoveItem('allergies', index)} disabled={formData.allergies.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('allergies', index)}
+                      disabled={formData.allergies.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
@@ -662,7 +745,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton onClick={() => handleRemoveItem('diagnoses', index)} disabled={formData.diagnoses.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('diagnoses', index)}
+                      disabled={formData.diagnoses.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
@@ -721,7 +807,10 @@ export default function MedicalRecordForm() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton onClick={() => handleRemoveItem('vitalSigns', index)} disabled={formData.vitalSigns.length === 1}>
+                    <IconButton
+                      onClick={() => handleRemoveItem('vitalSigns', index)}
+                      disabled={formData.vitalSigns.length === 0}
+                    >
                       <Delete />
                     </IconButton>
                   </Grid>
