@@ -10,7 +10,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { format } from 'date-fns';
-import { getMedicalRecord, createMedicalRecord, updateMedicalRecord } from '../services/medicalRecordsService';
+import { getMedicalRecord, createMedicalRecord, updateMedicalRecord } from '@/services/medicalRecordsService';
 
 export default function MedicalRecordForm() {
   const router = useRouter();
