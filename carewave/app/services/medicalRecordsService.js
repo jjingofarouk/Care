@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const API_ROUTES = {
   MEDICAL_RECORDS: '/api/medical-records',
@@ -9,16 +8,15 @@ const API_ROUTES = {
   BULK: '/api/medical-records/bulk'
 };
 
-// Create axios instance with default config
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
-  },
+    'Authorization': `Bearer ${localStorage.getItem('token')}`
+  }
 });
 
-// Request interceptor for logging
 apiClient.interceptors.request.use(
   (config) => {
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
@@ -30,7 +28,6 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -46,11 +43,10 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Validation functions
 function validateMedicalRecordData(data) {
   if (!data) throw new Error('No medical record data provided');
-  if (!data.patientId || !data.recordDate) {
-    throw new Error('Patient ID and record date are required');
+  if (!data.patientId || !data.recordDate || !data.doctorId) {
+    throw new Error('Patient ID, doctor ID, and record date are required');
   }
   const recordDate = new Date(data.recordDate);
   if (isNaN(recordDate.getTime())) {
@@ -131,8 +127,8 @@ function validateFamilyHistoryData(data) {
 }
 
 function validateMedicationHistoryData(data) {
-  if (!data.medicalRecordId || !data.medicationName || !data.dosage || !data.frequency) {
-    throw new Error('Medical record ID, medication name, dosage, and frequency are required for medication history');
+  if (!data.medicalRecordId || !data.medicationName) {
+    throw new Error('Medical record ID and medication name are required for medication history');
   }
   if (data.startDate && isNaN(new Date(data.startDate).getTime())) {
     throw new Error('Invalid date format for startDate');
@@ -180,7 +176,6 @@ function validateTravelHistoryData(data) {
   return true;
 }
 
-// Medical record service functions
 export async function getAllMedicalRecords(filters = {}) {
   try {
     const params = new URLSearchParams();
@@ -255,7 +250,6 @@ export async function deleteMedicalRecord(id) {
   }
 }
 
-// Resource-specific functions
 const resourceTypes = [
   { name: 'allergy', validator: validateAllergyData },
   { name: 'diagnosis', validator: validateDiagnosisData },
@@ -273,7 +267,6 @@ const resourceTypes = [
 ];
 
 resourceTypes.forEach(({ name, validator }) => {
-  // Get all resources for patient
   exports[`get${name.charAt(0).toUpperCase() + name.slice(1)}s`] = async (patientId) => {
     try {
       if (!patientId) throw new Error('Patient ID is required');
@@ -290,7 +283,6 @@ resourceTypes.forEach(({ name, validator }) => {
     }
   };
 
-  // Get resource by ID
   exports[`get${name.charAt(0).toUpperCase() + name.slice(1)}ById`] = async (id) => {
     try {
       if (!id) throw new Error(`${name} ID is required`);
@@ -303,7 +295,6 @@ resourceTypes.forEach(({ name, validator }) => {
     }
   };
 
-  // Create resource
   exports[`create${name.charAt(0).toUpperCase() + name.slice(1)}`] = async (data) => {
     try {
       validator(data);
@@ -319,7 +310,6 @@ resourceTypes.forEach(({ name, validator }) => {
     }
   };
 
-  // Update resource
   exports[`update${name.charAt(0).toUpperCase() + name.slice(1)}`] = async (id, data) => {
     try {
       if (!id) throw new Error(`${name} ID is required`);
@@ -336,7 +326,6 @@ resourceTypes.forEach(({ name, validator }) => {
     }
   };
 
-  // Delete resource
   exports[`delete${name.charAt(0).toUpperCase() + name.slice(1)}`] = async (id) => {
     try {
       if (!id) throw new Error(`${name} ID is required`);
@@ -355,10 +344,8 @@ export async function bulkCreateMedicalRecords(records) {
       throw new Error('Records array is required');
     }
     records.forEach(validateMedicalRecordData);
-    
     const response = await apiClient.post(API_ROUTES.BULK, records);
     if (!response.data) throw new Error('Failed to bulk create medical records');
-    
     return response.data;
   } catch (error) {
     console.error('Error in bulk create medical records:', error);
@@ -371,20 +358,15 @@ export async function bulkDeleteMedicalRecords(ids) {
     if (!Array.isArray(ids) || ids.length === 0) {
       throw new Error('Medical record IDs array is required');
     }
-    
     const deletePromises = ids.map(id => deleteMedicalRecord(id));
     const results = await Promise.allSettled(deletePromises);
-    
     const successful = results.filter(result => result.status === 'fulfilled').length;
     const failed = results.filter(result => result.status === 'rejected').length;
-    
     return {
       successful,
       failed,
       total: ids.length,
-      errors: results
-        .filter(result => result.status === 'rejected')
-        .map(result => result.reason.message)
+      errors: results.filter(result => result.status === 'rejected').map(result => result.reason.message)
     };
   } catch (error) {
     console.error('Error in bulk delete medical records:', error);
@@ -398,7 +380,6 @@ export async function getMedicalRecordStats(filters = {}) {
     if (filters.patientId) params.append('patientId', filters.patientId);
     if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
     if (filters.dateTo) params.append('dateTo', filters.dateTo);
-    
     const response = await apiClient.get(`${API_ROUTES.STATS}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -421,7 +402,6 @@ export async function getRecentMedicalRecords(limit = 10) {
   }
 }
 
-// Export default service object
 const medicalRecordsService = {
   getAllMedicalRecords,
   getMedicalRecordById,
