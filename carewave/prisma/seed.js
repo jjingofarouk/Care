@@ -204,12 +204,19 @@ async function main() {
   console.log('Seeding patient addresses...');
   for (const address of addresses) {
     try {
-      await prisma.patientAddress.upsert({
-        where: { id: address.id },
-        update: {},
-        create: address,
+      // Check if address already exists for this patient
+      const existingAddress = await prisma.patientAddress.findFirst({
+        where: { patientId: address.patientId }
       });
-      console.log(`Created address for patient in: ${address.city}`);
+      
+      if (!existingAddress) {
+        await prisma.patientAddress.create({
+          data: address,
+        });
+        console.log(`Created address for patient in: ${address.city}`);
+      } else {
+        console.log(`Address already exists for patient: ${address.patientId}`);
+      }
     } catch (error) {
       console.error(`Error creating address for patient ${address.patientId}:`, error.message);
     }
@@ -312,12 +319,19 @@ async function main() {
   console.log('Seeding next of kin...');
   for (const nok of nextOfKins) {
     try {
-      await prisma.nextOfKin.upsert({
-        where: { patientId: nok.patientId },
-        update: {},
-        create: nok,
+      // Check if Next of Kin already exists for this patient (unique constraint)
+      const existingNok = await prisma.nextOfKin.findUnique({
+        where: { patientId: nok.patientId }
       });
-      console.log(`Created next of kin for patient: ${nok.firstName} ${nok.lastName}`);
+      
+      if (!existingNok) {
+        await prisma.nextOfKin.create({
+          data: nok,
+        });
+        console.log(`Created next of kin for patient: ${nok.firstName} ${nok.lastName}`);
+      } else {
+        console.log(`Next of kin already exists for patient: ${nok.patientId}`);
+      }
     } catch (error) {
       console.error(`Error creating next of kin for patient ${nok.patientId}:`, error.message);
     }
@@ -400,12 +414,28 @@ async function main() {
   console.log('Seeding insurance information...');
   for (const insurance of insuranceInfos) {
     try {
-      await prisma.insuranceInfo.upsert({
-        where: { patientId: insurance.patientId },
-        update: {},
-        create: insurance,
+      // Check if insurance already exists for this patient (unique constraint)
+      const existingInsurance = await prisma.insuranceInfo.findUnique({
+        where: { patientId: insurance.patientId }
       });
-      console.log(`Created insurance info for patient with provider: ${insurance.provider}`);
+      
+      if (!existingInsurance) {
+        // Also check for policy number uniqueness
+        const existingPolicy = await prisma.insuranceInfo.findUnique({
+          where: { policyNumber: insurance.policyNumber }
+        });
+        
+        if (!existingPolicy) {
+          await prisma.insuranceInfo.create({
+            data: insurance,
+          });
+          console.log(`Created insurance info for patient with provider: ${insurance.provider}`);
+        } else {
+          console.log(`Policy number ${insurance.policyNumber} already exists`);
+        }
+      } else {
+        console.log(`Insurance already exists for patient: ${insurance.patientId}`);
+      }
     } catch (error) {
       console.error(`Error creating insurance info for patient ${insurance.patientId}:`, error.message);
     }
@@ -421,12 +451,19 @@ async function main() {
   console.log('Seeding medical records...');
   for (const record of medicalRecords) {
     try {
-      await prisma.medicalRecord.upsert({
-        where: { id: record.id },
-        update: {},
-        create: record,
+      // Check if medical record with this ID already exists
+      const existingRecord = await prisma.medicalRecord.findUnique({
+        where: { id: record.id }
       });
-      console.log(`Created medical record for patient: ${record.patientId}`);
+      
+      if (!existingRecord) {
+        await prisma.medicalRecord.create({
+          data: record,
+        });
+        console.log(`Created medical record for patient: ${record.patientId}`);
+      } else {
+        console.log(`Medical record already exists: ${record.id}`);
+      }
     } catch (error) {
       console.error(`Error creating medical record for patient ${record.patientId}:`, error.message);
     }
@@ -445,12 +482,18 @@ async function main() {
   console.log('Seeding allergies...');
   for (const allergy of allergies) {
     try {
-      await prisma.allergy.upsert({
-        where: { id: allergy.id },
-        update: {},
-        create: allergy,
+      const existingAllergy = await prisma.allergy.findUnique({
+        where: { id: allergy.id }
       });
-      console.log(`Created allergy: ${allergy.name}`);
+      
+      if (!existingAllergy) {
+        await prisma.allergy.create({
+          data: allergy,
+        });
+        console.log(`Created allergy: ${allergy.name}`);
+      } else {
+        console.log(`Allergy already exists: ${allergy.id}`);
+      }
     } catch (error) {
       console.error(`Error creating allergy for medical record ${allergy.medicalRecordId}:`, error.message);
     }
@@ -468,12 +511,18 @@ async function main() {
   console.log('Seeding diagnoses...');
   for (const diagnosis of diagnoses) {
     try {
-      await prisma.diagnosis.upsert({
-        where: { id: diagnosis.id },
-        update: {},
-        create: diagnosis,
+      const existingDiagnosis = await prisma.diagnosis.findUnique({
+        where: { id: diagnosis.id }
       });
-      console.log(`Created diagnosis: ${diagnosis.description}`);
+      
+      if (!existingDiagnosis) {
+        await prisma.diagnosis.create({
+          data: diagnosis,
+        });
+        console.log(`Created diagnosis: ${diagnosis.description}`);
+      } else {
+        console.log(`Diagnosis already exists: ${diagnosis.id}`);
+      }
     } catch (error) {
       console.error(`Error creating diagnosis for medical record ${diagnosis.medicalRecordId}:`, error.message);
     }
@@ -494,12 +543,18 @@ async function main() {
   console.log('Seeding vital signs...');
   for (const vitalSign of vitalSigns) {
     try {
-      await prisma.vitalSign.upsert({
-        where: { id: vitalSign.id },
-        update: {},
-        create: vitalSign,
+      const existingVitalSign = await prisma.vitalSign.findUnique({
+        where: { id: vitalSign.id }
       });
-      console.log(`Created vital sign for medical record: ${vitalSign.medicalRecordId}`);
+      
+      if (!existingVitalSign) {
+        await prisma.vitalSign.create({
+          data: vitalSign,
+        });
+        console.log(`Created vital sign for medical record: ${vitalSign.medicalRecordId}`);
+      } else {
+        console.log(`Vital sign already exists: ${vitalSign.id}`);
+      }
     } catch (error) {
       console.error(`Error creating vital sign for medical record ${vitalSign.medicalRecordId}:`, error.message);
     }
@@ -517,12 +572,19 @@ async function main() {
   console.log('Seeding chief complaints...');
   for (const complaint of chiefComplaints) {
     try {
-      await prisma.chiefComplaint.upsert({
-        where: { id: complaint.id },
-        update: {},
-        create: complaint,
+      // Check if chief complaint already exists for this medical record (unique constraint)
+      const existingComplaint = await prisma.chiefComplaint.findUnique({
+        where: { medicalRecordId: complaint.medicalRecordId }
       });
-      console.log(`Created chief complaint for medical record: ${complaint.medicalRecordId}`);
+      
+      if (!existingComplaint) {
+        await prisma.chiefComplaint.create({
+          data: complaint,
+        });
+        console.log(`Created chief complaint for medical record: ${complaint.medicalRecordId}`);
+      } else {
+        console.log(`Chief complaint already exists for medical record: ${complaint.medicalRecordId}`);
+      }
     } catch (error) {
       console.error(`Error creating chief complaint for medical record ${complaint.medicalRecordId}:`, error.message);
     }
@@ -541,12 +603,19 @@ async function main() {
   console.log('Seeding present illnesses...');
   for (const illness of presentIllnesses) {
     try {
-      await prisma.presentIllness.upsert({
-        where: { id: illness.id },
-        update: {},
-        create: illness,
+      // Check if present illness already exists for this medical record (unique constraint)
+      const existingIllness = await prisma.presentIllness.findUnique({
+        where: { medicalRecordId: illness.medicalRecordId }
       });
-      console.log(`Created present illness for medical record: ${illness.medicalRecordId}`);
+      
+      if (!existingIllness) {
+        await prisma.presentIllness.create({
+          data: illness,
+        });
+        console.log(`Created present illness for medical record: ${illness.medicalRecordId}`);
+      } else {
+        console.log(`Present illness already exists for medical record: ${illness.medicalRecordId}`);
+      }
     } catch (error) {
       console.error(`Error creating present illness for medical record ${illness.medicalRecordId}:`, error.message);
     }
@@ -566,12 +635,18 @@ async function main() {
   console.log('Seeding past medical conditions...');
   for (const condition of pastMedicalConditions) {
     try {
-      await prisma.pastMedicalCondition.upsert({
-        where: { id: condition.id },
-        update: {},
-        create: condition,
+      const existingCondition = await prisma.pastMedicalCondition.findUnique({
+        where: { id: condition.id }
       });
-      console.log(`Created past medical condition: ${condition.condition}`);
+      
+      if (!existingCondition) {
+        await prisma.pastMedicalCondition.create({
+          data: condition,
+        });
+        console.log(`Created past medical condition: ${condition.condition}`);
+      } else {
+        console.log(`Past medical condition already exists: ${condition.id}`);
+      }
     } catch (error) {
       console.error(`Error creating past medical condition for medical record ${condition.medicalRecordId}:`, error.message);
     }
@@ -593,12 +668,18 @@ async function main() {
   console.log('Seeding medication histories...');
   for (const medication of medicationHistories) {
     try {
-      await prisma.medicationHistory.upsert({
-        where: { id: medication.id },
-        update: {},
-        create: medication,
+      const existingMedication = await prisma.medicationHistory.findUnique({
+        where: { id: medication.id }
       });
-      console.log(`Created medication history: ${medication.medicationName}`);
+      
+      if (!existingMedication) {
+        await prisma.medicationHistory.create({
+          data: medication,
+        });
+        console.log(`Created medication history: ${medication.medicationName}`);
+      } else {
+        console.log(`Medication history already exists: ${medication.id}`);
+      }
     } catch (error) {
       console.error(`Error creating medication history for medical record ${medication.medicalRecordId}:`, error.message);
     }
@@ -618,12 +699,19 @@ async function main() {
   console.log('Seeding social histories...');
   for (const history of socialHistories) {
     try {
-      await prisma.socialHistory.upsert({
-        where: { id: history.id },
-        update: {},
-        create: history,
+      // Check if social history already exists for this medical record (unique constraint)
+      const existingHistory = await prisma.socialHistory.findUnique({
+        where: { medicalRecordId: history.medicalRecordId }
       });
-      console.log(`Created social history for medical record: ${history.medicalRecordId}`);
+      
+      if (!existingHistory) {
+        await prisma.socialHistory.create({
+          data: history,
+        });
+        console.log(`Created social history for medical record: ${history.medicalRecordId}`);
+      } else {
+        console.log(`Social history already exists for medical record: ${history.medicalRecordId}`);
+      }
     } catch (error) {
       console.error(`Error creating social history for medical record ${history.medicalRecordId}:`, error.message);
     }
