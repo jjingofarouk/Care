@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import MedicalRecordForm from '../components/medical-records/MedicalRecordForm';
-import MedicalRecordList from '../components/medical-records/MedicalRecordList';
+import MedicalRecordsList from '../components/medical-records/MedicalRecordsList';
 import MedicalRecordSummary from '../components/medical-records/MedicalRecordSummary';
 
 const MedicalRecordsPage = () => {
