@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, Grid, Typography } from '@mui/material';
+import { TextField, Button, Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Save, Stethoscope } from 'lucide-react';
 
 const DiagnosisForm = ({ initialData = {}, onSubmit, medicalRecords = [] }) => {
