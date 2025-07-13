@@ -1,290 +1,220 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Box, Typography, Button, Paper, List, ListItem, ListItemText } from '@mui/material';
-import medicalRecordsService from '@/services/medicalRecordsService';
-import MedicalRecordForm from '@/components/medical-records/MedicalRecordForm';
+import { Box, Typography, Paper, Grid, Button, Divider } from '@mui/material';
+import { format } from 'date-fns';
 
-export default function MedicalRecordDetail() {
-  const { id } = useParams();
+export default function MedicalRecordDetailPage() {
+  const params = useParams();
   const router = useRouter();
   const [record, setRecord] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    const fetchRecord = async () => {
+    async function fetchMedicalRecord() {
       try {
-        const data = await medicalRecordsService.getMedicalRecordById(id);
+        const response = await fetch(`/api/medical-records/${params.id}?include=chiefComplaint,presentIllness,pastConditions,surgicalHistory,familyHistory,medicationHistory,socialHistory,reviewOfSystems,immunizations,travelHistory,allergies,diagnoses,vitalSigns`);
+        const data = await response.json();
         setRecord(data);
-      } catch (err) {
-        setError('Failed to load medical record');
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching medical record:', error);
       }
-    };
-    fetchRecord();
-  }, [id]);
-
-  const handleEdit = () => {
-    setEditing(true);
-  };
-
-  const handleDelete = async () => {
-    try {
-      await medicalRecordsService.deleteMedicalRecord(id);
-      router.push('/medical-records');
-    } catch (err) {
-      setError('Failed to delete medical record');
     }
-  };
+    fetchMedicalRecord();
+  }, [params.id]);
 
-  const handleFormSubmit = async (data) => {
-    try {
-      await medicalRecordsService.updateMedicalRecord(id, data);
-      setEditing(false);
-      const updatedRecord = await medicalRecordsService.getMedicalRecordById(id);
-      setRecord(updatedRecord);
-    } catch (err) {
-      setError('Failed to update medical record');
-    }
-  };
-
-  if (loading) return <Box>Loading...</Box>;
-  if (error) return <Box color="error.main">{error}</Box>;
-  if (!record) return <Box>Record not found</Box>;
-
-  if (editing) {
-    return (
-      <Box className="container mx-auto p-4">
-        <MedicalRecordForm initialData={record} medicalRecord={record} onSubmit={handleFormSubmit} />
-        <Button variant="outlined" onClick={() => setEditing(false)} className="mt-4">Cancel Edit</Button>
-      </Box>
-    );
-  }
+  if (!record) return <Box>Loading...</Box>;
 
   return (
-    <Box className="container mx-auto p-4">
-      <Typography variant="h4" className="mb-4">Medical Record Details</Typography>
-      <Paper className="p-4">
-        <Typography variant="h6">Patient: {record.patient?.name}</Typography>
-        <Typography variant="h6">Doctor: {record.doctor?.name} ({record.doctor?.department?.name || 'N/A'})</Typography>
-        <Typography variant="h6">Record Date: {new Date(record.recordDate).toLocaleDateString()}</Typography>
-        
-        {record.chiefComplaint && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Chief Complaint</Typography>
-            <List>
-              <ListItem>
-                <ListItemText primary="Description" secondary={record.chiefComplaint.description} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Duration" secondary={record.chiefComplaint.duration} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Onset" secondary={record.chiefComplaint.onset || 'N/A'} />
-              </ListItem>
-            </List>
-          </Box>
-        )}
-
-        {record.presentIllness && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Present Illness</Typography>
-            <List>
-              <ListItem>
-                <ListItemText primary="Narrative" secondary={record.presentIllness.narrative} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Severity" secondary={record.presentIllness.severity || 'N/A'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Progress" secondary={record.presentIllness.progress || 'N/A'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Associated Symptoms" secondary={record.presentIllness.associatedSymptoms || 'N/A'} />
-              </ListItem>
-            </List>
-          </Box>
-        )}
-
-        {record.diagnoses?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Diagnoses</Typography>
-            <List>
-              {record.diagnoses.map(d => (
-                <ListItem key={d.id}>
-                  <ListItemText
-                    primary={`${d.code}: ${d.description}`}
-                    secondary={`Diagnosed: ${new Date(d.diagnosedAt).toLocaleDateString()}`}
-                  />
-                </ListItem>
+    <Box sx={{ p: 3 }}>
+      <Paper elevation={3} sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+          <Typography variant="h5">
+            Medical Record for {record.patient.firstName} {record.patient.lastName}
+          </Typography>
+          <Button variant="contained" onClick={() => router.push(`/medical-records/${params.id}/edit`)}>
+            Edit Record
+          </Button>
+        </Box>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Typography variant="h6">Record Details</Typography>
+            <Typography>Record ID: {record.id}</Typography>
+            <Typography>Record Date: {format(new Date(record.recordDate), 'MM/dd/yyyy')}</Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <Divider />
+          </Grid>
+          {/* Chief Complaint */}
+          {record.chiefComplaint && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Chief Complaint</Typography>
+              <Typography>Description: {record.chiefComplaint.description}</Typography>
+              <Typography>Duration: {record.chiefComplaint.duration}</Typography>
+              <Typography>Onset: {record.chiefComplaint.onset || 'N/A'}</Typography>
+            </Grid>
+          )}
+          {/* Present Illness */}
+          {record.presentIllness && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Present Illness</Typography>
+              <Typography>Narrative: {record.presentIllness.narrative}</Typography>
+              <Typography>Severity: {record.presentIllness.severity || 'N/A'}</Typography>
+              <Typography>Progress: {record.presentIllness.progress || 'N/A'}</Typography>
+              <Typography>Associated Symptoms: {record.presentIllness.associatedSymptoms || 'N/A'}</Typography>
+            </Grid>
+          )}
+          {/* Past Conditions */}
+          {record.pastConditions.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Past Medical Conditions</Typography>
+              {record.pastConditions.map((condition, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>Condition: {condition.condition}</Typography>
+                  <Typography>Diagnosis Date: {condition.diagnosisDate ? format(new Date(condition.diagnosisDate), 'MM/dd/yyyy') : 'N/A'}</Typography>
+                  <Typography>Notes: {condition.notes || 'N/A'}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
-
-        {record.vitalSigns?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Vital Signs</Typography>
-            <List>
-              {record.vitalSigns.map(v => (
-                <ListItem key={v.id}>
-                  <ListItemText
-                    primary={`BP: ${v.bloodPressure || 'N/A'}, HR: ${v.heartRate || 'N/A'}, Temp: ${v.temperature || 'N/A'}`}
-                    secondary={`Recorded: ${new Date(v.recordedAt).toLocaleDateString()}`}
-                  />
-                </ListItem>
+            </Grid>
+          )}
+          {/* Surgical History */}
+          {record.surgicalHistory.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Surgical History</Typography>
+              {record.surgicalHistory.map((surgery, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>Procedure: {surgery.procedure}</Typography>
+                  <Typography>Date Performed: {surgery.datePerformed ? format(new Date(surgery.datePerformed), 'MM/dd/yyyy') : 'N/A'}</Typography>
+                  <Typography>Outcome: {surgery.outcome || 'N/A'}</Typography>
+                  <Typography>Notes: {surgery.notes || 'N/A'}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
-
-        {record.allergies?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Allergies</Typography>
-            <List>
-              {record.allergies.map(a => (
-                <ListItem key={a.id}>
-                  <ListItemText primary={a.name} secondary={`Severity: ${a.severity}`} />
-                </ListItem>
+            </Grid>
+          )}
+          {/* Family History */}
+          {record.familyHistory.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Family History</Typography>
+              {record.familyHistory.map((family, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>Relative: {family.relative}</Typography>
+                  <Typography>Condition: {family.condition}</Typography>
+                  <Typography>Age at Diagnosis: {family.ageAtDiagnosis || 'N/A'}</Typography>
+                  <Typography>Notes: {family.notes || 'N/A'}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
-
-        {record.pastConditions?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Past Conditions</Typography>
-            <List>
-              {record.pastConditions.map(p => (
-                <ListItem key={p.id}>
-                  <ListItemText
-                    primary={p.condition}
-                    secondary={`Diagnosed: ${p.diagnosisDate ? new Date(p.diagnosisDate).toLocaleDateString() : 'N/A'}`}
-                  />
-                </ListItem>
+            </Grid>
+          )}
+          {/* Medication History */}
+          {record.medicationHistory.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Medication History</Typography>
+              {record.medicationHistory.map((medication, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>Medication: {medication.medicationName}</Typography>
+                  <Typography>Dosage: {medication.dosage}</Typography>
+                  <Typography>Frequency: {medication.frequency}</Typography>
+                  <Typography>Start Date: {medication.startDate ? format(new Date(medication.startDate), 'MM/dd/yyyy') : 'N/A'}</Typography>
+                  <Typography>End Date: {medication.endDate ? format(new Date(medication.endDate), 'MM/dd/yyyy') : 'N/A'}</Typography>
+                  <Typography>Current: {medication.isCurrent ? 'Yes' : 'No'}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
-
-        {record.surgicalHistory?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Surgical History</Typography>
-            <List>
-              {record.surgicalHistory.map(s => (
-                <ListItem key={s.id}>
-                  <ListItemText
-                    primary={s.procedure}
-                    secondary={`Performed: ${s.datePerformed ? new Date(s.datePerformed).toLocaleDateString() : 'N/A'}`}
-                  />
-                </ListItem>
+            </Grid>
+          )}
+          {/* Social History */}
+          {record.socialHistory && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Social History</Typography>
+              <Typography>Smoking Status: {record.socialHistory.smokingStatus || 'N/A'}</Typography>
+              <Typography>Alcohol Use: {record.socialHistory.alcoholUse || 'N/A'}</Typography>
+              <Typography>Occupation: {record.socialHistory.occupation || 'N/A'}</Typography>
+              <Typography>Marital Status: {record.socialHistory.maritalStatus || 'N/A'}</Typography>
+              <Typography>Living Situation: {record.socialHistory.livingSituation || 'N/A'}</Typography>
+            </Grid>
+          )}
+          {/* Review of Systems */}
+          {record.reviewOfSystems.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Review of Systems</Typography>
+              {record.reviewOfSystems.map((review, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>System: {review.system}</Typography>
+                  <Typography>Findings: {review.findings}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
-
-        {record.familyHistory?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Family History</Typography>
-            <List>
-              {record.familyHistory.map(f => (
-                <ListItem key={f.id}>
-                  <ListItemText
-                    primary={`${f.relative}: ${f.condition}`}
-                    secondary={`Age at Diagnosis: ${f.ageAtDiagnosis || 'N/A'}`}
-                  />
-                </ListItem>
+            </Grid>
+          )}
+          {/* Immunizations */}
+          {record.immunizations.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Immunizations</Typography>
+              {record.immunizations.map((immunization, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>Vaccine: {immunization.vaccine}</Typography>
+                  <Typography>Date Given: {format(new Date(immunization.dateGiven), 'MM/dd/yyyy')}</Typography>
+                  <Typography>Administered By: {immunization.administeredBy || 'N/A'}</Typography>
+                  <Typography>Notes: {immunization.notes || 'N/A'}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
-
-        {record.medicationHistory?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Medication History</Typography>
-            <List>
-              {record.medicationHistory.map(m => (
-                <ListItem key={m.id}>
-                  <ListItemText
-                    primary={`${m.medicationName} (${m.dosage})`}
-                    secondary={`Current: ${m.isCurrent ? 'Yes' : 'No'}`}
-                  />
-                </ListItem>
+            </Grid>
+          )}
+          {/* Travel History */}
+          {record.travelHistory.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Travel History</Typography>
+              {record.travelHistory.map((travel, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>Country Visited: {travel.countryVisited}</Typography>
+                  <Typography>Date From: {travel.dateFrom ? format(new Date(travel.dateFrom), 'MM/dd/yyyy') : 'N/A'}</Typography>
+                  <Typography>Date To: {travel.dateTo ? format(new Date(travel.dateTo), 'MM/dd/yyyy') : 'N/A'}</Typography>
+                  <Typography>Purpose: {travel.purpose || 'N/A'}</Typography>
+                  <Typography>Notes: {travel.travelNotes || 'N/A'}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
-
-        {record.socialHistory && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Social History</Typography>
-            <List>
-              <ListItem>
-                <ListItemText primary="Smoking Status" secondary={record.socialHistory.smokingStatus || 'N/A'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Alcohol Use" secondary={record.socialHistory.alcoholUse || 'N/A'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Occupation" secondary={record.socialHistory.occupation || 'N/A'} />
-              </ListItem>
-            </List>
-          </Box>
-        )}
-
-        {record.reviewOfSystems?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Review of Systems</Typography>
-            <List>
-              {record.reviewOfSystems.map(r => (
-                <ListItem key={r.id}>
-                  <ListItemText primary={r.system} secondary={r.findings} />
-                </ListItem>
+            </Grid>
+          )}
+          {/* Allergies */}
+          {record.allergies.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Allergies</Typography>
+              {record.allergies.map((allergy, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>Name: {allergy.name}</Typography>
+                  <Typography>Severity: {allergy.severity}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
-
-        {record.immunizations?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Immunizations</Typography>
-            <List>
-              {record.immunizations.map(i => (
-                <ListItem key={i.id}>
-                  <ListItemText
-                    primary={i.vaccine}
-                    secondary={`Given: ${new Date(i.dateGiven).toLocaleDateString()}`}
-                  />
-                </ListItem>
+            </Grid>
+          )}
+          {/* Diagnoses */}
+          {record.diagnoses.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Diagnoses</Typography>
+              {record.diagnoses.map((diagnosis, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>Code: {diagnosis.code}</Typography>
+                  <Typography>Description: {diagnosis.description}</Typography>
+                  <Typography>Diagnosed At: {format(new Date(diagnosis.diagnosedAt), 'MM/dd/yyyy')}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
-
-        {record.travelHistory?.length > 0 && (
-          <Box mt={2}>
-            <Typography variant="subtitle1">Travel History</Typography>
-            <List>
-              {record.travelHistory.map(t => (
-                <ListItem key={t.id}>
-                  <ListItemText
-                    primary={t.countryVisited}
-                    secondary={`From: ${t.dateFrom ? new Date(t.dateFrom).toLocaleDateString() : 'N/A'}`}
-                  />
-                </ListItem>
+            </Grid>
+          )}
+          {/* Vital Signs */}
+          {record.vitalSigns.length > 0 && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Vital Signs</Typography>
+              {record.vitalSigns.map((vital, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography>Blood Pressure: {vital.bloodPressure || 'N/A'}</Typography>
+                  <Typography>Heart Rate: {vital.heartRate || 'N/A'}</Typography>
+                  <Typography>Temperature: {vital.temperature || 'N/A'}</Typography>
+                  <Typography>Respiratory Rate: {vital.respiratoryRate || 'N/A'}</Typography>
+                  <Typography>Oxygen Saturation: {vital.oxygenSaturation || 'N/A'}</Typography>
+                  <Typography>Recorded At: {format(new Date(vital.recordedAt), 'MM/dd/yyyy')}</Typography>
+                </Box>
               ))}
-            </List>
-          </Box>
-        )}
+            </Grid>
+          )}
+        </Grid>
       </Paper>
-      <Box className="mt-4 flex gap-2">
-        <Button variant="contained" onClick={handleEdit}>Edit</Button>
-        <Button variant="outlined" color="error" onClick={handleDelete}>Delete</Button>
-        <Button variant="outlined" onClick={() => router.push('/medical-records')}>Back</Button>
-      </Box>
     </Box>
   );
 }
