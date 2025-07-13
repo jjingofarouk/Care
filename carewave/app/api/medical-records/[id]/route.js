@@ -428,7 +428,7 @@ export async function DELETE(request, { params }) {
 
       case 'familyHistory':
         await prisma.familyHistory.delete({
-          where: id }
+          where: { id }
         });
         return NextResponse.json({ message: 'Family history deleted' });
 
