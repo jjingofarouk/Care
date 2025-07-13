@@ -1,93 +1,60 @@
-import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import jwt from 'jsonwebtoken';
+import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-const authenticate = (request) => {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader) return null;
-  const token = authHeader.replace('Bearer ', '');
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return null;
-  }
-};
-
 export async function GET(request) {
-  const user = authenticate(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const { searchParams } = new URL(request.url);
-  const patientId = searchParams.get('patientId');
-  const dateFrom = searchParams.get('dateFrom');
-  const dateTo = searchParams.get('dateTo');
-
   try {
-    const where = {
-      ...(patientId && { patientId }),
-      ...(dateFrom && dateTo && {
-        recordDate: {
-          gte: new Date(dateFrom),
-          lte: new Date(dateTo),
-        },
-      }),
+    const { searchParams } = new URL(request.url);
+    const patientId = searchParams.get('patientId');
+    const dateFrom = searchParams.get('dateFrom');
+    const dateTo = searchParams.get('dateTo');
+
+    const where = {};
+    if (patientId) {
+      where.patientId = patientId;
+    }
+    if (dateFrom || dateTo) {
+      where.recordDate = {};
+      if (dateFrom) {
+        where.recordDate.gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        where.recordDate.lte = new Date(dateTo);
+      }
+    }
+
+    const [totalRecords, totalAllergies, totalDiagnoses, totalPatients, totalChiefComplaints, totalMedications, totalImmunizations] =
+      await Promise.all([
+        prisma.medicalRecord.count({ where }),
+        prisma.allergy.count({ where: { medicalRecord: where } }),
+        prisma.diagnosis.count({ where: { medicalRecord: where } }),
+        prisma.patient.count({
+          where: { medicalRecords: { some: where } },
+        }),
+        prisma.chiefComplaint.count({ where: { medicalRecord: where } }),
+        prisma.medicationHistory.count({ where: { medicalRecord: where } }),
+        prisma.immunization.count({ where: { medicalRecord: where } }),
+      ]);
+
+    const stats = {
+      totalRecords,
+      totalAllergies,
+      totalDiagnoses,
+      averageRecordsPerPatient: totalPatients > 0 ? (totalRecords / totalPatients).toFixed(2) : 0,
+      totalChiefComplaints,
+      totalMedications,
+      totalImmunizations,
     };
 
-    const [
-      totalRecords,
-      totalAllergies,
-      totalDiagnoses,
-      totalVitalSigns,
-      totalChiefComplaints,
-      totalPresentIllnesses,
-      totalPastConditions,
-      totalSurgicalHistory,
-      totalFamilyHistory,
-      totalMedicationHistory,
-      totalSocialHistory,
-      totalReviewOfSystems,
-      totalImmunizations,
-      totalTravelHistory,
-      patientCount
-    ] = await Promise.all([
-      prisma.medicalRecord.count({ where }),
-      prisma.allergy.count({ where: { medicalRecord: where } }),
-      prisma.diagnosis.count({ where: { medicalRecord: where } }),
-      prisma.vitalSign.count({ where: { medicalRecord: where } }),
-      prisma.chiefComplaint.count({ where: { medicalRecord: where } }),
-      prisma.presentIllness.count({ where: { medicalRecord: where } }),
-      prisma.pastMedicalCondition.count({ where: { medicalRecord: where } }),
-      prisma.surgicalHistory.count({ where: { medicalRecord: where } }),
-      prisma.familyHistory.count({ where: { medicalRecord: where } }),
-      prisma.medicationHistory.count({ where: { medicalRecord: where } }),
-      prisma.socialHistory.count({ where: { medicalRecord: where } }),
-      prisma.reviewOfSystems.count({ where: { medicalRecord: where } }),
-      prisma.immunization.count({ where: { medicalRecord: where } }),
-      prisma.travelHistory.count({ where: { medicalRecord: where } }),
-      prisma.patient.count()
-    ]);
-
-    return NextResponse.json({
-      totalRecords,
-      totalAllergies,
-      totalDiagnoses,
-      totalVitalSigns,
-      totalChiefComplaints,
-      totalPresentIllnesses,
-      totalPastConditions,
-      totalSurgicalHistory,
-      totalFamilyHistory,
-      totalMedicationHistory,
-      totalSocialHistory,
-      totalReviewOfSystems,
-      totalImmunizations,
-      totalTravelHistory,
-      averageRecordsPerPatient: patientCount > 0 ? totalRecords / patientCount : 0
-    });
+    return NextResponse.json(stats);
   } catch (error) {
-    console.error('Error fetching medical record stats:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('GET /api/medical-records/stats error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch medical record stats', details: error.message },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
   }
 }
