@@ -2,7 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Paper, Alert } from '@mui/material';
 import { BarChart2 } from 'lucide-react';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import { getMedicalRecordStats } from '../services/medicalRecordsService';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const MedicalRecordStats = () => {
   const [stats, setStats] = useState({
@@ -34,6 +46,65 @@ const MedicalRecordStats = () => {
     fetchStats();
   }, []);
 
+  const chartData = {
+    labels: [
+      'Records',
+      'Allergies',
+      'Diagnoses',
+      'Chief Complaints',
+      'Medications',
+      'Immunizations',
+    ],
+    datasets: [
+      {
+        label: 'Medical Record Statistics',
+        data: [
+          stats.totalRecords,
+          stats.totalAllergies,
+          stats.totalDiagnoses,
+          stats.totalChiefComplaints,
+          stats.totalMedications,
+          stats.totalImmunizations,
+        ],
+        backgroundColor: [
+          '#42A5F5',
+          '#66BB6A',
+          '#EF5350',
+          '#FFCA28',
+          '#AB47BC',
+          '#26A69A',
+        ],
+        borderColor: [
+          '#1976D2',
+          '#388E3C',
+          '#C62828',
+          '#FBC02D',
+          '#7B1FA2',
+          '#00897B',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' },
+      title: { display: true, text: 'Medical Record Statistics Overview' },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Count' },
+      },
+      x: {
+        title: { display: true, text: 'Categories' },
+      },
+    },
+  };
+
   if (loading) {
     return (
       <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
@@ -54,143 +125,29 @@ const MedicalRecordStats = () => {
         </Alert>
       )}
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Total Records
-            </Typography>
-            <Typography variant="h6" fontWeight="bold">
-              {stats.totalRecords}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Total Allergies
-            </Typography>
-            <Typography variant="h6" fontWeight="bold">
-              {stats.totalAllergies}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Total Diagnoses
-            </Typography>
-            <Typography variant="h6" fontWeight="bold">
-              {stats.totalDiagnoses}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Avg Records/Patient
-            </Typography>
-            <Typography variant="h6" fontWeight="bold">
-              {stats.averageRecordsPerPatient}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Total Chief Complaints
-            </Typography>
-            <Typography variant="h6" fontWeight="bold">
-              {stats.totalChiefComplaints}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Total Medications
-            </Typography>
-            <Typography variant="h6" fontWeight="bold">
-              {stats.totalMedications}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Total Immunizations
-            </Typography>
-            <Typography variant="h6" fontWeight="bold">
-              {stats.totalImmunizations}
-            </Typography>
-          </Paper>
-        </Grid>
+        {[
+          { label: 'Total Records', value: stats.totalRecords },
+          { label: 'Total Allergies', value: stats.totalAllergies },
+          { label: 'Total Diagnoses', value: stats.totalDiagnoses },
+          { label: 'Avg Records/Patient', value: stats.averageRecordsPerPatient },
+          { label: 'Total Chief Complaints', value: stats.totalChiefComplaints },
+          { label: 'Total Medications', value: stats.totalMedications },
+          { label: 'Total Immunizations', value: stats.totalImmunizations },
+        ].map((item, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Paper sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                {item.label}
+              </Typography>
+              <Typography variant="h6" fontWeight="bold">
+                {item.value}
+              </Typography>
+            </Paper>
+          </Grid>
+        ))}
       </Grid>
       <Box sx={{ mt: 4, height: 400 }}>
-        ```chartjs
-        {
-          "type": "bar",
-          "data": {
-            "labels": ["Records", "Allergies", "Diagnoses", "Chief Complaints", "Medications", "Immunizations"],
-            "datasets": [{
-              "label": "Medical Record Statistics",
-              "data": [
-                ${stats.totalRecords},
-                ${stats.totalAllergies},
-                ${stats.totalDiagnoses},
-                ${stats.totalChiefComplaints},
-                ${stats.totalMedications},
-                ${stats.totalImmunizations}
-              ],
-              "backgroundColor": [
-                "#42A5F5",
-                "#66BB6A",
-                "#EF5350",
-                "#FFCA28",
-                "#AB47BC",
-                "#26A69A"
-              ],
-              "borderColor": [
-                "#1976D2",
-                "#388E3C",
-                "#C62828",
-                "#FBC02D",
-                "#7B1FA2",
-                "#00897B"
-              ],
-              "borderWidth": 1
-            }]
-          },
-          "options": {
-            "responsive": true,
-            "maintainAspectRatio": false,
-            "scales": {
-              "y": {
-                "beginAtZero": true,
-                "title": {
-                  "display": true,
-                  "text": "Count"
-                }
-              },
-              "x": {
-                "title": {
-                  "display": true,
-                  "text": "Categories"
-                }
-              }
-            },
-            "plugins": {
-              "legend": {
-                "display": true,
-                "position": "top"
-              },
-              "title": {
-                "display": true,
-                "text": "Medical Record Statistics Overview"
-              }
-            }
-          }
-        }
-        ```
+        <Bar data={chartData} options={chartOptions} />
       </Box>
     </Box>
   );
