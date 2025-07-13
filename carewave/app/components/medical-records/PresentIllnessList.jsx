@@ -47,7 +47,7 @@ const PresentIllnessList = ({ illnesses = [], onEdit, onDelete }) => {
           rows={illnesses}
           columns={columns}
           pageSize={10}
-          rowsPerPageOptions=[10, 25, 50]}
+          rowsPerPageOptions={[10, 25, 50]}
           className="table"
           disableSelectionOnClick
         />
