@@ -25,7 +25,7 @@ const VitalSignForm = ({ initialData = {}, onSubmit, medicalRecords = [] }) => {
   return (
     <Box component="form" onSubmit={handleSubmit} className="card p-6">
       <Typography variant="h6" className="card-title mb-4">Vital Signs</Typography>
-      <Grid container spacing Asc={2} spacing={3}>
+      <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
             <InputLabel>Medical Record</InputLabel>
