@@ -76,7 +76,7 @@ const MedicalRecordsPage = () => {
         </Box>
       )}
 
-      <MedicalRecordList
+      <MedicalRecordsList
         records={records}
         onEdit={handleEdit}
         onDelete={handleDelete}
