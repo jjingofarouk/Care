@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Tabs, Tab, Box, Button, Drawer, Divider } from '@mui/material';
+import { Tabs, Tab, Box, Button, Drawer, Divider, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import MedicalRecordForm from '../components/medical-records/MedicalRecordForm';
 import MedicalRecordSummary from '../components/medical-records/MedicalRecordSummary';
@@ -53,7 +53,7 @@ const MedicalRecordsLayout = ({ children }) => {
     setDrawerOpen(true);
   };
 
-  const handleSubmit = (formData) => {
+  const handleSubmit = () => {
     // Simulate API call to save record
     setDrawerOpen(false);
   };
