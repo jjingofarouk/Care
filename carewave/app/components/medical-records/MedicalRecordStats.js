@@ -1,38 +1,37 @@
+'use client';
 import React from 'react';
-import { Card, CardContent, Typography, Grid } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import { BarChart2 } from 'lucide-react';
 
-export default function MedicalRecordStats({ stats }) {
-  const statItems = [
-    { label: 'Total Records', value: stats.totalRecords },
-    { label: 'Allergies', value: stats.totalAllergies },
-    { label: 'Diagnoses', value: stats.totalDiagnoses },
-    { label: 'Vital Signs', value: stats.totalVitalSigns },
-    { label: 'Chief Complaints', value: stats.totalChiefComplaints },
-    { label: 'Present Illnesses', value: stats.totalPresentIllnesses },
-    { label: 'Past Conditions', value: stats.totalPastConditions },
-    { label: 'Surgical History', value: stats.totalSurgicalHistory },
-    { label: 'Family History', value: stats.totalFamilyHistory },
-    { label: 'Medications', value: stats.totalMedicationHistory },
-    { label: 'Social History', value: stats.totalSocialHistory },
-    { label: 'Review of Systems', value: stats.totalReviewOfSystems },
-    { label: 'Immunizations', value: stats.totalImmunizations },
-    { label: 'Travel History', value: stats.totalTravelHistory },
-    { label: 'Avg Records/Patient', value: stats.averageRecordsPerPatient.toFixed(2) }
-  ];
-
+const MedicalRecordStats = ({ stats }) => {
   return (
-    <Card sx={{ mb: 4 }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>Statistics</Typography>
-        <Grid container spacing={2}>
-          {statItems.map(item => (
-            <Grid item xs={12} sm={6} md={4} key={item.label}>
-              <Typography variant="body2" color="text.secondary">{item.label}</Typography>
-              <Typography variant="h6">{item.value}</Typography>
-            </Grid>
-          ))}
-        </Grid>
-      </CardContent>
-    </Card>
+    <Box className="card mb-4 p-4 w-full">
+      <div className="card-header">
+        <Typography className="card-title flex items-center gap-2">
+          <BarChart2 size={24} />
+          Statistics
+        </Typography>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="p-4 bg-[var(--hospital-gray-50)] rounded-lg">
+          <Typography className="text-sm text-[var(--hospital-gray-500)]">Total Records</Typography>
+          <Typography className="text-2xl font-bold">{stats.totalRecords}</Typography>
+        </div>
+        <div className="p-4 bg-[var(--hospital-gray-50)] rounded-lg">
+          <Typography className="text-sm text-[var(--hospital-gray-500)]">Total Allergies</Typography>
+          <Typography className="text-2xl font-bold">{stats.totalAllergies}</Typography>
+        </div>
+        <div className="p-4 bg-[var(--hospital-gray-50)] rounded-lg">
+          <Typography className="text-sm text-[var(--hospital-gray-500)]">Total Diagnoses</Typography>
+          <Typography className="text-2xl font-bold">{stats.totalDiagnoses}</Typography>
+        </div>
+        <div className="p-4 bg-[var(--hospital-gray-50)] rounded-lg">
+          <Typography className="text-sm text-[var(--hospital-gray-500)]">Average Records/Patient</Typography>
+          <Typography className="text-2xl font-bold">{stats.averageRecordsPerPatient.toFixed(2)}</Typography>
+        </div>
+      </div>
+    </Box>
   );
-}
+};
+
+export default MedicalRecordStats;
