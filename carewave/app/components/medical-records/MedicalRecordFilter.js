@@ -1,9 +1,9 @@
 'use client';
-import React from 'react;
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { TextField, Button, Box } from '@mui/material';
+import { Search, X } from 'lucide-react';
 
-export default function MedicalRecordFilter({ onFilterChange, showDateRange = true }) {
+const MedicalRecordFilter = ({ onFilterChange }) => {
   const [filters, setFilters] = useState({
     patientId: '',
     dateFrom: '',
@@ -12,63 +12,67 @@ export default function MedicalRecordFilter({ onFilterChange, showDateRange = tr
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     onFilterChange(filters);
   };
 
-  const handleReset = () => {
-    setFilters({
-      patientId: '',
-      dateFrom: '',
-      dateTo: ''
-    });
-    onFilterChange({
-      patientId: '',
-      dateFrom: '',
-      dateTo: ''
-    });
+  const handleClear = () => {
+    setFilters({ patientId: '', dateFrom: '', dateTo: '' });
+    onFilterChange({ patientId: '', dateFrom: '', dateTo: '' });
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 2, mb: 4 }}>
-      <TextField
-        name="patientId"
-        label="Patient ID"
-        value={filters.patientId}
-        onChange={handleChange}
-        size="small"
-      />
-      {showDateRange && (
-        <>
-          <TextField
-            name="dateFrom"
-            label="Date From"
-            type="date"
-            value={filters.dateFrom}
-            onChange={handleChange}
-            size="small"
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            name="dateTo"
-            label="Date To"
-            type="date"
-            value={filters.dateTo}
-            onChange={handleChange}
-            size="small"
-            InputLabelProps={{ shrink: true }}
-          />
-        </>
-      )}
-      <Button type="submit" variant="contained">Filter</Button>
-      <Button variant="outlined" onClick={handleReset}>Reset</Button>
+    <Box className="card mb-4 p-4 w-full">
+      <div className="flex flex-wrap gap-4">
+        <TextField
+          label="Patient ID"
+          name="patientId"
+          value={filters.patientId}
+          onChange={handleChange}
+          className="input flex-1 min-w-[200px]"
+        />
+        <TextField
+          label="Date From"
+          name="dateFrom"
+          type="date"
+          value={filters.dateFrom}
+          onChange={handleChange}
+          className="input flex-1 min-w-[200px]"
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Date To"
+          name="dateTo"
+          type="date"
+          value={filters.dateTo}
+          onChange={handleChange}
+          className="input flex-1 min-w-[200px]"
+          InputLabelProps={{ shrink: true }}
+        />
+        <div className="flex gap-2">
+          <Button
+            variant="contained"
+            className="btn-primary"
+            onClick={handleSubmit}
+            startIcon={<Search />}
+          >
+            Filter
+          </Button>
+          <Button
+            variant="outlined"
+            className="btn-outline"
+            onClick={handleClear}
+            startIcon={<X />}
+          >
+            Clear
+          </Button>
+        </div>
+      </div>
     </Box>
   );
-}
+};
+
+export default MedicalRecordFilter;
