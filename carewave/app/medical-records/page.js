@@ -1,10 +1,10 @@
 'use client';
 import React from 'react';
 import { useState, useEffect } from 'react';
-import medicalRecordsService from '../../services/medicalRecordsService';
-import MedicalRecordList from '../../components/medical-records/MedicalRecordList';
-import MedicalRecordFilter from '../../components/medical-records/MedicalRecordFilter';
-import MedicalRecordStats from '../../components/medical-records/MedicalRecordStats';
+import medicalRecordsService from '@/services/medicalRecordsService';
+import MedicalRecordList from '@/components/medical-records/MedicalRecordList';
+import MedicalRecordFilter from '@/components/medical-records/MedicalRecordFilter';
+import MedicalRecordStats from '@/components/medical-records/MedicalRecordStats';
 
 export default function MedicalRecordsPage() {
   const [records, setRecords] = useState([]);
