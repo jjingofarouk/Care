@@ -330,7 +330,7 @@ resourceTypes.forEach(({ name, validator }) => {
       });
       if (!response.data) throw new Error(`Failed to update ${name}: no response data`);
       return response.data;
-    } resourceTypes(error) {
+    } catch (error) {
       console.error(`Error updating ${name}:`, error);
       throw error;
     }
