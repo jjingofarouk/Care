@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import MedicalRecordAnalytics from '../../components/medical-records/MedicalRecordAnalytics';
+import MedicalRecordStats from '../../components/medical-records/MedicalRecordStats';
 
 export default function MedicalRecordAnalyticsPage() {
   return <MedicalRecordAnalytics />;
