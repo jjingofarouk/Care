@@ -1,124 +1,238 @@
-import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import jwt from 'jsonwebtoken';
+import { NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
-const authenticate = (request) => {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader) return null;
-  const token = authHeader.replace('Bearer ', '');
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return null;
-  }
-};
-
 export async function GET(request) {
-  const user = authenticate(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const { searchParams } = new URL(request.url);
-  const patientId = searchParams.get('patientId');
-  const resource = searchParams.get('resource');
-  const dateFrom = searchParams.get('dateFrom');
-  const dateTo = searchParams.get('dateTo');
-
   try {
-    if (resource) {
-      const queries = {
-        patients: () => prisma.patient.findMany({
-          select: { id: true, firstName: true, lastName: true },
-          orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }]
-        }),
-        doctors: () => prisma.doctor.findMany({
-          select: { id: true, firstName: true, lastName: true, department: { select: { name: true } } },
-          orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }]
-        }),
-        allergies: () => prisma.allergy.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { createdAt: 'desc' }
-        }),
-        diagnoses: () => prisma.diagnosis.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { diagnosedAt: 'desc' }
-        }),
-        vitalSigns: () => prisma.vitalSign.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { recordedAt: 'desc' }
-        }),
-        chiefComplaints: () => prisma.chiefComplaint.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { createdAt: 'desc' }
-        }),
-        presentIllnesses: () => prisma.presentIllness.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { createdAt: 'desc' }
-        }),
-        pastConditions: () => prisma.pastMedicalCondition.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { createdAt: 'desc' }
-        }),
-        surgicalHistory: () => prisma.surgicalHistory.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { datePerformed: 'desc' }
-        }),
-        familyHistory: () => prisma.familyHistory.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { createdAt: 'desc' }
-        }),
-        medicationHistory: () => prisma.medicationHistory.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { createdAt: 'desc' }
-        }),
-        socialHistory: () => prisma.socialHistory.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { createdAt: 'desc' }
-        }),
-        reviewOfSystems: () => prisma.reviewOfSystems.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { createdAt: 'desc' }
-        }),
-        immunizations: () => prisma.immunization.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { dateGiven: 'desc' }
-        }),
-        travelHistory: () => prisma.travelHistory.findMany({
-          where: { medicalRecord: { patientId } },
-          orderBy: { dateFrom: 'desc' }
-        })
-      };
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search');
+    const patientId = searchParams.get('patientId');
+    const include = searchParams.get('include');
 
-      if (queries[resource]) {
-        const result = await queries[resource]();
-        if (resource === 'patients') {
-          return NextResponse.json(result.map(p => ({ ...p, name: `${p.firstName} ${p.lastName}` })));
+    const where = {};
+    if (search) {
+      where.OR = [
+        { patient: { firstName: { contains: search, mode: 'insensitive' } } },
+        { patient: { lastName: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+    if (patientId) {
+      where.patientId = patientId;
+    }
+
+    const includeObj = {
+      patient: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
         }
-        if (resource === 'doctors') {
-          return NextResponse.json(result.map(d => ({ ...d, name: `${d.firstName} ${d.lastName}` })));
-        }
-        return NextResponse.json(result);
       }
-      return NextResponse.json({ error: 'Invalid resource' }, { status: 400 });
+    };
+    if (include) {
+      const includeFields = include.split(',');
+      includeFields.forEach(field => {
+        switch (field.trim()) {
+          case 'chiefComplaint':
+            includeObj.chiefComplaint = true;
+            break;
+          case 'presentIllness':
+            includeObj.presentIllness = true;
+            break;
+          case 'pastConditions':
+            includeObj.pastConditions = true;
+            break;
+          case 'surgicalHistory':
+            includeObj.surgicalHistory = true;
+            break;
+          case 'familyHistory':
+            includeObj.familyHistory = true;
+            break;
+          case 'medicationHistory':
+            includeObj.medicationHistory = true;
+            break;
+          case 'socialHistory':
+            includeObj.socialHistory = true;
+            break;
+          case 'reviewOfSystems':
+            includeObj.reviewOfSystems = true;
+            break;
+          case 'immunizations':
+            includeObj.immunizations = true;
+            break;
+          case 'travelHistory':
+            includeObj.travelHistory = true;
+            break;
+          case 'allergies':
+            includeObj.allergies = true;
+            break;
+          case 'diagnoses':
+            includeObj.diagnoses = true;
+            break;
+          case 'vitalSigns':
+            includeObj.vitalSigns = true;
+            break;
+        }
+      });
     }
 
     const medicalRecords = await prisma.medicalRecord.findMany({
-      where: {
-        patientId,
-        ...(dateFrom && dateTo && {
-          recordDate: {
-            gte: new Date(dateFrom),
-            lte: new Date(dateTo)
+      where,
+      include: includeObj,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return NextResponse.json(medicalRecords);
+  } catch (error) {
+    console.error('GET /api/medical-records error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch medical records', details: error.message },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function POST(request) {
+  try {
+    const data = await request.json();
+
+    if (!data.patientId || !data.recordDate) {
+      return NextResponse.json(
+        { error: 'Patient ID and record date are required' },
+        { status: 400 }
+      );
+    }
+
+    const id = `MR-${uuidv4().slice(0, 8)}`;
+    const recordDate = new Date(data.recordDate);
+    if (isNaN(recordDate.getTime())) {
+      return NextResponse.json(
+        { error: 'Invalid date format for recordDate' },
+        { status: 400 }
+      );
+    }
+
+    const medicalRecord = await prisma.medicalRecord.create({
+      data: {
+        id,
+        patientId: data.patientId,
+        recordDate,
+        chiefComplaint: data.chiefComplaint ? {
+          create: {
+            description: data.chiefComplaint.description || '',
+            duration: data.chiefComplaint.duration || '',
+            onset: data.chiefComplaint.onset || null,
           }
-        })
+        } : undefined,
+        presentIllness: data.presentIllness ? {
+          create: {
+            narrative: data.presentIllness.narrative || '',
+            severity: data.presentIllness.severity || null,
+            progress: data.presentIllness.progress || null,
+            associatedSymptoms: data.presentIllness.associatedSymptoms || null,
+          }
+        } : undefined,
+        pastConditions: data.pastConditions ? {
+          create: data.pastConditions.map(condition => ({
+            condition: condition.condition || '',
+            diagnosisDate: condition.diagnosisDate ? new Date(condition.diagnosisDate) : null,
+            notes: condition.notes || null,
+          }))
+        } : undefined,
+        surgicalHistory: data.surgicalHistory ? {
+          create: data.surgicalHistory.map(surgery => ({
+            procedure: surgery.procedure || '',
+            datePerformed: surgery.datePerformed ? new Date(surgery.datePerformed) : null,
+            outcome: surgery.outcome || null,
+            notes: surgery.notes || null,
+          }))
+        } : undefined,
+        familyHistory: data.familyHistory ? {
+          create: data.familyHistory.map(family => ({
+            relative: family.relative || '',
+            condition: family.condition || '',
+            ageAtDiagnosis: family.ageAtDiagnosis || null,
+            notes: family.notes || null,
+          }))
+        } : undefined,
+        medicationHistory: data.medicationHistory ? {
+          create: data.medicationHistory.map(medication => ({
+            medicationName: medication.medicationName || '',
+            dosage: medication.dosage || '',
+            frequency: medication.frequency || '',
+            startDate: medication.startDate ? new Date(medication.startDate) : null,
+            endDate: medication.endDate ? new Date(medication.endDate) : null,
+            isCurrent: medication.isCurrent || false,
+          }))
+        } : undefined,
+        socialHistory: data.socialHistory ? {
+          create: {
+            smokingStatus: data.socialHistory.smokingStatus || null,
+            alcoholUse: data.socialHistory.alcoholUse || null,
+            occupation: data.socialHistory.occupation || null,
+            maritalStatus: data.socialHistory.maritalStatus || null,
+            livingSituation: data.socialHistory.livingSituation || null,
+          }
+        } : undefined,
+        reviewOfSystems: data.reviewOfSystems ? {
+          create: data.reviewOfSystems.map(review => ({
+            system: review.system || '',
+            findings: review.findings || '',
+          }))
+        } : undefined,
+        immunizations: data.immunizations ? {
+          create: data.immunizations.map(immunization => ({
+            vaccine: immunization.vaccine || '',
+            dateGiven: new Date(immunization.dateGiven),
+            administeredBy: immunization.administeredBy || null,
+            notes: immunization.notes || null,
+          }))
+        } : undefined,
+        travelHistory: data.travelHistory ? {
+          create: data.travelHistory.map(travel => ({
+            countryVisited: travel.countryVisited || '',
+            dateFrom: travel.dateFrom ? new Date(travel.dateFrom) : null,
+            dateTo: travel.dateTo ? new Date(travel.dateTo) : null,
+            purpose: travel.purpose || null,
+            travelNotes: travel.travelNotes || null,
+          }))
+        } : undefined,
+        allergies: data.allergies ? {
+          create: data.allergies.map(allergy => ({
+            name: allergy.name || '',
+            severity: allergy.severity || '',
+          }))
+        } : undefined,
+        diagnoses: data.diagnoses ? {
+          create: data.diagnoses.map(diagnosis => ({
+            code: diagnosis.code || '',
+            description: diagnosis.description || '',
+            diagnosedAt: new Date(diagnosis.diagnosedAt),
+          }))
+        } : undefined,
+        vitalSigns: data.vitalSigns ? {
+          create: data.vitalSigns.map(vital => ({
+            bloodPressure: vital.bloodPressure || null,
+            heartRate: vital.heartRate || null,
+            temperature: vital.temperature || null,
+            respiratoryRate: vital.respiratoryRate || null,
+            oxygenSaturation: vital.oxygenSaturation || null,
+            recordedAt: new Date(vital.recordedAt),
+          }))
+        } : undefined,
       },
       include: {
-        patient: { select: { id: true, firstName: true, lastName: true } },
-        doctor: { select: { id: true, firstName: true, lastName: true, department: { select: { name: true } } } },
-        allergies: true,
-        diagnoses: true,
-        vitalSigns: true,
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          }
+        },
         chiefComplaint: true,
         presentIllness: true,
         pastConditions: true,
@@ -128,91 +242,21 @@ export async function GET(request) {
         socialHistory: true,
         reviewOfSystems: true,
         immunizations: true,
-        travelHistory: true
+        travelHistory: true,
+        allergies: true,
+        diagnoses: true,
+        vitalSigns: true,
       },
-      orderBy: { recordDate: 'desc' }
     });
 
-    return NextResponse.json(medicalRecords.map(record => ({
-      ...record,
-      patient: record.patient ? { ...record.patient, name: `${record.patient.firstName} ${record.patient.lastName}` } : null,
-      doctor: record.doctor ? { ...record.doctor, name: `${record.doctor.firstName} ${record.doctor.lastName}` } : null
-    })));
+    return NextResponse.json(medicalRecord, { status: 201 });
   } catch (error) {
-    console.error('Error in medical records API:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-
-export async function POST(request) {
-  const user = authenticate(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  try {
-    const data = await request.json();
-    const { resource, ...recordData } = data;
-
-    const createOperations = {
-      medicalRecord: () => prisma.medicalRecord.create({
-        data: {
-          patientId: recordData.patientId,
-          doctorId: recordData.doctorId,
-          recordDate: new Date(recordData.recordDate)
-        },
-        include: {
-          patient: { select: { id: true, firstName: true, lastName: true } },
-          doctor: { select: { id: true, firstName: true, lastName: true, department: { select: { name: true } } } }
-        }
-      }),
-      allergy: () => prisma.allergy.create({ data: { medicalRecordId: recordData.medicalRecordId, name: recordData.name, severity: recordData.severity } }),
-      diagnosis: () => prisma.diagnosis.create({ data: { medicalRecordId: recordData.medicalRecordId, code: recordData.code, description: recordData.description, diagnosedAt: new Date(recordData.diagnosedAt) } }),
-      vitalSign: () => prisma.vitalSign.create({
-        data: {
-          medicalRecordId: recordData.medicalRecordId,
-          bloodPressure: recordData.bloodPressure,
-          heartRate: parseInt(recordData.heartRate),
-          temperature: parseFloat(recordData.temperature),
-          respiratoryRate: parseInt(recordData.respiratoryRate),
-          oxygenSaturation: parseFloat(recordData.oxygenSaturation),
-          recordedAt: new Date(recordData.recordedAt)
-        }
-      }),
-      chiefComplaint: () => prisma.chiefComplaint.create({ data: { medicalRecordId: recordData.medicalRecordId, description: recordData.description, duration: recordData.duration, onset: recordData.onset } }),
-      presentIllness: () => prisma.presentIllness.create({ data: { medicalRecordId: recordData.medicalRecordId, narrative: recordData.narrative, severity: recordData.severity, progress: recordData.progress, associatedSymptoms: recordData.associatedSymptoms } }),
-      pastCondition: () => prisma.pastMedicalCondition.create({ data: { medicalRecordId: recordData.medicalRecordId, condition: recordData.condition, diagnosisDate: recordData.diagnosisDate ? new Date(recordData.diagnosisDate) : null, notes: recordData.notes } }),
-      surgicalHistory: () => prisma.surgicalHistory.create({ data: { medicalRecordId: recordData.medicalRecordId, procedure: recordData.procedure, datePerformed: recordData.datePerformed ? new Date(recordData.datePerformed) : null, outcome: recordData.outcome, notes: recordData.notes } }),
-      familyHistory: () => prisma.familyHistory.create({ data: { medicalRecordId: recordData.medicalRecordId, relative: recordData.relative, condition: recordData.condition, ageAtDiagnosis: parseInt(recordData.ageAtDiagnosis), notes: recordData.notes } }),
-      medicationHistory: () => prisma.medicationHistory.create({
-        data: {
-          medicalRecordId: recordData.medicalRecordId,
-          medicationName: recordData.medicationName,
-          dosage: recordData.dosage,
-          frequency: recordData.frequency,
-          startDate: recordData.startDate ? new Date(recordData.startDate) : null,
-          endDate: recordData.endDate ? new Date(recordData.endDate) : null,
-          isCurrent: recordData.isCurrent
-        }
-      }),
-      socialHistory: () => prisma.socialHistory.create({ data: { medicalRecordId: recordData.medicalRecordId, smokingStatus: recordData.smokingStatus, alcoholUse: recordData.alcoholUse, occupation: recordData.occupation, maritalStatus: recordData.maritalStatus, livingSituation: recordData.livingSituation } }),
-      reviewOfSystems: () => prisma.reviewOfSystems.create({ data: { medicalRecordId: recordData.medicalRecordId, system: recordData.system, findings: recordData.findings } }),
-      immunization: () => prisma.immunization.create({ data: { medicalRecordId: recordData.medicalRecordId, vaccine: recordData.vaccine, dateGiven: new Date(recordData.dateGiven), administeredBy: recordData.administeredBy, notes: recordData.notes } }),
-      travelHistory: () => prisma.travelHistory.create({ data: { medicalRecordId: recordData.medicalRecordId, countryVisited: recordData.countryVisited, dateFrom: recordData.dateFrom ? new Date(recordData.dateFrom) : null, dateTo: recordData.dateTo ? new Date(recordData.dateTo) : null, purpose: recordData.purpose, travelNotes: recordData.travelNotes } })
-    };
-
-    if (createOperations[resource]) {
-      const result = await createOperations[resource]();
-      if (resource === 'medicalRecord') {
-        return NextResponse.json({
-          ...result,
-          patient: result.patient ? { ...result.patient, name: `${result.patient.firstName} ${result.patient.lastName}` } : null,
-          doctor: result.doctor ? { ...result.doctor, name: `${result.doctor.firstName} ${result.doctor.lastName}` } : null
-        });
-      }
-      return NextResponse.json(result);
-    }
-    return NextResponse.json({ error: 'Invalid resource' }, { status: 400 });
-  } catch (error) {
-    console.error('Error creating medical record:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('POST /api/medical-records error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create medical record', details: error.message },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
   }
 }
