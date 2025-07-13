@@ -14,12 +14,12 @@ export async function GET(request, { params }) {
           id: true,
           firstName: true,
           lastName: true,
-        }
-      }
+        },
+      },
     };
     if (include) {
       const includeFields = include.split(',');
-      includeFields.forEach(field => {
+      includeFields.forEach((field) => {
         switch (field.trim()) {
           case 'chiefComplaint':
             includeObj.chiefComplaint = true;
@@ -108,6 +108,14 @@ export async function PUT(request, { params }) {
       );
     }
 
+    // Validate related data
+    if (data.chiefComplaint && (!data.chiefComplaint.description || !data.chiefComplaint.duration)) {
+      return NextResponse.json(
+        { error: 'Chief complaint requires description and duration' },
+        { status: 400 }
+      );
+    }
+
     const medicalRecord = await prisma.medicalRecord.update({
       where: { id },
       data: {
@@ -125,7 +133,7 @@ export async function PUT(request, { params }) {
               duration: data.chiefComplaint?.duration || '',
               onset: data.chiefComplaint?.onset || null,
             },
-          }
+          },
         },
         presentIllness: {
           upsert: {
@@ -141,11 +149,11 @@ export async function PUT(request, { params }) {
               progress: data.presentIllness?.progress || null,
               associatedSymptoms: data.presentIllness?.associatedSymptoms || null,
             },
-          }
+          },
         },
         pastConditions: {
           deleteMany: {},
-          create: data.pastConditions?.map(condition => ({
+          create: data.pastConditions?.map((condition) => ({
             condition: condition.condition || '',
             diagnosisDate: condition.diagnosisDate ? new Date(condition.diagnosisDate) : null,
             notes: condition.notes || null,
@@ -153,7 +161,7 @@ export async function PUT(request, { params }) {
         },
         surgicalHistory: {
           deleteMany: {},
-          create: data.surgicalHistory?.map(surgery => ({
+          create: data.surgicalHistory?.map((surgery) => ({
             procedure: surgery.procedure || '',
             datePerformed: surgery.datePerformed ? new Date(surgery.datePerformed) : null,
             outcome: surgery.outcome || null,
@@ -162,16 +170,16 @@ export async function PUT(request, { params }) {
         },
         familyHistory: {
           deleteMany: {},
-          create: data.familyHistory?.map(family => ({
+          create: data.familyHistory?.map((family) => ({
             relative: family.relative || '',
             condition: family.condition || '',
-            ageAtDiagnosis: family.ageAtDiagnosis || null,
+            ageAtDiagnosis: family.ageAtDiagnosis ? parseInt(family.ageAtDiagnosis, 10) : null,
             notes: family.notes || null,
           })) || [],
         },
         medicationHistory: {
           deleteMany: {},
-          create: data.medicationHistory?.map(medication => ({
+          create: data.medicationHistory?.map((medication) => ({
             medicationName: medication.medicationName || '',
             dosage: medication.dosage || '',
             frequency: medication.frequency || '',
@@ -196,18 +204,18 @@ export async function PUT(request, { params }) {
               maritalStatus: data.socialHistory?.maritalStatus || null,
               livingSituation: data.socialHistory?.livingSituation || null,
             },
-          }
+          },
         },
         reviewOfSystems: {
           deleteMany: {},
-          create: data.reviewOfSystems?.map(review => ({
+          create: data.reviewOfSystems?.map((review) => ({
             system: review.system || '',
             findings: review.findings || '',
           })) || [],
         },
         immunizations: {
           deleteMany: {},
-          create: data.immunizations?.map(immunization => ({
+          create: data.immunizations?.map((immunization) => ({
             vaccine: immunization.vaccine || '',
             dateGiven: new Date(immunization.dateGiven),
             administeredBy: immunization.administeredBy || null,
@@ -216,7 +224,7 @@ export async function PUT(request, { params }) {
         },
         travelHistory: {
           deleteMany: {},
-          create: data.travelHistory?.map(travel => ({
+          create: data.travelHistory?.map((travel) => ({
             countryVisited: travel.countryVisited || '',
             dateFrom: travel.dateFrom ? new Date(travel.dateFrom) : null,
             dateTo: travel.dateTo ? new Date(travel.dateTo) : null,
@@ -226,14 +234,14 @@ export async function PUT(request, { params }) {
         },
         allergies: {
           deleteMany: {},
-          create: data.allergies?.map(allergy => ({
+          create: data.allergies?.map((allergy) => ({
             name: allergy.name || '',
             severity: allergy.severity || '',
           })) || [],
         },
         diagnoses: {
           deleteMany: {},
-          create: data.diagnoses?.map(diagnosis => ({
+          create: data.diagnoses?.map((diagnosis) => ({
             code: diagnosis.code || '',
             description: diagnosis.description || '',
             diagnosedAt: new Date(diagnosis.diagnosedAt),
@@ -241,12 +249,12 @@ export async function PUT(request, { params }) {
         },
         vitalSigns: {
           deleteMany: {},
-          create: data.vitalSigns?.map(vital => ({
+          create: data.vitalSigns?.map((vital) => ({
             bloodPressure: vital.bloodPressure || null,
-            heartRate: vital.heartRate || null,
-            temperature: vital.temperature || null,
-            respiratoryRate: vital.respiratoryRate || null,
-            oxygenSaturation: vital.oxygenSaturation || null,
+            heartRate: vital.heartRate ? parseInt(vital.heartRate, 10) : null,
+            temperature: vital.temperature ? parseFloat(vital.temperature) : null,
+            respiratoryRate: vital.respiratoryRate ? parseInt(vital.respiratoryRate, 10) : null,
+            oxygenSaturation: vital.oxygenSaturation ? parseFloat(vital.oxygenSaturation) : null,
             recordedAt: new Date(vital.recordedAt),
           })) || [],
         },
@@ -257,7 +265,7 @@ export async function PUT(request, { params }) {
             id: true,
             firstName: true,
             lastName: true,
-          }
+          },
         },
         chiefComplaint: true,
         presentIllness: true,
