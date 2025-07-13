@@ -4,7 +4,7 @@ import { TextField, Button, MenuItem, Select, InputLabel, FormControl, Box, Auto
 import { X, Save, Stethoscope } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-const MedicalRecordForm = ({ initialData, medicalRecord }) => {
+const MedicalRecordForm = ({ initialData, medicalRecord, token }) => {
   const router = useRouter();
   const [formData, setFormData] = useState(initialData || {});
   const [resourceType, setResourceType] = useState(medicalRecord?.resource || 'medicalRecord');
@@ -13,13 +13,11 @@ const MedicalRecordForm = ({ initialData, medicalRecord }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Move localStorage access inside useEffect with proper server-side check
   useEffect(() => {
-    if (typeof window === 'undefined') return; // Skip execution on server-side
+    if (typeof window === 'undefined') return;
 
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
         if (!token) throw new Error('No authentication token found');
 
         const [patientRes, doctorRes] = await Promise.all([
@@ -38,7 +36,7 @@ const MedicalRecordForm = ({ initialData, medicalRecord }) => {
       }
     };
     fetchData();
-  }, []);
+  }, [token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,7 +54,6 @@ const MedicalRecordForm = ({ initialData, medicalRecord }) => {
 
     try {
       if (typeof window === 'undefined') throw new Error('Client-side only operation');
-      const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
       const method = medicalRecord?.id ? 'PUT' : 'POST';
@@ -182,7 +179,7 @@ const MedicalRecordForm = ({ initialData, medicalRecord }) => {
       <>
         <TextField label="Medical Record ID" name="medicalRecordId" value={formData.medicalRecordId || ''} onChange={handleChange} fullWidth className="input mb-4" required />
         <TextField label="Condition" name="condition" value={formData.condition || ''} onChange={handleChange} fullWidth className="input mb-4" required />
-        <TextField label="Diagnosis Date" name="diagnosisDate" type="date" value={formData.diagnosisDate || ''} onChange={handleChange} försvided fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} />
+        <TextField label="Diagnosis Date" name="diagnosisDate" type="date" value={formData.diagnosisDate || ''} onChange={handleChange} fullWidth className="input mb-4" InputLabelProps={{ shrink: true }} />
         <TextField label="Notes" name="notes" value={formData.notes || ''} onChange={handleChange} fullWidth multiline rows={4} className="input mb-4" />
       </>
     ),
