@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Autocomplete, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Box } from '@mui/material';
+import { Autocomplete, TextField, Table, Typography, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Box } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import medicalRecordsService from '@/services/medicalRecordsService';
 import { User } from 'lucide-react';
