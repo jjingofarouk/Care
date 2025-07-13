@@ -1,9 +1,8 @@
-// MedicalRecordForm.jsx
+// app/components/medical-records/MedicalRecordForm.jsx
 'use client';
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, MenuItem, Select, InputLabel, FormControl, Box, Divider, Typography } from '@mui/material';
-import { X, Save, User } from 'lucide-react';
-import medicalRecordsService from '@/services/medicalRecordsService';
+import { TextField, Button, MenuItem, Select, InputLabel, FormControl, Box } from '@mui/material';
+import { X, Save } from 'lucide-react';
 import patientService from '@/services/patientService';
 
 const MedicalRecordForm = ({ initialData, onSubmit }) => {
