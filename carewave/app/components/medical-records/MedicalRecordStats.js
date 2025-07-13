@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { getMedicalRecordStats } from '../services/medicalRecordsService';
+import { getMedicalRecordStats } from '@/services/medicalRecordsService';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
