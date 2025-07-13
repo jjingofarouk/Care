@@ -14,11 +14,9 @@ const MedicalRecordForm = ({ initialData, medicalRecord, token }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
     const fetchData = async () => {
       try {
-        if (!token) throw new Error('No authentication token found');
+        if (!token) throw new Error('No authentication token provided');
 
         const [patientRes, doctorRes] = await Promise.all([
           fetch('/api/medical-records?resource=patients', { headers: { Authorization: `Bearer ${token}` } }),
@@ -53,8 +51,7 @@ const MedicalRecordForm = ({ initialData, medicalRecord, token }) => {
     setError(null);
 
     try {
-      if (typeof window === 'undefined') throw new Error('Client-side only operation');
-      if (!token) throw new Error('No authentication token found');
+      if (!token) throw new Error('No authentication token provided');
 
       const method = medicalRecord?.id ? 'PUT' : 'POST';
       const url = medicalRecord?.id ? `/api/medical-records/${medicalRecord.id}` : '/api/medical-records';
@@ -282,7 +279,7 @@ const MedicalRecordForm = ({ initialData, medicalRecord, token }) => {
     return (
       <Box className="card max-w-full mx-auto p-4">
         <div className="alert alert-error mb-2">{error}</div>
-        <Button variant="outlined" onClick={() => window.location.reload()} className="btn-secondary">Retry</Button>
+        <Button variant="outlined" onClick={() => router.refresh()} className="btn-secondary">Retry</Button>
       </Box>
     );
   }
