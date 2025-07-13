@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import medicalRecordsService from '../../../services/medicalRecordsService';
-import ResourceList from '../../../components/medical-records/ResourceList';
-import MedicalRecordFilter from '../../../components/medical-records/MedicalRecordFilter';
+import medicalRecordsService from '@/services/medicalRecordsService';
+import ResourceList from '@/components/medical-records/ResourceList';
+import MedicalRecordFilter from '@/components/medical-records/MedicalRecordFilter';
 
 export default function ResourcePage() {
   const { resource } = useParams();
