@@ -34,48 +34,48 @@ export default function MedicalRecordForm() {
   const [patients, setPatients] = useState([]);
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    async function fetchPatients() {
-      try {
-        const response = await fetch('/api/patients');
-        const data = await response.json();
-        setPatients(data);
-      } catch (error) {
-        console.error('Error fetching patients:', error);
-      }
+  const fetchPatients = async () => {
+    try {
+      const response = await fetch('/api/patients');
+      const data = await response.json();
+      setPatients(data);
+    } catch (error) {
+      console.error('Error fetching patients:', error);
     }
-    fetchPatients();
+  };
 
-    if (params.id) {
-      async function fetchMedicalRecord() {
-        try {
-          const response = await fetch(`/api/medical-records/${params.id}?include=chiefComplaint,presentIllness,pastConditions,surgicalHistory,familyHistory,medicationHistory,socialHistory,reviewOfSystems,immunizations,travelHistory,allergies,diagnoses,vitalSigns`);
-          const data = await response.json();
-          setFormData({
-            ...data,
-            recordDate: new Date(data.recordDate),
-            pastConditions: data.pastConditions.map(c => ({ ...c, diagnosisDate: c.diagnosisDate ? new Date(c.diagnosisDate) : null })),
-            surgicalHistory: data.surgicalHistory.map(s => ({ ...s, datePerformed: s.datePerformed ? new Date(s.datePerformed) : null })),
-            medicationHistory: data.medicationHistory.map(m => ({
-              ...m,
-              startDate: m.startDate ? new Date(m.startDate) : null,
-              endDate: m.endDate ? new Date(m.endDate) : null,
-            })),
-            immunizations: data.immunizations.map(i => ({ ...i, dateGiven: new Date(i.dateGiven) })),
-            travelHistory: data.travelHistory.map(t => ({
-              ...t,
-              dateFrom: t.dateFrom ? new Date(t.dateFrom) : null,
-              dateTo: t.dateTo ? new Date(t.dateTo) : null,
-            })),
-            diagnoses: data.diagnoses.map(d => ({ ...d, diagnosedAt: new Date(d.diagnosedAt) })),
-            vitalSigns: data.vitalSigns.map(v => ({ ...v, recordedAt: new Date(v.recordedAt) })),
-          });
-        } catch (error) {
-          console.error('Error fetching medical record:', error);
-        }
-      }
-      fetchMedicalRecord();
+  const fetchMedicalRecord = async () => {
+    if (!params.id) return;
+    try {
+      const response = await fetch(`/api/medical-records/${params.id}?include=chiefComplaint,presentIllness,pastConditions,surgicalHistory,familyHistory,medicationHistory,socialHistory,reviewOfSystems,immunizations,travelHistory,allergies,diagnoses,vitalSigns`);
+      const data = await response.json();
+      setFormData({
+        ...data,
+        recordDate: new Date(data.recordDate),
+        pastConditions: data.pastConditions.map(c => ({ ...c, diagnosisDate: c.diagnosisDate ? new Date(c.diagnosisDate) : null })),
+        surgicalHistory: data.surgicalHistory.map(s => ({ ...s, datePerformed: s.datePerformed ? new Date(s.datePerformed) : null })),
+        medicationHistory: data.medicationHistory.map(m => ({
+          ...m,
+          startDate: m.startDate ? new Date(m.startDate) : null,
+          endDate: m.endDate ? new Date(m.endDate) : null,
+        })),
+        immunizations: data.immunizations.map(i => ({ ...i, dateGiven: new Date(i.dateGiven) })),
+        travelHistory: data.travelHistory.map(t => ({
+          ...t,
+          dateFrom: t.dateFrom ? new Date(t.dateFrom) : null,
+          dateTo: t.dateTo ? new Date(t.dateTo) : null,
+        })),
+        diagnoses: data.diagnoses.map(d => ({ ...d, diagnosedAt: new Date(d.diagnosedAt) })),
+        vitalSigns: data.vitalSigns.map(v => ({ ...v, recordedAt: new Date(v.recordedAt) })),
+      });
+    } catch (error) {
+      console.error('Error fetching medical record:', error);
     }
+  };
+
+  useEffect(() => {
+    fetchPatients();
+    fetchMedicalRecord();
   }, [params.id]);
 
   const handleInputChange = (section, field, value, index = null) => {
@@ -205,7 +205,6 @@ export default function MedicalRecordForm() {
                 renderInput={(params) => <TextField {...params} fullWidth error={!!errors.recordDate} helperText={errors.recordDate} />}
               />
             </Grid>
-            {/* Chief Complaint */}
             <Grid item xs={12}>
               <Typography variant="h6">Chief Complaint</Typography>
             </Grid>
@@ -233,7 +232,6 @@ export default function MedicalRecordForm() {
                 onChange={(e) => handleInputChange('chiefComplaint', 'onset', e.target.value)}
               />
             </Grid>
-            {/* Present Illness */}
             <Grid item xs={12}>
               <Typography variant="h6">Present Illness</Typography>
             </Grid>
@@ -271,7 +269,6 @@ export default function MedicalRecordForm() {
                 onChange={(e) => handleInputChange('presentIllness', 'associatedSymptoms', e.target.value)}
               />
             </Grid>
-            {/* Past Conditions */}
             <Grid item xs={12}>
               <Typography variant="h6">Past Medical Conditions</Typography>
               {formData.pastConditions.map((condition, index) => (
@@ -311,7 +308,6 @@ export default function MedicalRecordForm() {
                 Add Past Condition
               </Button>
             </Grid>
-            {/* Surgical History */}
             <Grid item xs={12}>
               <Typography variant="h6">Surgical History</Typography>
               {formData.surgicalHistory.map((surgery, index) => (
@@ -351,7 +347,6 @@ export default function MedicalRecordForm() {
                 Add Surgical History
               </Button>
             </Grid>
-            {/* Family History */}
             <Grid item xs={12}>
               <Typography variant="h6">Family History</Typography>
               {formData.familyHistory.map((family, index) => (
@@ -392,7 +387,6 @@ export default function MedicalRecordForm() {
                 Add Family History
               </Button>
             </Grid>
-            {/* Medication History */}
             <Grid item xs={12}>
               <Typography variant="h6">Medication History</Typography>
               {formData.medicationHistory.map((medication, index) => (
@@ -448,7 +442,6 @@ export default function MedicalRecordForm() {
                 Add Medication
               </Button>
             </Grid>
-            {/* Social History */}
             <Grid item xs={12}>
               <Typography variant="h6">Social History</Typography>
             </Grid>
@@ -492,7 +485,6 @@ export default function MedicalRecordForm() {
                 onChange={(e) => handleInputChange('socialHistory', 'livingSituation', e.target.value)}
               />
             </Grid>
-            {/* Review of Systems */}
             <Grid item xs={12}>
               <Typography variant="h6">Review of Systems</Typography>
               {formData.reviewOfSystems.map((review, index) => (
@@ -524,7 +516,6 @@ export default function MedicalRecordForm() {
                 Add Review of System
               </Button>
             </Grid>
-            {/* Immunizations */}
             <Grid item xs={12}>
               <Typography variant="h6">Immunizations</Typography>
               {formData.immunizations.map((immunization, index) => (
@@ -564,7 +555,6 @@ export default function MedicalRecordForm() {
                 Add Immunization
               </Button>
             </Grid>
-            {/* Travel History */}
             <Grid item xs={12}>
               <Typography variant="h6">Travel History</Typography>
               {formData.travelHistory.map((travel, index) => (
@@ -612,7 +602,6 @@ export default function MedicalRecordForm() {
                 Add Travel History
               </Button>
             </Grid>
-            {/* Allergies */}
             <Grid item xs={12}>
               <Typography variant="h6">Allergies</Typography>
               {formData.allergies.map((allergy, index) => (
@@ -644,7 +633,6 @@ export default function MedicalRecordForm() {
                 Add Allergy
               </Button>
             </Grid>
-            {/* Diagnoses */}
             <Grid item xs={12}>
               <Typography variant="h6">Diagnoses</Typography>
               {formData.diagnoses.map((diagnosis, index) => (
@@ -684,7 +672,6 @@ export default function MedicalRecordForm() {
                 Add Diagnosis
               </Button>
             </Grid>
-            {/* Vital Signs */}
             <Grid item xs={12}>
               <Typography variant="h6">Vital Signs</Typography>
               {formData.vitalSigns.map((vital, index) => (
