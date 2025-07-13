@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Box, Grid, Typography } from '@mui/material';
-import { Calendar, User, Save } from 'lucide-react';
+import { Calendar, Save } from 'lucide-react';
 
 const MedicalRecordForm = ({ initialData = {}, onSubmit, patients = [] }) => {
   const [formData, setFormData] = useState({
