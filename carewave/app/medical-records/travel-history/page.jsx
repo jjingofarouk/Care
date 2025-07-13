@@ -1,88 +1,86 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import TravelHistoryForm from '../../components/medical-records/TravelHistoryForm';
-import TravelHistoryList from '../../components/medical-records/TravelHistoryList';
+import { DataGrid } from '@mui/x-data-grid';
+import { IconButton } from '@mui/material';
+import { Edit, Trash2 } from 'lucide-react';
+import medicalRecordsService from '@/services/medicalRecordsService';
 
 const TravelHistoryPage = () => {
   const [travelHistory, setTravelHistory] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedTravelHistory, setSelectedTravelHistory] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock fetch function - replace with actual API call
   useEffect(() => {
     const fetchTravelHistory = async () => {
-      // Simulate API call
-      const mockTravelHistory = [
-        {
-          id: 1,
-          medicalRecordId: 1,
-          countryVisited: 'Brazil',
-          dateFrom: '2025-02-01',
-          dateTo: '2025-02-15',
-          purpose: 'Vacation',
-          travelNotes: 'No health issues reported',
-        },
-      ];
-      setTravelHistory(mockTravelHistory);
+      try {
+        setLoading(true);
+        const data = await medicalRecordsService.getTravelHistory();
+        setTravelHistory(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchTravelHistory();
   }, []);
 
-  const handleSubmit = (formData) => {
-    // Simulate API call to save travel history
-    const newTravelHistory = { ...formData, id: travelHistory.length + 1 };
-    setTravelHistory([...travelHistory, newTravelHistory]);
-    setShowForm(false);
-    setSelectedTravelHistory(null);
+  const handleDelete = async (id) => {
+    try {
+      await medicalRecordsService.deleteTravelHistory(id);
+      setTravelHistory(travelHistory.filter(travel => travel.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleEdit = (travelHistory) => {
-    setSelectedTravelHistory(travelHistory);
-    setShowForm(true);
-  };
-
-  const handleDelete = (id) => {
-    setTravelHistory(travelHistory.filter((history) => history.id !== id));
-  };
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'countryVisited', headerName: 'Country Visited', width: 200 },
+    { field: 'dateFrom', headerName: 'Date From', width: 150, type: 'date', valueGetter: (params) => params.row.dateFrom ? new Date(params.row.dateFrom) : null },
+    { field: 'dateTo', headerName: 'Date To', width: 150, type: 'date', valueGetter: (params) => params.row.dateTo ? new Date(params.row.dateTo) : null },
+    { field: 'purpose', headerName: 'Purpose', width: 200 },
+    { field: 'travelNotes', headerName: 'Notes', width: 300 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      renderCell: (params) => (
+        <div className="flex gap-2">
+          <IconButton onClick={() => console.log('Edit', params.row.id)} className="text-[var(--hospital-accent)]">
+            <Edit size={20} />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)} className="text-[var(--hospital-error)]">
+            <Trash2 size={20} />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Box className="p-6 max-w-7xl mx-auto">
-      <Typography variant="h4" className="mb-6 text-hospital-gray-900">
-        Travel History
-      </Typography>
-      
-      <Box className="mb-6">
-        <Button
-          variant="contained"
-          startIcon={<Plus />}
-          className="btn-primary"
-          onClick={() => {
-            setSelectedTravelHistory(null);
-            setShowForm(true);
-          }}
-        >
-          Add New Travel History
-        </Button>
-      </Box>
-
-      {showForm && (
-        <Box className="mb-6">
-          <TravelHistoryForm
-            initialData={selectedTravelHistory || {}}
-            onSubmit={handleSubmit}
-            medicalRecords={[{ id: 1, patient: { name: 'John Doe' } }]} // Mock records
-          />
-        </Box>
+    <div className="w-full">
+      {error && (
+        <div className="alert alert-error mb-4">
+          {error}
+        </div>
       )}
-
-      <TravelHistoryList
-        travelHistory={travelHistory}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    </Box>
+      {loading ? (
+        <div className="loading-spinner mx-auto" />
+      ) : (
+        <div className="table">
+          <DataGrid
+            rows={travelHistory}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 20, 50]}
+            className="w-full"
+            autoHeight
+            disableSelectionOnClick
+          />
+        </div>
+      )}
+    </div>
   );
 };
 
