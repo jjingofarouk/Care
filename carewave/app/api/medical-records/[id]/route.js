@@ -52,13 +52,8 @@ export async function GET(request, { params }) {
     const medicalRecord = await prisma.medicalRecord.findUnique({
       where: { id },
       include: {
-        patient: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
-        },
+        patient: { select: { id: true, firstName: true, lastName: true } },
+        doctor: { select: { id: true, firstName: true, lastName: true, department: { select: { name: true } } } },
         allergies: true,
         diagnoses: true,
         vitalSigns: true,
@@ -79,15 +74,11 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Medical record not found' }, { status: 404 });
     }
 
-    const transformedRecord = {
+    return NextResponse.json({
       ...medicalRecord,
-      patient: medicalRecord.patient ? {
-        ...medicalRecord.patient,
-        name: `${medicalRecord.patient.firstName} ${medicalRecord.patient.lastName}`
-      } : null
-    };
-
-    return NextResponse.json(transformedRecord);
+      patient: medicalRecord.patient ? { ...medicalRecord.patient, name: `${medicalRecord.patient.firstName} ${medicalRecord.patient.lastName}` } : null,
+      doctor: medicalRecord.doctor ? { ...medicalRecord.doctor, name: `${medicalRecord.doctor.firstName} ${medicalRecord.doctor.lastName}` } : null
+    });
   } catch (error) {
     console.error('Error in medical record API:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -108,96 +99,34 @@ export async function PUT(request, { params }) {
         where: { id },
         data: {
           patientId: updateData.patientId,
+          doctorId: updateData.doctorId,
           recordDate: new Date(updateData.recordDate),
           updatedAt: new Date()
         },
         include: {
-          patient: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true
-            }
-          }
+          patient: { select: { id: true, firstName: true, lastName: true } },
+          doctor: { select: { id: true, firstName: true, lastName: true, department: { select: { name: true } } } }
         }
       }),
-      allergy: () => prisma.allergy.update({
-        where: { id },
-        data: {
-          name: updateData.name,
-          severity: updateData.severity,
-          updatedAt: new Date()
-        }
-      }),
-      diagnosis: () => prisma.diagnosis.update({
-        where: { id },
-        data: {
-          code: updateData.code,
-          description: updateData.description,
-          diagnosedAt: new Date(updateData.diagnosedAt),
-          updatedAt: new Date()
-        }
-      }),
+      allergy: () => prisma.allergy.update({ where: { id }, data: { name: updateData.name, severity: updateData.severity, updatedAt: new Date() } }),
+      diagnosis: () => prisma.diagnosis.update({ where: { id }, data: { code: updateData.code, description: updateData.description, diagnosedAt: new Date(updateData.diagnosedAt), updatedAt: new Date() } }),
       vitalSign: () => prisma.vitalSign.update({
         where: { id },
         data: {
           bloodPressure: updateData.bloodPressure,
-          heartRate: updateData.heartRate,
-          temperature: updateData.temperature,
-          respiratoryRate: updateData.respiratoryRate,
-          oxygenSaturation: updateData.oxygenSaturation,
+          heartRate: parseInt(updateData.heartRate),
+          temperature: parseFloat(updateData.temperature),
+          respiratoryRate: parseInt(updateData.respiratoryRate),
+          oxygenSaturation: parseFloat(updateData.oxygenSaturation),
           recordedAt: new Date(updateData.recordedAt),
           updatedAt: new Date()
         }
       }),
-      chiefComplaint: () => prisma.chiefComplaint.update({
-        where: { id },
-        data: {
-          description: updateData.description,
-          duration: updateData.duration,
-          onset: updateData.onset,
-          updatedAt: new Date()
-        }
-      }),
-      presentIllness: () => prisma.presentIllness.update({
-        where: { id },
-        data: {
-          narrative: updateData.narrative,
-          severity: updateData.severity,
-          progress: updateData.progress,
-          associatedSymptoms: updateData.associatedSymptoms,
-          updatedAt: new Date()
-        }
-      }),
-      pastCondition: () => prisma.pastMedicalCondition.update({
-        where: { id },
-        data: {
-          condition: updateData.condition,
-          diagnosisDate: updateData.diagnosisDate ? new Date(updateData.diagnosisDate) : null,
-          notes: updateData.notes,
-          updatedAt: new Date()
-        }
-      }),
-      surgicalHistory: () => prisma.surgicalHistory.update({
-        where: { id },
-        data: {
-          procedure: updateData.procedure,
-          datePerformed: updateData.datePerformed ? new Date(updateData.datePerformed) : null,
-          outcome: updateData.outcome,
-          notes: updateData.notes,
-          updatedAt: new Date()
-        }
-      }),
-      familyHistory: () => prisma.familyHistory.update({
-        where: { id },
-        data: {
-          relative: updateData.relative,
-          condition: updateData.condition,
-          ageAtDiagnosis: updateData.ageAtDiagnosis,
-          notes: updateData.notes,
-          updatedAt: new Date()
-        }
-      }),
+      chiefComplaint: () => prisma.chiefComplaint.update({ where: { id }, data: { description: updateData.description, duration: updateData.duration, onset: updateData.onset, updatedAt: new Date() } }),
+      presentIllness: () => prisma.presentIllness.update({ where: { id }, data: { narrative: updateData.narrative, severity: updateData.severity, progress: updateData.progress, associatedSymptoms: updateData.associatedSymptoms, updatedAt: new Date() } }),
+      pastCondition: () => prisma.pastMedicalCondition.update({ where: { id }, data: { condition: updateData.condition, diagnosisDate: updateData.diagnosisDate ? new Date(updateData.diagnosisDate) : null, notes: updateData.notes, updatedAt: new Date() } }),
+      surgicalHistory: () => prisma.surgicalHistory.update({ where: { id }, data: { procedure: updateData.procedure, datePerformed: updateData.datePerformed ? new Date(updateData.datePerformed) : null, outcome: updateData.outcome, notes: updateData.notes, updatedAt: new Date() } }),
+      familyHistory: () => prisma.familyHistory.update({ where: { id }, data: { relative: updateData.relative, condition: updateData.condition, ageAtDiagnosis: parseInt(updateData.ageAtDiagnosis), notes: updateData.notes, updatedAt: new Date() } }),
       medicationHistory: () => prisma.medicationHistory.update({
         where: { id },
         data: {
@@ -210,46 +139,10 @@ export async function PUT(request, { params }) {
           updatedAt: new Date()
         }
       }),
-      socialHistory: () => prisma.socialHistory.update({
-        where: { id },
-        data: {
-          smokingStatus: updateData.smokingStatus,
-          alcoholUse: updateData.alcoholUse,
-          occupation: updateData.occupation,
-          maritalStatus: updateData.maritalStatus,
-          livingSituation: updateData.livingSituation,
-          updatedAt: new Date()
-        }
-      }),
-      reviewOfSystems: () => prisma.reviewOfSystems.update({
-        where: { id },
-        data: {
-          system: updateData.system,
-          findings: updateData.findings,
-          updatedAt: new Date()
-        }
-      }),
-      immunization: () => prisma.immunization.update({
-        where: { id },
-        data: {
-          vaccine: updateData.vaccine,
-          dateGiven: new Date(updateData.dateGiven),
-          administeredBy: updateData.administeredBy,
-          notes: updateData.notes,
-          updatedAt: new Date()
-        }
-      }),
-      travelHistory: () => prisma.travelHistory.update({
-        where: { id },
-        data: {
-          countryVisited: updateData.countryVisited,
-          dateFrom: updateData.dateFrom ? new Date(updateData.dateFrom) : null,
-          dateTo: updateData.dateTo ? new Date(updateData.dateTo) : null,
-          purpose: updateData.purpose,
-          travelNotes: updateData.travelNotes,
-          updatedAt: new Date()
-        }
-      })
+      socialHistory: () => prisma.socialHistory.update({ where: { id }, data: { smokingStatus: updateData.smokingStatus, alcoholUse: updateData.alcoholUse, occupation: updateData.occupation, maritalStatus: updateData.maritalStatus, livingSituation: updateData.livingSituation, updatedAt: new Date() } }),
+      reviewOfSystems: () => prisma.reviewOfSystems.update({ where: { id }, data: { system: updateData.system, findings: updateData.findings, updatedAt: new Date() } }),
+      immunization: () => prisma.immunization.update({ where: { id }, data: { vaccine: updateData.vaccine, dateGiven: new Date(updateData.dateGiven), administeredBy: updateData.administeredBy, notes: updateData.notes, updatedAt: new Date() } }),
+      travelHistory: () => prisma.travelHistory.update({ where: { id }, data: { countryVisited: updateData.countryVisited, dateFrom: updateData.dateFrom ? new Date(updateData.dateFrom) : null, dateTo: updateData.dateTo ? new Date(updateData.dateTo) : null, purpose: updateData.purpose, travelNotes: updateData.travelNotes, updatedAt: new Date() } })
     };
 
     if (updateOperations[resource]) {
@@ -257,10 +150,8 @@ export async function PUT(request, { params }) {
       if (resource === 'medicalRecord') {
         return NextResponse.json({
           ...result,
-          patient: {
-            ...result.patient,
-            name: `${result.patient.firstName} ${result.patient.lastName}`
-          }
+          patient: result.patient ? { ...result.patient, name: `${result.patient.firstName} ${result.patient.lastName}` } : null,
+          doctor: result.doctor ? { ...result.doctor, name: `${result.doctor.firstName} ${result.doctor.lastName}` } : null
         });
       }
       return NextResponse.json(result);
