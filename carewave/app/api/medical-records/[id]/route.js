@@ -107,7 +107,9 @@ export async function PUT(request, { params }) {
       medicalRecord: () => prisma.medicalRecord.update({
         where: { id },
         data: {
-          recordDate: new Date(updateData.recordDate)
+          patientId: updateData.patientId,
+          recordDate: new Date(updateData.recordDate),
+          updatedAt: new Date()
         },
         include: {
           patient: {
@@ -123,7 +125,8 @@ export async function PUT(request, { params }) {
         where: { id },
         data: {
           name: updateData.name,
-          severity: updateData.severity
+          severity: updateData.severity,
+          updatedAt: new Date()
         }
       }),
       diagnosis: () => prisma.diagnosis.update({
@@ -131,7 +134,8 @@ export async function PUT(request, { params }) {
         data: {
           code: updateData.code,
           description: updateData.description,
-          diagnosedAt: new Date(updateData.diagnosedAt)
+          diagnosedAt: new Date(updateData.diagnosedAt),
+          updatedAt: new Date()
         }
       }),
       vitalSign: () => prisma.vitalSign.update({
@@ -142,7 +146,8 @@ export async function PUT(request, { params }) {
           temperature: updateData.temperature,
           respiratoryRate: updateData.respiratoryRate,
           oxygenSaturation: updateData.oxygenSaturation,
-          recordedAt: new Date(updateData.recordedAt)
+          recordedAt: new Date(updateData.recordedAt),
+          updatedAt: new Date()
         }
       }),
       chiefComplaint: () => prisma.chiefComplaint.update({
@@ -150,7 +155,8 @@ export async function PUT(request, { params }) {
         data: {
           description: updateData.description,
           duration: updateData.duration,
-          onset: updateData.onset
+          onset: updateData.onset,
+          updatedAt: new Date()
         }
       }),
       presentIllness: () => prisma.presentIllness.update({
@@ -159,7 +165,8 @@ export async function PUT(request, { params }) {
           narrative: updateData.narrative,
           severity: updateData.severity,
           progress: updateData.progress,
-          associatedSymptoms: updateData.associatedSymptoms
+          associatedSymptoms: updateData.associatedSymptoms,
+          updatedAt: new Date()
         }
       }),
       pastCondition: () => prisma.pastMedicalCondition.update({
@@ -167,7 +174,8 @@ export async function PUT(request, { params }) {
         data: {
           condition: updateData.condition,
           diagnosisDate: updateData.diagnosisDate ? new Date(updateData.diagnosisDate) : null,
-          notes: updateData.notes
+          notes: updateData.notes,
+          updatedAt: new Date()
         }
       }),
       surgicalHistory: () => prisma.surgicalHistory.update({
@@ -176,7 +184,8 @@ export async function PUT(request, { params }) {
           procedure: updateData.procedure,
           datePerformed: updateData.datePerformed ? new Date(updateData.datePerformed) : null,
           outcome: updateData.outcome,
-          notes: updateData.notes
+          notes: updateData.notes,
+          updatedAt: new Date()
         }
       }),
       familyHistory: () => prisma.familyHistory.update({
@@ -185,7 +194,8 @@ export async function PUT(request, { params }) {
           relative: updateData.relative,
           condition: updateData.condition,
           ageAtDiagnosis: updateData.ageAtDiagnosis,
-          notes: updateData.notes
+          notes: updateData.notes,
+          updatedAt: new Date()
         }
       }),
       medicationHistory: () => prisma.medicationHistory.update({
@@ -196,7 +206,8 @@ export async function PUT(request, { params }) {
           frequency: updateData.frequency,
           startDate: updateData.startDate ? new Date(updateData.startDate) : null,
           endDate: updateData.endDate ? new Date(updateData.endDate) : null,
-          isCurrent: updateData.isCurrent
+          isCurrent: updateData.isCurrent,
+          updatedAt: new Date()
         }
       }),
       socialHistory: () => prisma.socialHistory.update({
@@ -206,14 +217,16 @@ export async function PUT(request, { params }) {
           alcoholUse: updateData.alcoholUse,
           occupation: updateData.occupation,
           maritalStatus: updateData.maritalStatus,
-          livingSituation: updateData.livingSituation
+          livingSituation: updateData.livingSituation,
+          updatedAt: new Date()
         }
       }),
       reviewOfSystems: () => prisma.reviewOfSystems.update({
         where: { id },
         data: {
           system: updateData.system,
-          findings: updateData.findings
+          findings: updateData.findings,
+          updatedAt: new Date()
         }
       }),
       immunization: () => prisma.immunization.update({
@@ -222,7 +235,8 @@ export async function PUT(request, { params }) {
           vaccine: updateData.vaccine,
           dateGiven: new Date(updateData.dateGiven),
           administeredBy: updateData.administeredBy,
-          notes: updateData.notes
+          notes: updateData.notes,
+          updatedAt: new Date()
         }
       }),
       travelHistory: () => prisma.travelHistory.update({
@@ -232,7 +246,8 @@ export async function PUT(request, { params }) {
           dateFrom: updateData.dateFrom ? new Date(updateData.dateFrom) : null,
           dateTo: updateData.dateTo ? new Date(updateData.dateTo) : null,
           purpose: updateData.purpose,
-          travelNotes: updateData.travelNotes
+          travelNotes: updateData.travelNotes,
+          updatedAt: new Date()
         }
       })
     };
