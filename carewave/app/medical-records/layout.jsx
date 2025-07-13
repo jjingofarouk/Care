@@ -1,78 +1,63 @@
+// app/components/medical-records/MedicalRecordsLayout.jsx
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Tabs, Tab, Box, Button, Drawer, Divider, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import MedicalRecordForm from '@/components/medical-records/MedicalRecordForm';
-import medicalRecordsService from '@/services/medicalRecordsService';
+import { Tabs, Tab, Box, Typography } from '@mui/material';
 
 const MedicalRecordsLayout = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [tabValue, setTabValue] = useState(() => {
-    if (pathname.includes('/medical-records/allergies')) return 1;
-    if (pathname.includes('/medical-records/diagnoses')) return 2;
-    if (pathname.includes('/medical-records/vital-signs')) return 3;
-    if (pathname.includes('/medical-records/chief-complaints')) return 4;
-    if (pathname.includes('/medical-records/present-illnesses')) return 5;
-    if (pathname.includes('/medical-records/past-conditions')) return 6;
-    if (pathname.includes('/medical-records/surgical-history')) return 7;
-    if (pathname.includes('/medical-records/family-history')) return 8;
-    if (pathname.includes('/medical-records/medication-history')) return 9;
-    if (pathname.includes('/medical-records/social-history')) return 10;
-    if (pathname.includes('/medical-records/review-of-systems')) return 11;
-    if (pathname.includes('/medical-records/immunizations')) return 12;
-    if (pathname.includes('/medical-records/travel-history')) return 13;
-    return 0;
-  });
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
+
+  // Sync tabValue with pathname to prevent hydration mismatch
+  useEffect(() => {
+    const pathToTab = {
+      '/medical-records': 0,
+      '/medical-records/allergies': 1,
+      '/medical-records/diagnoses': 2,
+      '/medical-records/vital-signs': 3,
+      '/medical-records/chief-complaints': 4,
+      '/medical-records/present-illnesses': 5,
+      '/medical-records/past-conditions': 6,
+      '/medical-records/surgical-history': 7,
+      '/medical-records/family-history': 8,
+      '/medical-records/medication-history': 9,
+      '/medical-records/social-history': 10,
+      '/medical-records/review-of-systems': 11,
+      '/medical-records/immunizations': 12,
+      '/medical-records/travel-history': 13,
+    };
+    setTabValue(pathToTab[pathname] || 0);
+  }, [pathname]);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
-    switch (newValue) {
-      case 0: router.push('/medical-records'); break;
-      case 1: router.push('/medical-records/allergies'); break;
-      case 2: router.push('/medical-records/diagnoses'); break;
-      case 3: router.push('/medical-records/vital-signs'); break;
-      case 4: router.push('/medical-records/chief-complaints'); break;
-      case 5: router.push('/medical-records/present-illnesses'); break;
-      case 6: router.push('/medical-records/past-conditions'); break;
-      case 7: router.push('/medical-records/surgical-history'); break;
-      case 8: router.push('/medical-records/family-history'); break;
-      case 9: router.push('/medical-records/medication-history'); break;
-      case 10: router.push('/medical-records/social-history'); break;
-      case 11: router.push('/medical-records/review-of-systems'); break;
-      case 12: router.push('/medical-records/immunizations'); break;
-      case 13: router.push('/medical-records/travel-history'); break;
-    }
-  };
-
-  const handleNewRecord = () => {
-    setSelectedRecord(null);
-    setDrawerOpen(true);
-  };
-
-  const handleSubmit = async (data) => {
-    try {
-      if (selectedRecord) {
-        await medicalRecordsService.updateMedicalRecord(selectedRecord.id, data);
-      } else {
-        await medicalRecordsService.createMedicalRecord(data);
-      }
-      setDrawerOpen(false);
-      router.refresh();
-    } catch (error) {
-      console.error('Error submitting record:', error);
-    }
+    const routes = [
+      '/medical-records',
+      '/medical-records/allergies',
+      '/medical-records/diagnoses',
+      '/medical-records/vital-signs',
+      '/medical-records/chief-complaints',
+      '/medical-records/present-illnesses',
+      '/medical-records/past-conditions',
+      '/medical-records/surgical-history',
+      '/medical-records/family-history',
+      '/medical-records/medication-history',
+      '/medical-records/social-history',
+      '/medical-records/review-of-systems',
+      '/medical-records/immunizations',
+      '/medical-records/travel-history',
+    ];
+    router.push(routes[newValue]);
   };
 
   return (
     <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
       <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4">
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <Box sx={{
-            flexGrow: 1,
+        <Box
+          sx={{
+            borderBottom: '1px solid var(--hospital-gray-200)',
+            mb: 1,
             '& .MuiTabs-root': {
               backgroundColor: 'var(--hospital-white)',
               borderRadius: '0.5rem',
@@ -115,67 +100,38 @@ const MedicalRecordsLayout = ({ children }) => {
                 borderRadius: '4px',
               },
             },
-          }}>
-            <Tabs
-              value={tabValue}
-              onChange={handleTabChange}
-              aria-label="medical records tabs"
-              variant="scrollable"
-              scrollButtons="auto"
-              allowScrollButtonsMobile
-            >
-              <Tab label="Overview" />
-              <Tab label="Allergies" />
-              <Tab label="Diagnoses" />
-              <Tab label="Vital Signs" />
-              <Tab label="Chief Complaints" />
-              <Tab label="Present Illnesses" />
-              <Tab label="Past Conditions" />
-              <Tab label="Surgical History" />
-              <Tab label="Family History" />
-              <Tab label="Medications" />
-              <Tab label="Social History" />
-              <Tab label="Review of Systems" />
-              <Tab label="Immunizations" />
-              <Tab label="Travel History" />
-            </Tabs>
-          </Box>
-          <Button
-            variant="contained"
-            startIcon={<Plus />}
-            className="btn-primary"
-            onClick={handleNewRecord}
-            sx={{ height: 'fit-content', alignSelf: 'center' }}
+          }}
+        >
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            aria-label="medical records tabs"
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
           >
-            New Record
-          </Button>
+            <Tab label="Overview" />
+            <Tab label="Allergies" />
+            <Tab label="Diagnoses" />
+            <Tab label="Vital Signs" />
+            <Tab label="Chief Complaints" />
+            <Tab label="Present Illnesses" />
+            <Tab label="Past Conditions" />
+            <Tab label="Surgical History" />
+            <Tab label="Family History" />
+            <Tab label="Medications" />
+            <Tab label="Social History" />
+            <Tab label="Review of Systems" />
+            <Tab label="Immunizations" />
+            <Tab label="Travel History" />
+          </Tabs>
         </Box>
-
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Box sx={{ flexGrow: 1 }}>{children}</Box>
-          <Drawer
-            anchor="right"
-            open={drawerOpen}
-            onClose={() => setDrawerOpen(false)}
-            sx={{
-              '& .MuiDrawer-paper': {
-                width: { xs: '100%', sm: '500px', md: '600px' },
-                p: 2,
-                bgcolor: 'var(--hospital-gray-50)',
-              },
-            }}
-          >
-            <Box sx={{ p: 2 }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                {selectedRecord ? 'Edit Medical Record' : 'New Medical Record'}
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <MedicalRecordForm
-                initialData={selectedRecord || {}}
-                onSubmit={handleSubmit}
-              />
-            </Box>
-          </Drawer>
+        <Box sx={{ mt: 2 }}>
+          {React.Children.count(children) > 0 ? (
+            children
+          ) : (
+            <Typography>No content available for this section</Typography>
+          )}
         </Box>
       </div>
     </div>
