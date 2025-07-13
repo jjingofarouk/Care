@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Tabs, Tab, Box, Button, Drawer, Divider, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
-import MedicalRecordForm from '../../components/medical-records/MedicalRecordForm';
-import medicalRecordsService from '../../services/medicalRecordsService';
+import MedicalRecordForm from '@/components/medical-records/MedicalRecordForm';
+import medicalRecordsService from '@/services/medicalRecordsService';
 
 const MedicalRecordsLayout = ({ children }) => {
   const router = useRouter();
