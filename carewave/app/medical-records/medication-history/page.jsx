@@ -1,88 +1,87 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import MedicationHistoryForm from '../../components/medical-records/MedicationHistoryForm';
-import MedicationHistoryList from '../../components/medical-records/MedicationHistoryList';
+import { DataGrid } from '@mui/x-data-grid';
+import { IconButton } from '@mui/material';
+import { Edit, Trash2 } from 'lucide-react';
+import medicalRecordsService from '@/services/medicalRecordsService';
 
 const MedicationHistoryPage = () => {
   const [medications, setMedications] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedMedication, setSelectedMedication] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock fetch function - replace with actual API call
   useEffect(() => {
     const fetchMedications = async () => {
-      // Simulate API call
-      const mockMedications = [
-        {
-          id: 1,
-          medicalRecordId: 1,
-          medicationName: 'Lisinopril',
-          dosage: '10mg',
-          frequency: 'Daily',
-          startDate: '2025-01-01',
-          isCurrent: true,
-        },
-      ];
-      setMedications(mockMedications);
+      try {
+        setLoading(true);
+        const data = await medicalRecordsService.getMedicationHistory();
+        setMedications(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchMedications();
   }, []);
 
-  const handleSubmit = (formData) => {
-    // Simulate API call to save medication
-    const newMedication = { ...formData, id: medications.length + 1 };
-    setMedications([...medications, newMedication]);
-    setShowForm(false);
-    setSelectedMedication(null);
+  const handleDelete = async (id) => {
+    try {
+      await medicalRecordsService.deleteMedicationHistory(id);
+      setMedications(medications.filter(med => med.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleEdit = (medication) => {
-    setSelectedMedication(medication);
-    setShowForm(true);
-  };
-
-  const handleDelete = (id) => {
-    setMedications(medications.filter((medication) => medication.id !== id));
-  };
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'medicationName', headerName: 'Medication', width: 200 },
+    { field: 'dosage', headerName: 'Dosage', width: 150 },
+    { field: 'frequency', headerName: 'Frequency', width: 150 },
+    { field: 'startDate', headerName: 'Start Date', width: 150, type: 'date', valueGetter: (params) => params.row.startDate ? new Date(params.row.startDate) : null },
+    { field: 'endDate', headerName: 'End Date', width: 150, type: 'date', valueGetter: (params) => params.row.endDate ? new Date(params.row.endDate) : null },
+    { field: 'isCurrent', headerName: 'Current', width: 100, type: 'boolean' },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      renderCell: (params) => (
+        <div className="flex gap-2">
+          <IconButton onClick={() => console.log('Edit', params.row.id)} className="text-[var(--hospital-accent)]">
+            <Edit size={20} />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)} className="text-[var(--hospital-error)]">
+            <Trash2 size={20} />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Box className="p-6 max-w-7xl mx-auto">
-      <Typography variant="h4" className="mb-6 text-hospital-gray-900">
-        Medication History
-      </Typography>
-      
-      <Box className="mb-6">
-        <Button
-          variant="contained"
-          startIcon={<Plus />}
-          className="btn-primary"
-          onClick={() => {
-            setSelectedMedication(null);
-            setShowForm(true);
-          }}
-        >
-          Add New Medication
-        </Button>
-      </Box>
-
-      {showForm && (
-        <Box className="mb-6">
-          <MedicationHistoryForm
-            initialData={selectedMedication || {}}
-            onSubmit={handleSubmit}
-            medicalRecords={[{ id: 1, patient: { name: 'John Doe' } }]} // Mock records
-          />
-        </Box>
+    <div className="w-full">
+      {error && (
+        <div className="alert alert-error mb-4">
+          {error}
+        </div>
       )}
-
-      <MedicationHistoryList
-        medications={medications}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    </Box>
+      {loading ? (
+        <div className="loading-spinner mx-auto" />
+      ) : (
+        <div className="table">
+          <DataGrid
+            rows={medications}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 20, 50]}
+            className="w-full"
+            autoHeight
+            disableSelectionOnClick
+          />
+        </div>
+      )}
+    </div>
   );
 };
 
