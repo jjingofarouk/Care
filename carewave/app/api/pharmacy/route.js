@@ -1,28 +1,35 @@
 import { PrismaClient } from '@prisma/client';
-import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const patientId = searchParams.get('patientId');
-  const drugId = searchParams.get('drugId');
+export async function GET() {
   try {
     const prescriptions = await prisma.prescription.findMany({
-      where: {
-        ...(patientId && { patientId }),
-        ...(drugId && { drugId }),
-      },
-      include: {
-        patient: { include: { user: true } },
-        doctor: { include: { user: true } },
-        drug: true,
+      include: { 
+        patient: true, 
+        doctor: true, 
+        items: { include: { medication: true } } 
       },
     });
-    return NextResponse.json(prescriptions);
+
+    // Flatten the data structure - create one row per prescription item
+    const flattenedPrescriptions = prescriptions.flatMap(prescription => 
+      prescription.items.map(item => ({
+        id: `${prescription.id}-${item.id}`, // Unique ID for each row
+        prescriptionId: prescription.id,
+        patient: prescription.patient,
+        doctor: prescription.doctor,
+        drug: item.medication, // Map medication to drug for consistency
+        dosage: item.dosage,
+        prescribedAt: prescription.prescribedAt,
+        // Include original prescription data if needed
+        originalPrescription: prescription
+      }))
+    );
+
+    return Response.json(flattenedPrescriptions);
   } catch (error) {
-    console.error('GET /api/pharmacy error:', error);
-    return NextResponse.json({ error: 'Failed to fetch prescriptions', details: error.message }, { status: 500 });
+    return Response.json({ error: 'Failed to fetch prescriptions' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
@@ -31,27 +38,32 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const data = await request.json();
-    if (!data.patientId || !data.doctorId || !data.drugId || !data.dosage || !data.prescribedAt) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
     const prescription = await prisma.prescription.create({
       data: {
-        patient: { connect: { id: data.patientId } },
-        doctor: { connect: { id: data.doctorId } },
-        drug: { connect: { id: data.drugId } },
-        dosage: data.dosage,
-        prescribedAt: new Date(data.prescribedAt),
+        ...data,
+        items: { create: data.items },
       },
-      include: {
-        patient: { include: { user: true } },
-        doctor: { include: { user: true } },
-        drug: true,
+      include: { 
+        patient: true, 
+        doctor: true, 
+        items: { include: { medication: true } } 
       },
     });
-    return NextResponse.json(prescription, { status: 201 });
+
+    // Return flattened structure for consistency
+    const flattenedPrescription = prescription.items.map(item => ({
+      id: `${prescription.id}-${item.id}`,
+      prescriptionId: prescription.id,
+      patient: prescription.patient,
+      doctor: prescription.doctor,
+      drug: item.medication,
+      dosage: item.dosage,
+      prescribedAt: prescription.prescribedAt,
+    }));
+
+    return Response.json(flattenedPrescription);
   } catch (error) {
-    console.error('POST /api/pharmacy error:', error);
-    return NextResponse.json({ error: 'Failed to create prescription', details: error.message }, { status: 500 });
+    return Response.json({ error: 'Failed to create prescription' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
