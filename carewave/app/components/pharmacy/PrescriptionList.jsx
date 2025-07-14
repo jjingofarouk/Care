@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { IconButton, Menu, MenuItem, Box } from '@mui/material';
 import { Edit, Trash2, MoreHorizontal } from 'lucide-react';
@@ -7,11 +7,64 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
-export default function PrescriptionList({ prescriptions = [], loading, onPrescriptionDeleted }) {
+export default function PrescriptionList({ 
+  prescriptions: initialPrescriptions = [], 
+  loading: initialLoading = false, 
+  onPrescriptionDeleted 
+}) {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [prescriptions, setPrescriptions] = useState(initialPrescriptions);
+  const [loading, setLoading] = useState(initialLoading);
+  const [error, setError] = useState(null);
+
+  // Fetch prescriptions if not provided as props
+  useEffect(() => {
+    if (!initialPrescriptions || initialPrescriptions.length === 0) {
+      fetchPrescriptions();
+    }
+  }, []);
+
+  const fetchPrescriptions = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch('/api/pharmacy/prescriptions', {
+        method: 'GET',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setPrescriptions(data);
+    } catch (err) {
+      console.error('Error fetching prescriptions:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token');
+    }
+    return null;
+  };
 
   const handleMenuClick = (event, id) => {
     setAnchorEl(event.currentTarget);
@@ -28,15 +81,26 @@ export default function PrescriptionList({ prescriptions = [], loading, onPrescr
 
     setDeleteLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      await fetch(`/api/pharmacy/prescriptions?id=${selectedPrescription}`, {
+      const response = await fetch(`/api/pharmacy/prescriptions?id=${selectedPrescription}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      // Remove the deleted prescription from local state
+      setPrescriptions(prev => prev.filter(p => p.id !== selectedPrescription));
 
       if (onPrescriptionDeleted) {
         onPrescriptionDeleted(selectedPrescription);
@@ -85,16 +149,24 @@ export default function PrescriptionList({ prescriptions = [], loading, onPrescr
       field: 'prescribedAt',
       headerName: 'Prescribed At',
       width: 180,
-      renderCell: (params) => 
-        params.row.prescribedAt ? 
-        format(new Date(params.row.prescribedAt), 'PPp') : 
-        'N/A',
+      renderCell: (params) => {
+        try {
+          return params.row.prescribedAt ? 
+            format(new Date(params.row.prescribedAt), 'PPp') : 
+            'N/A';
+        } catch (error) {
+          console.error('Date formatting error:', error);
+          return 'Invalid Date';
+        }
+      },
       headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
     },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 120,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => (
         <Box className="flex gap-2">
           <Link href={`/prescriptions/${params.row.id}/edit`}>
@@ -115,16 +187,39 @@ export default function PrescriptionList({ prescriptions = [], loading, onPrescr
     },
   ];
 
+  if (error) {
+    return (
+      <div className="card w-full max-w-7xl mx-auto">
+        <div className="p-4 text-center">
+          <div className="text-red-500 mb-2">Error loading prescriptions</div>
+          <div className="text-sm text-gray-600">{error}</div>
+          <button 
+            onClick={fetchPrescriptions}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card w-full max-w-7xl mx-auto">
       <div style={{ height: 600, width: '100%' }} className="overflow-x-auto custom-scrollbar">
         <DataGrid
           rows={loading ? [] : prescriptions}
           columns={columns}
-          pageSize={10}
-          rowsPerPageOptions={[10, 20, 50]}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 10,
+              },
+            },
+          }}
+          pageSizeOptions={[10, 20, 50]}
           loading={loading}
-          disableSelectionOnClick
+          disableRowSelectionOnClick
           autoHeight={false}
           sx={{
             '& .MuiDataGrid-root': {
@@ -152,8 +247,8 @@ export default function PrescriptionList({ prescriptions = [], loading, onPrescr
               backgroundColor: 'var(--hospital-white)',
             },
           }}
-          components={{
-            NoRowsOverlay: () => (
+          slots={{
+            noRowsOverlay: () => (
               <Box className="flex justify-center items-center h-full text-[var(--hospital-gray-500)]">
                 {loading ? (
                   <div className="loading-spinner"></div>
