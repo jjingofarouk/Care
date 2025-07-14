@@ -1,12 +1,11 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Chip, IconButton, Menu, MenuItem, Box, TextField, InputAdornment } from '@mui/material';
+import { Chip, IconButton, Button, Menu, MenuItem, Box, TextField, InputAdornment } from '@mui/material';
 import { Edit, Trash2, MoreHorizontal, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import pharmacyService from '../../services/pharmacyService';
 
 export default function InventoryTable({ inventory = [], loading, onInventoryItemDeleted }) {
   const router = useRouter();
