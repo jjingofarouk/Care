@@ -29,55 +29,6 @@ async function updateDoctorIds() {
           data: { id: newId },
         });
 
-        // Update related tables
-        // DoctorSchedule
-        await tx.doctorSchedule.updateMany({
-          where: { doctorId: oldId },
-          data: { doctorId: newId },
-        });
-
-        // DoctorLeave
-        await tx.doctorLeave.updateMany({
-          where: { doctorId: oldId },
-          data: { doctorId: newId },
-        });
-
-        // Appointment
-        await tx.appointment.updateMany({
-          where: { doctorId: oldId },
-          data: { doctorId: newId },
-        });
-
-        // DoctorSpecialization
-        await tx.doctorSpecialization.updateMany({
-          where: { doctorId: oldId },
-          data: { doctorId: newId },
-        });
-
-        // ClinicalNote
-        await tx.clinicalNote.updateMany({
-          where: { doctorId: oldId },
-          data: { doctorId: newId },
-        });
-
-        // ProgressNote
-        await tx.progressNote.updateMany({
-          where: { doctorId: oldId },
-          data: { doctorId: newId },
-        });
-
-        // SOAPNote
-        await tx.soapNote.updateMany({
-          where: { doctorId: oldId },
-          data: { doctorId: newId },
-        });
-
-        // Prescription
-        await tx.prescription.updateMany({
-          where: { doctorId: oldId },
-          data: { doctorId: newId },
-        });
-
         console.log(`Updated doctor ${oldId} to ${newId}`);
       }
     });
