@@ -1,11 +1,14 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Helper function to generate random date between 2023 and 2025
+// Helper function to generate random date between 2020 and 2025 with weighted monthly distribution
 function generateRandomDate() {
-  const start = new Date(2023, 0, 1);
+  const start = new Date(2020, 0, 1);
   const end = new Date(2025, 11, 31);
-  const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  // Generate random timestamp
+  const timestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
+  const date = new Date(timestamp);
+  
   // Set random time between 8 AM and 6 PM
   date.setHours(Math.floor(Math.random() * 10) + 8, Math.floor(Math.random() * 60));
   return date;
@@ -30,9 +33,9 @@ async function main() {
   // Define possible appointment statuses
   const appointmentStatuses = ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED'];
 
-  // Create 10,000 appointments
-  console.log('📅 Creating 10,000 appointments...');
-  for (let i = 0; i < 10000; i++) {
+  // Create 20,000 appointments
+  console.log('📅 Creating 20,000 appointments...');
+  for (let i = 0; i < 20000; i++) {
     const patient = getRandomElement(patients);
     const doctor = getRandomElement(doctors);
     const visitType = getRandomElement(visitTypes);
@@ -40,7 +43,7 @@ async function main() {
     const appointmentDate = generateRandomDate();
 
     try {
-      console.log(`Creating appointment ${i + 1}/10000 for ${patient.firstName} ${patient.lastName} with Dr. ${doctor.firstName} ${doctor.lastName}...`);
+      console.log(`Creating appointment ${i + 1}/20000 for ${patient.firstName} ${patient.lastName} with Dr. ${doctor.firstName} ${doctor.lastName}...`);
       
       const appointment = await prisma.appointment.create({
         data: {
@@ -61,7 +64,7 @@ async function main() {
         },
       });
 
-      if ((i + 1) % 1000 === 0) {
+      if ((i + 1) % 2000 === 0) {
         console.log(`✅ Progress: Created ${i + 1} appointments`);
       }
     } catch (error) {
