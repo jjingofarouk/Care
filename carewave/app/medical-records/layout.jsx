@@ -9,7 +9,7 @@ const MedicalRecordLayout = ({ children }) => {
   const [tabValue, setTabValue] = useState(() => {
     if (pathname.includes('/medical-records/new')) return 1;
     if (pathname.includes('/medical-records/analytics')) return 2;
-    if (pathname.includes('/app/patients/new')) return 3;
+    if (pathname.includes('/patients/new')) return 3;
     return 0;
   });
 
