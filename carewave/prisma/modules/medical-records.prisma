@@ -4,16 +4,20 @@ model MedicalRecord {
   id                 String              @id @default(uuid())
   patientId          String
   patient            Patient             @relation("PatientMedicalRecords", fields: [patientId], references: [id], onDelete: Cascade)
+
+  admissionId        String?             // NEW: Optional link to admission
+  admission          Admission?          @relation("AdmissionMedicalRecords", fields: [admissionId], references: [id], onDelete: SetNull)
+
   recordDate         DateTime
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
-  // Relations to clinical data
+  // Clinical data
   allergies          Allergy[]           @relation("MedicalRecordAllergies")
   diagnoses          Diagnosis[]         @relation("MedicalRecordDiagnoses")
   vitalSigns         VitalSign[]         @relation("MedicalRecordVitalSigns")
 
-  // History taking (1:1 or 1:N)
+  // History taking
   chiefComplaint     ChiefComplaint?
   presentIllness     PresentIllness?
   pastConditions     PastMedicalCondition[]
