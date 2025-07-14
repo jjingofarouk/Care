@@ -1,12 +1,11 @@
 'use client';
 import React, { useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Chip, IconButton, Menu, MenuItem, Box } from '@mui/material';
+import { IconButton, Menu, MenuItem, Box } from '@mui/material';
 import { Edit, Trash2, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import pharmacyService from '../../services/pharmacyService';
 
 export default function PrescriptionList({ prescriptions = [], loading, onPrescriptionDeleted }) {
   const router = useRouter();
