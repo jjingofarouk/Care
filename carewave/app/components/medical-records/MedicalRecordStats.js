@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Alert } from '@mui/material';
-import { BarChart2 } from 'lucide-react';
+import { Typography, Grid } from '@mui/material';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
