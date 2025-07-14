@@ -99,21 +99,21 @@ export default function MedicalRecordList() {
       field: 'patientName',
       headerName: 'Patient Name',
       width: 200,
-      valueGetter: (params) => getPatientName(params.row),
+      valueGetter: (value, row) => getPatientName(row),
       renderCell: (params) => <Typography variant="body2">{params.value}</Typography>,
     },
     {
       field: 'recordDate',
       headerName: 'Record Date',
       width: 130,
-      valueGetter: (params) => formatDate(params.row.recordDate),
+      valueGetter: (value, row) => formatDate(row.recordDate),
       renderCell: (params) => <Typography variant="body2">{params.value}</Typography>,
     },
     {
       field: 'chiefComplaint',
       headerName: 'Chief Complaint',
       width: 250,
-      valueGetter: (params) => getChiefComplaint(params.row),
+      valueGetter: (value, row) => getChiefComplaint(row),
       renderCell: (params) => (
         <Typography
           variant="body2"
@@ -131,7 +131,7 @@ export default function MedicalRecordList() {
       field: 'diagnosis',
       headerName: 'Diagnosis',
       width: 250,
-      valueGetter: (params) => getDiagnosis(params.row),
+      valueGetter: (value, row) => getDiagnosis(row),
       renderCell: (params) => (
         <Typography
           variant="body2"
