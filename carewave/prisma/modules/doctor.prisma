@@ -1,7 +1,7 @@
 // doctor.prisma
 // Represents a doctor in the hospital
 model Doctor {
-  id               String              @id @default(uuid())
+  id               String              @id
   firstName        String
   lastName         String
   email            String              @unique
