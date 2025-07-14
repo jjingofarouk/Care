@@ -1,11 +1,12 @@
 {
-  "name": "Hospital Management System",
-  "short_name": "HospitalApp",
+  "name": "CareWave",
+  "short_name": "CareWave",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0f172a",
+  "background_color": "#f9fafb",
+  "theme_color": "#059669",
   "orientation": "portrait",
+  "description": "A modern and robust Hospital Management System with role-based access for doctors, patients, nurses, and staff.",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
