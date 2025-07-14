@@ -161,6 +161,6 @@ const adtService = {
   updateBedStatus,
   getAnalytics,
   getWards,
-  getBeds*.
+  getBeds,
 };
 export default adtService;
