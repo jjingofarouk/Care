@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Box, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import PrescriptionList from '@/components/PrescriptionList';
+import PrescriptionList from '@/components/pharmacy/PrescriptionList';
 import pharmacyService from '@/services/pharmacyService';
 
 export default function PharmacyHome() {
