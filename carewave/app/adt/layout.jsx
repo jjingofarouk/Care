@@ -1,59 +1,92 @@
 'use client';
-import React from 'react';
-// app/adt/layout.js
-
-import { useState } from 'react';
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { Tabs, Tab, Box } from '@mui/material';
 import { Hospital, Bed, ArrowLeftRight, BarChart2 } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
-export default function AdtLayout({ children }) {
+const AdtLayout = ({ children }) => {
+  const router = useRouter();
   const pathname = usePathname();
-  const [drawerOpen, setDrawerOpen] = useState(true);
+  const [tabValue, setTabValue] = useState(() => {
+    if (pathname.includes('/adt/discharges')) return 1;
+    if (pathname.includes('/adt/transfers')) return 2;
+    if (pathname.includes('/adt/analytics')) return 3;
+    return 0;
+  });
 
-  const menuItems = [
-    { text: 'Admissions', path: '/adt/admissions', icon: <Hospital size={20} /> },
-    { text: 'Discharges', path: '/adt/discharges', icon: <Bed size={20} /> },
-    { text: 'Transfers', path: '/adt/transfers', icon: <ArrowLeftRight size={20} /> },
-    { text: 'Analytics', path: '/adt/analytics', icon: <BarChart2 size={20} /> },
-  ];
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+    switch (newValue) {
+      case 0:
+        router.push('/adt/admissions');
+        break;
+      case 1:
+        router.push('/adt/discharges');
+        break;
+      case 2:
+        router.push('/adt/transfers');
+        break;
+      case 3:
+        router.push('/adt/analytics');
+        break;
+    }
+  };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Drawer
-        variant="persistent"
-        open={drawerOpen}
-        sx={{
-          width: 240,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': { width: 240, boxSizing: 'border-box', bgcolor: '#f5f5f5' },
-        }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            ADT Module
-          </Typography>
-          <List>
-            {menuItems.map((item) => (
-              <ListItem key={item.text} disablePadding>
-                <ListItemButton
-                  component={Link}
-                  href={item.path}
-                  selected={pathname === item.path}
-                  sx={{ borderRadius: 1, mb: 0.5 }}
-                >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+    <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
+      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4">
+        <Box className="mb-2">
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            aria-label="ADT management tabs"
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            className="card rounded-lg overflow-x-auto custom-scrollbar"
+          >
+            <Tab
+              label={
+                <span className="flex items-center gap-2">
+                  <Hospital className="h-4 w-4" />
+                  Admissions
+                </span>
+              }
+              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+            />
+            <Tab
+              label={
+                <span className="flex items-center gap-2">
+                  <Bed className="h-4 w-4" />
+                  Discharges
+                </span>
+              }
+              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+            />
+            <Tab
+              label={
+                <span className="flex items-center gap-2">
+                  <ArrowLeftRight className="h-4 w-4" />
+                  Transfers
+                </span>
+              }
+              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+            />
+            <Tab
+              label={
+                <span className="flex items-center gap-2">
+                  <BarChart2 className="h-4 w-4" />
+                  Analytics
+                </span>
+              }
+              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+            />
+          </Tabs>
         </Box>
-      </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, ml: drawerOpen ? 0 : -30 }}>
         {children}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
-}
+};
+
+export default AdtLayout;
