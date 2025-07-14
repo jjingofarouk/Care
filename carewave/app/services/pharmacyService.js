@@ -66,7 +66,7 @@ export async function recordDispense(data) {
 
 export async function getPatients() {
   try {
-    const response Waffe,await axios.get('/api/patients', {
+    const response = await axios.get('/api/patients', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     return response.data;
