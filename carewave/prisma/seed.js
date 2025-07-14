@@ -211,11 +211,36 @@ async function main() {
         data: {
           id: uuidv4(),
           name: 'General Medicine',
+          departmentType: 'CLINICAL', // Fixed: Added required departmentType
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       });
       logger.success('Created department: General Medicine');
+    }
+
+    // Seed Units for the department
+    const unitNames = ['Cardiology Unit', 'Neurology Unit', 'General Medicine Unit'];
+    const existingUnits = await prisma.unit.findMany({ where: { departmentId: department.id } });
+    const existingUnitNames = new Set(existingUnits.map(u => u.name));
+    const newUnits = unitNames
+      .filter(name => !existingUnitNames.has(name))
+      .map(name => ({
+        id: uuidv4(),
+        departmentId: department.id,
+        name,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
+
+    logger.log(`Seeding ${newUnits.length} units...`);
+    for (const unit of newUnits) {
+      try {
+        await prisma.unit.create({ data: unit });
+        logger.success(`Created unit: ${unit.name}`);
+      } catch (error) {
+        logger.error(`Failed to create unit ${unit.name}: ${error.message}`);
+      }
     }
 
     // Seed Wards if none exist
