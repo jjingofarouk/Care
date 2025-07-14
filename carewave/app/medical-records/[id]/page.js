@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
+import { getMedicalRecord } from '@/services/medicalRecordService';
 
 export default function MedicalRecordDetailPage() {
   const params = useParams();
