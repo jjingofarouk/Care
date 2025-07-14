@@ -1,185 +1,151 @@
-// app/adt/page.jsx
-"use client";
+
+// app/adt/page.js
+'use client';
 import React, { useState, useEffect } from 'react';
-import { Container, Box, Typography, Button, Alert, Tabs, Tab } from '@mui/material';
-import AdmissionForm from './AdtForm';
-import AdmissionList from './AdtList';
-import DoctorForm from './DoctorForm';
-import PatientForm from './PatientForm';
-import WardForm from './WardForm';
-import DischargeForm from './DischargeForm';
-import DischargeList from './DischargeList';
-import DoctorList from './DoctorList';
-import PatientList from './PatientList';
-import WardList from './WardList';
-import TriageDashboard from './TriageDashboard';
-import FinancialSummary from './FinancialSummary';
-import { getPatients, getDoctors, getWards } from './adtService';
-import styles from './page.module.css';
+import { Box, Button, Card, CardContent, Typography } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { Hospital } from 'lucide-react';
+import AdmissionForm from '../components/adt/AdmissionForm';
+import DischargeForm from '../components/adt/DischargeForm';
+import TransferForm from '../components/adt/TransferForm';
+import BedStatus from '../components/adt/BedStatus';
+import adtService from '../services/adtService';
 
 export default function AdtPage() {
+  const [admissions, setAdmissions] = useState([]);
+  const [openAdmissionForm, setOpenAdmissionForm] = useState(false);
+  const [openDischargeForm, setOpenDischargeForm] = useState(false);
+  const [openTransferForm, setOpenTransferForm] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState(null);
-  const [selectedDischarge, setSelectedDischarge] = useState(null);
-  const [patients, setPatients] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [wards, setWards] = useState([]);
-  const [refresh, setRefresh] = useState(false);
-  const [errors, setErrors] = useState([]);
-  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
-    async function fetchData() {
-      setErrors([]);
-      try {
-        const [patientData, doctorData, wardData] = await Promise.all([
-          getPatients().catch((err) => {
-            setErrors((prev) => [...prev, `Patients: ${err.response?.data?.details || err.message}`]);
-            return [];
-          }),
-          getDoctors().catch((err) => {
-            setErrors((prev) => [...prev, `Doctors: ${err.response?.data?.details || err.message}`]);
-            return [];
-          }),
-          getWards().catch((err) => {
-            setErrors((prev) => [...prev, `Wards: ${err.response?.data?.details || err.message}`]);
-            return [];
-          }),
-        ]);
-        setPatients(patientData);
-        setDoctors(doctorData);
-        setWards(wardData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setErrors((prev) => [...prev, 'General: Failed to fetch data. Please try again later.']);
-      }
+    fetchAdmissions();
+  }, []);
+
+  const fetchAdmissions = async () => {
+    try {
+      const data = await adtService.getAdmissions();
+      setAdmissions(data);
+    } catch (error) {
+      console.error('Error fetching admissions:', error);
     }
-    fetchData();
-  }, [refresh]);
-
-  const handleFormSubmit = () => {
-    setRefresh(!refresh);
-    setSelectedAdmission(null);
-    setSelectedDischarge(null);
   };
 
-  const handleClearSelection = () => {
-    setSelectedAdmission(null);
-    setSelectedDischarge(null);
-  };
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
+  const columns = [
+    { field: 'patientName', headerName: 'Patient', flex: 1, valueGetter: (params) => params.row.patient.name },
+    { field: 'wardName', headerName: 'Ward', flex: 1, valueGetter: (params) => params.row.ward.name },
+    { field: 'bedNumber', headerName: 'Bed', flex: 1, valueGetter: (params) => params.row.bed?.bedNumber || 'N/A' },
+    {
+      field: 'admissionDate',
+      headerName: 'Admission Date',
+      flex: 1,
+      valueGetter: (params) => new Date(params.row.admissionDate).toLocaleDateString(),
+    },
+    {
+      field: 'emergency',
+      headerName: 'Emergency',
+      flex: 1,
+      valueGetter: (params) => params.row.emergencyCases.length > 0 ? params.row.emergencyCases[0].triage.triageLevel : 'N/A',
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      renderCell: (params) => (
+        <>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => {
+              setSelectedAdmission(params.row);
+              setOpenAdmissionForm(true);
+            }}
+            sx={{ mr: 1 }}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => {
+              setSelectedAdmission(params.row);
+              setOpenDischargeForm(true);
+            }}
+            sx={{ mr: 1 }}
+          >
+            Discharge
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => {
+              setSelectedAdmission(params.row);
+              setOpenTransferForm(true);
+            }}
+          >
+            Transfer
+          </Button>
+        </>
+      ),
+    },
+  ];
 
   return (
-    <Box className={styles.container}>
-      <Container className={styles.contentBox}>
-        <Typography variant="h4" className={styles.mainTitle}>
-          Admissions, Discharge, and Triage (ADT)
-        </Typography>
-        {(selectedAdmission || selectedDischarge) && (
-          <Button
-            variant="contained"
-            onClick={handleClearSelection}
-            className={styles.clearButton}
-          >
-            Clear Selection
-          </Button>
-        )}
-        {errors.length > 0 && (
-          <Box className={styles.errorContainer}>
-            {errors.map((error, index) => (
-              <Alert key={index} severity="error" className={styles.errorAlert}>
-                {error}
-              </Alert>
-            ))}
-          </Box>
-        )}
-        {(patients.length === 0 && doctors.length === 0 && wards.length === 0 && errors.length === 0) && (
-          <Alert severity="info" className={styles.infoAlert}>
-            No patients, doctors, or wards found. Please add data using the respective tabs.
-          </Alert>
-        )}
-        <Box className={styles.tabsContainer}>
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            className={styles.tabs}
-            variant="scrollable"
-            scrollButtons="auto"
-          >
-            <Tab label="Admissions" className={styles.tab} classes={{ selected: styles.tabSelected }} />
-            <Tab label="Discharges" className={styles.tab} classes={{ selected: styles.tabSelected }} />
-            <Tab label="Patients" className={styles.tab} classes={{ selected: styles.tabSelected }} />
-            <Tab label="Doctors" className={styles.tab} classes={{ selected: styles.tabSelected }} />
-            <Tab label="Wards" className={styles.tab} classes={{ selected: styles.tabSelected }} />
-            <Tab label="Triage Dashboard" className={styles.tab} classes={{ selected: styles.tabSelected }} />
-            <Tab label="Financial Summary" className={styles.tab} classes={{ selected: styles.tabSelected }} />
-          </Tabs>
-          <Box className={`${styles.tabContent} ${styles.fadeIn}`}>
-            {tabValue === 0 && (
-              <Box className={styles.sectionContainer}>
-                <Box className={styles.formSection}>
-                  <AdmissionForm
-                    admission={selectedAdmission}
-                    onSubmit={handleFormSubmit}
-                    patients={patients}
-                    doctors={doctors}
-                    wards={wards}
-                  />
-                </Box>
-                <AdmissionList onSelectAdmission={setSelectedAdmission} refresh={refresh} />
-              </Box>
-            )}
-            {tabValue === 1 && (
-              <Box className={styles.sectionContainer}>
-                <Box className={styles.formSection}>
-                  <DischargeForm
-                    discharge={selectedDischarge}
-                    onSubmit={handleFormSubmit}
-                    doctors={doctors}
-                  />
-                </Box>
-                <DischargeList onSelectDischarge={setSelectedDischarge} refresh={refresh} />
-              </Box>
-            )}
-            {tabValue === 2 && (
-              <Box className={styles.sectionContainer}>
-                <Box className={styles.formSection}>
-                  <PatientForm onSubmit={handleFormSubmit} />
-                </Box>
-                <PatientList />
-              </Box>
-            )}
-            {tabValue === 3 && (
-              <Box className={styles.sectionContainer}>
-                <Box className={styles.formSection}>
-                  <DoctorForm onSubmit={handleFormSubmit} />
-                </Box>
-                <DoctorList />
-              </Box>
-            )}
-            {tabValue === 4 && (
-              <Box className={styles.sectionContainer}>
-                <Box className={styles.formSection}>
-                  <WardForm onSubmit={handleFormSubmit} />
-                </Box>
-                <WardList />
-              </Box>
-            )}
-            {tabValue === 5 && (
-              <Box className={styles.sectionContainer}>
-                <TriageDashboard />
-              </Box>
-            )}
-            {tabValue === 6 && (
-              <Box className={styles.sectionContainer}>
-                <FinancialSummary />
-              </Box>
-            )}
-          </Box>
-        </Box>
-      </Container>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        <Hospital size={24} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+        Admissions
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => {
+          setSelectedAdmission(null);
+          setOpenAdmissionForm(true);
+        }}
+        sx={{ mb: 2 }}
+      >
+        New Admission
+      </Button>
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Current Admissions
+          </Typography>
+          <DataGrid
+            rows={admissions}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 25, 50]}
+            autoHeight
+          />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Bed Status
+          </Typography>
+          <BedStatus />
+        </CardContent>
+      </Card>
+      <AdmissionForm
+        open={openAdmissionForm}
+        onClose={() => setOpenAdmissionForm(false)}
+        admission={selectedAdmission}
+        onSave={fetchAdmissions}
+      />
+      <DischargeForm
+        open={openDischargeForm}
+        onClose={() => setOpenDischargeForm(false)}
+        admission={selectedAdmission}
+        onSave={fetchAdmissions}
+      />
+      <TransferForm
+        open={openTransferForm}
+        onClose={() => setOpenTransferForm(false)}
+        admission={selectedAdmission}
+        onSave={fetchAdmissions}
+      />
     </Box>
   );
 }
