@@ -1,12 +1,20 @@
+// next.config.js
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   webpack: (config, { isServer }) => {
-    // Transpile only undici if needed
     config.module.rules.push({
-      test: /\.m?js$/, // Support .js and .mjs
+      test: /\.m?js$/,
       include: [/node_modules\/undici/],
       resolve: {
-        fullySpecified: false, // Fixes module specifier errors
+        fullySpecified: false,
       },
       use: {
         loader: 'babel-loader',
@@ -19,7 +27,6 @@ const nextConfig = {
               },
             ],
           ],
-          plugins: [], // Optional: add any plugins if needed
           babelrc: false,
           configFile: false,
         },
@@ -30,4 +37,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);
