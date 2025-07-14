@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Chip, IconButton, Button, Menu, MenuItem, Box, TextField, InputAdornment } from '@mui/material';
-import { Edit, Trash2, MoreHorizontal, Search } from 'lucide-react';
+import { Edit, Trash2, MoreHorizontal, Search, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
@@ -26,6 +26,13 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
     );
   }, [searchTerm, inventory]);
 
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token');
+    }
+    return null;
+  };
+
   const handleMenuClick = (event, id) => {
     setAnchorEl(event.currentTarget);
     setSelectedItem(id);
@@ -41,15 +48,23 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
 
     setDeleteLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      await fetch(`/api/pharmacy/inventory?id=${selectedItem}`, {
+      const response = await fetch(`/api/pharmacy/inventory?id=${selectedItem}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
 
       if (onInventoryItemDeleted) {
         onInventoryItemDeleted(selectedItem);
@@ -70,7 +85,7 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
 
     setDeleteLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
@@ -79,7 +94,10 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
         selectedRows.map((id) =>
           fetch(`/api/pharmacy/inventory?id=${id}`, {
             method: 'DELETE',
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
           })
         )
       );
@@ -130,8 +148,14 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
       field: 'expiryDate',
       headerName: 'Expiry Date',
       width: 150,
-      renderCell: (params) =>
-        params.row.expiryDate ? format(new Date(params.row.expiryDate), 'PP') : 'N/A',
+      renderCell: (params) => {
+        try {
+          return params.row.expiryDate ? format(new Date(params.row.expiryDate), 'PP') : 'N/A';
+        } catch (error) {
+          console.error('Date formatting error:', error);
+          return 'Invalid Date';
+        }
+      },
       headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
       sortable: true,
     },
@@ -150,13 +174,20 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
       width: 150,
       renderCell: (params) => getStockStatus(params.row.quantity, params.row.expiryDate),
       headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+      sortable: false,
     },
     {
       field: 'createdAt',
       headerName: 'Created At',
       width: 180,
-      renderCell: (params) =>
-        params.row.createdAt ? format(new Date(params.row.createdAt), 'PPp') : 'N/A',
+      renderCell: (params) => {
+        try {
+          return params.row.createdAt ? format(new Date(params.row.createdAt), 'PPp') : 'N/A';
+        } catch (error) {
+          console.error('Date formatting error:', error);
+          return 'Invalid Date';
+        }
+      },
       headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
       sortable: true,
     },
@@ -164,19 +195,32 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
       field: 'updatedAt',
       headerName: 'Updated At',
       width: 180,
-      renderCell: (params) =>
-        params.row.updatedAt ? format(new Date(params.row.updatedAt), 'PPp') : 'N/A',
+      renderCell: (params) => {
+        try {
+          return params.row.updatedAt ? format(new Date(params.row.updatedAt), 'PPp') : 'N/A';
+        } catch (error) {
+          console.error('Date formatting error:', error);
+          return 'Invalid Date';
+        }
+      },
       headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
       sortable: true,
     },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 120,
+      width: 150,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => (
         <Box className="flex gap-2">
+          <Link href={`/inventory/${params.row.id}`}>
+            <IconButton className="btn-outline" size="small" title="View Details">
+              <Eye className="h-4 w-4" />
+            </IconButton>
+          </Link>
           <Link href={`/inventory/${params.row.id}/edit`}>
-            <IconButton className="btn-outline" size="small">
+            <IconButton className="btn-outline" size="small" title="Edit">
               <Edit className="h-4 w-4" />
             </IconButton>
           </Link>
@@ -184,6 +228,7 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
             className="btn-outline"
             size="small"
             onClick={(e) => handleMenuClick(e, params.row.id)}
+            title="More Options"
           >
             <MoreHorizontal className="h-4 w-4" />
           </IconButton>
@@ -239,12 +284,18 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
         <DataGrid
           rows={loading ? [] : rows}
           columns={columns}
-          pageSize={10}
-          rowsPerPageOptions={[10, 20, 50]}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 10,
+              },
+            },
+          }}
+          pageSizeOptions={[10, 20, 50]}
           loading={loading}
           checkboxSelection
-          onSelectionModelChange={(newSelection) => setSelectedRows(newSelection)}
-          disableSelectionOnClick
+          onRowSelectionModelChange={(newSelection) => setSelectedRows(newSelection)}
+          disableRowSelectionOnClick
           autoHeight={false}
           sx={{
             '& .MuiDataGrid-root': {
@@ -272,8 +323,8 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
               backgroundColor: 'var(--hospital-white)',
             },
           }}
-          components={{
-            NoRowsOverlay: () => (
+          slots={{
+            noRowsOverlay: () => (
               <Box className="flex justify-center items-center h-full text-[var(--hospital-gray-500)]">
                 {loading ? (
                   <div className="loading-spinner"></div>
