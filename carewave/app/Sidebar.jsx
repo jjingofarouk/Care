@@ -144,6 +144,7 @@ const roleBasedNavItems = {
     { name: 'Helpdesk', path: '/helpdesk', icon: Headphones, category: 'support' },
     { name: 'Marketing Referral', path: '/mkt-referral', icon: Users, category: 'support' },
     { name: 'Social Service', path: '/social-service', icon: Users, category: 'support' },
+    { name: 'Departments', path: '/departments', icon: Building2, category: 'admin' }, // Added Departments
     { name: 'Settings', path: '/settings', icon: Settings, category: 'admin' },
     { name: 'System Admin', path: '/system-admin', icon: Monitor, category: 'admin' },
     { name: 'Utilities', path: '/utilities', icon: Wrench, category: 'admin' },
@@ -174,7 +175,7 @@ const roleBasedNavItems = {
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'Analytics', path: '/analytics', icon: TrendingUp, category: 'reports' },
     { name: 'Reports', path: '/reports', icon: FileBarChart, category: 'reports' },
-    { name: 'Departments', path: '/departments', icon: Building2, category: 'admin' },
+    { name: 'Departments', path: '/departments', icon: Building2, category: 'admin' }, // Added Departments
     { name: 'Performance', path: '/performance', icon: Star, category: 'admin' },
     { name: 'Settings', path: '/settings', icon: Settings, category: 'admin' },
   ],
