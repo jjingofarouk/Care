@@ -6,31 +6,32 @@ import { format } from 'date-fns';
 export default function PrescriptionList({ prescriptions = [] }) {
   const columns = [
     {
-      field: 'patient',
+      field: 'patientName',
       headerName: 'Patient',
       flex: 1,
       minWidth: 150,
-      valueGetter: (params) => params.row.patient?.user?.name || '',
+      valueGetter: ({ row }) => `${row.patient?.firstName || ''} ${row.patient?.lastName || ''}`.trim() || 'N/A',
     },
     {
-      field: 'doctor',
+      field: 'doctorName',
       headerName: 'Doctor',
       flex: 1,
       minWidth: 150,
-      valueGetter: (params) => params.row.doctor?.user?.name || '',
+      valueGetter: ({ row }) => `${row.doctor?.firstName || ''} ${row.doctor?.lastName || ''}`.trim() || 'N/A',
     },
     {
-      field: 'drug',
+      field: 'drugName',
       headerName: 'Drug',
       flex: 1,
       minWidth: 120,
-      valueGetter: (params) => params.row.drug?.name || '',
+      valueGetter: ({ row }) => row.drug?.name || 'N/A',
     },
     {
       field: 'dosage',
       headerName: 'Dosage',
       flex: 0.8,
       minWidth: 100,
+      valueGetter: ({ row }) => row.dosage || 'N/A',
     },
     {
       field: 'prescribedAt',
@@ -38,11 +39,8 @@ export default function PrescriptionList({ prescriptions = [] }) {
       flex: 1,
       minWidth: 180,
       type: 'dateTime',
-      valueGetter: (params) => params.row.prescribedAt ? new Date(params.row.prescribedAt) : null,
-      valueFormatter: (params) => {
-        if (!params.value) return '';
-        return format(new Date(params.value), 'PPp');
-      },
+      valueGetter: ({ row }) => (row.prescribedAt ? new Date(row.prescribedAt) : null),
+      valueFormatter: ({ value }) => (value ? format(value, 'PPp') : 'N/A'),
     },
   ];
 
@@ -51,7 +49,7 @@ export default function PrescriptionList({ prescriptions = [] }) {
     patient: prescription.patient,
     doctor: prescription.doctor,
     drug: prescription.drug,
-    dosage: prescription.dosage || '',
+    dosage: prescription.dosage,
     prescribedAt: prescription.prescribedAt,
   }));
 
@@ -65,19 +63,13 @@ export default function PrescriptionList({ prescriptions = [] }) {
           rows={rows}
           columns={columns}
           initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
+            pagination: { paginationModel: { pageSize: 10 } },
           }}
           pageSizeOptions={[5, 10, 25, 50]}
           checkboxSelection
           disableRowSelectionOnClick
           sx={{
-            '& .MuiDataGrid-root': {
-              border: 'none',
-            },
+            border: 'none',
             '& .MuiDataGrid-cell': {
               borderBottom: '1px solid #e5e7eb',
             },
