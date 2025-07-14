@@ -1,8 +1,7 @@
-
 // app/adt/page.js
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Card, CardContent, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Typography, Alert, CircularProgress } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { Hospital } from 'lucide-react';
 import AdmissionForm from '../components/adt/AdmissionForm';
@@ -13,6 +12,8 @@ import adtService from '../services/adtService';
 
 export default function AdtPage() {
   const [admissions, setAdmissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [openAdmissionForm, setOpenAdmissionForm] = useState(false);
   const [openDischargeForm, setOpenDischargeForm] = useState(false);
   const [openTransferForm, setOpenTransferForm] = useState(false);
@@ -24,35 +25,71 @@ export default function AdtPage() {
 
   const fetchAdmissions = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const data = await adtService.getAdmissions();
       setAdmissions(data);
     } catch (error) {
       console.error('Error fetching admissions:', error);
+      setError('Failed to load admissions. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const columns = [
-    { field: 'patientName', headerName: 'Patient', flex: 1, valueGetter: (params) => params.row.patient.name },
-    { field: 'wardName', headerName: 'Ward', flex: 1, valueGetter: (params) => params.row.ward.name },
-    { field: 'bedNumber', headerName: 'Bed', flex: 1, valueGetter: (params) => params.row.bed?.bedNumber || 'N/A' },
+    { 
+      field: 'patientName', 
+      headerName: 'Patient', 
+      flex: 1,
+      valueGetter: (value, row) => {
+        // Handle different possible data structures
+        if (row.patient?.name) return row.patient.name;
+        if (row.patient?.firstName && row.patient?.lastName) {
+          return `${row.patient.firstName} ${row.patient.lastName}`;
+        }
+        return 'N/A';
+      }
+    },
+    { 
+      field: 'wardName', 
+      headerName: 'Ward', 
+      flex: 1,
+      valueGetter: (value, row) => row.ward?.name || 'N/A'
+    },
+    { 
+      field: 'bedNumber', 
+      headerName: 'Bed', 
+      flex: 1,
+      valueGetter: (value, row) => row.bed?.bedNumber || 'N/A'
+    },
     {
       field: 'admissionDate',
       headerName: 'Admission Date',
       flex: 1,
-      valueGetter: (params) => new Date(params.row.admissionDate).toLocaleDateString(),
+      valueGetter: (value, row) => {
+        if (!row.admissionDate) return 'N/A';
+        return new Date(row.admissionDate).toLocaleDateString();
+      }
     },
     {
       field: 'emergency',
       headerName: 'Emergency',
       flex: 1,
-      valueGetter: (params) => params.row.emergencyCases.length > 0 ? params.row.emergencyCases[0].triage.triageLevel : 'N/A',
+      valueGetter: (value, row) => {
+        if (row.emergencyCases && row.emergencyCases.length > 0) {
+          return row.emergencyCases[0].triage?.triageLevel || 'N/A';
+        }
+        return 'N/A';
+      }
     },
     {
       field: 'actions',
       headerName: 'Actions',
       flex: 1,
+      sortable: false,
       renderCell: (params) => (
-        <>
+        <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             variant="outlined"
             size="small"
@@ -60,7 +97,6 @@ export default function AdtPage() {
               setSelectedAdmission(params.row);
               setOpenAdmissionForm(true);
             }}
-            sx={{ mr: 1 }}
           >
             Edit
           </Button>
@@ -71,7 +107,6 @@ export default function AdtPage() {
               setSelectedAdmission(params.row);
               setOpenDischargeForm(true);
             }}
-            sx={{ mr: 1 }}
           >
             Discharge
           </Button>
@@ -85,10 +120,18 @@ export default function AdtPage() {
           >
             Transfer
           </Button>
-        </>
+        </Box>
       ),
     },
   ];
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 3 }}>
@@ -96,6 +139,7 @@ export default function AdtPage() {
         <Hospital size={24} style={{ verticalAlign: 'middle', marginRight: 8 }} />
         Admissions
       </Typography>
+      
       <Button
         variant="contained"
         onClick={() => {
@@ -106,6 +150,13 @@ export default function AdtPage() {
       >
         New Admission
       </Button>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
@@ -114,12 +165,25 @@ export default function AdtPage() {
           <DataGrid
             rows={admissions}
             columns={columns}
-            pageSize={10}
-            rowsPerPageOptions={[10, 25, 50]}
+            getRowId={(row) => row.id || `${row.patientId}-${row.admissionDate}`}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[10, 25, 50]}
             autoHeight
+            disableRowSelectionOnClick
+            sx={{
+              '& .MuiDataGrid-cell': {
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
           />
         </CardContent>
       </Card>
+
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom>
@@ -128,6 +192,7 @@ export default function AdtPage() {
           <BedStatus />
         </CardContent>
       </Card>
+
       <AdmissionForm
         open={openAdmissionForm}
         onClose={() => setOpenAdmissionForm(false)}
