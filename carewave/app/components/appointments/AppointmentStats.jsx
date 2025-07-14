@@ -26,6 +26,7 @@ import {
   PointElement,
   LineElement,
 } from 'chart.js';
+import AppointmentFilter from './AppointmentFilter';
 
 ChartJS.register(
   CategoryScale, 
@@ -83,7 +84,6 @@ const StatCard = ({ title, value, icon: Icon, color, delay = 0, trend = null, su
         onHoverEnd={() => setIsHovered(false)}
         className="relative group"
       >
-        {/* Background glow effect */}
         <motion.div
           className="absolute inset-0 rounded-3xl blur-xl opacity-20"
           style={{ backgroundColor: color }}
@@ -93,16 +93,11 @@ const StatCard = ({ title, value, icon: Icon, color, delay = 0, trend = null, su
           }}
           transition={{ duration: 0.3 }}
         />
-        
-        {/* Main card */}
         <div className="relative bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-2xl overflow-hidden">
-          {/* Gradient overlay */}
           <div 
             className="absolute inset-0 opacity-5 bg-gradient-to-br from-transparent via-transparent to-current"
             style={{ color }}
           />
-          
-          {/* Content */}
           <div className="relative z-10">
             <div className="flex items-start justify-between mb-4">
               <motion.div
@@ -116,20 +111,18 @@ const StatCard = ({ title, value, icon: Icon, color, delay = 0, trend = null, su
               >
                 <Icon className="h-6 w-6" style={{ color }} />
               </motion.div>
-              
               {trend && (
                 <motion.div
-                  className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
+                  className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${trend >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: delay + 0.3 }}
                 >
                   <TrendingUp className="h-3 w-3" />
-                  {trend}
+                  {trend >= 0 ? '+' : ''}{trend}%
                 </motion.div>
               )}
             </div>
-            
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -151,8 +144,6 @@ const StatCard = ({ title, value, icon: Icon, color, delay = 0, trend = null, su
               )}
             </motion.div>
           </div>
-          
-          {/* Decorative elements */}
           <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-gradient-to-br from-white/20 to-transparent blur-sm" />
           <div className="absolute -bottom-2 -left-2 w-16 h-16 rounded-full bg-gradient-to-tr from-white/10 to-transparent blur-sm" />
         </div>
@@ -192,174 +183,58 @@ export default function AppointmentStats() {
     topVisitTypes: [],
     topDoctors: [],
     avgAppointmentsPerDay: 0,
-    busyDays: [],
-    doctorUtilization: [],
     completionRate: 0,
     cancellationRate: 0,
-    noShowRate: 0,
     monthlyTrend: [],
     weeklyDistribution: [],
     timeSlotDistribution: [],
-    patientReturnRate: 0,
-    avgWaitTime: 0,
+    monthTrend: 0,
+    weekTrend: 0,
   });
-
+  const [filters, setFilters] = useState({
+    status: '',
+    doctorId: '',
+    patientId: '',
+    dateFrom: '',
+    dateTo: '',
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams({
+        resource: 'stats',
+        ...(filters.status && { status: filters.status }),
+        ...(filters.doctorId && { doctorId: filters.doctorId }),
+        ...(filters.patientId && { patientId: filters.patientId }),
+        ...(filters.dateFrom && { dateFrom: filters.dateFrom }),
+        ...(filters.dateTo && { dateTo: filters.dateTo }),
+      });
+      const response = await fetch(`/api/appointments?${queryParams}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch appointment stats');
+      
+      const data = await response.json();
+      setStats(data);
+    } catch (err) {
+      console.error('Error fetching appointment stats:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/appointments', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch appointments');
-        
-        const appointments = await response.json();
-        
-        // Calculate comprehensive statistics
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        
-        // Basic status counts
-        const statusCounts = appointments.reduce(
-          (acc, appt) => {
-            const status = appt.appointmentStatus?.toLowerCase() || 'pending';
-            acc[status] = (acc[status] || 0) + 1;
-            return acc;
-          },
-          { pending: 0, confirmed: 0, cancelled: 0, completed: 0 }
-        );
-
-        // Time-based counts
-        const todayAppointments = appointments.filter(appt => 
-          new Date(appt.appointmentDate) >= today
-        ).length;
-        
-        const thisWeekAppointments = appointments.filter(appt => 
-          new Date(appt.appointmentDate) >= thisWeek
-        ).length;
-        
-        const thisMonthAppointments = appointments.filter(appt => 
-          new Date(appt.appointmentDate) >= thisMonth
-        ).length;
-
-        // Department analysis
-        const departmentCounts = appointments.reduce((acc, appt) => {
-          const dept = appt.doctor?.department?.name || 'Unknown';
-          acc[dept] = (acc[dept] || 0) + 1;
-          return acc;
-        }, {});
-        
-        const topDepartments = Object.entries(departmentCounts)
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 5)
-          .map(([name, count]) => ({ name, count }));
-
-        // Visit type analysis
-        const visitTypeCounts = appointments.reduce((acc, appt) => {
-          const visitType = appt.visitType?.name || 'Unknown';
-          acc[visitType] = (acc[visitType] || 0) + 1;
-          return acc;
-        }, {});
-        
-        const topVisitTypes = Object.entries(visitTypeCounts)
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 5)
-          .map(([name, count]) => ({ name, count }));
-
-        // Doctor analysis
-        const doctorCounts = appointments.reduce((acc, appt) => {
-          if (appt.doctor) {
-            const doctorName = appt.doctor.name || `${appt.doctor.firstName} ${appt.doctor.lastName}`;
-            acc[doctorName] = (acc[doctorName] || 0) + 1;
-          }
-          return acc;
-        }, {});
-        
-        const topDoctors = Object.entries(doctorCounts)
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 5)
-          .map(([name, count]) => ({ name, count }));
-
-        // Calculate rates
-        const totalAppointments = appointments.length;
-        const completionRate = totalAppointments > 0 ? 
-          ((statusCounts.completed / totalAppointments) * 100).toFixed(1) : 0;
-        const cancellationRate = totalAppointments > 0 ? 
-          ((statusCounts.cancelled / totalAppointments) * 100).toFixed(1) : 0;
-
-        // Weekly distribution
-        const weeklyDistribution = Array.from({ length: 7 }, (_, i) => {
-          const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i];
-          const count = appointments.filter(appt => 
-            new Date(appt.appointmentDate).getDay() === i
-          ).length;
-          return { day: dayName, count };
-        });
-
-        // Monthly trend (last 6 months)
-        const monthlyTrend = Array.from({ length: 6 }, (_, i) => {
-          const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-          const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-          const count = appointments.filter(appt => {
-            const apptDate = new Date(appt.appointmentDate);
-            return apptDate.getMonth() === date.getMonth() && 
-                   apptDate.getFullYear() === date.getFullYear();
-          }).length;
-          return { month: monthName, count };
-        }).reverse();
-
-        // Time slot distribution
-        const timeSlotDistribution = appointments.reduce((acc, appt) => {
-          const hour = new Date(appt.appointmentDate).getHours();
-          let timeSlot;
-          if (hour < 6) timeSlot = 'Early Morning (12-6 AM)';
-          else if (hour < 12) timeSlot = 'Morning (6-12 PM)';
-          else if (hour < 17) timeSlot = 'Afternoon (12-5 PM)';
-          else timeSlot = 'Evening (5-11 PM)';
-          
-          acc[timeSlot] = (acc[timeSlot] || 0) + 1;
-          return acc;
-        }, {});
-
-        const avgAppointmentsPerDay = totalAppointments > 0 ? 
-          Math.round(totalAppointments / 30) : 0; // Rough estimate
-
-        setStats({
-          ...statusCounts,
-          totalAppointments,
-          todayAppointments,
-          thisWeekAppointments,
-          thisMonthAppointments,
-          topDepartments,
-          topVisitTypes,
-          topDoctors,
-          avgAppointmentsPerDay,
-          completionRate: parseFloat(completionRate),
-          cancellationRate: parseFloat(cancellationRate),
-          monthlyTrend,
-          weeklyDistribution,
-          timeSlotDistribution: Object.entries(timeSlotDistribution)
-            .map(([slot, count]) => ({ slot, count })),
-          patientReturnRate: 85, // Mock data - would need patient history analysis
-          avgWaitTime: 15, // Mock data - would need actual wait time tracking
-        });
-        
-      } catch (err) {
-        console.error('Error fetching appointment stats:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStats();
-  }, []);
+  }, [filters]);
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
 
   if (loading) {
     return (
@@ -384,12 +259,8 @@ export default function AppointmentStats() {
     datasets: [{
       label: 'Appointment Status',
       data: [stats.pending, stats.confirmed, stats.cancelled, stats.completed],
-      backgroundColor: [
-        '#FFA726', '#4CAF50', '#F44336', '#2196F3'
-      ],
-      borderColor: [
-        '#FF9800', '#4CAF50', '#F44336', '#2196F3'
-      ],
+      backgroundColor: ['#FFA726', '#4CAF50', '#F44336', '#2196F3'],
+      borderColor: ['#FF9800', '#4CAF50', '#F44336', '#2196F3'],
       borderWidth: 0,
       borderRadius: 12,
     }],
@@ -476,62 +347,61 @@ export default function AppointmentStats() {
       value: stats.totalAppointments,
       icon: Calendar,
       color: "#2196F3",
-      subtitle: "All time"
+      subtitle: "All time",
     },
     {
       title: "Today's Appointments",
       value: stats.todayAppointments,
       icon: CalendarIcon,
       color: "#4CAF50",
-      trend: "+12%"
+      trend: stats.weekTrend,
     },
     {
       title: "This Week",
       value: stats.thisWeekAppointments,
       icon: Activity,
       color: "#FF9800",
-      trend: "+8%"
+      trend: stats.weekTrend,
     },
     {
       title: "This Month",
       value: stats.thisMonthAppointments,
       icon: BarChart3,
       color: "#9C27B0",
-      trend: "+15%"
+      trend: stats.monthTrend,
     },
     {
       title: "Pending",
       value: stats.pending,
       icon: Clock,
       color: "#FFA726",
-      subtitle: "Awaiting confirmation"
+      subtitle: "Awaiting confirmation",
     },
     {
       title: "Confirmed",
       value: stats.confirmed,
       icon: CheckCircle,
       color: "#4CAF50",
-      subtitle: "Ready to go"
+      subtitle: "Ready to go",
     },
     {
       title: "Completed",
       value: stats.completed,
       icon: UserCheck,
       color: "#2196F3",
-      subtitle: "Successfully finished"
+      subtitle: "Successfully finished",
     },
     {
       title: "Completion Rate",
       value: stats.completionRate,
       icon: Star,
       color: "#4CAF50",
-      subtitle: "% of appointments completed"
-    }
+      subtitle: "% of appointments completed",
+    },
   ];
 
   return (
     <div className="max-w-full mx-auto mb-6 p-4">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -546,7 +416,8 @@ export default function AppointmentStats() {
         </Typography>
       </motion.div>
 
-      {/* Stats Cards */}
+      <AppointmentFilter onFilterChange={handleFilterChange} />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {cardData.map((card, cardIndex) => (
           <StatCard
@@ -562,7 +433,6 @@ export default function AppointmentStats() {
         ))}
       </div>
 
-      {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <ChartCard title="Appointment Status Distribution" delay={0.2}>
           <Box className="h-[300px]">
@@ -589,7 +459,6 @@ export default function AppointmentStats() {
         </ChartCard>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ChartCard title="Top Departments" delay={0.6}>
           <div className="space-y-3">
@@ -619,6 +488,17 @@ export default function AppointmentStats() {
               <div key={doctor.name} className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{doctor.name}</span>
                 <span className="font-semibold text-purple-600">{doctor.count}</span>
+              </div>
+            ))}
+          </div>
+        </ChartCard>
+
+        <ChartCard title="Time Slot Distribution" delay={0.9}>
+          <div className="space-y-3">
+            {stats.timeSlotDistribution.map((slot) => (
+              <div key={slot.slot} className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">{slot.slot}</span>
+                <span className="font-semibold text-teal-600">{slot.count}</span>
               </div>
             ))}
           </div>
