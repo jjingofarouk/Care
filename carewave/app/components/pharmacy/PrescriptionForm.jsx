@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { TextField, Autocomplete, Button, FormControl, Box, Typography } from '@mui/material';
-import { Search, User, Stethoscope, Pill } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import pharmacyService from '../../services/pharmacyService';
 
@@ -57,7 +56,7 @@ export default function PrescriptionForm({ prescription }) {
 
     try {
       const method = prescription?.id ? 'PUT' : 'POST';
-      const response = await pharmacyService.createPrescription({
+      await pharmacyService.createPrescription({
         ...formData,
         method
       });
@@ -113,15 +112,6 @@ export default function PrescriptionForm({ prescription }) {
                 label="Patient"
                 required
                 className="input"
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <User className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                }}
               />
             )}
           />
@@ -143,15 +133,6 @@ export default function PrescriptionForm({ prescription }) {
                 label="Doctor"
                 required
                 className="input"
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <Stethoscope className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                }}
               />
             )}
           />
@@ -169,15 +150,6 @@ export default function PrescriptionForm({ prescription }) {
                 label="Drug"
                 required
                 className="input"
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <Pill className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                }}
               />
             )}
           />
