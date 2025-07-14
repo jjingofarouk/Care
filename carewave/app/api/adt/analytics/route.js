@@ -1,8 +1,9 @@
+
 // app/api/adt/analytics/route.js
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import { subDays, startOfDay, endOfDay } from 'date-fns';
+import { subDays, startOfDay } from 'date-fns';
 
 const prisma = new PrismaClient();
 
@@ -26,15 +27,10 @@ export async function GET(request) {
   const dateTo = searchParams.get('dateTo') || new Date();
 
   try {
-    const [admissions, discharges, transfers, wards, beds] = await Promise.all([
+    const [admissions, transfers, wards, beds] = await Promise.all([
       prisma.admission.groupBy({
         by: ['admissionDate'],
         where: { admissionDate: { gte: new Date(dateFrom), lte: new Date(dateTo) } },
-        _count: { id: true },
-      }),
-      prisma.discharge.groupBy({
-        by: ['dischargeDate', 'admissionId'],
-        where: { dischargeDate: { gte: new Date(dateFrom), lte: new Date(dateTo) } },
         _count: { id: true },
       }),
       prisma.transfer.groupBy({
@@ -93,7 +89,7 @@ export async function GET(request) {
       totalDischargesThisMonth: await prisma.discharge.count({
         where: { dischargeDate: { gte: subDays(new Date(), 30), lte: new Date() } },
       }),
-      totalBeds,
+      totalBeds: beds,
       availableBeds: beds - (await prisma.bed.count({ where: { isOccupied: true } })),
     };
 
