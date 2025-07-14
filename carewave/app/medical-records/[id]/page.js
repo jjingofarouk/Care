@@ -1,9 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Box, Typography, Paper, Grid, Button, Divider, Alert } from '@mui/material';
 import { format } from 'date-fns';
-import { getMedicalRecord } from '../../services/medicalRecordsService';
 
 export default function MedicalRecordDetailPage() {
   const params = useParams();
@@ -33,230 +31,267 @@ export default function MedicalRecordDetailPage() {
 
   if (loading) {
     return (
-      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
-        <Typography>Loading medical record...</Typography>
-      </Box>
+      <div className="min-h-screen flex items-center justify-center bg-hospital-gray-50">
+        <div className="loading-spinner"></div>
+        <span className="ml-3 text-hospital-gray-700">Loading medical record...</span>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
-        <Alert severity="error">{error}</Alert>
-        <Button variant="contained" onClick={() => router.push('/medical-records')} sx={{ mt: 2 }}>
-          Back to Records
-        </Button>
-      </Box>
+      <div className="min-h-screen flex items-center justify-center bg-hospital-gray-50 px-4">
+        <div className="alert alert-error max-w-2xl w-full">
+          <span>{error}</span>
+          <button
+            className="btn btn-outline mt-4"
+            onClick={() => router.push('/medical-records')}
+          >
+            Back to Records
+          </button>
+        </div>
+      </div>
     );
   }
 
   if (!record) {
     return (
-      <Box sx={{ p: 4 }}>
-        <Alert severity="warning">Medical record not found</Alert>
-        <Button variant="contained" onClick={() => router.push('/medical-records')} sx={{ mt: 2 }}>
-          Back to Records
-        </Button>
-      </Box>
+      <div className="min-h-screen flex items-center justify-center bg-hospital-gray-50 px-4">
+        <div className="alert alert-warning max-w-2xl w-full">
+          <span>Medical record not found</span>
+          <button
+            className="btn btn-outline mt-4"
+            onClick={() => router.push('/medical-records')}
+          >
+            Back to Records
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ p: 4, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h5">
+    <div className="min-h-screen bg-hospital-gray-50 px-2 sm:px-4 py-4">
+      <div className="card max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-hospital-gray-900">
             Medical Record for {record.patient?.firstName || 'N/A'} {record.patient?.lastName || 'N/A'}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="contained" onClick={() => router.push(`/medical-records/${params.id}/edit`)}>
+          </h1>
+          <div className="flex gap-3">
+            <button
+              className="btn btn-primary"
+              onClick={() => router.push(`/medical-records/${params.id}/edit`)}
+            >
               Edit Record
-            </Button>
-            <Button variant="outlined" onClick={() => router.push('/medical-records')}>
+            </button>
+            <button
+              className="btn btn-outline"
+              onClick={() => router.push('/medical-records')}
+            >
               Back to Records
-            </Button>
-          </Box>
-        </Box>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Typography variant="h6">Record Details</Typography>
-            <Typography>Record ID: {record.id || 'N/A'}</Typography>
-            <Typography>Record Date: {record.recordDate ? format(new Date(record.recordDate), 'MM/dd/yyyy') : 'N/A'}</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <Divider />
-          </Grid>
-          {/* Chief Complaint */}
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6">
+          <div>
+            <h2 className="card-title">Record Details</h2>
+            <p className="text-hospital-gray-700">Record ID: {record.id || 'N/A'}</p>
+            <p className="text-hospital-gray-700">
+              Record Date: {record.recordDate ? format(new Date(record.recordDate), 'MM/dd/yyyy') : 'N/A'}
+            </p>
+          </div>
+
+          <div className="border-t border-hospital-gray-200" />
+
           {record.chiefComplaint && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Chief Complaint</Typography>
-              <Typography>Description: {record.chiefComplaint.description || 'N/A'}</Typography>
-              <Typography>Duration: {record.chiefComplaint.duration || 'N/A'}</Typography>
-              <Typography>Onset: {record.chiefComplaint.onset || 'N/A'}</Typography>
-            </Grid>
+            <div>
+              <h2 className="card-title">Chief Complaint</h2>
+              <p className="text-hospital-gray-700">Description: {record.chiefComplaint.description || 'N/A'}</p>
+              <p className="text-hospital-gray-700">Duration: {record.chiefComplaint.duration || 'N/A'}</p>
+              <p className="text-hospital-gray-700">Onset: {record.chiefComplaint.onset || 'N/A'}</p>
+            </div>
           )}
-          {/* Present Illness */}
+
           {record.presentIllness && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Present Illness</Typography>
-              <Typography>Narrative: {record.presentIllness.narrative || 'N/A'}</Typography>
-              <Typography>Severity: {record.presentIllness.severity || 'N/A'}</Typography>
-              <Typography>Progress: {record.presentIllness.progress || 'N/A'}</Typography>
-              <Typography>Associated Symptoms: {record.presentIllness.associatedSymptoms || 'N/A'}</Typography>
-            </Grid>
+            <div>
+              <h2 className="card-title">Present Illness</h2>
+              <p className="text-hospital-gray-700">Narrative: {record.presentIlliness.narrative || 'N/A'}</p>
+              <p className="text-hospital-gray-700">Severity: {record.presentIllness.severity || 'N/A'}</p>
+              <p className="text-hospital-gray-700">Progress: {record.presentIllness.progress || 'N/A'}</p>
+              <p className="text-hospital-gray-700">Associated Symptoms: {record.presentIllness.associatedSymptoms || 'N/A'}</p>
+            </div>
           )}
-          {/* Past Conditions */}
+
           {record.pastConditions?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Past Medical Conditions</Typography>
+            <div>
+              <h2 className="card-title">Past Medical Conditions</h2>
               {record.pastConditions.map((condition, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>Condition: {condition.condition || 'N/A'}</Typography>
-                  <Typography>Diagnosis Date: {condition.diagnosisDate ? format(new Date(condition.diagnosisDate), 'MM/dd/yyyy') : 'N/A'}</Typography>
-                  <Typography>Notes: {condition.notes || 'N/A'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">Condition: {condition.condition || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">
+                    Diagnosis Date: {condition.diagnosisDate ? format(new Date(condition.diagnosisDate), 'MM/dd/yyyy') : 'N/A'}
+                  </p>
+                  <p className="text-hospital-gray-700">Notes: {condition.notes || 'N/A'}</p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-          {/* Surgical History */}
+
           {record.surgicalHistory?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Surgical History</Typography>
+            <div>
+              <h2 className="card-title">Surgical History</h2>
               {record.surgicalHistory.map((surgery, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>Procedure: {surgery.procedure || 'N/A'}</Typography>
-                  <Typography>Date Performed: {surgery.datePerformed ? format(new Date(surgery.datePerformed), 'MM/dd/yyyy') : 'N/A'}</Typography>
-                  <Typography>Outcome: {surgery.outcome || 'N/A'}</Typography>
-                  <Typography>Notes: {surgery.notes || 'N/A'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">Procedure: {surgery.procedure || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">
+                    Date Performed: {surgery.datePerformed ? format(new Date(surgery.datePerformed), 'MM/dd/yyyy') : 'N/A'}
+                  </p>
+                  <p className="text-hospital-gray-700">Outcome: {surgery.outcome || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Notes: {surgery.notes || 'N/A'}</p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-          {/* Family History */}
+
           {record.familyHistory?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Family History</Typography>
+            <div>
+              <h2 className="card-title">Family History</h2>
               {record.familyHistory.map((family, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>Relative: {family.relative || 'N/A'}</Typography>
-                  <Typography>Condition: {family.condition || 'N/A'}</Typography>
-                  <Typography>Age at Diagnosis: {family.ageAtDiagnosis || 'N/A'}</Typography>
-                  <Typography>Notes: {family.notes || 'N/A'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">Relative: {family.relative || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Condition: {family.condition || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Age at Diagnosis: {family.ageAtDiagnosis || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Notes: {family.notes || 'N/A'}</p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-          {/* Medication History */}
+
           {record.medicationHistory?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Medication History</Typography>
+            <div>
+              <h2 className="card-title">Medication History</h2>
               {record.medicationHistory.map((medication, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>Medication: {medication.medicationName || 'N/A'}</Typography>
-                  <Typography>Dosage: {medication.dosage || 'N/A'}</Typography>
-                  <Typography>Frequency: {medication.frequency || 'N/A'}</Typography>
-                  <Typography>Start Date: {medication.startDate ? format(new Date(medication.startDate), 'MM/dd/yyyy') : 'N/A'}</Typography>
-                  <Typography>End Date: {medication.endDate ? format(new Date(medication.endDate), 'MM/dd/yyyy') : 'N/A'}</Typography>
-                  <Typography>Current: {medication.isCurrent ? 'Yes' : 'No'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">Medication: {medication.medicationName || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Dosage: {medication.dosage || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Frequency: {medication.frequency || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">
+                    Start Date: {medication.startDate ? format(new Date(medication.startDate), 'MM/dd/yyyy') : 'N/A'}
+                  </p>
+                  <p className="text-hospital-gray-700">
+                    End Date: {medication.endDate ? format(new Date(medication.endDate), 'MM/dd/yyyy') : 'N/A'}
+                  </p>
+                  <p className="text-hospital-gray-700">Current: {medication.isCurrent ? 'Yes' : 'No'}</p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-          {/* Social History */}
+
           {record.socialHistory && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Social History</Typography>
-              <Typography>Smoking Status: {record.socialHistory.smokingStatus || 'N/A'}</Typography>
-              <Typography>Alcohol Use: {record.socialHistory.alcoholUse || 'N/A'}</Typography>
-              <Typography>Occupation: {record.socialHistory.occupation || 'N/A'}</Typography>
-              <Typography>Marital Status: {record.socialHistory.maritalStatus || 'N/A'}</Typography>
-              <Typography>Living Situation: {record.socialHistory.livingSituation || 'N/A'}</Typography>
-            </Grid>
+            <div>
+              <h2 className="card-title">Social History</h2>
+              <p className="text-hospital-gray-700">Smoking Status: {record.socialHistory.smokingStatus || 'N/A'}</p>
+              <p className="text-hospital-gray-700">Alcohol Use: {record.socialHistory.alcoholUse || 'N/A'}</p>
+              <p className="text-hospital-gray-700">Occupation: {record.socialHistory.occupation || 'N/A'}</p>
+              <p className="text-hospital-gray-700">Marital Status: {record.socialHistory.maritalStatus || 'N/A'}</p>
+              <p className="text-hospital-gray-700">Living Situation: {record.socialHistory.livingSituation || 'N/A'}</p>
+            </div>
           )}
-          {/* Review of Systems */}
+
           {record.reviewOfSystems?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Review of Systems</Typography>
+            <div>
+              <h2 className="card-title">Review of Systems</h2>
               {record.reviewOfSystems.map((review, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>System: {review.system || 'N/A'}</Typography>
-                  <Typography>Findings: {review.findings || 'N/A'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">System: {review.system || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Findings: {review.findings || 'N/A'}</p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-          {/* Immunizations */}
+
           {record.immunizations?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Immunizations</Typography>
+            <div>
+              <h2 className="card-title">Immunizations</h2>
               {record.immunizations.map((immunization, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>Vaccine: {immunization.vaccine || 'N/A'}</Typography>
-                  <Typography>Date Given: {immunization.dateGiven ? format(new Date(immunization.dateGiven), 'MM/dd/yyyy') : 'N/A'}</Typography>
-                  <Typography>Administered By: {immunization.administeredBy || 'N/A'}</Typography>
-                  <Typography>Notes: {immunization.notes || 'N/A'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">Vaccine: {immunization.vaccine || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">
+                    Date Given: {immunization.dateGiven ? format(new Date(immunization.dateGiven), 'MM/dd/yyyy') : 'N/A'}
+                  </p>
+                  <p className="text-hospital-gray-700">Administered By: {immunization.administeredBy || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Notes: {immunization.notes || 'N/A'}</p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-          {/* Travel History */}
+
           {record.travelHistory?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Travel History</Typography>
+            <div>
+              <h2 className="card-title">Travel History</h2>
               {record.travelHistory.map((travel, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>Country Visited: {travel.countryVisited || 'N/A'}</Typography>
-                  <Typography>Date From: {travel.dateFrom ? format(new Date(travel.dateFrom), 'MM/dd/yyyy') : 'N/A'}</Typography>
-                  <Typography>Date To: {travel.dateTo ? format(new Date(travel.dateTo), 'MM/dd/yyyy') : 'N/A'}</Typography>
-                  <Typography>Purpose: {travel.purpose || 'N/A'}</Typography>
-                  <Typography>Notes: {travel.travelNotes || 'N/A'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">Country Visited: {travel.countryVisited || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">
+                    Date From: {travel.dateFrom ? format(new Date(travel.dateFrom), 'MM/dd/yyyy') : 'N/A'}
+                  </p>
+                  <p className="text-hospital-gray-700">
+                    Date To: {travel.dateTo ? format(new Date(travel.dateTo), 'MM/dd/yyyy') : 'N/A'}
+                  </p>
+                  <p className="text-hospital-gray-700">Purpose: {travel.purpose || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Notes: {travel.travelNotes || 'N/A'}</p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-          {/* Allergies */}
+
           {record.allergies?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Allergies</Typography>
+            <div>
+              <h2 className="card-title">Allergies</h2>
               {record.allergies.map((allergy, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>Name: {allergy.name || 'N/A'}</Typography>
-                  <Typography>Severity: {allergy.severity || 'N/A'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">Name: {allergy.name || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Severity: {allergy.severity || 'N/A'}</p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-          {/* Diagnoses */}
+
           {record.diagnoses?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Diagnoses</Typography>
+            <div>
+              <h2 className="card-title">Diagnoses</h2>
               {record.diagnoses.map((diagnosis, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>Code: {diagnosis.code || 'N/A'}</Typography>
-                  <Typography>Description: {diagnosis.description || 'N/A'}</Typography>
-                  <Typography>Diagnosed At: {diagnosis.diagnosedAt ? format(new Date(diagnosis.diagnosedAt), 'MM/dd/yyyy') : 'N/A'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">Code: {diagnosis.code || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Description: {diagnosis.description || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">
+                    Diagnosed At: {diagnosis.diagnosedAt ? format(new Date(diagnosis.diagnosedAt), 'MM/dd/yyyy') : 'N/A'}
+                  </p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-          {/* Vital Signs */}
+
           {record.vitalSigns?.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h6">Vital Signs</Typography>
+            <div>
+              <h2 className="card-title">Vital Signs</h2>
               {record.vitalSigns.map((vital, index) => (
-                <Box key={index} sx={{ mb: 1, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  <Typography>Blood Pressure: {vital.bloodPressure || 'N/A'}</Typography>
-                  <Typography>Heart Rate: {vital.heartRate || 'N/A'}</Typography>
-                  <Typography>Temperature: {vital.temperature || 'N/A'}</Typography>
-                  <Typography>Respiratory Rate: {vital.respiratoryRate || 'N/A'}</Typography>
-                  <Typography>Oxygen Saturation: {vital.oxygenSaturation || 'N/A'}</Typography>
-                  <Typography>Recorded At: {vital.recordedAt ? format(new Date(vital.recordedAt), 'MM/dd/yyyy') : 'N/A'}</Typography>
-                </Box>
+                <div key={index} className="ml-4 border-l-2 border-hospital-gray-200 pl-4 mb-4">
+                  <p className="text-hospital-gray-700">Blood Pressure: {vital.bloodPressure || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Heart Rate: {vital.heartRate || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Temperature: {vital.temperature || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Respiratory Rate: {vital.respiratoryRate || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">Oxygen Saturation: {vital.oxygenSaturation || 'N/A'}</p>
+                  <p className="text-hospital-gray-700">
+                    Recorded At: {vital.recordedAt ? format(new Date(vital.recordedAt), 'MM/dd/yyyy') : 'N/A'}
+                  </p>
+                </div>
               ))}
-            </Grid>
+            </div>
           )}
-        </Grid>
-      </Paper>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
