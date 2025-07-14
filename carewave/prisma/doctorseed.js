@@ -10,17 +10,13 @@ function generatePhoneNumber() {
 }
 
 // Helper function to generate random doctor ID
-async function generateDoctorId() {
-  let id;
-  let exists = true;
-  while (exists) {
-    id = `D-${Math.floor(1000 + Math.random() * 9000).toString().padStart(4, '0')}`;
-    exists = await prisma.doctor.findUnique({ where: { doctorId: id } });
-  }
-  return id;
+async function generateDoctorId(index) {
+  return `D-${(index + 1).toString().padStart(4, '0')}`;
 }
 
 async function main() {
+  console.log('🌱 Starting seed process...');
+
   // Lists of names
   const firstNames = [
     'John', 'Mary', 'James', 'Sarah', 'David', 'Esther', 'Peter', 'Grace', 'Michael', 'Jane',
@@ -179,14 +175,13 @@ async function main() {
   const allSpecializations = await prisma.specialization.findMany();
 
   // Create doctors
+  const existingDoctorCount = await prisma.doctor.count();
   const doctorData = [];
   for (let i = 0; i < 1000; i++) {
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
     const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
     const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@carewave.com`;
-    const doctorId = await generateDoctorId();
     doctorData.push({
-      doctorId,
       firstName,
       lastName,
       email,
@@ -277,6 +272,23 @@ async function main() {
       }
     }
   }
+
+  // Final count
+  const finalDepartments = await prisma.department.count();
+  const finalDoctors = await prisma.doctor.count();
+  const finalNurses = await prisma.nurse.count();
+  const finalSpecializations = await prisma.specialization.count();
+  const finalUnits = await prisma.unit.count();
+  const finalDoctorSpecializations = await prisma.doctorSpecialization.count();
+
+  console.log('🎉 Seed process completed successfully!');
+  console.log('\n📊 Final Summary:');
+  console.log(`- Departments: ${finalDepartments}`);
+  console.log(`- Specializations: ${finalSpecializations}`);
+  console.log(`- Doctors: ${finalDoctors}`);
+  console.log(`- Nurses: ${finalNurses}`);
+  console.log(`- Units: ${finalUnits}`);
+  console.log(`- Doctor-Specialization relationships: ${finalDoctorSpecializations}`);
 }
 
 main()
