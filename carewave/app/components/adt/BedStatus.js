@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box, Button, Chip } from '@mui/material';
-import { Bed } from 'lucide-react';
 import adtService from '../../services/adtService';
 
 export default function BedStatus({ wardId }) {
