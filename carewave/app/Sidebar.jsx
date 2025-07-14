@@ -46,13 +46,15 @@ import {
   Star,
   TrendingUp,
   UserCheck,
-  Zap
+  Zap,
+  Video // Added Video icon for telemedicine
 } from 'lucide-react';
 import { useAuth } from './auth/AuthContext';
 
 const roleBasedNavItems = {
   PATIENT: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
+    { name: 'Telemedicine', path: '/telemedicine', icon: Video, category: 'health' }, // Added Telemedicine
     { name: 'My Appointments', path: '/appointments', icon: Calendar, category: 'health' },
     { name: 'Medical Records', path: '/medical-records', icon: FileText, category: 'health' },
     { name: 'Test Results', path: '/test-results', icon: FileBarChart, category: 'health' },
@@ -61,6 +63,7 @@ const roleBasedNavItems = {
   ],
   DOCTOR: [
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
+    { name: 'Telemedicine', path: '/telemedicine', icon: Video, category: 'clinical' }, // Added Telemedicine
     { name: 'My Patients', path: '/patients', icon: User, category: 'patient-care' },
     { name: 'Appointments', path: '/appointments', icon: Calendar, category: 'patient-care' },
     { name: 'Clinical Notes', path: '/clinical', icon: Stethoscope, category: 'clinical' },
@@ -144,7 +147,7 @@ const roleBasedNavItems = {
     { name: 'Helpdesk', path: '/helpdesk', icon: Headphones, category: 'support' },
     { name: 'Marketing Referral', path: '/mkt-referral', icon: Users, category: 'support' },
     { name: 'Social Service', path: '/social-service', icon: Users, category: 'support' },
-    { name: 'Departments', path: '/departments', icon: Building2, category: 'admin' }, // Added Departments
+    { name: 'Departments', path: '/departments', icon: Building2, category: 'admin' },
     { name: 'Settings', path: '/settings', icon: Settings, category: 'admin' },
     { name: 'System Admin', path: '/system-admin', icon: Monitor, category: 'admin' },
     { name: 'Utilities', path: '/utilities', icon: Wrench, category: 'admin' },
@@ -175,7 +178,7 @@ const roleBasedNavItems = {
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'Analytics', path: '/analytics', icon: TrendingUp, category: 'reports' },
     { name: 'Reports', path: '/reports', icon: FileBarChart, category: 'reports' },
-    { name: 'Departments', path: '/departments', icon: Building2, category: 'admin' }, // Added Departments
+    { name: 'Departments', path: '/departments', icon: Building2, category: 'admin' },
     { name: 'Performance', path: '/performance', icon: Star, category: 'admin' },
     { name: 'Settings', path: '/settings', icon: Settings, category: 'admin' },
   ],
