@@ -1,6 +1,7 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import pharmacyService from '../../services/pharmacyService';
+import { Search } from 'lucide-react';
 
 export default function PrescriptionForm({ patients, doctors, drugs }) {
   const [formData, setFormData] = useState({
@@ -10,6 +11,32 @@ export default function PrescriptionForm({ patients, doctors, drugs }) {
     dosage: '',
     prescribedAt: new Date().toISOString().slice(0, 16),
   });
+  const [searchTerms, setSearchTerms] = useState({
+    patient: '',
+    doctor: '',
+    drug: '',
+  });
+  const [filteredPatients, setFilteredPatients] = useState(patients);
+  const [filteredDoctors, setFilteredDoctors] = useState(doctors);
+  const [filteredDrugs, setFilteredDrugs] = useState(drugs);
+
+  useEffect(() => {
+    setFilteredPatients(
+      patients.filter((patient) =>
+        patient.user.name.toLowerCase().includes(searchTerms.patient.toLowerCase())
+      )
+    );
+    setFilteredDoctors(
+      doctors.filter((doctor) =>
+        doctor.user.name.toLowerCase().includes(searchTerms.doctor.toLowerCase())
+      )
+    );
+    setFilteredDrugs(
+      drugs.filter((drug) =>
+        drug.name.toLowerCase().includes(searchTerms.drug.toLowerCase())
+      )
+    );
+  }, [searchTerms, patients, doctors, drugs]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,9 +49,14 @@ export default function PrescriptionForm({ patients, doctors, drugs }) {
         dosage: '',
         prescribedAt: new Date().toISOString().slice(0, 16),
       });
+      setSearchTerms({ patient: '', doctor: '', drug: '' });
     } catch (error) {
       console.error('Error submitting prescription:', error);
     }
+  };
+
+  const handleSearchChange = (field, value) => {
+    setSearchTerms({ ...searchTerms, [field]: value });
   };
 
   return (
@@ -33,45 +65,75 @@ export default function PrescriptionForm({ patients, doctors, drugs }) {
         <h2 className="card-title">New Prescription</h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <select
-          className="select"
-          value={formData.patientId}
-          onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-          required
-        >
-          <option value="">Select Patient</option>
-          {patients.map((patient) => (
-            <option key={patient.id} value={patient.id}>
-              {patient.user.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="select"
-          value={formData.doctorId}
-          onChange={(e) => setFormData({ ...formData, doctorId: e.target.value })}
-          required
-        >
-          <option value="">Select Doctor</option>
-          {doctors.map((doctor) => (
-            <option key={doctor.id} value={doctor.id}>
-              {doctor.user.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="select"
-          value={formData.drugId}
-          onChange={(e) => setFormData({ ...formData, drugId: e.target.value })}
-          required
-        >
-          <option value="">Select Drug</option>
-          {drugs.map((drug) => (
-            <option key={drug.id} value={drug.id}>
-              {drug.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <input
+            type="text"
+            className="input pl-10"
+            value={searchTerms.patient}
+            onChange={(e) => handleSearchChange('patient', e.target.value)}
+            placeholder="Search Patients"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--hospital-gray-500)]" />
+          <select
+            className="select mt-2"
+            value={formData.patientId}
+            onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
+            required
+          >
+            <option value="">Select Patient</option>
+            {filteredPatients.map((patient) => (
+              <option key={patient.id} value={patient.id}>
+                {patient.user.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="relative">
+          <input
+            type="text"
+            className="input pl-10"
+            value={searchTerms.doctor}
+            onChange={(e) => handleSearchChange('doctor', e.target.value)}
+            placeholder="Search Doctors"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--hospital-gray-500)]" />
+          <select
+            className="select mt-2"
+            value={formData.doctorId}
+            onChange={(e) => setFormData({ ...formData, doctorId: e.target.value })}
+            required
+          >
+            <option value="">Select Doctor</option>
+            {filteredDoctors.map((doctor) => (
+              <option key={doctor.id} value={doctor.id}>
+                {doctor.user.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="relative">
+          <input
+            type="text"
+            className="input pl-10"
+            value={searchTerms.drug}
+            onChange={(e) => handleSearchChange('drug', e.target.value)}
+            placeholder="Search Drugs"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--hospital-gray-500)]" />
+          <select
+            className="select mt-2"
+            value={formData.drugId}
+            onChange={(e) => setFormData({ ...formData, drugId: e.target.value })}
+            required
+          >
+            <option value="">Select Drug</option>
+            {filteredDrugs.map((drug) => (
+              <option key={drug.id} value={drug.id}>
+                {drug.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <input
           type="text"
           className="input"
