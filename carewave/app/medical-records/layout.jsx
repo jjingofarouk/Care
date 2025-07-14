@@ -26,7 +26,7 @@ const MedicalRecordLayout = ({ children }) => {
         router.push('/medical-records/analytics');
         break;
       case 3:
-        router.push('/app/patients/new');
+        router.push('/patients/new');
         break;
     }
   };
