@@ -1,158 +1,231 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { TextField, Autocomplete, Button, FormControl, Box, Typography } from '@mui/material';
+import { Search, User, Stethoscope, Pill } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import pharmacyService from '../../services/pharmacyService';
-import { Search } from 'lucide-react';
 
-export default function PrescriptionForm({ patients, doctors, drugs }) {
+export default function PrescriptionForm({ prescription }) {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    patientId: '',
-    doctorId: '',
-    drugId: '',
-    dosage: '',
-    prescribedAt: new Date().toISOString().slice(0, 16),
+    id: prescription?.id || '',
+    patientId: prescription?.patientId || '',
+    doctorId: prescription?.doctorId || '',
+    drugId: prescription?.drugId || '',
+    dosage: prescription?.dosage || '',
+    prescribedAt: prescription?.prescribedAt ? 
+      new Date(prescription.prescribedAt).toISOString().slice(0, 16) : 
+      new Date().toISOString().slice(0, 16),
   });
-  const [searchTerms, setSearchTerms] = useState({
-    patient: '',
-    doctor: '',
-    drug: '',
-  });
-  const [filteredPatients, setFilteredPatients] = useState(patients);
-  const [filteredDoctors, setFilteredDoctors] = useState(doctors);
-  const [filteredDrugs, setFilteredDrugs] = useState(drugs);
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [drugs, setDrugs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setFilteredPatients(
-      patients.filter((patient) =>
-        patient.user.name.toLowerCase().includes(searchTerms.patient.toLowerCase())
-      )
-    );
-    setFilteredDoctors(
-      doctors.filter((doctor) =>
-        doctor.user.name.toLowerCase().includes(searchTerms.doctor.toLowerCase())
-      )
-    );
-    setFilteredDrugs(
-      drugs.filter((drug) =>
-        drug.name.toLowerCase().includes(searchTerms.drug.toLowerCase())
-      )
-    );
-  }, [searchTerms, patients, doctors, drugs]);
+    const fetchData = async () => {
+      try {
+        const [patientData, doctorData, drugData] = await Promise.all([
+          pharmacyService.getPatients(),
+          pharmacyService.getDoctors(),
+          pharmacyService.getDrugs()
+        ]);
+        setPatients(patientData);
+        setDoctors(doctorData);
+        setDrugs(drugData);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError(err.message);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleAutocompleteChange = (name, value) => {
+    setFormData({ ...formData, [name]: value ? value.id : '' });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
-      await pharmacyService.createPrescription(formData);
-      setFormData({
-        patientId: '',
-        doctorId: '',
-        drugId: '',
-        dosage: '',
-        prescribedAt: new Date().toISOString().slice(0, 16),
+      const method = prescription?.id ? 'PUT' : 'POST';
+      const response = await pharmacyService.createPrescription({
+        ...formData,
+        method
       });
-      setSearchTerms({ patient: '', doctor: '', drug: '' });
-    } catch (error) {
-      console.error('Error submitting prescription:', error);
+      
+      router.push('/prescriptions');
+    } catch (err) {
+      console.error('Error saving prescription:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSearchChange = (field, value) => {
-    setSearchTerms({ ...searchTerms, [field]: value });
-  };
+  if (error && !patients.length && !doctors.length && !drugs.length) {
+    return (
+      <div className="card max-w-full mx-auto p-4">
+        <div className="alert alert-error mb-2">
+          <span>Error loading form data: {error}</span>
+        </div>
+        <Button 
+          variant="outlined" 
+          onClick={() => window.location.reload()}
+          className="btn-secondary"
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="card w-full p-4">
-      <div className="card-header">
-        <h2 className="card-title">New Prescription</h2>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="relative">
-          <input
-            type="text"
-            className="input pl-10"
-            value={searchTerms.patient}
-            onChange={(e) => handleSearchChange('patient', e.target.value)}
-            placeholder="Search Patients"
-          />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--hospital-gray-500)]" />
-          <select
-            className="select mt-2"
-            value={formData.patientId}
-            onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-            required
-          >
-            <option value="">Select Patient</option>
-            {filteredPatients.map((patient) => (
-              <option key={patient.id} value={patient.id}>
-                {patient.user.name}
-              </option>
-            ))}
-          </select>
+    <div className="card max-w-full mx-auto p-4">
+      <Typography variant="h5" className="card-title mb-4 font-bold">
+        {prescription?.id ? 'Edit Prescription' : 'New Prescription'}
+      </Typography>
+      
+      {error && (
+        <div className="alert alert-error mb-4">
+          <span>{error}</span>
         </div>
-        <div className="relative">
-          <input
-            type="text"
-            className="input pl-10"
-            value={searchTerms.doctor}
-            onChange={(e) => handleSearchChange('doctor', e.target.value)}
-            placeholder="Search Doctors"
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <FormControl fullWidth>
+          <Autocomplete
+            options={patients}
+            getOptionLabel={(option) => option.name || ''}
+            onChange={(e, value) => handleAutocompleteChange('patientId', value)}
+            value={patients.find(p => p.id === formData.patientId) || null}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Patient"
+                required
+                className="input"
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      <User className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />
+                      {params.InputProps.startAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--hospital-gray-500)]" />
-          <select
-            className="select mt-2"
-            value={formData.doctorId}
-            onChange={(e) => setFormData({ ...formData, doctorId: e.target.value })}
-            required
-          >
-            <option value="">Select Doctor</option>
-            {filteredDoctors.map((doctor) => (
-              <option key={doctor.id} value={doctor.id}>
-                {doctor.user.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="relative">
-          <input
-            type="text"
-            className="input pl-10"
-            value={searchTerms.drug}
-            onChange={(e) => handleSearchChange('drug', e.target.value)}
-            placeholder="Search Drugs"
+        </FormControl>
+
+        <FormControl fullWidth>
+          <Autocomplete
+            options={doctors}
+            getOptionLabel={(option) => 
+              option.department?.name 
+                ? `Dr. ${option.name} (${option.department.name})`
+                : `Dr. ${option.name}`
+            }
+            onChange={(e, value) => handleAutocompleteChange('doctorId', value)}
+            value={doctors.find(d => d.id === formData.doctorId) || null}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Doctor"
+                required
+                className="input"
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      <Stethoscope className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />
+                      {params.InputProps.startAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--hospital-gray-500)]" />
-          <select
-            className="select mt-2"
-            value={formData.drugId}
-            onChange={(e) => setFormData({ ...formData, drugId: e.target.value })}
-            required
-          >
-            <option value="">Select Drug</option>
-            {filteredDrugs.map((drug) => (
-              <option key={drug.id} value={drug.id}>
-                {drug.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <input
-          type="text"
-          className="input"
+        </FormControl>
+
+        <FormControl fullWidth>
+          <Autocomplete
+            options={drugs}
+            getOptionLabel={(option) => option.name || ''}
+            onChange={(e, value) => handleAutocompleteChange('drugId', value)}
+            value={drugs.find(d => d.id === formData.drugId) || null}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Drug"
+                required
+                className="input"
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      <Pill className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />
+                      {params.InputProps.startAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+          />
+        </FormControl>
+
+        <TextField
+          name="dosage"
+          label="Dosage"
           value={formData.dosage}
-          onChange={(e) => setFormData({ ...formData, dosage: e.target.value })}
-          placeholder="Dosage"
-          required
-        />
-        <input
-          type="datetime-local"
+          onChange={handleChange}
           className="input"
-          value={formData.prescribedAt}
-          onChange={(e) => setFormData({ ...formData, prescribedAt: e.target.value })}
+          fullWidth
           required
         />
-      </div>
-      <button type="submit" className="btn btn-primary mt-4">
-        Create Prescription
-      </button>
-    </form>
+
+        <TextField
+          name="prescribedAt"
+          label="Prescribed At"
+          type="datetime-local"
+          value={formData.prescribedAt}
+          onChange={handleChange}
+          className="input"
+          fullWidth
+          required
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+
+        <Box className="flex justify-end gap-2 mt-6">
+          <Button
+            variant="outlined"
+            className="btn-secondary"
+            onClick={() => router.push('/prescriptions')}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            className="btn-primary"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : (prescription?.id ? 'Update' : 'Create')}
+          </Button>
+        </Box>
+      </form>
+    </div>
   );
 }
