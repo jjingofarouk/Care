@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
   Box, Button, TextField, Select, MenuItem, FormControl, InputLabel,
-  Typography, Grid, Paper, IconButton, FormHelperText
+  Typography, Grid, FormHelperText, IconButton
 } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -230,14 +230,17 @@ export default function MedicalRecordForm() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
-        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h5" gutterBottom>
+      <Box component="form" onSubmit={handleSubmit} className="w-full min-h-screen">
+        <div className="card m-0 p-4">
+          <Typography variant="h5" className="card-title mb-2">
             Medical Record Form
           </Typography>
-          <Grid container spacing={3}>
+          {errors.submit && (
+            <div className="alert alert-error mb-2">{errors.submit}</div>
+          )}
+          <Grid container spacing={1}>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth error={!!errors.patientId}>
+              <FormControl fullWidth error={!!errors.patientId} className="select">
                 <InputLabel>Patient</InputLabel>
                 <Select
                   value={formData.patientId}
@@ -250,7 +253,11 @@ export default function MedicalRecordForm() {
                     </MenuItem>
                   ))}
                 </Select>
-                {errors.patientId && <FormHelperText>{errors.patientId}</FormHelperText>}
+                {errors.patientId && (
+                  <FormHelperText className="text-[var(--hospital-error)]">
+                    {errors.patientId}
+                  </FormHelperText>
+                )}
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -259,13 +266,25 @@ export default function MedicalRecordForm() {
                 value={formData.recordDate}
                 onChange={(date) => setFormData((prev) => ({ ...prev, recordDate: date }))}
                 renderInput={(params) => (
-                  <TextField {...params} fullWidth error={!!errors.recordDate} helperText={errors.recordDate} />
+                  <TextField
+                    {...params}
+                    fullWidth
+                    error={!!errors.recordDate}
+                    helperText={errors.recordDate}
+                    className="input"
+                  />
                 )}
               />
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Chief Complaint</Typography>
-              {errors.chiefComplaint && <Typography color="error">{errors.chiefComplaint}</Typography>}
+              <Typography variant="h6" className="card-title mt-2">
+                Chief Complaint
+              </Typography>
+              {errors.chiefComplaint && (
+                <span className="text-sm text-[var(--hospital-error)]">
+                  {errors.chiefComplaint}
+                </span>
+              )}
             </Grid>
             <Grid item xs={12} sm={4}>
               <TextField
@@ -273,6 +292,7 @@ export default function MedicalRecordForm() {
                 label="Description"
                 value={formData.chiefComplaint.description}
                 onChange={(e) => handleInputChange('chiefComplaint', 'description', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -281,6 +301,7 @@ export default function MedicalRecordForm() {
                 label="Duration"
                 value={formData.chiefComplaint.duration}
                 onChange={(e) => handleInputChange('chiefComplaint', 'duration', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -289,10 +310,13 @@ export default function MedicalRecordForm() {
                 label="Onset"
                 value={formData.chiefComplaint.onset}
                 onChange={(e) => handleInputChange('chiefComplaint', 'onset', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Present Illness</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Present Illness
+              </Typography>
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -302,6 +326,7 @@ export default function MedicalRecordForm() {
                 label="Narrative"
                 value={formData.presentIllness.narrative}
                 onChange={(e) => handleInputChange('presentIllness', 'narrative', e.target.value)}
+                className="textarea"
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -310,6 +335,7 @@ export default function MedicalRecordForm() {
                 label="Severity"
                 value={formData.presentIllness.severity}
                 onChange={(e) => handleInputChange('presentIllness', 'severity', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -318,6 +344,7 @@ export default function MedicalRecordForm() {
                 label="Progress"
                 value={formData.presentIllness.progress}
                 onChange={(e) => handleInputChange('presentIllness', 'progress', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -326,18 +353,22 @@ export default function MedicalRecordForm() {
                 label="Associated Symptoms"
                 value={formData.presentIllness.associatedSymptoms}
                 onChange={(e) => handleInputChange('presentIllness', 'associatedSymptoms', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Past Medical Conditions</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Past Medical Conditions
+              </Typography>
               {formData.pastConditions.map((condition, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={3}>
                     <TextField
                       fullWidth
                       label="Condition"
                       value={condition.condition}
                       onChange={(e) => handleInputChange('pastConditions', 'condition', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -345,7 +376,7 @@ export default function MedicalRecordForm() {
                       label="Diagnosis Date"
                       value={condition.diagnosisDate}
                       onChange={(date) => handleInputChange('pastConditions', 'diagnosisDate', date, index)}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
+                      renderInput={(params) => <TextField {...params} fullWidth className="input" />}
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -354,32 +385,40 @@ export default function MedicalRecordForm() {
                       label="Notes"
                       value={condition.notes}
                       onChange={(e) => handleInputChange('pastConditions', 'notes', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('pastConditions', index)}
                       disabled={formData.pastConditions.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('pastConditions')}>
-                Add Past Condition
-              </Button>
+              <button
+                onClick={() => handleAddItem('pastConditions')}
+                className="btn btn-primary mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Past Condition
+              </button>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Surgical History</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Surgical History
+              </Typography>
               {formData.surgicalHistory.map((surgery, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={3}>
                     <TextField
                       fullWidth
                       label="Procedure"
                       value={surgery.procedure}
                       onChange={(e) => handleInputChange('surgicalHistory', 'procedure', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -387,7 +426,7 @@ export default function MedicalRecordForm() {
                       label="Date Performed"
                       value={surgery.datePerformed}
                       onChange={(date) => handleInputChange('surgicalHistory', 'datePerformed', date, index)}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
+                      renderInput={(params) => <TextField {...params} fullWidth className="input" />}
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -396,32 +435,40 @@ export default function MedicalRecordForm() {
                       label="Outcome"
                       value={surgery.outcome}
                       onChange={(e) => handleInputChange('surgicalHistory', 'outcome', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('surgicalHistory', index)}
                       disabled={formData.surgicalHistory.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('surgicalHistory')}>
-                Add Surgical History
-              </Button>
+              <button
+                onClick={() => handleAddItem('surgicalHistory')}
+                className="btn btn-primary mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Surgical History
+              </button>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Family History</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Family History
+              </Typography>
               {formData.familyHistory.map((family, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={3}>
                     <TextField
                       fullWidth
                       label="Relative"
                       value={family.relative}
                       onChange={(e) => handleInputChange('familyHistory', 'relative', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -430,6 +477,7 @@ export default function MedicalRecordForm() {
                       label="Condition"
                       value={family.condition}
                       onChange={(e) => handleInputChange('familyHistory', 'condition', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -439,32 +487,41 @@ export default function MedicalRecordForm() {
                       type="number"
                       value={family.ageAtDiagnosis}
                       onChange={(e) => handleInputChange('familyHistory', 'ageAtDiagnosis', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('familyHistory', index)}
                       disabled={formData.familyHistory.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('familyHistory')}>
-                Add Family History
-              </Button>
+              <button
+                onClick={() => handleAddItem('familyHistory')}
+                className="btn btn-primaryške
+                mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Family History
+              </button>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Medication History</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Medication History
+              </Typography>
               {formData.medicationHistory.map((medication, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={2}>
                     <TextField
                       fullWidth
                       label="Medication Name"
                       value={medication.medicationName}
                       onChange={(e) => handleInputChange('medicationHistory', 'medicationName', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -473,6 +530,7 @@ export default function MedicalRecordForm() {
                       label="Dosage"
                       value={medication.dosage}
                       onChange={(e) => handleInputChange('medicationHistory', 'dosage', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -481,6 +539,7 @@ export default function MedicalRecordForm() {
                       label="Frequency"
                       value={medication.frequency}
                       onChange={(e) => handleInputChange('medicationHistory', 'frequency', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -488,7 +547,7 @@ export default function MedicalRecordForm() {
                       label="Start Date"
                       value={medication.startDate}
                       onChange={(date) => handleInputChange('medicationHistory', 'startDate', date, index)}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
+                      renderInput={(params) => <TextField {...params} fullWidth className="input" />}
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -496,25 +555,31 @@ export default function MedicalRecordForm() {
                       label="End Date"
                       value={medication.endDate}
                       onChange={(date) => handleInputChange('medicationHistory', 'endDate', date, index)}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
+                      renderInput={(params) => <TextField {...params} fullWidth className="input" />}
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('medicationHistory', index)}
                       disabled={formData.medicationHistory.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('medicationHistory')}>
-                Add Medication
-              </Button>
+              <button
+                onClick={() => handleAddItem('medicationHistory')}
+                className="btn btn-primary mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Medication
+              </button>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Social History</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Social History
+              </Typography>
             </Grid>
             <Grid item xs={12} sm={4}>
               <TextField
@@ -522,6 +587,7 @@ export default function MedicalRecordForm() {
                 label="Smoking Status"
                 value={formData.socialHistory.smokingStatus}
                 onChange={(e) => handleInputChange('socialHistory', 'smokingStatus', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -530,6 +596,7 @@ export default function MedicalRecordForm() {
                 label="Alcohol Use"
                 value={formData.socialHistory.alcoholUse}
                 onChange={(e) => handleInputChange('socialHistory', 'alcoholUse', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -538,6 +605,7 @@ export default function MedicalRecordForm() {
                 label="Occupation"
                 value={formData.socialHistory.occupation}
                 onChange={(e) => handleInputChange('socialHistory', 'occupation', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -546,6 +614,7 @@ export default function MedicalRecordForm() {
                 label="Marital Status"
                 value={formData.socialHistory.maritalStatus}
                 onChange={(e) => handleInputChange('socialHistory', 'maritalStatus', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -554,18 +623,22 @@ export default function MedicalRecordForm() {
                 label="Living Situation"
                 value={formData.socialHistory.livingSituation}
                 onChange={(e) => handleInputChange('socialHistory', 'livingSituation', e.target.value)}
+                className="input"
               />
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Review of Systems</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Review of Systems
+              </Typography>
               {formData.reviewOfSystems.map((review, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={5}>
                     <TextField
                       fullWidth
                       label="System"
                       value={review.system}
                       onChange={(e) => handleInputChange('reviewOfSystems', 'system', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={5}>
@@ -574,32 +647,40 @@ export default function MedicalRecordForm() {
                       label="Findings"
                       value={review.findings}
                       onChange={(e) => handleInputChange('reviewOfSystems', 'findings', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('reviewOfSystems', index)}
                       disabled={formData.reviewOfSystems.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('reviewOfSystems')}>
-                Add Review of System
-              </Button>
+              <button
+                onClick={() => handleAddItem('reviewOfSystems')}
+                className="btn btn-primary mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Review of System
+              </button>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Immunizations</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Immunizations
+              </Typography>
               {formData.immunizations.map((immunization, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={3}>
                     <TextField
                       fullWidth
                       label="Vaccine"
                       value={immunization.vaccine}
                       onChange={(e) => handleInputChange('immunizations', 'vaccine', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -607,7 +688,7 @@ export default function MedicalRecordForm() {
                       label="Date Given"
                       value={immunization.dateGiven}
                       onChange={(date) => handleInputChange('immunizations', 'dateGiven', date, index)}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
+                      renderInput={(params) => <TextField {...params} fullWidth className="input" />}
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -616,32 +697,40 @@ export default function MedicalRecordForm() {
                       label="Administered By"
                       value={immunization.administeredBy}
                       onChange={(e) => handleInputChange('immunizations', 'administeredBy', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('immunizations', index)}
                       disabled={formData.immunizations.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('immunizations')}>
-                Add Immunization
-              </Button>
+              <button
+                onClick={() => handleAddItem('immunizations')}
+                className="btn btn-primary mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Immunization
+              </button>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Travel History</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Travel History
+              </Typography>
               {formData.travelHistory.map((travel, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={3}>
                     <TextField
                       fullWidth
                       label="Country Visited"
                       value={travel.countryVisited}
                       onChange={(e) => handleInputChange('travelHistory', 'countryVisited', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -649,7 +738,7 @@ export default function MedicalRecordForm() {
                       label="Date From"
                       value={travel.dateFrom}
                       onChange={(date) => handleInputChange('travelHistory', 'dateFrom', date, index)}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
+                      renderInput={(params) => <TextField {...params} fullWidth className="input" />}
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -657,7 +746,7 @@ export default function MedicalRecordForm() {
                       label="Date To"
                       value={travel.dateTo}
                       onChange={(date) => handleInputChange('travelHistory', 'dateTo', date, index)}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
+                      renderInput={(params) => <TextField {...params} fullWidth className="input" />}
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -666,32 +755,40 @@ export default function MedicalRecordForm() {
                       label="Purpose"
                       value={travel.purpose}
                       onChange={(e) => handleInputChange('travelHistory', 'purpose', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('travelHistory', index)}
                       disabled={formData.travelHistory.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('travelHistory')}>
-                Add Travel History
-              </Button>
+              <button
+                onClick={() => handleAddItem('travelHistory')}
+                className="btn btn-primary mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Travel History
+              </button>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Allergies</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Allergies
+              </Typography>
               {formData.allergies.map((allergy, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={5}>
                     <TextField
                       fullWidth
                       label="Allergy Name"
                       value={allergy.name}
                       onChange={(e) => handleInputChange('allergies', 'name', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={5}>
@@ -700,32 +797,40 @@ export default function MedicalRecordForm() {
                       label="Severity"
                       value={allergy.severity}
                       onChange={(e) => handleInputChange('allergies', 'severity', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('allergies', index)}
                       disabled={formData.allergies.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('allergies')}>
-                Add Allergy
-              </Button>
+              <button
+                onClick={() => handleAddItem('allergies')}
+                className="btn btn-primary mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Allergy
+              </button>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Diagnoses</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Diagnoses
+              </Typography>
               {formData.diagnoses.map((diagnosis, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={3}>
                     <TextField
                       fullWidth
                       label="Code"
                       value={diagnosis.code}
                       onChange={(e) => handleInputChange('diagnoses', 'code', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -734,6 +839,7 @@ export default function MedicalRecordForm() {
                       label="Description"
                       value={diagnosis.description}
                       onChange={(e) => handleInputChange('diagnoses', 'description', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -741,33 +847,40 @@ export default function MedicalRecordForm() {
                       label="Diagnosed At"
                       value={diagnosis.diagnosedAt}
                       onChange={(date) => handleInputChange('diagnoses', 'diagnosedAt', date, index)}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
+                      renderInput={(params) => <TextField {...params} fullWidth className="input" />}
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('diagnoses', index)}
                       disabled={formData.diagnoses.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('diagnoses')}>
-                Add Diagnosis
-              </Button>
+              <button
+                onClick={() => handleAddItem('diagnoses')}
+                className="btn btn-primary mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Diagnosis
+              </button>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Vital Signs</Typography>
+              <Typography variant="h6" className="card-title mt-2">
+                Vital Signs
+              </Typography>
               {formData.vitalSigns.map((vital, index) => (
-                <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={1} key={index} className="mb-2">
                   <Grid item xs={12} sm={2}>
                     <TextField
                       fullWidth
                       label="Blood Pressure"
                       value={vital.bloodPressure}
                       onChange={(e) => handleInputChange('vitalSigns', 'bloodPressure', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -777,6 +890,7 @@ export default function MedicalRecordForm() {
                       type="number"
                       value={vital.heartRate}
                       onChange={(e) => handleInputChange('vitalSigns', 'heartRate', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -786,6 +900,7 @@ export default function MedicalRecordForm() {
                       type="number"
                       value={vital.temperature}
                       onChange={(e) => handleInputChange('vitalSigns', 'temperature', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -795,6 +910,7 @@ export default function MedicalRecordForm() {
                       type="number"
                       value={vital.respiratoryRate}
                       onChange={(e) => handleInputChange('vitalSigns', 'respiratoryRate', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -804,30 +920,37 @@ export default function MedicalRecordForm() {
                       type="number"
                       value={vital.oxygenSaturation}
                       onChange={(e) => handleInputChange('vitalSigns', 'oxygenSaturation', e.target.value, index)}
+                      className="input"
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton
+                    <button
                       onClick={() => handleRemoveItem('vitalSigns', index)}
                       disabled={formData.vitalSigns.length === 0}
+                      className="btn btn-danger p-2 min-h-0 h-8 w-8"
                     >
-                      <Delete />
-                    </IconButton>
+                      <Delete className="!w-4 !h-4" />
+                    </button>
                   </Grid>
                 </Grid>
               ))}
-              <Button startIcon={<Add />} onClick={() => handleAddItem('vitalSigns')}>
-                Add Vital Sign
-              </Button>
+              <button
+                onClick={() => handleAddItem('vitalSigns')}
+                className="btn btn-primary mt-1"
+              >
+                <Add className="!w-4 !h-4 mr-1" /> Add Vital Sign
+              </button>
             </Grid>
             <Grid item xs={12}>
-              {errors.submit && <Typography color="error">{errors.submit}</Typography>}
-              <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+              <button
+                type="submit"
+                className="btn btn-primary mt-2"
+              >
                 {params.id ? 'Update' : 'Create'} Medical Record
-              </Button>
+              </button>
             </Grid>
           </Grid>
-        </Paper>
+        </div>
       </Box>
     </LocalizationProvider>
   );
