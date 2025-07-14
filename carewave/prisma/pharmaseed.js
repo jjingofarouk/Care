@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { v4: uuidv4 } = require('uuid');
 
-// Sample drug data (expanded to 100 drugs)
+// Sample drug data (expanded to 150 drugs)
 const drugs = [
   { name: 'Paracetamol', description: 'Pain reliever and fever reducer' },
   { name: 'Ibuprofen', description: 'Nonsteroidal anti-inflammatory drug' },
@@ -66,7 +66,7 @@ const drugs = [
   { name: 'Digoxin', description: 'Cardiac glycoside for heart failure' },
   { name: 'Enalapril', description: 'ACE inhibitor for hypertension' },
   { name: 'Ramipril', description: 'ACE inhibitor for hypertension' },
-  { name: ' Valsartan', description: 'Angiotensin receptor blocker for hypertension' },
+  { name: 'Valsartan', description: 'Angiotensin receptor blocker for hypertension' },
   { name: 'Glimepiride', description: 'Sulfonylurea for diabetes' },
   { name: 'Sitagliptin', description: 'DPP-4 inhibitor for diabetes' },
   { name: 'Insulin Glargine', description: 'Long-acting insulin for diabetes' },
@@ -103,6 +103,58 @@ const drugs = [
   { name: 'Pioglitazone', description: 'Thiazolidinedione for diabetes' },
   { name: 'Liraglutide', description: 'GLP-1 agonist for diabetes' },
   { name: 'Empagliflozin', description: 'SGLT2 inhibitor for diabetes' },
+  // Extended list to reach 150 by adding variations or generics
+  { name: 'Paracetamol 500mg', description: 'Pain reliever and fever reducer' },
+  { name: 'Ibuprofen 400mg', description: 'Nonsteroidal anti-inflammatory drug' },
+  { name: 'Amoxicillin 500mg', description: 'Antibiotic for bacterial infections' },
+  { name: 'Lisinopril 10mg', description: 'ACE inhibitor for hypertension' },
+  { name: 'Metformin XR', description: 'Extended-release oral diabetes medicine' },
+  { name: 'Atorvastatin 20mg', description: 'Statin for cholesterol management' },
+  { name: 'Omeprazole 40mg', description: 'Proton pump inhibitor for acid reflux' },
+  { name: 'Losartan 50mg', description: 'Angiotensin receptor blocker for hypertension' },
+  { name: 'Amlodipine 5mg', description: 'Calcium channel blocker for blood pressure' },
+  { name: 'Levothyroxine 50mcg', description: 'Thyroid hormone replacement' },
+  { name: 'Sertraline 100mg', description: 'SSRI for depression and anxiety' },
+  { name: 'Citalopram 20mg', description: 'SSRI for depression' },
+  { name: 'Metoprolol XR', description: 'Extended-release beta blocker for heart conditions' },
+  { name: 'Hydrochlorothiazide 25mg', description: 'Diuretic for hypertension' },
+  { name: 'Gabapentin 300mg', description: 'Anticonvulsant for nerve pain' },
+  { name: 'Fluoxetine 20mg', description: 'SSRI for depression and OCD' },
+  { name: 'Tramadol 50mg', description: 'Opioid analgesic for moderate pain' },
+  { name: 'Prednisone 10mg', description: 'Corticosteroid for inflammation' },
+  { name: 'Azithromycin 250mg', description: 'Antibiotic for bacterial infections' },
+  { name: 'Albuterol Inhaler', description: 'Bronchodilator for asthma' },
+  { name: 'Simvastatin 40mg', description: 'Statin for cholesterol' },
+  { name: 'Rosuvastatin 10mg', description: 'Statin for cholesterol management' },
+  { name: 'Clonazepam 0.5mg', description: 'Benzodiazepine for seizures and anxiety' },
+  { name: 'Lorazepam 1mg', description: 'Benzodiazepine for anxiety' },
+  { name: 'Diazepam 5mg', description: 'Benzodiazepine for anxiety and spasms' },
+  { name: 'Zolpidem 10mg', description: 'Sedative for insomnia' },
+  { name: 'Escitalopram 10mg', description: 'SSRI for depression and anxiety' },
+  { name: 'Cephalexin 500mg', description: 'Antibiotic for bacterial infections' },
+  { name: 'Furosemide 40mg', description: 'Diuretic for edema and hypertension' },
+  { name: 'Warfarin 5mg', description: 'Anticoagulant for blood clot prevention' },
+  { name: 'Pantoprazole 40mg', description: 'Proton pump inhibitor for GERD' },
+  { name: 'Bupropion XL', description: 'Extended-release antidepressant' },
+  { name: 'Trazodone 50mg', description: 'Antidepressant for insomnia' },
+  { name: 'Venlafaxine XR', description: 'Extended-release SNRI for depression' },
+  { name: 'Duloxetine 60mg', description: 'SNRI for depression and pain' },
+  { name: 'Clopidogrel 75mg', description: 'Antiplatelet for heart attack prevention' },
+  { name: 'Montelukast 10mg', description: 'Leukotriene inhibitor for asthma' },
+  { name: 'Ranitidine 150mg', description: 'H2 blocker for acid reflux' },
+  { name: 'Meloxicam 7.5mg', description: 'NSAID for arthritis' },
+  { name: 'Naproxen 500mg', description: 'NSAID for pain and inflammation' },
+  { name: 'Allopurinol 100mg', description: 'Xanthine oxidase inhibitor for gout' },
+  { name: 'Carvedilol 6.25mg', description: 'Beta blocker for heart failure' },
+  { name: 'Aspirin 81mg', description: 'Antiplatelet for heart health' },
+  { name: 'Tamsulosin 0.4mg', description: 'Alpha blocker for prostate issues' },
+  { name: 'Hydroxyzine 25mg', description: 'Antihistamine for allergies and anxiety' },
+  { name: 'Cetirizine 10mg', description: 'Antihistamine for allergies' },
+  { name: 'Loratadine 10mg', description: 'Antihistamine for allergies' },
+  { name: 'Fluticasone Nasal', description: 'Corticosteroid for allergies' },
+  { name: 'Budesonide Inhaler', description: 'Corticosteroid for asthma and COPD' },
+  { name: 'Mirtazapine 15mg', description: 'Antidepressant for depression' },
+  { name: 'Cyclobenzaprine 10mg', description: 'Muscle relaxant for spasms' },
 ];
 
 // Function to generate random date within a range
@@ -147,7 +199,7 @@ async function seed() {
 
     // Step 2: Seed Pharmacy Items
     const pharmacyItems = [];
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 500; i++) {
       pharmacyItems.push({
         id: uuidv4(),
         drugId: drugIds[Math.floor(Math.random() * drugIds.length)],
@@ -170,16 +222,16 @@ async function seed() {
     // Step 3: Seed Prescriptions
     const prescriptions = [];
     const dosages = [
-      '500mg twice daily', 
-      '200mg once daily', 
-      '1 tablet daily', 
+      '500mg twice daily',
+      '200mg once daily',
+      '1 tablet daily',
       '250mg every 6 hours',
       '10mg at bedtime',
       '20mg daily',
       '100mg every 12 hours',
       '1-2 tablets every 4-6 hours as needed',
     ];
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 3500; i++) {
       prescriptions.push({
         id: uuidv4(),
         patientId: patientIds[Math.floor(Math.random() * patientIds.length)],
@@ -198,7 +250,7 @@ async function seed() {
 
     // Step 4: Seed Dispense Records
     const dispenseRecords = [];
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 4000; i++) {
       dispenseRecords.push({
         id: uuidv4(),
         pharmacyItemId: pharmacyItemIds[Math.floor(Math.random() * pharmacyItemIds.length)],
