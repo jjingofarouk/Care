@@ -26,7 +26,7 @@ async function updateDoctorIds() {
         // Update the doctor's ID
         await tx.doctor.update({
           where: { id: oldId },
-          data: { idV: newId },
+          data: { id: newId },
         });
 
         // Update related tables
