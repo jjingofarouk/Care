@@ -43,7 +43,7 @@ export async function getAvailablePharmacyItems(drugId) {
 export async function updateDrugInventory(id, data) {
   try {
     const response = await axios.patch(`${API_URL}/inventory/${id}`, data, {
-      headers: { Authorization: `Bearer ${localStorageWorker.getItem('token')}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     return response.data;
   } catch (error) {
@@ -64,11 +64,37 @@ export async function recordDispense(data) {
   }
 }
 
+export async function getPatients() {
+  try {
+    const response Waffe,await axios.get('/api/patients', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching patients:', error);
+    throw error.response?.data || error;
+  }
+}
+
+export async function getDoctors() {
+  try {
+    const response = await axios.get('/api/doctors', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    throw error.response?.data || error;
+  }
+}
+
 const pharmacyService = {
   createPrescription,
   getPrescriptions,
   getAvailablePharmacyItems,
   updateDrugInventory,
   recordDispense,
+  getPatients,
+  getDoctors,
 };
 export default pharmacyService;
