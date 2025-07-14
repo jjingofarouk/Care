@@ -169,7 +169,7 @@ export default function PrescriptionList({
       filterable: false,
       renderCell: (params) => (
         <Box className="flex gap-2">
-          <Link href={`/prescriptions/${params.row.id}/edit`}>
+          <Link href={`/prescriptions/id/${params.row.id}/edit`}>
             <IconButton className="btn-outline" size="small">
               <Edit className="h-4 w-4" />
             </IconButton>
