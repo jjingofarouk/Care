@@ -1,5 +1,3 @@
-"use client";
-import React from 'react'; // ✅ Add this line
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -12,7 +10,7 @@ export const isAuthenticated = (token) => {
     const currentTime = Date.now() / 1000;
     return decoded.exp > currentTime;
   } catch {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
     return false;
   }
@@ -28,8 +26,8 @@ export const requireAuth = (WrappedComponent) => {
     const router = useRouter();
 
     useEffect(() => {
-      const token = localStorage.getItem('token');
-      if (!isAuthenticated(token)) {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!isAuthenticated(accessToken)) {
         router.push('/auth');
       }
     }, [router]);
