@@ -6,6 +6,7 @@ export async function login({ email, password }) {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include', // Include cookies
     body: JSON.stringify({ email, password }),
   });
 
@@ -15,7 +16,7 @@ export async function login({ email, password }) {
   }
 
   const data = await response.json();
-  localStorage.setItem('token', data.token);
+  localStorage.setItem('accessToken', data.accessToken);
   localStorage.setItem('user', JSON.stringify(data.user));
   return data;
 }
@@ -26,6 +27,7 @@ export async function register({ email, password, firstName, lastName, role }) {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include', // Include cookies
     body: JSON.stringify({ email, password, firstName, lastName, role }),
   });
 
@@ -34,10 +36,35 @@ export async function register({ email, password, firstName, lastName, role }) {
     throw new Error(errorData.error || 'Registration failed');
   }
 
-  return response.json();
+  const data = await response.json();
+  localStorage.setItem('accessToken', data.accessToken);
+  localStorage.setItem('user', JSON.stringify(data.user));
+  return data;
 }
 
-export function logout() {
-  localStorage.removeItem('token');
+export async function refreshToken() {
+  const response = await fetch(`${BASE_URL}/api/refresh`, {
+    method: 'POST',
+    credentials: 'include', // Include refresh token cookie
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to refresh token');
+  }
+
+  const data = await response.json();
+  localStorage.setItem('accessToken', data.accessToken);
+  localStorage.setItem('user', JSON.stringify(data.user));
+  return data;
+}
+
+export async function logout() {
+  localStorage.removeItem('accessToken');
   localStorage.removeItem('user');
+  // Optionally revoke refresh token on server
+  await fetch(`${BASE_URL}/api/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  });
 }
