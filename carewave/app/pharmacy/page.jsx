@@ -1,8 +1,5 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Button, Box, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
-import Link from 'next/link';
 import PrescriptionList from '@/components/pharmacy/PrescriptionList';
 import pharmacyService from '@/services/pharmacyService';
 
@@ -31,28 +28,7 @@ export default function PharmacyHome() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <Box className="flex justify-between items-center mb-6">
-        <Typography variant="h4" className="font-bold text-[var(--hospital-gray-900)]">
-          Pharmacy Dashboard
-        </Typography>
-        <Link href="/pharmacy/prescriptions/new">
-          <Button
-            variant="contained"
-            className="btn-primary"
-            startIcon={<Plus className="h-4 w-4" />}
-          >
-            New Prescription
-          </Button>
-        </Link>
-      </Box>
-
-      {error && (
-        <div className="alert alert-error mb-4">
-          <span>Error: {error}</span>
-        </div>
-      )}
-
+    <div className="max-w-[1280px] mx-auto p-0 mobile-full-width">
       <PrescriptionList
         prescriptions={prescriptions}
         loading={loading}
