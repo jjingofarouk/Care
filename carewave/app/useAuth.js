@@ -2,26 +2,50 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUser, isAuthenticated } from './auth/authUtils';
-import { login, logout } from './auth/authService';
+import { login, logout, refreshToken } from './authService';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const isAuthenticated = (token) => {
+    if (!token) return false;
+    try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      return decoded.exp > currentTime;
+    } catch {
+      return false;
+    }
+  };
+
+  const getUser = () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  };
+
   const refreshUser = useCallback(async () => {
     setLoading(true);
     const storedUser = getUser();
-    const token = localStorage.getItem('token');
-    if (storedUser && isAuthenticated(token)) {
+    const accessToken = localStorage.getItem('accessToken');
+
+    if (storedUser && isAuthenticated(accessToken)) {
       setUser(storedUser);
-    } else {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { user } = await refreshToken();
+      setUser(user);
+    } catch (error) {
       setUser(null);
       await logout();
       router.push('/auth');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [router]);
 
   useEffect(() => {
@@ -32,7 +56,7 @@ const useAuth = () => {
     try {
       const { user } = await login(credentials);
       setUser(user);
-      router.push('/appointment');
+      router.push('/appointments');
       return user;
     } catch (error) {
       throw new Error(error.message);
