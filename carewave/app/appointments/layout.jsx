@@ -1,13 +1,12 @@
 // app/appointments/layout.jsx
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import React from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Calendar, FileText, Clock } from 'lucide-react';
 
 export default function AppointmentsLayout({ children }) {
-  const router = useRouter();
   const pathname = usePathname();
   const tabs = [
     { name: 'Appointments', href: '/appointments', icon: Calendar },
