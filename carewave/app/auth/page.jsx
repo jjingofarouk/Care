@@ -5,8 +5,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
-  Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, Heart, 
-  CheckCircle, Stethoscope, Users, Settings, LogIn 
+  Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, Heart, Stethoscope, Users, Settings, LogIn 
 } from 'lucide-react';
 import { login, register } from './authService';
 
@@ -240,7 +239,7 @@ export default function AuthPage() {
 
             <div className="text-center">
               <p className="text-[var(--hospital-gray-600)] mb-4">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <button
                   onClick={() => setIsLogin(false)}
                   className="text-[var(--hospital-accent)] hover:text-[var(--hospital-accent-dark)] font-semibold"
@@ -454,7 +453,7 @@ export default function AuthPage() {
             {isLogin && (
               <div className="text-center mt-8">
                 <p className="text-[var(--hospital-gray-600)] mb-4">
-                  Don't have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <button
                     onClick={() => setIsLogin(false)}
                     className="text-[var(--hospital-accent)] hover:text-[var(--hospital-accent-dark)] font-semibold"
