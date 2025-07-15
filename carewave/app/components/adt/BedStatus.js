@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, Button, Chip, Alert } from '@mui/material';
+import { Button, Chip, Alert } from '@mui/material';
 import { Loader } from 'lucide-react';
 import adtService from '../../services/adtService';
 
