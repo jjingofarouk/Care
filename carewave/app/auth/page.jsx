@@ -1,11 +1,37 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, CheckCircle, Stethoscope, Users, Settings, LogIn } from 'lucide-react';
-import { login, register } from './authService';
+import { useAuth } from '../../lib/useAuth';
+
+const roleCategories = {
+  'Patient Care': [
+    { value: 'PATIENT', label: 'Patient', description: 'Access medical records and appointments' },
+    { value: 'DOCTOR', label: 'Doctor', description: 'Manage patients and clinical data' },
+    { value: 'NURSE', label: 'Nurse', description: 'Patient care and nursing services' },
+    { value: 'SURGEON', label: 'Surgeon', description: 'Surgical procedures and operations' },
+  ],
+  'Medical Services': [
+    { value: 'LAB_TECHNICIAN', label: 'Lab Technician', description: 'Laboratory tests and analysis' },
+    { value: 'PHARMACIST', label: 'Pharmacist', description: 'Medication management' },
+    { value: 'RADIOLOGIST', label: 'Radiologist', description: 'Medical imaging and diagnostics' },
+  ],
+  'Administrative': [
+    { value: 'ADMIN', label: 'Admin', description: 'System administration' },
+    { value: 'RECEPTIONIST', label: 'Receptionist', description: 'Patient reception and scheduling' },
+    { value: 'HOSPITAL_MANAGER', label: 'Hospital Manager', description: 'Hospital operations management' },
+    { value: 'BILLING_OFFICER', label: 'Billing Officer', description: 'Financial and billing services' },
+    { value: 'ACCOUNTANT', label: 'Accountant', description: 'Financial accounting' },
+  ],
+  'Support Staff': [
+    { value: 'STAFF', label: 'Staff', description: 'General hospital staff' },
+    { value: 'IT_SUPPORT', label: 'IT Support', description: 'Technical support' },
+    { value: 'CLEANING_STAFF', label: 'Cleaning Staff', description: 'Facility maintenance' },
+    { value: 'SECURITY', label: 'Security', description: 'Security and safety' },
+  ],
+};
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,102 +41,106 @@ export default function AuthPage() {
   });
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const { login, user, loading } = useAuth();
   const router = useRouter();
 
-  const roleCategories = {
-    'Patient Care': [
-      { value: 'PATIENT', label: 'Patient', description: 'Access medical records and appointments' },
-      { value: 'DOCTOR', label: 'Doctor', description: 'Manage patients and clinical data' },
-      { value: 'NURSE', label: 'Nurse', description: 'Patient care and nursing services' },
-      { value: 'SURGEON', label: 'Surgeon', description: 'Surgical procedures and operations' },
-    ],
-    'Medical Services': [
-      { value: 'LAB_TECHNICIAN', label: 'Lab Technician', description: 'Laboratory tests and analysis' },
-      { value: 'PHARMACIST', label: 'Pharmacist', description: 'Medication management' },
-      { value: 'RADIOLOGIST', label: 'Radiologist', description: 'Medical imaging and diagnostics' },
-    ],
-    'Administrative': [
-      { value: 'ADMIN', label: 'Admin', description: 'System administration' },
-      { value: 'RECEPTIONIST', label: 'Receptionist', description: 'Patient reception and scheduling' },
-      { value: 'HOSPITAL_MANAGER', label: 'Hospital Manager', description: 'Hospital operations management' },
-      { value: 'BILLING_OFFICER', label: 'Billing Officer', description: 'Financial and billing services' },
-      { value: 'ACCOUNTANT', label: 'Accountant', description: 'Financial accounting' },
-    ],
-    'Support Staff': [
-      { value: 'STAFF', label: 'Staff', description: 'General hospital staff' },
-      { value: 'IT_SUPPORT', label: 'IT Support', description: 'Technical support' },
-      { value: 'CLEANING_STAFF', label: 'Cleaning Staff', description: 'Facility maintenance' },
-      { value: 'SECURITY', label: 'Security', description: 'Security and safety' },
-    ],
-  };
+  // Client-side validation for email format
+  const isValidEmail = useCallback((email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }, []);
 
-  const handleLoginChange = (e) => {
-    setLoginFormData({ ...loginFormData, [e.target.name]: e.target.value });
-    if (error) setError(null);
-  };
+  // Client-side validation for password strength
+  const isValidPassword = useCallback((password) => {
+    return password.length >= 8;
+  }, []);
 
-  const handleRegisterChange = (e) => {
-    setRegisterFormData({ ...registerFormData, [e.target.name]: e.target.value });
-    if (error) setError(null);
-  };
+  // Validate login form
+  const isLoginFormValid = useMemo(() => {
+    return isValidEmail(loginFormData.email) && isValidPassword(loginFormData.password);
+  }, [loginFormData, isValidEmail, isValidPassword]);
 
-  const handleLoginSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-    try {
-      await login(loginFormData);
-      router.push('/appointments');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    if (currentStep !== 3) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      await register(registerFormData);
-      setIsLogin(true);
-      setCurrentStep(1);
-      setRegisterFormData({ email: '', password: '', firstName: '', lastName: '', role: 'PATIENT' });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const nextStep = () => {
-    if (isStepValid() && currentStep < 3) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const isStepValid = () => {
+  // Validate registration form by step
+  const isStepValid = useMemo(() => {
     switch (currentStep) {
       case 1:
-        return registerFormData.firstName && registerFormData.lastName;
+        return registerFormData.firstName.trim() && registerFormData.lastName.trim();
       case 2:
-        return registerFormData.email && registerFormData.password;
+        return isValidEmail(registerFormData.email) && isValidPassword(registerFormData.password);
       case 3:
         return registerFormData.role;
       default:
         return false;
     }
-  };
+  }, [registerFormData, currentStep, isValidEmail, isValidPassword]);
+
+  const handleLoginChange = useCallback((e) => {
+    setLoginFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError(null);
+  }, []);
+
+  const handleRegisterChange = useCallback((e) => {
+    setRegisterFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError(null);
+  }, []);
+
+  const handleLoginSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    if (!isLoginFormValid || isSubmitting) return;
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await login(loginFormData);
+      router.push('/appointments');
+    } catch (err) {
+      setError(err.message === 'User already exists' ? 'Invalid credentials' : err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [loginFormData, isLoginFormValid, isSubmitting, login, router]);
+
+  const handleRegisterSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    if (currentStep !== 3 || !isStepValid || isSubmitting) return;
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await login(registerFormData); // Use login to authenticate after registration
+      router.push('/auth');
+      setCurrentStep(1);
+      setRegisterFormData({ email: '', password: '', firstName: '', lastName: '', role: 'PATIENT' });
+    } catch (err) {
+      setError(err.message === 'User already exists' ? 'Email is already registered' : err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [registerFormData, currentStep, isStepValid, isSubmitting, login, router]);
+
+  const nextStep = useCallback(() => {
+    if (isStepValid && currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+      setError(null);
+    }
+  }, [isStepValid, currentStep]);
+
+  const prevStep = useCallback(() => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      setError(null);
+    }
+  }, [currentStep]);
+
+  // Redirect if already authenticated
+  if (loading) {
+    return <div className="loading-spinner mx-auto mt-20"></div>;
+  }
+  if (user) {
+    router.push('/appointments');
+    return null;
+  }
 
   const containerVariants = {
     hidden: { opacity: 0, x: 50 },
@@ -204,22 +234,22 @@ export default function AuthPage() {
                     />
                     <span className="text-sm text-hospital-gray-600">Remember me</span>
                   </label>
-                  <Link
+                  <a
                     href="/auth/forgot-password"
                     className="text-sm text-hospital-accent hover:text-hospital-accent-dark font-medium transition-colors"
                   >
                     Forgot password?
-                  </Link>
+                  </a>
                 </div>
 
                 <motion.button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={!isLoginFormValid || isSubmitting}
                   className="btn btn-primary w-full"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: isLoginFormValid && !isSubmitting ? 1.02 : 1 }}
+                  whileTap={{ scale: isLoginFormValid && !isSubmitting ? 0.98 : 1 }}
                 >
-                  {isLoading ? (
+                  {isSubmitting ? (
                     <>
                       <div className="loading-spinner"></div>
                       Signing in...
@@ -240,6 +270,7 @@ export default function AuthPage() {
                     onClick={() => {
                       setIsLogin(false);
                       setError(null);
+                      setCurrentStep(1);
                     }}
                     className="text-hospital-accent hover:text-hospital-accent-dark font-semibold transition-colors"
                   >
@@ -368,7 +399,7 @@ export default function AuthPage() {
                           onChange={handleRegisterChange}
                           className="input w-full pl-12 pr-12"
                           required
-                          placeholder="Create a strong password"
+                          placeholder="Create a strong password (min 8 characters)"
                         />
                         <button
                           type="button"
@@ -378,6 +409,9 @@ export default function AuthPage() {
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
+                      {!isValidPassword(registerFormData.password) && registerFormData.password && (
+                        <p className="text-sm text-hospital-error">Password must be at least 8 characters</p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -389,7 +423,7 @@ export default function AuthPage() {
                         <div key={category} className="space-y-4">
                           <h3 className="text-lg font-semibold text-hospital-gray-800 flex items-center gap-2">
                             {category === 'Patient Care' && <Stethoscope className="w-5 h-5" />}
-                            {category === 'Medical Services' && <Heart className="w-5 h-5" />}
+                            {category === 'Medical Services' && <Users className="w-5 h-5" />}
                             {category === 'Administrative' && <Settings className="w-5 h-5" />}
                             {category === 'Support Staff' && <Users className="w-5 h-5" />}
                             {category}
@@ -462,6 +496,7 @@ export default function AuthPage() {
                     className={`btn btn-secondary ${currentStep === 1 ? 'invisible' : ''}`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    disabled={isSubmitting}
                   >
                     Previous
                   </motion.button>
@@ -470,22 +505,22 @@ export default function AuthPage() {
                     <motion.button
                       type="button"
                       onClick={nextStep}
-                      disabled={!isStepValid()}
+                      disabled={!isStepValid || isSubmitting}
                       className="btn btn-primary"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ scale: isStepValid && !isSubmitting ? 1.02 : 1 }}
+                      whileTap={{ scale: isStepValid && !isSubmitting ? 0.98 : 1 }}
                     >
                       Next
                     </motion.button>
                   ) : (
                     <motion.button
                       type="submit"
-                      disabled={isLoading || !isStepValid()}
+                      disabled={!isStepValid || isSubmitting}
                       className="btn btn-primary"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ scale: isStepValid && !isSubmitting ? 1.02 : 1 }}
+                      whileTap={{ scale: isStepValid && !isSubmitting ? 0.98 : 1 }}
                     >
-                      {isLoading ? (
+                      {isSubmitting ? (
                         <>
                           <div className="loading-spinner"></div>
                           Creating Account...
@@ -509,6 +544,7 @@ export default function AuthPage() {
                       setIsLogin(true);
                       setCurrentStep(1);
                       setError(null);
+                      setRegisterFormData({ email: '', password: '', firstName: '', lastName: '', role: 'PATIENT' });
                     }}
                     className="text-hospital-accent hover:text-hospital-accent-dark font-semibold transition-colors"
                   >
