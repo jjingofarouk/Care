@@ -34,8 +34,8 @@ const AdtLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
-      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4">
-        <Box className="mb-2">
+      <div className="w-full px-1 sm:px-2">
+        <Box className="mb-1">
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
@@ -44,42 +44,67 @@ const AdtLayout = ({ children }) => {
             scrollButtons="auto"
             allowScrollButtonsMobile
             className="card rounded-lg overflow-x-auto custom-scrollbar"
+            sx={{
+              '& .MuiTabs-indicator': {
+                backgroundColor: 'var(--hospital-accent)',
+              },
+            }}
           >
             <Tab
               label={
-                <span className="flex items-center gap-2">
-                  <Hospital className="h-4 w-4" />
+                <span className="flex items-center gap-1.5">
+                  <Hospital className="h-3.5 w-3.5" />
                   Admissions
                 </span>
               }
-              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+              className="text-[var(--hospital-gray-700)] font-medium text-xs uppercase tracking-wide px-2 py-1.5 min-h-[2rem] transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+              sx={{
+                '&.Mui-selected': {
+                  color: 'var(--hospital-accent)',
+                },
+              }}
             />
             <Tab
               label={
-                <span className="flex items-center gap-2">
-                  <Bed className="h-4 w-4" />
+                <span className="flex items-center gap-1.5">
+                  <Bed className="h-3.5 w-3.5" />
                   Discharges
                 </span>
               }
-              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+              className="text-[var(--hospital-gray-700)] font-medium text-xs uppercase tracking-wide px-2 py-1.5 min-h-[2rem] transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+              sx={{
+                '&.Mui-selected': {
+                  color: 'var(--hospital-accent)',
+                },
+              }}
             />
             <Tab
               label={
-                <span className="flex items-center gap-2">
-                  <ArrowLeftRight className="h-4 w-4" />
+                <span className="flex items-center gap-1.5">
+                  <ArrowLeftRight className="h-3.5 w-3.5" />
                   Transfers
                 </span>
               }
-              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+              className="text-[var(--hospital-gray-700)] font-medium text-xs uppercase tracking-wide px-2 py-1.5 min-h-[2rem] transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+              sx={{
+                '&.Mui-selected': {
+                  color: 'var(--hospital-accent)',
+                },
+              }}
             />
             <Tab
               label={
-                <span className="flex items-center gap-2">
-                  <BarChart2 className="h-4 w-4" />
+                <span className="flex items-center gap-1.5">
+                  <BarChart2 className="h-3.5 w-3.5" />
                   Analytics
                 </span>
               }
-              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+              className="text-[var(--hospital-gray-700)] font-medium text-xs uppercase tracking-wide px-2 py-1.5 min-h-[2rem] transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
+              sx={{
+                '&.Mui-selected': {
+                  color: 'var(--hospital-accent)',
+                },
+              }}
             />
           </Tabs>
         </Box>
