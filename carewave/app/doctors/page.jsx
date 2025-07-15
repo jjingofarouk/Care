@@ -1,11 +1,13 @@
 // app/doctors/page.jsx
 'use client';
-import React from 'react';
-import { useState, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DoctorTable from '../components/doctors/DoctorTable';
 import DoctorForm from '../components/doctors/DoctorForm';
 import { getDoctors, createDoctor, deleteDoctor } from '../services/doctorService';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 export default function DoctorsPage() {
   const [doctors, setDoctors] = useState([]);
@@ -21,10 +23,8 @@ export default function DoctorsPage() {
         setLoading(true);
         setError(null);
         const data = await getDoctors();
-        console.log('Fetched doctors:', data);
         setDoctors(data || []);
       } catch (error) {
-        console.error('Error fetching doctors:', error);
         setError('Failed to load doctors. Please try again.');
         setDoctors([]);
       } finally {
@@ -36,15 +36,16 @@ export default function DoctorsPage() {
 
   const handleSubmit = async (formData) => {
     try {
+      setLoading(true);
       await createDoctor(formData);
       setOpen(false);
       setSelectedDoctor(null);
-      
       const data = await getDoctors();
       setDoctors(data || []);
     } catch (error) {
-      console.error('Error creating doctor:', error);
       setError('Failed to create doctor. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,12 +55,14 @@ export default function DoctorsPage() {
     }
     
     try {
+      setLoading(true);
       await deleteDoctor(id);
       const data = await getDoctors();
       setDoctors(data || []);
     } catch (error) {
-      console.error('Error deleting doctor:', error);
       setError('Failed to delete doctor. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,62 +71,67 @@ export default function DoctorsPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
-<div className="mx-auto w-full max-w-[1920px] px-1 sm:px-2 lg:px-4 py-1">
-        <div className="card">
-          <div className="card-header">
-            <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-              <h1 className="card-title text-[var(--role-doctor)]">
-                Doctors Management
-              </h1>
-              <button
-                className="btn btn-primary bg-[var(--role-doctor)] hover:bg-[var(--hospital-accent-dark)] w-full sm:w-auto"
-                onClick={() => setOpen(true)}
-              >
-                Add Doctor
-              </button>
-            </div>
-          </div>
-          
-          {error && (
-            <div className="alert alert-error m-2">
-              {error}
-            </div>
+    <div className="card w-full max-w-[100vw] mx-0 p-0">
+      <div className="card-header px-2 py-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <h2 className="card-title text-lg">
+            {loading ? <Skeleton width={200} height={24} baseColor="#e5e7eb" highlightColor="#f3f4f6" /> : 'Doctors Management'}
+          </h2>
+          {loading ? (
+            <Skeleton width={150} height={36} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+          ) : (
+            <button
+              className="btn btn-primary mb-2"
+              onClick={() => setOpen(true)}
+            >
+              Add Doctor
+            </button>
           )}
-          
-          <div className="p-2">
-            {loading ? (
-              <div className="flex items-center justify-center p-4">
-                <div className="loading-spinner" />
+        </div>
+      </div>
+      <div className="p-2">
+        {error && (
+          <div className="alert alert-error mb-2">
+            {loading ? <Skeleton width={300} height={24} baseColor="#e5e7eb" highlightColor="#f3f4f6" /> : error}
+          </div>
+        )}
+        {loading ? (
+          <Skeleton count={5} height={60} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+        ) : (
+          <DoctorTable
+            doctors={doctors}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
+        {open && (
+          <div className="fixed inset-0 bg-hospital-gray-900 bg-opacity-50 flex items-center justify-center">
+            <div className="card max-w-md w-full mx-2 p-0">
+              <div className="card-header px-2 py-1">
+                <h2 className="card-title text-lg">
+                  {loading ? <Skeleton width={200} height={24} baseColor="#e5e7eb" highlightColor="#f3f4f6" /> : 'Add Doctor'}
+                </h2>
               </div>
-            ) : (
-              <DoctorTable
-                doctors={doctors}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className={`fixed inset-0 bg-[var(--hospital-gray-900)] bg-opacity-50 transition-opacity ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
-             onClick={() => setOpen(false)}>
-          <div className={`fixed left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-[var(--hospital-white)] shadow-xl transition-all duration-[var(--transition-normal)] ${open ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
-               onClick={(e) => e.stopPropagation()}>
-            <div className="rounded-t-lg bg-[var(--hospital-gray-50)] px-4 py-2">
-              <h2 className="text-base font-semibold text-[var(--role-doctor)]">
-                Add Doctor
-              </h2>
-            </div>
-            <div className="p-4">
-              <DoctorForm
-                doctor={selectedDoctor}
-                onSubmit={handleSubmit}
-                onCancel={() => setOpen(false)}
-              />
+              <div className="p-2">
+                {loading ? (
+                  <>
+                    <Skeleton height={40} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                    <Skeleton height={40} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                    <Skeleton height={40} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                    <Skeleton height={40} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                    <Skeleton width={100} height={36} count={2} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                  </>
+                ) : (
+                  <DoctorForm
+                    doctor={selectedDoctor}
+                    onSubmit={handleSubmit}
+                    onCancel={() => setOpen(false)}
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
