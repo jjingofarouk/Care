@@ -20,7 +20,6 @@ export default function PrescriptionList({
   const [loading, setLoading] = useState(initialLoading);
   const [error, setError] = useState(null);
 
-  // Fetch prescriptions if not provided as props
   useEffect(() => {
     if (!initialPrescriptions || initialPrescriptions.length === 0) {
       fetchPrescriptions();
@@ -99,7 +98,6 @@ export default function PrescriptionList({
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
-      // Remove the deleted prescription from local state
       setPrescriptions(prev => prev.filter(p => p.id !== selectedPrescription));
 
       if (onPrescriptionDeleted) {
@@ -169,7 +167,7 @@ export default function PrescriptionList({
       filterable: false,
       renderCell: (params) => (
         <Box className="flex gap-2">
-          <Link href={`/prescriptions/id/${params.row.id}/edit`}>
+          <Link href={`/pharmacy/prescriptions/new?id=${params.row.id}`}>
             <IconButton className="btn-outline" size="small">
               <Edit className="h-4 w-4" />
             </IconButton>
@@ -189,13 +187,13 @@ export default function PrescriptionList({
 
   if (error) {
     return (
-      <div className="card w-full max-w-7xl mx-auto">
-        <div className="p-4 text-center">
-          <div className="text-red-500 mb-2">Error loading prescriptions</div>
-          <div className="text-sm text-gray-600">{error}</div>
+      <div className="card max-w-[1280px] mx-auto p-2">
+        <div className="text-center">
+          <div className="text-[var(--hospital-error)] mb-2">Error loading prescriptions</div>
+          <div className="text-sm text-[var(--hospital-gray-600)]">{error}</div>
           <button 
             onClick={fetchPrescriptions}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="btn btn-primary mt-4"
           >
             Retry
           </button>
@@ -205,8 +203,8 @@ export default function PrescriptionList({
   }
 
   return (
-    <div className="card w-full max-w-7xl mx-auto">
-      <div style={{ height: 600, width: '100%' }} className="overflow-x-auto custom-scrollbar">
+    <div className="card max-w-[1280px] mx-auto p-2">
+      <div className="overflow-x-auto custom-scrollbar">
         <DataGrid
           rows={loading ? [] : prescriptions}
           columns={columns}
@@ -230,7 +228,7 @@ export default function PrescriptionList({
             },
             '& .MuiDataGrid-cell': {
               borderTop: '1px solid var(--hospital-gray-200)',
-              color: 'var(--hospital-gray-900)',
+              color: 'var(--text-primary)',
               padding: '0.75rem 1.5rem',
             },
             '& .MuiDataGrid-columnHeaders': {
