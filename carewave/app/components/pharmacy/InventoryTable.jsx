@@ -1,130 +1,99 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Chip, IconButton, Button, Menu, MenuItem, Box, TextField, InputAdornment } from '@mui/material';
-import { Edit, Trash2, MoreHorizontal, Search, Eye } from 'lucide-react';
-import Link from 'next/link';
+import { Search, Add, Edit, Delete, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
-export default function InventoryTable({ inventory = [], loading, onInventoryItemDeleted }) {
+export default function InventoryTable() {
   const router = useRouter();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredInventory, setFilteredInventory] = useState(inventory);
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setFilteredInventory(
-      inventory.filter(
-        (item) =>
-          item.drug?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.batchNumber.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-  }, [searchTerm, inventory]);
+    fetchInventory();
+  }, [search]);
 
-  const getToken = () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('token');
-    }
-    return null;
-  };
-
-  const handleMenuClick = (event, id) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedItem(id);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedItem(null);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedItem) return;
-
-    setDeleteLoading(true);
+  const fetchInventory = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const token = getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`/api/pharmacy/inventory?id=${selectedItem}`, {
+      const response = await fetch(`/api/pharmacy/inventory?search=${encodeURIComponent(search)}`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch inventory: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        throw new Error('API response is not an array');
+      }
+
+      const validatedInventory = data.map((item) => ({
+        id: item.id || '',
+        drug: item.drug || { name: '' },
+        batchNumber: item.batchNumber || '',
+        expiryDate: item.expiryDate || '',
+        quantity: item.quantity || 0,
+        unitPrice: item.unitPrice || 0,
+        createdAt: item.createdAt || '',
+        updatedAt: item.updatedAt || '',
+      })).filter(Boolean);
+
+      setInventory(validatedInventory);
+    } catch (err) {
+      console.error('Failed to fetch inventory:', err);
+      setError(err.message);
+      setInventory([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getToken = () => {
+    return typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  };
+
+  const handleDelete = async (id) => {
+    if (!id || !window.confirm('Are you sure you want to delete this inventory item?')) return;
+
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`/api/pharmacy/inventory?id=${id}`, {
         method: 'DELETE',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        throw new Error(errorData.error || `Failed to delete item: ${response.status}`);
       }
 
-      if (onInventoryItemDeleted) {
-        onInventoryItemDeleted(selectedItem);
-      } else {
-        router.refresh();
-      }
+      setInventory((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
-      console.error('Error deleting inventory item:', err);
-      alert('Failed to delete inventory item: ' + err.message);
-    } finally {
-      setDeleteLoading(false);
-      handleMenuClose();
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (!selectedRows.length) return;
-
-    setDeleteLoading(true);
-    try {
-      const token = getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      await Promise.all(
-        selectedRows.map((id) =>
-          fetch(`/api/pharmacy/inventory?id=${id}`, {
-            method: 'DELETE',
-            headers: { 
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-          })
-        )
-      );
-
-      if (onInventoryItemDeleted) {
-        selectedRows.forEach((id) => onInventoryItemDeleted(id));
-      } else {
-        router.refresh();
-      }
-      setSelectedRows([]);
-    } catch (err) {
-      console.error('Error deleting inventory items:', err);
-      alert('Failed to delete inventory items: ' + err.message);
-    } finally {
-      setDeleteLoading(false);
+      console.error('Failed to delete inventory item:', err);
+      alert(`Failed to delete item: ${err.message}`);
     }
   };
 
   const getStockStatus = (quantity, expiryDate) => {
-    const isExpired = new Date(expiryDate) < new Date();
-    if (isExpired) {
-      return <Chip label="Expired" className="badge-error" />;
-    }
-    if (quantity <= 10) {
-      return <Chip label="Low Stock" className="badge-warning" />;
-    }
-    return <Chip label="In Stock" className="badge-success" />;
+    const isExpired = expiryDate && new Date(expiryDate) < new Date();
+    if (isExpired) return <span className="badge badge-error">Expired</span>;
+    if (quantity <= 10) return <span className="badge badge-warning">Low Stock</span>;
+    return <span className="badge badge-success">In Stock</span>;
   };
 
   const columns = [
@@ -132,79 +101,66 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
       field: 'drugName',
       headerName: 'Drug',
       width: 200,
-      renderCell: (params) => params.row.drug?.name || 'N/A',
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
       sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) => params.row.drug?.name || '-',
     },
     {
       field: 'batchNumber',
       headerName: 'Batch Number',
       width: 150,
-      renderCell: (params) => params.row.batchNumber || 'N/A',
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
       sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
     },
     {
       field: 'expiryDate',
       headerName: 'Expiry Date',
       width: 150,
-      renderCell: (params) => {
-        try {
-          return params.row.expiryDate ? format(new Date(params.row.expiryDate), 'PP') : 'N/A';
-        } catch (error) {
-          console.error('Date formatting error:', error);
-          return 'Invalid Date';
-        }
-      },
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
       sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) =>
+        params.row.expiryDate ? format(new Date(params.row.expiryDate), 'PP') : '-',
     },
     {
       field: 'quantity',
       headerName: 'Quantity',
       width: 100,
       type: 'number',
-      renderCell: (params) => params.row.quantity || 0,
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
       sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+    },
+    {
+      field: 'unitPrice',
+      headerName: 'Unit Price',
+      width: 120,
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) =>
+        params.row.unitPrice ? `$${params.row.unitPrice.toFixed(2)}` : '-',
     },
     {
       field: 'status',
       headerName: 'Status',
       width: 150,
-      renderCell: (params) => getStockStatus(params.row.quantity, params.row.expiryDate),
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
       sortable: false,
-    },
-    {
-      field: 'createdAt',
-      headerName: 'Created At',
-      width: 180,
-      renderCell: (params) => {
-        try {
-          return params.row.createdAt ? format(new Date(params.row.createdAt), 'PPp') : 'N/A';
-        } catch (error) {
-          console.error('Date formatting error:', error);
-          return 'Invalid Date';
-        }
-      },
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
-      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) => getStockStatus(params.row.quantity, params.row.expiryDate),
     },
     {
       field: 'updatedAt',
       headerName: 'Updated At',
       width: 180,
-      renderCell: (params) => {
-        try {
-          return params.row.updatedAt ? format(new Date(params.row.updatedAt), 'PPp') : 'N/A';
-        } catch (error) {
-          console.error('Date formatting error:', error);
-          return 'Invalid Date';
-        }
-      },
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
       sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) =>
+        params.row.updatedAt ? format(new Date(params.row.updatedAt), 'PPp') : '-',
     },
     {
       field: 'actions',
@@ -212,141 +168,95 @@ export default function InventoryTable({ inventory = [], loading, onInventoryIte
       width: 150,
       sortable: false,
       filterable: false,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
       renderCell: (params) => (
-        <Box className="flex gap-2">
-          <Link href={`/inventory/${params.row.id}`}>
-            <IconButton className="btn-outline" size="small" title="View Details">
-              <Eye className="h-4 w-4" />
-            </IconButton>
-          </Link>
-          <Link href={`/inventory/${params.row.id}/edit`}>
-            <IconButton className="btn-outline" size="small" title="Edit">
-              <Edit className="h-4 w-4" />
-            </IconButton>
-          </Link>
-          <IconButton
-            className="btn-outline"
-            size="small"
-            onClick={(e) => handleMenuClick(e, params.row.id)}
-            title="More Options"
+        <div className="flex gap-1">
+          <button
+            className="btn btn-outline !p-2"
+            onClick={() => router.push(`/pharmacy/inventory/${params.row.id}`)}
+            title="View Item"
           >
-            <MoreHorizontal className="h-4 w-4" />
-          </IconButton>
-        </Box>
+            <Eye className="w-4 h-4" />
+          </button>
+          <button
+            className="btn btn-outline !p-2"
+            onClick={() => router.push(`/pharmacy/inventory/new?id=${params.row.id}`)}
+            title="Edit Item"
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            className="btn btn-outline !p-2 text-[var(--hospital-error)] border-[var(--hospital-error)] hover:bg-[var(--hospital-error)] hover:text-[var(--hospital-white)]"
+            onClick={() => handleDelete(params.row.id)}
+            title="Delete Item"
+          >
+            <Delete className="w-4 h-4" />
+          </button>
+        </div>
       ),
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
     },
   ];
 
-  const rows = filteredInventory.map((item) => ({
-    id: item.id,
-    drug: item.drug,
-    batchNumber: item.batchNumber,
-    expiryDate: item.expiryDate,
-    quantity: item.quantity,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
-  }));
-
   return (
-    <div className="card w-full max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Pharmacy Inventory</h2>
-        <Box className="flex gap-2">
-          <TextField
-            placeholder="Search by drug or batch number"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search className="h-4 w-4 text-[var(--hospital-gray-500)]" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ width: 300 }}
+    <div className="card p-2 max-w-[1280px] mx-auto mobile-full-width">
+      <div className="flex justify-between items-center mb-3">
+        <h1 className="card-title">Pharmacy Inventory</h1>
+        <button
+          className="btn btn-primary"
+          onClick={() => router.push('/pharmacy/inventory/new')}
+        >
+          <Add className="w-5 h-5" />
+          New Item
+        </button>
+      </div>
+
+      <div className="mb-3 max-w-md">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--hospital-gray-400)]" />
+          <input
+            type="text"
+            placeholder="Search by drug or batch number..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input pl-10 w-full"
           />
-          {selectedRows.length > 0 && (
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={handleBulkDelete}
-              disabled={deleteLoading}
-              startIcon={<Trash2 className="h-4 w-4" />}
-            >
-              {deleteLoading ? 'Deleting...' : `Delete ${selectedRows.length} items`}
-            </Button>
-          )}
-        </Box>
+        </div>
       </div>
-      <div style={{ height: 600, width: '100%' }} className="overflow-x-auto custom-scrollbar">
-        <DataGrid
-          rows={loading ? [] : rows}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-          }}
-          pageSizeOptions={[10, 20, 50]}
-          loading={loading}
-          checkboxSelection
-          onRowSelectionModelChange={(newSelection) => setSelectedRows(newSelection)}
-          disableRowSelectionOnClick
-          autoHeight={false}
-          sx={{
-            '& .MuiDataGrid-root': {
-              border: 'none',
-              backgroundColor: 'var(--hospital-white)',
-              borderRadius: '0.5rem',
-              boxShadow: 'var(--shadow-sm)',
-            },
-            '& .MuiDataGrid-cell': {
-              borderTop: '1px solid var(--hospital-gray-200)',
-              color: 'var(--hospital-gray-900)',
-              padding: '0.75rem 1.5rem',
-            },
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: 'var(--hospital-gray-50)',
-            },
-            '& .MuiDataGrid-row:hover': {
-              backgroundColor: 'var(--hospital-gray-50)',
-            },
-            '& .MuiDataGrid-footerContainer': {
-              backgroundColor: 'var(--hospital-gray-50)',
-              borderTop: '1px solid var(--hospital-gray-200)',
-            },
-            '& .MuiDataGrid-overlay': {
-              backgroundColor: 'var(--hospital-white)',
-            },
-          }}
-          slots={{
-            noRowsOverlay: () => (
-              <Box className="flex justify-center items-center h-full text-[var(--hospital-gray-500)]">
-                {loading ? (
-                  <div className="loading-spinner"></div>
-                ) : (
-                  'No inventory items found'
-                )}
-              </Box>
-            ),
-          }}
-        />
+
+      {error && (
+        <div className="alert alert-error mb-3">
+          <span>Error: {error}</span>
+          <button className="btn btn-outline" onClick={fetchInventory}>
+            Retry
+          </button>
+        </div>
+      )}
+
+      <div className="table w-full">
+        {loading ? (
+          <div className="flex justify-center p-4">
+            <div className="loading-spinner" />
+          </div>
+        ) : (
+          <DataGrid
+            rows={inventory}
+            columns={columns}
+            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+            pageSizeOptions={[10, 25, 50]}
+            autoHeight
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+            classes={{
+              root: 'table',
+              columnHeaders: 'bg-[var(--hospital-gray-50)]',
+              row: 'hover:bg-[var(--hospital-gray-50)]',
+              cell: 'py-2',
+            }}
+            localeText={{ noRowsLabel: 'No inventory items found' }}
+          />
+        )}
       </div>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        className="dropdown-menu"
-      >
-        <MenuItem onClick={handleDelete} className="dropdown-item" disabled={deleteLoading}>
-          <Trash2 className="h-4 w-4 mr-2" />
-          {deleteLoading ? 'Deleting...' : 'Delete'}
-        </MenuItem>
-      </Menu>
     </div>
   );
 }
