@@ -1,23 +1,45 @@
 import { PrismaClient } from '@prisma/client';
-import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const fixedAssets = await prisma.fixedAsset.findMany();
-    return NextResponse.json(fixedAssets);
+    const assets = await prisma.fixedAsset.findMany({
+      include: {
+        depreciationSchedules: true,
+        assetAudits: true,
+      },
+    });
+    return new Response(JSON.stringify(assets), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch fixed assets' }, { status: 500 });
+    return new Response(JSON.stringify({ error: 'Failed to fetch assets' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
 export async function POST(request) {
   try {
     const data = await request.json();
-    const fixedAsset = await prisma.fixedAsset.create({ data });
-    return NextResponse.json(fixedAsset, { status: 201 });
+    const asset = await prisma.fixedAsset.create({
+      data: {
+        name: data.name,
+        purchaseDate: new Date(data.purchaseDate),
+        cost: parseFloat(data.cost),
+      },
+    });
+    return new Response(JSON.stringify(asset), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create fixed asset' }, { status: 500 });
+    return new Response(JSON.stringify({ error: 'Failed to create asset' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
