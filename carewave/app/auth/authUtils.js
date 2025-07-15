@@ -1,6 +1,8 @@
+"use client";
+
+import React, { useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 export const isAuthenticated = (token) => {
   if (!token) return false;
