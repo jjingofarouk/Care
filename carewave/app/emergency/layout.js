@@ -14,12 +14,12 @@ export default function EmergencyLayout({ children }) {
   ];
 
   return (
-    <div className="min-h-screen bg-hospital-gray-50">
+    <div className="min-h-screen bg-hospital-gray-50 p-0">
       <nav className="bg-hospital-white border-b border-hospital-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex space-x-4">
-              {tabs.map((tab) => (
+              {tabs.map((tab, index) => (
                 <Link
                   key={tab.name}
                   href={tab.href}
@@ -28,8 +28,9 @@ export default function EmergencyLayout({ children }) {
                       ? 'bg-hospital-accent text-hospital-white'
                       : 'text-hospital-gray-600 hover:bg-hospital-gray-100'
                   }`}
+                  style={{ zIndex: tabs.length - index }}
                 >
-                  {tab.name}
+                  <span className="relative z-10">{tab.name}</span>
                 </Link>
               ))}
             </div>
