@@ -1,109 +1,46 @@
+// app/medical-records/layout.jsx
 'use client';
-import React, { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Tabs, Tab, Box } from '@mui/material';
 
-const MedicalRecordLayout = ({ children }) => {
-  const router = useRouter();
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+export default function MedicalRecordLayout({ children }) {
   const pathname = usePathname();
-  const [tabValue, setTabValue] = useState(() => {
-    if (pathname.includes('/medical-records/new')) return 1;
-    if (pathname.includes('/medical-records/analytics')) return 2;
-    if (pathname.includes('/patients/new')) return 3;
-    return 0;
-  });
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-    switch (newValue) {
-      case 0:
-        router.push('/medical-records');
-        break;
-      case 1:
-        router.push('/medical-records/new');
-        break;
-      case 2:
-        router.push('/medical-records/analytics');
-        break;
-      case 3:
-        router.push('/patients/new');
-        break;
-    }
-  };
+  const tabs = [
+    { name: 'Medical Records', href: '/medical-records' },
+    { name: 'New Medical Record', href: '/medical-records/new' },
+    { name: 'Analytics', href: '/medical-records/analytics' },
+    { name: 'New Patient', href: '/patients/new' },
+  ];
 
   return (
-    <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
-      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4">
-        <Box
-          className="card m-0 p-0"
-          sx={{
-            '& .MuiTabs-root': {
-              backgroundColor: 'var(--hospital-white)',
-              borderRadius: '0.5rem',
-              boxShadow: 'var(--shadow-sm)',
-              overflowX: 'auto',
-            },
-            '& .MuiTabs-flexContainer': {
-              flexWrap: 'nowrap',
-            },
-            '& .MuiTab-root': {
-              color: 'var(--hospital-gray-700)',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              padding: '0.25rem 0.75rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              transition: 'all var(--transition-normal)',
-              minWidth: '100px',
-              whiteSpace: 'nowrap',
-            },
-            '& .MuiTab-root.Mui-selected': {
-              color: 'var(--hospital-accent)',
-              backgroundColor: 'var(--hospital-gray-50)',
-              fontWeight: 600,
-            },
-            '& .MuiTabs-indicator': {
-              backgroundColor: 'var(--hospital-accent)',
-              height: '3px',
-              borderRadius: '3px 3px 0 0',
-            },
-            '& .MuiTabs-scroller': {
-              overflowX: 'auto !important',
-              '&::-webkit-scrollbar': {
-                height: '6px',
-              },
-              '&::-webkit-scrollbar-track': {
-                backgroundColor: 'var(--hospital-gray-50)',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                backgroundColor: 'var(--hospital-accent)',
-                borderRadius: '3px',
-              },
-              '&::-webkit-scrollbar-thumb:hover': {
-                backgroundColor: 'var(--hospital-accent-dark)',
-              },
-            },
-          }}
-        >
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            aria-label="medical record management tabs"
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-            className="custom-scrollbar"
-          >
-            <Tab label="Medical Records" className="btn" />
-            <Tab label="New Medical Record" className="btn" />
-            <Tab label="Analytics" className="btn" />
-            <Tab label="New Patient" className="btn" />
-          </Tabs>
-        </Box>
-        <div className="mt-2">{children}</div>
-      </div>
+    <div className="min-h-screen bg-hospital-gray-50 p-0">
+      <nav className="bg-hospital-white border-b border-hospital-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-10 overflow-x-auto">
+            <div className="flex space-x-4 whitespace-nowrap">
+              {tabs.map((tab, index) => (
+                <Link
+                  key={tab.name}
+                  href={tab.href}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200 ${
+                    pathname === tab.href
+                      ? 'bg-hospital-accent text-hospital-white'
+                      : 'text-hospital-gray-600 hover:bg-hospital-gray-100'
+                  }`}
+                  style={{ zIndex: tabs.length - index }}
+                >
+                  <span className="relative z-10">{tab.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </nav>
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {children}
+      </main>
     </div>
   );
-};
-
-export default MedicalRecordLayout;
+}
