@@ -4,7 +4,8 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, CheckCircle, Stethoscope, Users, Settings, LogIn } from 'lucide-react';
-import { useAuth } from '..//useAuth';
+import { useAuth } from '../useAuth';
+import { signIn } from 'next-auth/react';
 
 const roleCategories = {
   'Patient Care': [
@@ -28,7 +29,7 @@ const roleCategories = {
   'Support Staff': [
     { value: 'STAFF', label: 'Staff', description: 'General hospital staff' },
     { value: 'IT_SUPPORT', label: 'IT Support', description: 'Technical support' },
-    { value: 'CLEANING_STAFF', label: 'Cleaning Staff', description: 'Facility maintenance' },
+    { value: 'CLEANING_STAFF', label: “Cleaning Staff', description: 'Facility maintenance' },
     { value: 'SECURITY', label: 'Security', description: 'Security and safety' },
   ],
 };
@@ -93,13 +94,12 @@ export default function AuthPage() {
 
     try {
       await login(loginFormData);
-      router.push('/appointments');
     } catch (err) {
       setError(err.message === 'User already exists' ? 'Invalid credentials' : err.message);
     } finally {
       setIsSubmitting(false);
     }
-  }, [loginFormData, isLoginFormValid, isSubmitting, login, router]);
+  }, [loginFormData, isLoginFormValid, isSubmitting, login]);
 
   const handleRegisterSubmit = useCallback(async (e) => {
     e.preventDefault();
@@ -108,8 +108,26 @@ export default function AuthPage() {
     setError(null);
 
     try {
-      await login(registerFormData); // Use login to authenticate after registration
-      router.push('/appointments'); // Changed to /appointments for consistency
+      // Register user via custom API route
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registerFormData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Registration failed');
+      }
+
+      // Automatically sign in after registration
+      await signIn('credentials', {
+        email: registerFormData.email,
+        password: registerFormData.password,
+        redirect: false,
+      });
+
+      router.push('/appointments');
       setCurrentStep(1);
       setRegisterFormData({ email: '', password: '', firstName: '', lastName: '', role: 'PATIENT' });
     } catch (err) {
@@ -117,7 +135,7 @@ export default function AuthPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [registerFormData, currentStep, isStepValid, isSubmitting, login, router]);
+  }, [registerFormData, currentStep, isStepValid, isSubmitting, router]);
 
   const nextStep = useCallback(() => {
     if (isStepValid && currentStep < 3) {
@@ -265,7 +283,7 @@ export default function AuthPage() {
 
               <div className="text-center mt-6">
                 <p className="text-hospital-gray-600 text-sm">
-                  Don&apos;t have an account?{' '}
+                  Don't have an account?{' '}
                   <button
                     onClick={() => {
                       setIsLogin(false);
