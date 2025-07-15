@@ -6,7 +6,6 @@ import pharmacyService from '@/services/pharmacyService';
 export default function PharmacyHome() {
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPrescriptions = async () => {
@@ -16,7 +15,6 @@ export default function PharmacyHome() {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching prescriptions:', err);
-        setError(err.message);
         setLoading(false);
       }
     };
