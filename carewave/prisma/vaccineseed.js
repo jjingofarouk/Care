@@ -47,14 +47,68 @@ async function seed() {
     { id: 'Shigella', name: 'Shigella', description: 'Shigella vaccine (pipeline)' },
   ];
 
+  const schedules = [
+    { id: '10001', name: 'Childhood Schedule', description: 'Standard childhood immunization schedule' },
+    { id: '10002', name: 'Adult Schedule', description: 'Standard adult immunization schedule' },
+    { id: '10003', name: 'Travel Schedule', description: 'Immunization schedule for travelers' },
+  ];
+
+  function generateRandomDate(start, end) {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  }
+
+  function generateFiveDigitId() {
+    return Math.floor(10000 + Math.random() * 90000).toString();
+  }
+
   try {
+    // Seed vaccines
     await prisma.vaccine.createMany({
       data: vaccines,
       skipDuplicates: true,
     });
-    console.log('Vaccines seeded successfully');
+
+    // Seed immunization schedules
+    await prisma.immunizationSchedule.createMany({
+      data: schedules,
+      skipDuplicates: true,
+    });
+
+    // Fetch all patients
+    const patients = await prisma.patient.findMany();
+    if (patients.length < 2000) {
+      throw new Error('Not enough patients in the database');
+    }
+
+    // Randomly select 2000 patients
+    const selectedPatients = patients.sort(() => 0.5 - Math.random()).slice(0, 2000);
+
+    // Generate vaccination records
+    const vaccinationRecords = [];
+    for (const patient of selectedPatients) {
+      const numRecords = Math.floor(Math.random() * 3) + 1; // 1-3 records per patient
+      for (let i = 0; i < numRecords; i++) {
+        const vaccine = vaccines[Math.floor(Math.random() * vaccines.length)];
+        const schedule = schedules[Math.floor(Math.random() * schedules.length)];
+        vaccinationRecords.push({
+          id: generateFiveDigitId(),
+          patientId: patient.id,
+          vaccineId: vaccine.id,
+          immunizationScheduleId: schedule.id,
+          administeredDate: generateRandomDate(new Date('2020-01-01'), new Date('2025-07-16')),
+        });
+      }
+    }
+
+    // Seed vaccination records
+    await prisma.vaccinationRecord.createMany({
+      data: vaccinationRecords,
+      skipDuplicates: true,
+    });
+
+    console.log('Vaccines, schedules, and vaccination records seeded successfully');
   } catch (error) {
-    console.error('Error seeding vaccines:', error);
+    console.error('Error seeding data:', error);
   } finally {
     await prisma.$disconnect();
   }
