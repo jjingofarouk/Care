@@ -6,6 +6,7 @@ import { assetsService } from '../services/assetsService';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { PlusCircle, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function FixedAssetsPage() {
   const [assets, setAssets] = useState([]);
@@ -16,55 +17,108 @@ export default function FixedAssetsPage() {
     cost: '',
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchAssets();
   }, []);
 
   const fetchAssets = async () => {
-    setLoading(true);
-    const data = await assetsService.getAssets();
-    setAssets(data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await assetsService.getAssets();
+      setAssets(data);
+    } catch (err) {
+      console.error('Error fetching assets:', err);
+      setError('Failed to fetch assets');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
     setFormData({ name: '', purchaseDate: '', cost: '' });
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    await assetsService.createAsset(formData);
-    await fetchAssets();
-    handleClose();
-    setLoading(false);
+    try {
+      setLoading(true);
+      setError(null);
+      await assetsService.createAsset(formData);
+      await fetchAssets();
+      handleClose();
+    } catch (err) {
+      console.error('Error creating asset:', err);
+      setError('Failed to create asset');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (id) => {
-    setLoading(true);
-    await assetsService.deleteAsset(id);
-    await fetchAssets();
-    setLoading(false);
+    try {
+      setLoading(true);
+      setError(null);
+      await assetsService.deleteAsset(id);
+      await fetchAssets();
+    } catch (err) {
+      console.error('Error deleting asset:', err);
+      setError('Failed to delete asset');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewAsset = (id) => {
+    router.push(`/fixed-assets/${id}`);
   };
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 200 },
     { field: 'name', headerName: 'Asset Name', width: 200 },
-    { field: 'purchaseDate', headerName: 'Purchase Date', width: 150, type: 'date', valueGetter: ({ value }) => new Date(value) },
-    { field: 'cost', headerName: 'Cost', width: 150, type: 'number', valueFormatter: ({ value }) => `$${value.toFixed(2)}` },
+    { 
+      field: 'purchaseDate', 
+      headerName: 'Purchase Date', 
+      width: 150, 
+      type: 'date',
+      valueGetter: (params) => {
+        const value = params.row.purchaseDate;
+        return value ? new Date(value) : null;
+      }
+    },
+    { 
+      field: 'cost', 
+      headerName: 'Cost', 
+      width: 150, 
+      type: 'number',
+      valueFormatter: (params) => {
+        const value = params.value;
+        return value ? `$${Number(value).toFixed(2)}` : '$0.00';
+      }
+    },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 200,
+      sortable: false,
       renderCell: (params) => (
         <div className="flex gap-2">
-          <a href={`/fixed-assets/${params.row.id}`} className="btn btn-primary flex items-center gap-2">
+          <button 
+            onClick={() => handleViewAsset(params.row.id)} 
+            className="btn btn-primary flex items-center gap-2"
+          >
             View
-          </a>
-          <button onClick={() => handleDelete(params.row.id)} className="btn btn-danger flex items-center gap-2">
+          </button>
+          <button 
+            onClick={() => handleDelete(params.row.id)} 
+            className="btn btn-danger flex items-center gap-2"
+          >
             <Trash2 size={16} /> Delete
           </button>
         </div>
@@ -80,6 +134,12 @@ export default function FixedAssetsPage() {
         </h2>
       </div>
       <div className="p-2">
+        {error && (
+          <div className="alert alert-error mb-2">
+            {error}
+          </div>
+        )}
+        
         {loading ? (
           <Skeleton width={150} height={36} baseColor="#e5e7eb" highlightColor="#f3f4f6" className="mb-2" />
         ) : (
@@ -87,13 +147,24 @@ export default function FixedAssetsPage() {
             <PlusCircle size={16} /> Add Asset
           </button>
         )}
+        
         <div className="h-[400px] w-full">
           {loading ? (
             <Skeleton count={5} height={60} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
           ) : (
-            <DataGrid rows={assets} columns={columns} pageSize={5} />
+            <DataGrid 
+              rows={assets} 
+              columns={columns} 
+              pageSize={5}
+              disableSelectionOnClick
+              onError={(error) => {
+                console.error('DataGrid error:', error);
+                setError('Error in data grid');
+              }}
+            />
           )}
         </div>
+        
         {open && (
           <div className="fixed inset-0 bg-hospital-gray-900 bg-opacity-50 flex items-center justify-center">
             <div className="card max-w-md w-full mx-2 p-0">
@@ -103,6 +174,12 @@ export default function FixedAssetsPage() {
                 </h2>
               </div>
               <form onSubmit={handleSubmit} className="p-2 space-y-2">
+                {error && (
+                  <div className="alert alert-error">
+                    {error}
+                  </div>
+                )}
+                
                 {loading ? (
                   <>
                     <Skeleton height={40} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
@@ -117,6 +194,7 @@ export default function FixedAssetsPage() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="input w-full"
+                      required
                     />
                     <input
                       type="date"
@@ -124,6 +202,7 @@ export default function FixedAssetsPage() {
                       value={formData.purchaseDate}
                       onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
                       className="input w-full"
+                      required
                     />
                     <input
                       type="number"
@@ -131,6 +210,9 @@ export default function FixedAssetsPage() {
                       value={formData.cost}
                       onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
                       className="input w-full"
+                      min="0"
+                      step="0.01"
+                      required
                     />
                   </>
                 )}
