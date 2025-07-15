@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, CheckCircle, Stethoscope, Users, Settings, LogIn } from 'lucide-react';
-import { useAuth } from '../useAuth';
+import { useAuth } from '../../lib/useAuth';
 
 const roleCategories = {
   'Patient Care': [
@@ -109,7 +109,7 @@ export default function AuthPage() {
 
     try {
       await login(registerFormData); // Use login to authenticate after registration
-      router.push('/auth');
+      router.push('/appointments'); // Changed to /appointments for consistency
       setCurrentStep(1);
       setRegisterFormData({ email: '', password: '', firstName: '', lastName: '', role: 'PATIENT' });
     } catch (err) {
@@ -265,7 +265,7 @@ export default function AuthPage() {
 
               <div className="text-center mt-6">
                 <p className="text-hospital-gray-600 text-sm">
-                  Don't have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <button
                     onClick={() => {
                       setIsLogin(false);
