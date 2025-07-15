@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -10,15 +11,9 @@ export async function GET() {
         assetAudits: true,
       },
     });
-    return new Response(JSON.stringify(assets), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json(assets, { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Failed to fetch assets' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json({ error: 'Failed to fetch assets' }, { status: 500 });
   }
 }
 
@@ -32,14 +27,8 @@ export async function POST(request) {
         cost: parseFloat(data.cost),
       },
     });
-    return new Response(JSON.stringify(asset), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json(asset, { status: 201 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Failed to create asset' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json({ error: 'Failed to create asset' }, { status: 500 });
   }
 }
