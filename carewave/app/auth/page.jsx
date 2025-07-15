@@ -280,7 +280,7 @@ export default function AuthPage() {
                     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
                   </div>
                   <p className="text-slate-400 mb-4">
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <button
                       onClick={() => setIsLogin(false)}
                       className="text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-200"
