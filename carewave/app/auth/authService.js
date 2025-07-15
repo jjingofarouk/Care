@@ -1,6 +1,7 @@
+// authService.js
 import { API_ROUTES, BASE_URL } from '../api';
 
-export async function login({ email, password }) {
+export async function login({ email, password, rememberMe }) {
   const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}`, {
     method: 'POST',
     headers: {
@@ -12,8 +13,9 @@ export async function login({ email, password }) {
   if (!response.ok) throw new Error('Login failed');
 
   const data = await response.json();
-  localStorage.setItem('token', data.token);
-  localStorage.setItem('user', JSON.stringify(data.user));
+  const storage = rememberMe ? localStorage : sessionStorage;
+  storage.setItem('token', data.token);
+  storage.setItem('user', JSON.stringify(data.user));
   return data;
 }
 
@@ -34,4 +36,6 @@ export async function register({ email, password, firstName, lastName }) {
 export function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
 }
