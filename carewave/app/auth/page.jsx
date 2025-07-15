@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, CheckCircle, Stethoscope, Users, Settings, LogIn } from 'lucide-react';
-import { useAuth } from '../../lib/useAuth';
+import { useAuth } from '..//useAuth';
 
 const roleCategories = {
   'Patient Care': [
