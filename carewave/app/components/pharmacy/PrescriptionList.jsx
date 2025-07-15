@@ -1,116 +1,89 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { IconButton, Menu, MenuItem, Box } from '@mui/material';
-import { Edit, Trash2, MoreHorizontal } from 'lucide-react';
-import Link from 'next/link';
+import { Search, Add, Edit, Delete, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
-export default function PrescriptionList({ 
-  prescriptions: initialPrescriptions = [], 
-  loading: initialLoading = false, 
-  onPrescriptionDeleted 
-}) {
+export default function PrescriptionList() {
   const router = useRouter();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedPrescription, setSelectedPrescription] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [prescriptions, setPrescriptions] = useState(initialPrescriptions);
-  const [loading, setLoading] = useState(initialLoading);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!initialPrescriptions || initialPrescriptions.length === 0) {
-      fetchPrescriptions();
-    }
-  }, []);
+    fetchPrescriptions();
+  }, [search]);
 
   const fetchPrescriptions = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      
       const token = getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('/api/pharmacy/prescriptions', {
-        method: 'GET',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
+      const response = await fetch(`/api/pharmacy/prescriptions?search=${encodeURIComponent(search)}`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`Failed to fetch prescriptions: ${response.status}`);
       }
 
       const data = await response.json();
-      setPrescriptions(data);
+      if (!Array.isArray(data)) {
+        throw new Error('API response is not an array');
+      }
+
+      const validatedPrescriptions = data.map((prescription) => ({
+        id: prescription.id || '',
+        patient: prescription.patient || { name: '' },
+        doctor: prescription.doctor || { name: '' },
+        drug: prescription.drug || { name: '' },
+        dosage: prescription.dosage || '',
+        prescribedAt: prescription.prescribedAt || '',
+      })).filter(Boolean);
+
+      setPrescriptions(validatedPrescriptions);
     } catch (err) {
-      console.error('Error fetching prescriptions:', err);
+      console.error('Failed to fetch prescriptions:', err);
       setError(err.message);
+      setPrescriptions([]);
     } finally {
       setLoading(false);
     }
   };
 
   const getToken = () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('token');
-    }
-    return null;
+    return typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   };
 
-  const handleMenuClick = (event, id) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedPrescription(id);
-  };
+  const handleDelete = async (id) => {
+    if (!id || !window.confirm('Are you sure you want to delete this prescription?')) return;
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedPrescription(null);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedPrescription) return;
-
-    setDeleteLoading(true);
     try {
       const token = getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`/api/pharmacy/prescriptions?id=${selectedPrescription}`, {
+      const response = await fetch(`/api/pharmacy/prescriptions?id=${id}`, {
         method: 'DELETE',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        throw new Error(errorData.error || `Failed to delete prescription: ${response.status}`);
       }
 
-      setPrescriptions(prev => prev.filter(p => p.id !== selectedPrescription));
-
-      if (onPrescriptionDeleted) {
-        onPrescriptionDeleted(selectedPrescription);
-      } else {
-        router.refresh();
-      }
+      setPrescriptions((prev) => prev.filter((prescription) => prescription.id !== id));
     } catch (err) {
-      console.error('Error deleting prescription:', err);
-      alert('Failed to delete prescription: ' + err.message);
-    } finally {
-      setDeleteLoading(false);
-      handleMenuClose();
+      console.error('Failed to delete prescription:', err);
+      alert(`Failed to delete prescription: ${err.message}`);
     }
   };
 
@@ -119,161 +92,142 @@ export default function PrescriptionList({
       field: 'patientName',
       headerName: 'Patient',
       width: 200,
-      renderCell: (params) => params.row.patient?.name || 'N/A',
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) => params.row.patient?.name || '-',
     },
     {
       field: 'doctorName',
       headerName: 'Doctor',
       width: 200,
-      renderCell: (params) => params.row.doctor?.name ? `Dr. ${params.row.doctor.name}` : 'N/A',
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) => params.row.doctor?.name ? `Dr. ${params.row.doctor.name}` : '-',
     },
     {
       field: 'drugName',
       headerName: 'Drug',
       width: 150,
-      renderCell: (params) => params.row.drug?.name || 'N/A',
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) => params.row.drug?.name || '-',
     },
     {
       field: 'dosage',
       headerName: 'Dosage',
       width: 150,
-      renderCell: (params) => params.row.dosage || 'N/A',
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
     },
     {
       field: 'prescribedAt',
       headerName: 'Prescribed At',
       width: 180,
-      renderCell: (params) => {
-        try {
-          return params.row.prescribedAt ? 
-            format(new Date(params.row.prescribedAt), 'PPp') : 
-            'N/A';
-        } catch (error) {
-          console.error('Date formatting error:', error);
-          return 'Invalid Date';
-        }
-      },
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
+      sortable: true,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      renderCell: (params) =>
+        params.row.prescribedAt ? format(new Date(params.row.prescribedAt), 'PPp') : '-',
     },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 120,
+      width: 150,
       sortable: false,
       filterable: false,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
       renderCell: (params) => (
-        <Box className="flex gap-2">
-          <Link href={`/pharmacy/prescriptions/new?id=${params.row.id}`}>
-            <IconButton className="btn-outline" size="small">
-              <Edit className="h-4 w-4" />
-            </IconButton>
-          </Link>
-          <IconButton 
-            className="btn-outline" 
-            size="small"
-            onClick={(e) => handleMenuClick(e, params.row.id)}
+        <div className="flex gap-1">
+          <button
+            className="btn btn-outline !p-2"
+            onClick={() => router.push(`/pharmacy/prescriptions/${params.row.id}`)}
+            title="View Prescription"
           >
-            <MoreHorizontal className="h-4 w-4" />
-          </IconButton>
-        </Box>
+            <Eye className="w-4 h-4" />
+          </button>
+          <button
+            className="btn btn-outline !p-2"
+            onClick={() => router.push(`/pharmacy/prescriptions/new?id=${params.row.id}`)}
+            title="Edit Prescription"
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            className="btn btn-outline !p-2 text-[var(--hospital-error)] border-[var(--hospital-error)] hover:bg-[var(--hospital-error)] hover:text-[var(--hospital-white)]"
+            onClick={() => handleDelete(params.row.id)}
+            title="Delete Prescription"
+          >
+            <Delete className="w-4 h-4" />
+          </button>
+        </div>
       ),
-      headerClassName: 'font-semibold text-[var(--hospital-gray-500)] uppercase tracking-wider bg-[var(--hospital-gray-50)]',
     },
   ];
 
-  if (error) {
-    return (
-      <div className="card max-w-[1280px] mx-auto p-2">
-        <div className="text-center">
-          <div className="text-[var(--hospital-error)] mb-2">Error loading prescriptions</div>
-          <div className="text-sm text-[var(--hospital-gray-600)]">{error}</div>
-          <button 
-            onClick={fetchPrescriptions}
-            className="btn btn-primary mt-4"
-          >
+  return (
+    <div className="card p-2 max-w-[1280px] mx-auto mobile-full-width">
+      <div className="flex justify-between items-center mb-3">
+        <h1 className="card-title">Prescriptions</h1>
+        <button
+          className="btn btn-primary"
+          onClick={() => router.push('/pharmacy/prescriptions/new')}
+        >
+          <Add className="w-5 h-5" />
+          New Prescription
+        </button>
+      </div>
+
+      <div className="mb-3 max-w-md">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--hospital-gray-400)]" />
+          <input
+            type="text"
+            placeholder="Search by patient or drug..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input pl-10 w-full"
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="alert alert-error mb-3">
+          <span>Error: {error}</span>
+          <button className="btn btn-outline" onClick={fetchPrescriptions}>
             Retry
           </button>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  return (
-    <div className="card max-w-[1280px] mx-auto p-2">
-      <div className="overflow-x-auto custom-scrollbar">
-        <DataGrid
-          rows={loading ? [] : prescriptions}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-          }}
-          pageSizeOptions={[10, 20, 50]}
-          loading={loading}
-          disableRowSelectionOnClick
-          autoHeight={false}
-          sx={{
-            '& .MuiDataGrid-root': {
-              border: 'none',
-              backgroundColor: 'var(--hospital-white)',
-              borderRadius: '0.5rem',
-              boxShadow: 'var(--shadow-sm)',
-            },
-            '& .MuiDataGrid-cell': {
-              borderTop: '1px solid var(--hospital-gray-200)',
-              color: 'var(--text-primary)',
-              padding: '0.75rem 1.5rem',
-            },
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: 'var(--hospital-gray-50)',
-            },
-            '& .MuiDataGrid-row:hover': {
-              backgroundColor: 'var(--hospital-gray-50)',
-            },
-            '& .MuiDataGrid-footerContainer': {
-              backgroundColor: 'var(--hospital-gray-50)',
-              borderTop: '1px solid var(--hospital-gray-200)',
-            },
-            '& .MuiDataGrid-overlay': {
-              backgroundColor: 'var(--hospital-white)',
-            },
-          }}
-          slots={{
-            noRowsOverlay: () => (
-              <Box className="flex justify-center items-center h-full text-[var(--hospital-gray-500)]">
-                {loading ? (
-                  <div className="loading-spinner"></div>
-                ) : (
-                  'No prescriptions found'
-                )}
-              </Box>
-            ),
-          }}
-        />
+      <div className="table w-full">
+        {loading ? (
+          <div className="flex justify-center p-4">
+            <div className="loading-spinner" />
+          </div>
+        ) : (
+          <DataGrid
+            rows={prescriptions}
+            columns={columns}
+            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+            pageSizeOptions={[10, 25, 50]}
+            autoHeight
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+            classes={{
+              root: 'table',
+              columnHeaders: 'bg-[var(--hospital-gray-50)]',
+              row: 'hover:bg-[var(--hospital-gray-50)]',
+              cell: 'py-2',
+            }}
+            localeText={{ noRowsLabel: 'No prescriptions found' }}
+          />
+        )}
       </div>
-      
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        className="dropdown-menu"
-      >
-        <MenuItem 
-          onClick={handleDelete} 
-          className="dropdown-item"
-          disabled={deleteLoading}
-        >
-          <Trash2 className="h-4 w-4 mr-2" /> 
-          {deleteLoading ? 'Deleting...' : 'Delete'}
-        </MenuItem>
-      </Menu>
     </div>
   );
 }
