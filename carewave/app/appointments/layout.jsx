@@ -1,79 +1,47 @@
+// app/appointments/layout.jsx
 'use client';
-import React, { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Tabs, Tab, Box } from '@mui/material';
+
+import React from 'react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Calendar, FileText, Clock } from 'lucide-react';
 
-const AppointmentsLayout = ({ children }) => {
-  const router = useRouter();
+export default function AppointmentsLayout({ children }) {
   const pathname = usePathname();
-  const [tabValue, setTabValue] = useState(() => {
-    if (pathname.includes('/appointments/visit-types')) return 1;
-    if (pathname.includes('/appointments/history')) return 2;
-    return 0;
-  });
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-    switch (newValue) {
-      case 0:
-        router.push('/appointments');
-        break;
-      case 1:
-        router.push('/appointments/visit-types');
-        break;
-      case 2:
-        router.push('/appointments/history');
-        break;
-    }
-  };
+  const tabs = [
+    { name: 'Appointments', href: '/appointments', icon: Calendar },
+    { name: 'Visit Types', href: '/appointments/visit-types', icon: FileText },
+    { name: 'Status History', href: '/appointments/history', icon: Clock },
+  ];
 
   return (
-    <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
-      <div className="mx-auto w-full max-w-[1920px] px-2 sm:px-4">
-        <Box className="mb-2">
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            aria-label="appointment management tabs"
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-            className="card rounded-lg overflow-x-auto custom-scrollbar"
-          >
-            <Tab 
-              label={
-                <span className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Appointments
-                </span>
-              }
-              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
-            />
-            <Tab 
-              label={
-                <span className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Visit Types
-                </span>
-              }
-              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
-            />
-            <Tab 
-              label={
-                <span className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Status History
-                </span>
-              }
-              className="text-[var(--hospital-gray-700)] font-medium text-sm uppercase tracking-wide px-3 py-2 transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
-            />
-          </Tabs>
-        </Box>
+    <div className="min-h-screen bg-hospital-gray-50 p-0">
+      <nav className="bg-hospital-white border-b border-hospital-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-10 overflow-x-auto">
+            <div className="flex space-x-4 whitespace-nowrap">
+              {tabs.map((tab, index) => (
+                <Link
+                  key={tab.name}
+                  href={tab.href}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200 flex items-center gap-2 ${
+                    pathname === tab.href
+                      ? 'bg-hospital-accent text-hospital-white'
+                      : 'text-hospital-gray-600 hover:bg-hospital-gray-100'
+                  }`}
+                  style={{ zIndex: tabs.length - index }}
+                >
+                  <tab.icon className="h-4 w-4" />
+                  <span className="relative z-10">{tab.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </nav>
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {children}
-      </div>
+      </main>
     </div>
   );
-};
-
-export default AppointmentsLayout;
+}
