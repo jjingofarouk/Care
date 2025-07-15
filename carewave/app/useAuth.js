@@ -1,76 +1,149 @@
+// /lib/hooks/useAuth.js
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
-import { login, logout, refreshToken } from './auth/authService';
+import { getUser, isAuthenticated, hasValidSession, getToken, getRefreshToken } from './auth/authUtils';
+import { login, logout, logoutAllDevices, refreshAccessToken, setupTokenRefresh } from './auth/authService';
 
-export const useAuth = () => {
+const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
 
-  const isAuthenticated = (token) => {
-    if (!token) return false;
-    try {
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      return decoded.exp > currentTime;
-    } catch {
-      return false;
-    }
-  };
-
-  const getUser = () => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
-  };
-
   const refreshUser = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    
     setLoading(true);
-    const storedUser = getUser();
-    const accessToken = localStorage.getItem('accessToken');
-
-    if (storedUser && isAuthenticated(accessToken)) {
-      setUser(storedUser);
-      setLoading(false);
-      return;
-    }
-
+    
     try {
-      const { user } = await refreshToken();
-      setUser(user);
+      const token = getToken();
+      const refreshToken = getRefreshToken();
+      
+      if (!hasValidSession()) {
+        setUser(null);
+        await logout();
+        setLoading(false);
+        setIsInitialized(true);
+        return;
+      }
+      
+      if (!isAuthenticated(token) && refreshToken) {
+        try {
+          await refreshAccessToken();
+        } catch (error) {
+          console.error('Token refresh failed:', error);
+          setUser(null);
+          await logout();
+          setLoading(false);
+          setIsInitialized(true);
+          return;
+        }
+      }
+      
+      const storedUser = getUser();
+      setUser(storedUser);
+      
+      setupTokenRefresh();
+      
     } catch (error) {
+      console.error('Error refreshing user:', error);
       setUser(null);
       await logout();
-      router.push('/auth');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
+    setIsInitialized(true);
   }, [router]);
 
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    if (!isInitialized) {
+      refreshUser();
+    }
+  }, [refreshUser, isInitialized]);
 
   const handleLogin = async (credentials) => {
     try {
+      setLoading(true);
       const { user } = await login(credentials);
       setUser(user);
-      router.push('/appointments');
+      
+      switch (user.role) {
+        case 'ADMIN':
+        case 'HOSPITAL_MANAGER':
+          router.push('/dashboard');
+          break;
+        case 'DOCTOR':
+        case 'NURSE':
+          router.push('/patients');
+          break;
+        case 'RECEPTIONIST':
+          router.push('/appointments');
+          break;
+        default:
+          router.push('/appointment');
+      }
+      
       return user;
     } catch (error) {
       throw new Error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogout = async () => {
-    await logout();
-    setUser(null);
-    router.push('/auth');
+    try {
+      setLoading(true);
+      await logout();
+      setUser(null);
+      router.push('/auth');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return { user, loading, login: handleLogin, logout: handleLogout, refreshUser };
+  const handleLogoutAllDevices = async () => {
+    try {
+      setLoading(true);
+      await logoutAllDevices();
+      setUser(null);
+      router.push('/auth');
+    } catch (error) {
+      console.error('Logout all devices error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasRole = (requiredRole) => {
+    return user?.role === requiredRole;
+  };
+
+  const hasAnyRole = (requiredRoles) => {
+    return user?.role && requiredRoles.includes(user.role);
+  };
+
+  const isUserAuthenticated = () => {
+    return !!user && hasValidSession();
+  };
+
+  return {
+    user,
+    loading,
+    isInitialized,
+    login: handleLogin,
+    logout: handleLogout,
+    logoutAllDevices: handleLogoutAllDevices,
+    refreshUser,
+    hasValidSession: hasValidSession(),
+    isAuthenticated: isUserAuthenticated(),
+    hasRole,
+    hasAnyRole,
+  };
 };
 
 export default useAuth;
