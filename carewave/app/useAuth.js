@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { login, logout, refreshToken } from './auth/authService';
+import { jwtDecode } from 'jwt-decode';
+import { login, logout, refreshToken } from './authService';
 
-const useAuth = () => {
+export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
