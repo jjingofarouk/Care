@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../lib/useAuth';
+import { useAuth } from '../useAuth';
 
 export default function AuthLayout({ children }) {
   const { user, loading } = useAuth();
