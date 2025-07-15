@@ -1,102 +1,49 @@
 "use client";
 
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useCallback } from 'react';
+import { getUser, isAuthenticated } from './auth/authUtils';
+import { login, logout } from './auth/authService';
 
 const useAuth = () => {
-  const { data: session, status } = useSession();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const user = session?.user || null;
-  const loading = status === 'loading';
-  const isInitialized = status !== 'loading';
-
-  const handleLogin = useCallback(async (credentials) => {
-    try {
-      const result = await signIn('credentials', {
-        ...credentials,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-      // Redirect based on role
-      if (result?.ok && user) {
-        switch (user.role) {
-          case 'ADMIN':
-          case 'HOSPITAL_MANAGER':
-            router.push('/dashboard');
-            break;
-          case 'DOCTOR':
-          case 'NURSE':
-            router.push('/patients');
-            break;
-          case 'RECEPTIONIST':
-            router.push('/appointments');
-            break;
-          default:
-            router.push('/appointment');
-        }
-      }
-
-      return user;
-    } catch (error) {
-      throw new Error(error.message);
+  const refreshUser = useCallback(async () => {
+    setLoading(true);
+    const storedUser = getUser();
+    if (storedUser && isAuthenticated()) {
+      setUser(storedUser);
+    } else {
+      setUser(null);
+      await logout();
     }
-  }, [user, router]);
-
-  const handleLogout = useCallback(async () => {
-    try {
-      await signOut({ redirect: false });
-      router.push('/auth');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  }, [router]);
-
-  const handleLogoutAllDevices = useCallback(async () => {
-    try {
-      await signOut({ redirect: false });
-      router.push('/auth');
-    } catch (error)Inclusion of role-based logic in the session callback ensures that the user’s role is available for client-side routing and access control.
-      console.error('Logout all devices error:', error);
-    }
-  }, [router]);
-
-  const hasRole = useCallback((requiredRole) => {
-    return user?.role === requiredRole;
-  }, [user]);
-
-  const hasAnyRole = useCallback((requiredRoles) => {
-    return user?.role && requiredRoles.includes(user.role);
-  }, [user]);
-
-  const isUserAuthenticated = useCallback(() => {
-    return !!user && status === 'authenticated';
-  }, [user, status]);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    if (isInitialized && !loading && !user) {
-      router.push('/auth');
-    }
-  }, [isInitialized, loading, user, router]);
+    refreshUser();
+  }, [refreshUser]);
 
-  return {
-    user,
-    loading,
-    isInitialized,
-    login: handleLogin,
-    logout: handleLogout,
-    logoutAllDevices: handleLogoutAllDevices,
-    refreshUser: () => {}, // No-op since NextAuth.js handles session refresh
-    hasValidSession: isUserAuthenticated,
-    isAuthenticated: isUserAuthenticated,
-    hasRole,
-    hasAnyRole,
+  const handleLogin = async (credentials) => {
+    try {
+      const { user } = await login(credentials);
+      setUser(user);
+      router.push('/appointment');
+      return user;
+    } catch (error) {
+      throw new Error('Login failed');
+    }
   };
+
+  const handleLogout = async () => {
+    await logout();
+    setUser(null);
+    router.push('/auth/login');
+  };
+
+  return { user, loading, login: handleLogin, logout: handleLogout, refreshUser };
 };
 
 export default useAuth;
