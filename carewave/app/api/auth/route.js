@@ -1,3 +1,4 @@
+// /api/auth (POST)
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
@@ -5,7 +6,6 @@ import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
-// Handle POST requests for /api/auth (login)
 export async function POST(request) {
   try {
     const { email, password } = await request.json();
@@ -25,7 +25,7 @@ export async function POST(request) {
     const token = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '30d' }
     );
 
     return NextResponse.json({
