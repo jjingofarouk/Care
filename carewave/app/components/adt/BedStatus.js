@@ -1,15 +1,15 @@
-// app/components/adt/BedStatus.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, Button, Chip, Alert, CircularProgress } from '@mui/material';
+import { Box, Button, Chip, Alert } from '@mui/material';
+import { Loader } from 'lucide-react';
 import adtService from '../../services/adtService';
 
 export default function BedStatus({ wardId }) {
   const [beds, setBeds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [updating, setUpdating] = useState(null); // Track which bed is being updated
+  const [updating, setUpdating] = useState(null);
 
   useEffect(() => {
     fetchBeds();
@@ -33,7 +33,7 @@ export default function BedStatus({ wardId }) {
     try {
       setUpdating(bedId);
       await adtService.updateBedStatus(bedId, !isOccupied);
-      await fetchBeds(); // Refresh the data
+      await fetchBeds();
     } catch (error) {
       console.error('Error updating bed status:', error);
       setError('Failed to update bed status. Please try again.');
@@ -47,22 +47,25 @@ export default function BedStatus({ wardId }) {
       field: 'bedNumber', 
       headerName: 'Bed Number', 
       flex: 1,
+      minWidth: 100,
       valueGetter: (value, row) => row.bedNumber || 'N/A'
     },
     { 
       field: 'wardName', 
       headerName: 'Ward', 
       flex: 1,
+      minWidth: 120,
       valueGetter: (value, row) => row.wardName || row.ward?.name || 'N/A'
     },
     {
       field: 'isOccupied',
       headerName: 'Status',
       flex: 1,
+      minWidth: 100,
       renderCell: (params) => (
         <Chip
           label={params.value ? 'Occupied' : 'Available'}
-          color={params.value ? 'error' : 'success'}
+          className={params.value ? 'badge-error' : 'badge-success'}
           variant="outlined"
         />
       ),
@@ -71,6 +74,7 @@ export default function BedStatus({ wardId }) {
       field: 'patientName',
       headerName: 'Patient',
       flex: 1,
+      minWidth: 150,
       valueGetter: (value, row) => {
         if (!row.isOccupied) return 'N/A';
         if (row.patient?.name) return row.patient.name;
@@ -88,11 +92,11 @@ export default function BedStatus({ wardId }) {
       field: 'actions',
       headerName: 'Actions',
       flex: 1,
+      minWidth: 120,
       sortable: false,
       renderCell: (params) => (
         <Button
-          variant="outlined"
-          size="small"
+          className={`btn ${updating === params.row.id ? 'btn-secondary' : 'btn-outline'}`}
           onClick={() => handleToggleStatus(params.row.id, params.row.isOccupied)}
           disabled={updating === params.row.id}
         >
@@ -104,44 +108,43 @@ export default function BedStatus({ wardId }) {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-        <CircularProgress />
-      </Box>
+      <div className="card flex justify-center items-center h-48">
+        <Loader className="loading-spinner" />
+      </div>
     );
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <div className="card w-full">
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert className="alert alert-error mb-2">
           {error}
         </Alert>
       )}
       
-      <DataGrid
-        rows={beds}
-        columns={columns}
-        getRowId={(row) => row.id || `${row.bedNumber}-${row.wardName}`}
-        initialState={{
-          pagination: {
-            paginationModel: { page: 0, pageSize: 10 },
-          },
-        }}
-        pageSizeOptions={[10, 25, 50]}
-        autoHeight
-        disableRowSelectionOnClick
-        sx={{
-          '& .MuiDataGrid-cell': {
-            display: 'flex',
-            alignItems: 'center',
-          },
-          '& .MuiDataGrid-row': {
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
+      <div className="w-full overflow-x-auto custom-scrollbar">
+        <DataGrid
+          rows={beds}
+          columns={columns}
+          getRowId={(row) => row.id || `${row.bedNumber}-${row.wardName}`}
+          initialState={{
+            pagination: {
+              paginationModel: { page: 0, pageSize: 10 },
             },
-          },
-        }}
-      />
-    </Box>
+          }}
+          pageSizeOptions={[10, 25, 50]}
+          autoHeight
+          disableRowSelectionOnClick
+          className="table"
+          classes={{
+            root: 'bg-[var(--hospital-white)]',
+            columnHeaders: 'bg-[var(--hospital-gray-50)]',
+            columnHeader: 'text-[var(--hospital-gray-500)] uppercase tracking-wider',
+            cell: 'text-[var(--hospital-gray-900)] border-t border-[var(--hospital-gray-200)]',
+            row: 'hover:bg-[var(--hospital-gray-50)]',
+          }}
+        />
+      </div>
+    </div>
   );
 }
