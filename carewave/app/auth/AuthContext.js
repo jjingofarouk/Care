@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { user } = await login(credentials);
       setUser(user);
-      router.push('/appointment');
+      router.push('/appointments');
       return user;
     } catch (error) {
       throw new Error(error.message);
