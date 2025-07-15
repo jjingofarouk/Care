@@ -5,7 +5,7 @@ import { assetsService } from '../../services/assetsService';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DollarSign, Calendar, FileText } from 'lucide-react';
+import { DollarSign, FileText } from 'lucide-react';
 
 export default function AssetAnalyticsPage() {
   const [analytics, setAnalytics] = useState({
