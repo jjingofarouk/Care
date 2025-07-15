@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Search, Add, Edit, Delete, Eye } from 'lucide-react';
+import { Search, Plus, Edit, Delete, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
@@ -177,7 +177,7 @@ export default function PrescriptionList() {
           className="btn btn-primary"
           onClick={() => router.push('/pharmacy/prescriptions/new')}
         >
-          <Add className="w-5 h-5" />
+          <Plus className="w-5 h-5" />
           New Prescription
         </button>
       </div>
