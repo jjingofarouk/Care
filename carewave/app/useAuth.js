@@ -1,9 +1,8 @@
-"use client";
-
+// auth.js
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUser, isAuthenticated } from './auth/authUtils';
-import { login, logout } from './auth/authService';
+import { getUser, isAuthenticated } from './authUtils';
+import { login, logout } from './authService';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -20,17 +19,19 @@ const useAuth = () => {
       await logout();
     }
     setLoading(false);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     refreshUser();
+    const interval = setInterval(refreshUser, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, [refreshUser]);
 
   const handleLogin = async (credentials) => {
     try {
       const { user } = await login(credentials);
       setUser(user);
-      router.push('/appointment');
+      router.push('/appointments');
       return user;
     } catch (error) {
       throw new Error('Login failed');
@@ -40,7 +41,7 @@ const useAuth = () => {
   const handleLogout = async () => {
     await logout();
     setUser(null);
-    router.push('/auth/login');
+    router.push('/auth');
   };
 
   return { user, loading, login: handleLogin, logout: handleLogout, refreshUser };
