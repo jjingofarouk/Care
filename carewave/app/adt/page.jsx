@@ -1,9 +1,7 @@
-// app/adt/page.js
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Card, CardContent, Typography, Alert, CircularProgress } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { Hospital } from 'lucide-react';
+import { Hospital, Loader } from 'lucide-react';
 import AdmissionForm from '../components/adt/AdmissionForm';
 import DischargeForm from '../components/adt/DischargeForm';
 import TransferForm from '../components/adt/TransferForm';
@@ -42,8 +40,8 @@ export default function AdtPage() {
       field: 'patientName', 
       headerName: 'Patient', 
       flex: 1,
+      minWidth: 150,
       valueGetter: (value, row) => {
-        // Handle different possible data structures
         if (row.patient?.name) return row.patient.name;
         if (row.patient?.firstName && row.patient?.lastName) {
           return `${row.patient.firstName} ${row.patient.lastName}`;
@@ -55,18 +53,21 @@ export default function AdtPage() {
       field: 'wardName', 
       headerName: 'Ward', 
       flex: 1,
+      minWidth: 120,
       valueGetter: (value, row) => row.ward?.name || 'N/A'
     },
     { 
       field: 'bedNumber', 
       headerName: 'Bed', 
       flex: 1,
+      minWidth: 100,
       valueGetter: (value, row) => row.bed?.bedNumber || 'N/A'
     },
     {
       field: 'admissionDate',
       headerName: 'Admission Date',
       flex: 1,
+      minWidth: 120,
       valueGetter: (value, row) => {
         if (!row.admissionDate) return 'N/A';
         return new Date(row.admissionDate).toLocaleDateString();
@@ -76,6 +77,7 @@ export default function AdtPage() {
       field: 'emergency',
       headerName: 'Emergency',
       flex: 1,
+      minWidth: 100,
       valueGetter: (value, row) => {
         if (row.emergencyCases && row.emergencyCases.length > 0) {
           return row.emergencyCases[0].triage?.triageLevel || 'N/A';
@@ -87,81 +89,78 @@ export default function AdtPage() {
       field: 'actions',
       headerName: 'Actions',
       flex: 1,
+      minWidth: 200,
       sortable: false,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            size="small"
+        <div className="flex gap-2">
+          <button
+            className="btn btn-outline text-xs"
             onClick={() => {
               setSelectedAdmission(params.row);
               setOpenAdmissionForm(true);
             }}
           >
             Edit
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
+          </button>
+          <button
+            className="btn btn-outline text-xs"
             onClick={() => {
               setSelectedAdmission(params.row);
               setOpenDischargeForm(true);
             }}
           >
             Discharge
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
+          </button>
+          <button
+            className="btn btn-outline text-xs"
             onClick={() => {
               setSelectedAdmission(params.row);
               setOpenTransferForm(true);
             }}
           >
             Transfer
-          </Button>
-        </Box>
+          </button>
+        </div>
       ),
     },
   ];
 
   if (loading) {
     return (
-      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress />
-      </Box>
+      <div className="card flex justify-center items-center min-h-[50vh] p-3">
+        <Loader className="loading-spinner" />
+      </div>
     );
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        <Hospital size={24} style={{ verticalAlign: 'middle', marginRight: 8 }} />
-        Admissions
-      </Typography>
+    <div className="w-full p-2 sm:p-3">
+      <div className="flex items-center gap-2 mb-4">
+        <Hospital className="h-6 w-6 text-[var(--hospital-gray-900)]" />
+        <h1 className="card-title">Admissions</h1>
+      </div>
       
-      <Button
-        variant="contained"
+      <button
+        className="btn btn-primary mb-4"
         onClick={() => {
           setSelectedAdmission(null);
           setOpenAdmissionForm(true);
         }}
-        sx={{ mb: 2 }}
       >
         New Admission
-      </Button>
+      </button>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="alert alert-error mb-4">
           {error}
-        </Alert>
+        </div>
       )}
 
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Current Admissions
-          </Typography>
+      <div className="card mb-4">
+        <div className="card-header">
+          <h2 className="card-title">Current Admissions</h2>
+        </div>
+        <div className="w-full overflow-x-auto custom-scrollbar">
           <DataGrid
             rows={admissions}
             columns={columns}
@@ -174,24 +173,24 @@ export default function AdtPage() {
             pageSizeOptions={[10, 25, 50]}
             autoHeight
             disableRowSelectionOnClick
-            sx={{
-              '& .MuiDataGrid-cell': {
-                display: 'flex',
-                alignItems: 'center',
-              },
+            className="table mobile-full-width"
+            classes={{
+              root: 'bg-[var(--hospital-white)]',
+              columnHeaders: 'bg-[var(--hospital-gray-50)]',
+              columnHeader: 'text-[var(--hospital-gray-500)] uppercase tracking-wider',
+              cell: 'text-[var(--hospital-gray-900)] border-t border-[var(--hospital-gray-200)] flex items-center',
+              row: 'hover:bg-[var(--hospital-gray-50)]',
             }}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Bed Status
-          </Typography>
-          <BedStatus />
-        </CardContent>
-      </Card>
+      <div className="card">
+        <div className="card-header">
+          <h2 className="card-title">Bed Status</h2>
+        </div>
+        <BedStatus />
+      </div>
 
       <AdmissionForm
         open={openAdmissionForm}
@@ -211,6 +210,6 @@ export default function AdtPage() {
         admission={selectedAdmission}
         onSave={fetchAdmissions}
       />
-    </Box>
+    </div>
   );
 }
