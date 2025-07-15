@@ -1,4 +1,8 @@
 // authUtils.js
+import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 export const isAuthenticated = () => {
   const token = localStorage.getItem('token');
   if (!token) return false;
