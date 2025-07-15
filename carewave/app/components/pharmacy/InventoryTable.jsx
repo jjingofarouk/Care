@@ -5,16 +5,18 @@ import { Search, Plus, Edit, Delete, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
-export default function InventoryTable() {
+export default function InventoryTable({ inventory: initialInventory = [], loading: initialLoading = false, onInventoryItemDeleted }) {
   const router = useRouter();
-  const [inventory, setInventory] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [inventory, setInventory] = useState(initialInventory);
+  const [loading, setLoading] = useState(initialLoading);
   const [search, setSearch] = useState('');
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchInventory();
-  }, [search]);
+    if (!initialInventory.length) {
+      fetchInventory();
+    }
+  }, [search, initialInventory]);
 
   const fetchInventory = async () => {
     setLoading(true);
@@ -82,7 +84,11 @@ export default function InventoryTable() {
         throw new Error(errorData.error || `Failed to delete item: ${response.status}`);
       }
 
-      setInventory((prev) => prev.filter((item) => item.id !== id));
+      if (onInventoryItemDeleted) {
+        onInventoryItemDeleted(id);
+      } else {
+        setInventory((prev) => prev.filter((item) => item.id !== id));
+      }
     } catch (err) {
       console.error('Failed to delete inventory item:', err);
       alert(`Failed to delete item: ${err.message}`);
@@ -100,7 +106,7 @@ export default function InventoryTable() {
     {
       field: 'drugName',
       headerName: 'Drug',
-      width: 200,
+      minWidth: 200,
       sortable: true,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -109,7 +115,7 @@ export default function InventoryTable() {
     {
       field: 'batchNumber',
       headerName: 'Batch Number',
-      width: 150,
+      minWidth: 150,
       sortable: true,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -117,7 +123,7 @@ export default function InventoryTable() {
     {
       field: 'expiryDate',
       headerName: 'Expiry Date',
-      width: 150,
+      minWidth: 150,
       sortable: true,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -127,7 +133,7 @@ export default function InventoryTable() {
     {
       field: 'quantity',
       headerName: 'Quantity',
-      width: 100,
+      minWidth: 100,
       type: 'number',
       sortable: true,
       headerClassName: 'table-header',
@@ -136,7 +142,7 @@ export default function InventoryTable() {
     {
       field: 'unitPrice',
       headerName: 'Unit Price',
-      width: 120,
+      minWidth: 120,
       sortable: true,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -146,7 +152,7 @@ export default function InventoryTable() {
     {
       field: 'status',
       headerName: 'Status',
-      width: 150,
+      minWidth: 150,
       sortable: false,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -155,7 +161,7 @@ export default function InventoryTable() {
     {
       field: 'updatedAt',
       headerName: 'Updated At',
-      width: 180,
+      minWidth: 180,
       sortable: true,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -165,7 +171,7 @@ export default function InventoryTable() {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 150,
+      minWidth: 150,
       sortable: false,
       filterable: false,
       headerClassName: 'table-header',
@@ -199,7 +205,7 @@ export default function InventoryTable() {
   ];
 
   return (
-    <div className="card p-2 max-w-[1280px] mx-auto mobile-full-width">
+    <div className="card max-w-[1280px] mx-auto w-full overflow-x-auto custom-scrollbar">
       <div className="flex justify-between items-center mb-3">
         <h1 className="card-title">Pharmacy Inventory</h1>
         <button
@@ -211,7 +217,7 @@ export default function InventoryTable() {
         </button>
       </div>
 
-      <div className="mb-3 max-w-md">
+      <div className="mb-3 max-w-md w-full">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--hospital-gray-400)]" />
           <input
@@ -233,7 +239,7 @@ export default function InventoryTable() {
         </div>
       )}
 
-      <div className="table w-full">
+      <div className="table w-[1200px] min-w-full">
         {loading ? (
           <div className="flex justify-center p-4">
             <div className="loading-spinner" />
@@ -248,10 +254,11 @@ export default function InventoryTable() {
             disableRowSelectionOnClick
             getRowId={(row) => row.id}
             classes={{
-              root: 'table',
+              root: 'table bg-[var(--hospital-white)] rounded-lg shadow-[var(--shadow-sm)]',
               columnHeaders: 'bg-[var(--hospital-gray-50)]',
               row: 'hover:bg-[var(--hospital-gray-50)]',
-              cell: 'py-2',
+              cell: 'py-2 px-4 text-[var(--hospital-gray-900)] border-t border-[var(--hospital-gray-200)]',
+              footerContainer: 'bg-[var(--hospital-gray-50)] border-t border-[var(--hospital-gray-200)]',
             }}
             localeText={{ noRowsLabel: 'No inventory items found' }}
           />
