@@ -1,10 +1,4 @@
-"use client";
-
-import React from 'react'; // ✅ Add this line
-import { jwtDecode } from 'jwt-decode';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-
+// authUtils.js
 export const isAuthenticated = () => {
   const token = localStorage.getItem('token');
   if (!token) return false;
@@ -12,8 +6,14 @@ export const isAuthenticated = () => {
   try {
     const decoded = jwtDecode(token);
     const currentTime = Date.now() / 1000;
-    return decoded.exp > currentTime;
-  } catch {
+    if (decoded.exp < currentTime) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Token validation error:', error);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     return false;
