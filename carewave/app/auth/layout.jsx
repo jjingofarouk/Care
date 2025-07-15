@@ -2,13 +2,13 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../useAuth';
+import { useSession } from 'next-auth/react';
 
 export default function AuthLayout({ children }) {
-  const { user, loading } = useAuth();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  if (loading) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-hospital-gray-50">
         <div className="loading-spinner"></div>
@@ -16,7 +16,7 @@ export default function AuthLayout({ children }) {
     );
   }
 
-  if (user) {
+  if (session?.user) {
     router.push('/appointments');
     return null;
   }
