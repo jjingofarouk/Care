@@ -1,117 +1,48 @@
+// app/adt/layout.jsx
 'use client';
-import React, { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Tabs, Tab, Box } from '@mui/material';
+
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Hospital, Bed, ArrowLeftRight, BarChart2 } from 'lucide-react';
 
-const AdtLayout = ({ children }) => {
-  const router = useRouter();
+export default function AdtLayout({ children }) {
   const pathname = usePathname();
-  const [tabValue, setTabValue] = useState(() => {
-    if (pathname.includes('/adt/discharges')) return 1;
-    if (pathname.includes('/adt/transfers')) return 2;
-    if (pathname.includes('/adt/analytics')) return 3;
-    return 0;
-  });
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-    switch (newValue) {
-      case 0:
-        router.push('/adt/admissions');
-        break;
-      case 1:
-        router.push('/adt/discharges');
-        break;
-      case 2:
-        router.push('/adt/transfers');
-        break;
-      case 3:
-        router.push('/adt/analytics');
-        break;
-    }
-  };
+  const tabs = [
+    { name: 'Admissions', href: '/adt/admissions', icon: Hospital },
+    { name: 'Discharges', href: '/adt/discharges', icon: Bed },
+    { name: 'Transfers', href: '/adt/transfers', icon: ArrowLeftRight },
+    { name: 'Analytics', href: '/adt/analytics', icon: BarChart2 },
+  ];
 
   return (
-    <div className="min-h-screen w-full bg-[var(--hospital-gray-50)]">
-      <div className="w-full px-1 sm:px-2">
-        <Box className="mb-1">
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            aria-label="ADT management tabs"
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-            className="card rounded-lg overflow-x-auto custom-scrollbar"
-            sx={{
-              '& .MuiTabs-indicator': {
-                backgroundColor: 'var(--hospital-accent)',
-              },
-            }}
-          >
-            <Tab
-              label={
-                <span className="flex items-center gap-1.5">
-                  <Hospital className="h-3.5 w-3.5" />
-                  Admissions
-                </span>
-              }
-              className="text-[var(--hospital-gray-700)] font-medium text-xs uppercase tracking-wide px-2 py-1.5 min-h-[2rem] transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
-              sx={{
-                '&.Mui-selected': {
-                  color: 'var(--hospital-accent)',
-                },
-              }}
-            />
-            <Tab
-              label={
-                <span className="flex items-center gap-1.5">
-                  <Bed className="h-3.5 w-3.5" />
-                  Discharges
-                </span>
-              }
-              className="text-[var(--hospital-gray-700)] font-medium text-xs uppercase tracking-wide px-2 py-1.5 min-h-[2rem] transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
-              sx={{
-                '&.Mui-selected': {
-                  color: 'var(--hospital-accent)',
-                },
-              }}
-            />
-            <Tab
-              label={
-                <span className="flex items-center gap-1.5">
-                  <ArrowLeftRight className="h-3.5 w-3.5" />
-                  Transfers
-                </span>
-              }
-              className="text-[var(--hospital-gray-700)] font-medium text-xs uppercase tracking-wide px-2 py-1.5 min-h-[2rem] transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
-              sx={{
-                '&.Mui-selected': {
-                  color: 'var(--hospital-accent)',
-                },
-              }}
-            />
-            <Tab
-              label={
-                <span className="flex items-center gap-1.5">
-                  <BarChart2 className="h-3.5 w-3.5" />
-                  Analytics
-                </span>
-              }
-              className="text-[var(--hospital-gray-700)] font-medium text-xs uppercase tracking-wide px-2 py-1.5 min-h-[2rem] transition-all duration-200 hover:bg-[var(--hospital-gray-50)]"
-              sx={{
-                '&.Mui-selected': {
-                  color: 'var(--hospital-accent)',
-                },
-              }}
-            />
-          </Tabs>
-        </Box>
+    <div className="min-h-screen bg-hospital-gray-50 p-0">
+      <nav className="bg-hospital-white border-b border-hospital-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-10 overflow-x-auto">
+            <div className="flex space-x-4 whitespace-nowrap">
+              {tabs.map((tab, index) => (
+                <Link
+                  key={tab.name}
+                  href={tab.href}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200 flex items-center gap-2 ${
+                    pathname === tab.href
+                      ? 'bg-hospital-accent text-hospital-white'
+                      : 'text-hospital-gray-600 hover:bg-hospital-gray-100'
+                  }`}
+                  style={{ zIndex: tabs.length - index }}
+                >
+                  <tab.icon className="h-4 w-4" />
+                  <span className="relative z-10">{tab.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </nav>
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {children}
-      </div>
+      </main>
     </div>
   );
-};
-
-export default AdtLayout;
+}
