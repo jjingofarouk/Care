@@ -3,38 +3,39 @@ const { v4: uuidv4 } = require('uuid');
 
 const prisma = new PrismaClient();
 
-async function seedEmergencyLogs() {
+async function updateEmergencyCaseIds() {
   try {
-    // Fetch existing emergency cases
+    // Fetch all existing emergency cases
     const emergencyCases = await prisma.emergencyCase.findMany();
     if (emergencyCases.length === 0) throw new Error('No emergency cases found');
 
-    const emergencyCaseIds = emergencyCases.map(ec => ec.id);
+    // Generate new UUIDs for emergency cases
+    const updatedEmergencyCases = emergencyCases.map(emergencyCase => ({
+      id: uuidv4(),
+      patientId: emergencyCase.patientId,
+      triageId: emergencyCase.triageId,
+      admissionId: emergencyCase.admissionId,
+      createdAt: emergencyCase.createdAt,
+      updatedAt: new Date(),
+    }));
 
-    // Generate 1000 Emergency Logs
-    const logs = [];
-    for (let i = 1; i <= 1000; i++) {
-      const emergencyIndex = Math.floor(Math.random() * emergencyCaseIds.length);
-      logs.push({
-        id: uuidv4(),
-        emergencyCaseId: emergencyCaseIds[emergencyIndex],
-        description: `Log entry for emergency case ${emergencyCaseIds[emergencyIndex]}`,
-        loggedAt: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    }
+    // Update related emergency logs to nullify emergencyCaseId, delete existing emergency cases, and insert new ones
+    await prisma.$transaction([
+      prisma.emergencyLog.updateMany({
+        data: { emergencyCaseId: null },
+        where: { emergencyCaseId: { not: null } },
+      }),
+      prisma.emergencyCase.deleteMany(),
+      prisma.emergencyCase.createMany({ data: updatedEmergencyCases }),
+    ]);
 
-    // Insert Emergency Logs
-    await prisma.emergencyLog.createMany({ data: logs });
-
-    console.log('Seeded 1000 emergency logs');
+    console.log('Updated emergency case IDs with new UUIDs');
   } catch (e) {
-    console.error('Error seeding emergency logs:', e);
+    console.error('Error updating emergency case IDs:', e);
     process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-seedEmergencyLogs();
+updateEmergencyCaseIds();
