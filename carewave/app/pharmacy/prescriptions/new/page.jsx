@@ -1,10 +1,10 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, MenuItem, Select, InputLabel, FormControl, CircularProgress } from '@mui/material';
+import React, { useState, useEffect, Suspense } from 'react';
+import { Box, Typography, TextField, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { format } from 'date-fns';
 
-export default function PrescriptionForm() {
+function PrescriptionFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prescriptionId = searchParams.get('id');
@@ -26,7 +26,7 @@ export default function PrescriptionForm() {
     if (prescriptionId) {
       fetchPrescription();
     }
-  }, []);
+  }, [prescriptionId]);
 
   const fetchResources = async () => {
     try {
@@ -100,10 +100,7 @@ export default function PrescriptionForm() {
   };
 
   const getToken = () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('token');
-    }
-    return null;
+    return typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   };
 
   const handleSubmit = async (e) => {
@@ -150,35 +147,34 @@ export default function PrescriptionForm() {
   if (loading) {
     return (
       <Box className="flex justify-center items-center h-screen">
-        <CircularProgress />
+        <div className="loading-spinner" />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box className="card w-full max-w-3xl mx-auto mt-8 p-6">
-        <Typography color="error" className="mb-4">
+      <div className="card max-w-[1280px] mx-auto p-2 mobile-full-width">
+        <Typography className="text-[var(--hospital-error)] mb-2">
           Error: {error}
         </Typography>
-        <Button
-          variant="contained"
+        <button
           onClick={() => router.push('/pharmacy/prescriptions')}
-          className="bg-blue-500 hover:bg-blue-600"
+          className="btn btn-primary"
         >
           Back to Prescriptions
-        </Button>
-      </Box>
+        </button>
+      </div>
     );
   }
 
   return (
-    <Box className="card w-full max-w-3xl mx-auto mt-8 p-6">
-      <Typography variant="h4" className="mb-6 text-[var(--hospital-gray-900)]">
+    <div className="card max-w-[1280px] mx-auto p-2 mobile-full-width">
+      <Typography className="text-[var(--hospital-gray-900)] mb-3 text-xl font-semibold">
         {prescriptionId ? 'Edit Prescription' : 'New Prescription'}
       </Typography>
 
-      <Box component="form" onSubmit={handleSubmit} className="space-y-4">
+      <Box component="form" onSubmit={handleSubmit} className="space-y-3">
         <FormControl fullWidth>
           <InputLabel>Patient</InputLabel>
           <Select
@@ -186,6 +182,7 @@ export default function PrescriptionForm() {
             value={formData.patientId}
             onChange={handleChange}
             required
+            className="select"
           >
             {patients.map((patient) => (
               <MenuItem key={patient.id} value={patient.id}>
@@ -202,6 +199,7 @@ export default function PrescriptionForm() {
             value={formData.doctorId}
             onChange={handleChange}
             required
+            className="select"
           >
             {doctors.map((doctor) => (
               <MenuItem key={doctor.id} value={doctor.id}>
@@ -218,6 +216,7 @@ export default function PrescriptionForm() {
             value={formData.drugId}
             onChange={handleChange}
             required
+            className="select"
           >
             {drugs.map((drug) => (
               <MenuItem key={drug.id} value={drug.id}>
@@ -234,6 +233,7 @@ export default function PrescriptionForm() {
           value={formData.dosage}
           onChange={handleChange}
           required
+          className="input"
         />
 
         <TextField
@@ -244,26 +244,33 @@ export default function PrescriptionForm() {
           value={formData.prescribedAt}
           onChange={handleChange}
           required
+          className="input"
         />
 
-        <Box className="flex gap-4">
-          <Button
+        <div className="flex gap-3">
+          <button
             type="submit"
-            variant="contained"
             disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600"
+            className="btn btn-primary"
           >
             {loading ? 'Saving...' : 'Save Prescription'}
-          </Button>
-          <Button
-            variant="outlined"
+          </button>
+          <button
             onClick={() => router.push('/pharmacy/prescriptions')}
-            className="border-[var(--hospital-gray-300)] text-[var(--hospital-gray-700)] hover:bg-[var(--hospital-gray-50)]"
+            className="btn btn-outline"
           >
             Cancel
-          </Button>
-        </Box>
+          </button>
+        </div>
       </Box>
-    </Box>
+    </div>
+  );
+}
+
+export default function PrescriptionForm() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center h-screen"><div className="loading-spinner" /></div>}>
+      <PrescriptionFormContent />
+    </Suspense>
   );
 }
