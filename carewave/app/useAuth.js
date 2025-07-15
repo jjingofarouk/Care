@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUser, isAuthenticated, hasValidSession, getToken, getRefreshToken } from '../auth/authUtils';
-import { login, logout, logoutAllDevices, refreshAccessToken, setupTokenRefresh } from '../auth/authService';
+import { getUser, isAuthenticated, hasValidSession, getToken, getRefreshToken } from './auth/authUtils';
+import { login, logout, logoutAllDevices, refreshAccessToken, setupTokenRefresh } from './auth/authService';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
