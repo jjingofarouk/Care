@@ -1,0 +1,44 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+export default function EmergencyLayout({ children }) {
+  const pathname = usePathname();
+  const tabs = [
+    { name: 'Emergency Cases', href: '/emergency' },
+    { name: 'Triage', href: '/emergency/triage' },
+    { name: 'Ambulances', href: '/emergency/ambulance' },
+    { name: 'Logs', href: '/emergency/emergency-log' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-hospital-gray-50">
+      <nav className="bg-hospital-white border-b border-hospital-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex space-x-4">
+              {tabs.map((tab) => (
+                <Link
+                  key={tab.name}
+                  href={tab.href}
+                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                    pathname === tab.href
+                      ? 'bg-hospital-accent text-hospital-white'
+                      : 'text-hospital-gray-600 hover:bg-hospital-gray-100'
+                  }`}
+                >
+                  {tab.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </nav>
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {children}
+      </main>
+    </div>
+  );
+}
