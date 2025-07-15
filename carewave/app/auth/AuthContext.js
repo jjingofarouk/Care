@@ -1,5 +1,4 @@
-"use client";
-
+// AuthProvider.js
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
@@ -46,6 +45,8 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     refreshUser();
+    const interval = setInterval(refreshUser, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, [refreshUser]);
 
   const handleLogin = async (credentials) => {
