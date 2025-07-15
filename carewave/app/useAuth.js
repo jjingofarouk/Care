@@ -1,134 +1,88 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { getUser, isAuthenticated, hasValidSession, getToken, getRefreshToken } from './auth/authUtils';
-import { login, logout, logoutAllDevices, refreshAccessToken, setupTokenRefresh } from './auth/authService';
+import { useEffect, useCallback } from 'react';
 
 const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  const refreshUser = useCallback(async () => {
-    if (typeof window === 'undefined') return;
-    
-    setLoading(true);
-    
+  const user = session?.user || null;
+  const loading = status === 'loading';
+  const isInitialized = status !== 'loading';
+
+  const handleLogin = useCallback(async (credentials) => {
     try {
-      const token = getToken();
-      const refreshToken = getRefreshToken();
-      
-      if (!hasValidSession()) {
-        setUser(null);
-        await logout();
-        setLoading(false);
-        setIsInitialized(true);
-        return;
+      const result = await signIn('credentials', {
+        ...credentials,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
       }
-      
-      if (!isAuthenticated(token) && refreshToken) {
-        try {
-          await refreshAccessToken();
-        } catch (error) {
-          console.error('Token refresh failed:', error);
-          setUser(null);
-          await logout();
-          setLoading(false);
-          setIsInitialized(true);
-          return;
+
+      // Redirect based on role
+      if (result?.ok && user) {
+        switch (user.role) {
+          case 'ADMIN':
+          case 'HOSPITAL_MANAGER':
+            router.push('/dashboard');
+            break;
+          case 'DOCTOR':
+          case 'NURSE':
+            router.push('/patients');
+            break;
+          case 'RECEPTIONIST':
+            router.push('/appointments');
+            break;
+          default:
+            router.push('/appointment');
         }
       }
-      
-      const storedUser = getUser();
-      setUser(storedUser);
-      
-      setupTokenRefresh();
-      
-    } catch (error) {
-      console.error('Error refreshing user:', error);
-      setUser(null);
-      await logout();
-    }
-    
-    setLoading(false);
-    setIsInitialized(true);
-  }, []);
 
-  useEffect(() => {
-    if (!isInitialized) {
-      refreshUser();
-    }
-  }, [refreshUser, isInitialized]);
-
-  const handleLogin = async (credentials) => {
-    try {
-      setLoading(true);
-      const { user } = await login(credentials);
-      setUser(user);
-      
-      switch (user.role) {
-        case 'ADMIN':
-        case 'HOSPITAL_MANAGER':
-          router.push('/dashboard');
-          break;
-        case 'DOCTOR':
-        case 'NURSE':
-          router.push('/patients');
-          break;
-        case 'RECEPTIONIST':
-          router.push('/appointments');
-          break;
-        default:
-          router.push('/appointment');
-      }
-      
       return user;
     } catch (error) {
       throw new Error(error.message);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [user, router]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
-      setLoading(true);
-      await logout();
-      setUser(null);
+      await signOut({ redirect: false });
       router.push('/auth');
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [router]);
 
-  const handleLogoutAllDevices = async () => {
+  const handleLogoutAllDevices = useCallback(async () => {
     try {
-      setLoading(true);
-      await logoutAllDevices();
-      setUser(null);
+      await signOut({ redirect: false });
       router.push('/auth');
-    } catch (error) {
+    } catch (error)Inclusion of role-based logic in the session callback ensures that the user’s role is available for client-side routing and access control.
       console.error('Logout all devices error:', error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [router]);
 
-  const hasRole = (requiredRole) => {
+  const hasRole = useCallback((requiredRole) => {
     return user?.role === requiredRole;
-  };
+  }, [user]);
 
-  const hasAnyRole = (requiredRoles) => {
+  const hasAnyRole = useCallback((requiredRoles) => {
     return user?.role && requiredRoles.includes(user.role);
-  };
+  }, [user]);
 
-  const isUserAuthenticated = () => {
-    return !!user && hasValidSession();
-  };
+  const isUserAuthenticated = useCallback(() => {
+    return !!user && status === 'authenticated';
+  }, [user, status]);
+
+  useEffect(() => {
+    if (isInitialized && !loading && !user) {
+      router.push('/auth');
+    }
+  }, [isInitialized, loading, user, router]);
 
   return {
     user,
@@ -137,9 +91,9 @@ const useAuth = () => {
     login: handleLogin,
     logout: handleLogout,
     logoutAllDevices: handleLogoutAllDevices,
-    refreshUser,
-    hasValidSession: hasValidSession(),
-    isAuthenticated: isUserAuthenticated(),
+    refreshUser: () => {}, // No-op since NextAuth.js handles session refresh
+    hasValidSession: isUserAuthenticated,
+    isAuthenticated: isUserAuthenticated,
     hasRole,
     hasAnyRole,
   };
