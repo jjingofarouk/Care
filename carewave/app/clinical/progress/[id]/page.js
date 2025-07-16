@@ -117,7 +117,7 @@ export default function ProgressNoteView({ params }) {
           <div className="flex items-start gap-3">
             <Calendar size={20} className="text-hospital-accent mt-1" />
             <div>
-              <h3 className="font-semibold text-hospital-gray-700">Created At</3>
+              <h3 className="font-semibold text-hospital-gray-700">Created At</h3>
               <p className="text-hospital-gray-900">{new Date(note.createdAt).toLocaleString()}</p>
             </div>
           </div>
