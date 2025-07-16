@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSOAPNote } from '@/services/clinicalService';
+import { ArrowLeft, Save, X, User, Stethoscope, Clipboard } from 'lucide-react';
 
 export default function SOAPNoteNew() {
   const router = useRouter();
@@ -25,78 +26,147 @@ export default function SOAPNoteNew() {
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">New SOAP Note</h1>
-      <form onSubmit={handleSubmit} className="bg-hospital-white p-6 rounded-lg shadow">
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-hospital-gray-700">Patient ID</label>
-          <input
-            type="text"
-            value={formData.patientId}
-            onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-            className="mt-1 block w-full rounded-md border-hospital-gray-300 shadow-sm focus:border-hospital-accent focus:ring focus:ring-hospital-accent focus:ring-opacity-50"
-          />
+    <div className="container mx-auto px-4 py-8 animate-fade-in">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gradient">New SOAP Note</h1>
+        <button
+          onClick={() => router.push('/clinical/soap')}
+          className="btn btn-outline"
+        >
+          <ArrowLeft size={20} />
+          Back to Notes
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="card">
+        <div className="card-header">
+          <h2 className="card-title">Create SOAP Note</h2>
+          <p className="card-subtitle">Add a new SOAP note</p>
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-hospital-gray-700">Doctor ID</label>
-          <input
-            type="text"
-            value={formData.doctorId}
-            onChange={(e) => setFormData({ ...formData, doctorId: e.target.value })}
-            className="mt-1 block w-full rounded-md border-hospital-gray-300 shadow-sm focus:border-hospital-accent focus:ring focus:ring-hospital-accent focus:ring-opacity-50"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-hospital-gray-700">Subjective</label>
-          <textarea
-            value={formData.subjective}
-            onChange={(e) => setFormData({ ...formData, subjective: e.target.value })}
-            className="mt-1 block w-full rounded-md border-hospital-gray-300 shadow-sm focus:border-hospital-accent focus:ring focus:ring-hospital-accent focus:ring-opacity-50"
-            rows="5"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-hospital-gray-700">Objective</label>
-          <textarea
-            value={formData.objective}
-            onChange={(e) => setFormData({ ...formData, objective: e.target.value })}
-            className="mt-1 block w-full rounded-md border-hospital-gray-300 shadow-sm focus:border-hospital-accent focus:ring focus:ring-hospital-accent focus:ring-opacity-50"
-            rows="5"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-hospital-gray-700">Assessment</label>
-          <textarea
-            value={formData.assessment}
-            onChange={(e) => setFormData({ ...formData, assessment: e.target.value })}
-            className="mt-1 block w-full rounded-md border-hospital-gray-300 shadow-sm focus:border-hospital-accent focus:ring focus:ring-hospital-accent focus:ring-opacity-50"
-            rows="5"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-hospital-gray-700">Plan</label>
-          <textarea
-            value={formData.plan}
-            onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
-            className="mt-1 block w-full rounded-md border-hospital-gray-300 shadow-sm focus:border-hospital-accent focus:ring focus:ring-hospital-accent focus:ring-opacity-50"
-            rows="5"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <button
-            type="submit"
-            className="bg-hospital-accent text-white px-4 py-2 rounded"
-          >
-            Create
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push('/clinical/soap')}
-            className="bg-hospital-gray-200 text-hospital-gray-800 px-4 py-2 rounded"
-          >
-            Cancel
-          </button>
+
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-hospital-gray-700 mb-1">
+              <div className="flex items-center gap-2">
+                <User size={16} className="text-hospital-accent" />
+                Patient ID
+              </div>
+            </label>
+            <input
+              type="text"
+              name="patientId"
+              value={formData.patientId}
+              onChange={handleChange}
+              className="input w-full"
+              placeholder="Enter patient ID"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-hospital-gray-700 mb-1">
+              <div className="flex items-center gap-2">
+                <Stethoscope size={16} className="text-hospital-accent" />
+                Doctor ID
+              </div>
+            </label>
+            <input
+              type="text"
+              name="doctorId"
+              value={formData.doctorId}
+              onChange={handleChange}
+              className="input w-full"
+              placeholder="Enter doctor ID"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-hospital-gray-700 mb-1">
+              <div className="flex items-center gap-2">
+                <Clipboard size={16} className="text-hospital-accent" />
+                Subjective
+              </div>
+            </label>
+            <textarea
+              name="subjective"
+              value={formData.subjective}
+              onChange={handleChange}
+              className="textarea w-full"
+              rows="5"
+              placeholder="Enter subjective details"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-hospital-gray-700 mb-1">
+              <div className="flex items-center gap-2">
+                <Clipboard size={16} className="text-hospital-accent" />
+                Objective
+              </div>
+            </label>
+            <textarea
+              name="objective"
+              value={formData.objective}
+              onChange={handleChange}
+              className="textarea w-full"
+              rows="5"
+              placeholder="Enter objective details"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-hospital-gray-700 mb-1">
+              <div className="flex items-center gap-2">
+                <Clipboard size={16} className="text-hospital-accent" />
+                Assessment
+              </div>
+            </label>
+            <textarea
+              name="assessment"
+              value={formData.assessment}
+              onChange={handleChange}
+              className="textarea w-full"
+              rows="5"
+              placeholder="Enter assessment details"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-hospital-gray-700 mb-1">
+              <div className="flex items-center gap-2">
+                <Clipboard size={16} className="text-hospital-accent" />
+                Plan
+              </div>
+            </label>
+            <textarea
+              name="plan"
+              value={formData.plan}
+              onChange={handleChange}
+              className="textarea w-full"
+              rows="5"
+              placeholder="Enter plan details"
+            />
+          </div>
+
+          <div className="flex space-x-2">
+            <button type="submit" className="btn btn-primary">
+              <Save size={20} />
+              Create
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/clinical/soap')}
+              className="btn btn-secondary"
+            >
+              <X size={20} />
+              Cancel
+            </button>
+          </div>
         </div>
       </form>
     </div>
