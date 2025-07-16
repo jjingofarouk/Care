@@ -10,16 +10,24 @@ import 'react-loading-skeleton/dist/skeleton.css';
 export default function VaccinesPage() {
   const [vaccines, setVaccines] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchVaccines();
   }, []);
 
   const fetchVaccines = async () => {
-    setLoading(true);
-    const data = await vaccinationService.getVaccines();
-    setVaccines(data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const data = await vaccinationService.getVaccines();
+      setVaccines(data);
+      setError('');
+    } catch (err) {
+      setError('Failed to fetch vaccines');
+      console.error('Error fetching vaccines:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columns = [
@@ -30,19 +38,30 @@ export default function VaccinesPage() {
       field: 'createdAt',
       headerName: 'Created At',
       width: 200,
-      valueGetter: (params) => new Date(params.row.createdAt).toLocaleDateString(),
+      valueGetter: (value, row) => new Date(row.createdAt).toLocaleDateString(),
     },
   ];
 
   return (
-    <div className="card w-full max-w-[100vw] mx-0 p-0">
-      <div className="card-header px-2 py-1">
-        <h2 className="card-title text-lg">
+    <div style={{ width: '100%', maxWidth: '100vw', margin: 0, padding: 0 }}>
+      <div style={{ padding: '8px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
+        <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>
           {loading ? <Skeleton width={200} height={24} baseColor="#e5e7eb" highlightColor="#f3f4f6" /> : 'Vaccines'}
         </h2>
       </div>
-      <div className="p-2">
-        <div className="h-[400px] w-full">
+      <div style={{ padding: '8px' }}>
+        {error && (
+          <div style={{ 
+            backgroundColor: '#f8d7da', 
+            color: '#721c24', 
+            padding: '8px', 
+            borderRadius: '4px', 
+            marginBottom: '8px' 
+          }}>
+            {error}
+          </div>
+        )}
+        <div style={{ height: '400px', width: '100%' }}>
           {loading ? (
             <Skeleton count={5} height={60} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
           ) : (
@@ -51,6 +70,7 @@ export default function VaccinesPage() {
               columns={columns}
               initialState={{ pagination: { paginationModel: { pageSize: 5, page: 0 } } }}
               pageSizeOptions={[5, 10, 25]}
+              disableRowSelectionOnClick
             />
           )}
         </div>
