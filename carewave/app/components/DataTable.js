@@ -1,3 +1,4 @@
+// File: app/components/DataTable.js
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -18,7 +19,6 @@ import {
   Settings,
   Filter,
   X,
-  Calendar,
   Search,
   Check
 } from 'lucide-react';
@@ -145,8 +145,6 @@ export function DataTable({
   const [columnVisibility, setColumnVisibility] = useState({});
   const [showColumnManager, setShowColumnManager] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [dateFilters, setDateFilters] = useState({});
-  const [rangeFilters, setRangeFilters] = useState({});
 
   // Enhanced columns with selection checkbox
   const enhancedColumns = useMemo(() => {
@@ -242,36 +240,9 @@ export function DataTable({
     window.URL.revokeObjectURL(url);
   };
 
-  // Advanced filtering functions
-  const applyDateFilter = (columnId, startDate, endDate) => {
-    setDateFilters(prev => ({
-      ...prev,
-      [columnId]: { startDate, endDate }
-    }));
-    
-    const column = table.getColumn(columnId);
-    if (column) {
-      column.setFilterValue([startDate, endDate]);
-    }
-  };
-
-  const applyRangeFilter = (columnId, min, max) => {
-    setRangeFilters(prev => ({
-      ...prev,
-      [columnId]: { min, max }
-    }));
-    
-    const column = table.getColumn(columnId);
-    if (column) {
-      column.setFilterValue([min, max]);
-    }
-  };
-
   const clearAllFilters = () => {
     setGlobalFilter('');
     setColumnFilters([]);
-    setDateFilters({});
-    setRangeFilters({});
     table.resetColumnFilters();
   };
 
@@ -373,7 +344,7 @@ export function DataTable({
         </div>
 
         {/* Selection Info */}
-        {enableRowSelection && Object.keys(rowSelection).length > 0 && (
+        {enableRowSelection && Object.keys(rowSelectioncheckoutSelection).length > 0 && (
           <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
             <span className="text-sm text-blue-700 font-medium">
               {Object.keys(rowSelection).length} row(s) selected
@@ -467,14 +438,14 @@ export function DataTable({
         <table className="min-w-full divide-y divide-[var(--hospital-gray-200)]">
           <thead className="bg-[var(--hospital-gray-50)]">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
+              <.tsx key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     className="px-6 py-3 text-left text-xs font-medium text-[var(--hospital-gray-600)] uppercase tracking-wider"
                   >
                     <div
-                      className="flex items-center gap-2 cursor-pointer select-none hover:text-[var(--hospital-gray-800)] transition-colors duration-200"
+                      className="flex items-center gap-2 cursor-pointer select-none hover:text-[var(--hospital-gray-800] transition-colors duration-200"
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
