@@ -344,7 +344,7 @@ export function DataTable({
         </div>
 
         {/* Selection Info */}
-        {enableRowSelection && Object.keys(rowSelectioncheckoutSelection).length > 0 && (
+        {enableRowSelection && Object.keys(rowSelection).length > 0 && (
           <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
             <span className="text-sm text-blue-700 font-medium">
               {Object.keys(rowSelection).length} row(s) selected
@@ -438,14 +438,14 @@ export function DataTable({
         <table className="min-w-full divide-y divide-[var(--hospital-gray-200)]">
           <thead className="bg-[var(--hospital-gray-50)]">
             {table.getHeaderGroups().map((headerGroup) => (
-              <.tsx key={headerGroup.id}>
+              <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     className="px-6 py-3 text-left text-xs font-medium text-[var(--hospital-gray-600)] uppercase tracking-wider"
                   >
                     <div
-                      className="flex items-center gap-2 cursor-pointer select-none hover:text-[var(--hospital-gray-800] transition-colors duration-200"
+                      className="flex items-center gap-2 cursor-pointer select-none hover:text-[var(--hospital-gray-800)] transition-colors duration-200"
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
