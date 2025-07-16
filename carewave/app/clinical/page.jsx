@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DataTable } from '@/components/DataTable';
-import { getClinicalNotes, createClinicalNote, deleteClinicalNote } from '@/services/clinicalService';
+import { getClinicalNotes, deleteClinicalNote } from '@/services/clinicalService';
 
 export default function ClinicalNotes() {
   const router = useRouter();
