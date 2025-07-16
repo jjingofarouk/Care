@@ -31,60 +31,60 @@ const queueService = {
       params.append('search', searchQuery);
     }
     params.append('include', 'addresses,nextOfKin,insuranceInfo');
-    const response = await axios.get(`/api/patients?${params.toString()}`);
+    const response = await axios.get(`/api/queue/patients?${params.toString()}`);
     return response.data;
   },
 
   getServiceCounters: async () => {
-    const response = await axios.get('/api/service-counters');
+    const response = await axios.get('/api/queue/service-counters');
     return response.data;
   },
 
   getServiceCounterById: async (id) => {
-    const response = await axios.get(`/api/service-counters/${id}`);
+    const response = await axios.get(`/api/queue/service-counters/${id}`);
     return response.data;
   },
 
   createServiceCounter: async (data) => {
-    const response = await axios.post('/api/service-counters', data);
+    const response = await axios.post('/api/queue/service-counters', data);
     return response.data;
   },
 
   updateServiceCounter: async (id, data) => {
-    const response = await axios.put(`/api/service-counters/${id}`, data);
+    const response = await axios.put(`/api/queue/service-counters/${id}`, data);
     return response.data;
   },
 
   deleteServiceCounter: async (id) => {
-    await axios.delete(`/api/service-counters/${id}`);
+    await axios.delete(`/api/queue/service-counters/${id}`);
   },
 
   getQueueStatuses: async () => {
-    const response = await axios.get('/api/queue-statuses');
+    const response = await axios.get('/api/queue/statuses');
     return response.data;
   },
 
   getQueueStatusById: async (id) => {
-    const response = await axios.get(`/api/queue-statuses/${id}`);
+    const response = await axios.get(`/api/queue/statuses/${id}`);
     return response.data;
   },
 
   createQueueStatus: async (data) => {
-    const response = await axios.post('/api/queue-statuses', data);
+    const response = await axios.post('/api/queue/statuses', data);
     return response.data;
   },
 
   updateQueueStatus: async (id, data) => {
-    const response = await axios.put(`/api/queue-statuses/${id}`, data);
+    const response = await axios.put(`/api/queue/statuses/${id}`, data);
     return response.data;
   },
 
   deleteQueueStatus: async (id) => {
-    await axios.delete(`/api/queue-statuses/${id}`);
+    await axios.delete(`/api/queue/statuses/${id}`);
   },
 
   getDepartments: async () => {
-    const response = await axios.get('/api/departments');
+    const response = await axios.get('/api/queue/departments');
     return response.data;
   },
 };
