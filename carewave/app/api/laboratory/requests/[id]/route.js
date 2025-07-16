@@ -5,16 +5,16 @@ const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
-    const request = await prisma.labRequest.findUnique({
-      where: { id: parseInt(params.id) },
+    const labRequest = await prisma.labRequest.findUnique({
+      where: { id: params.id }, // Treat as string, remove parseInt
       include: {
         patient: true,
         labTest: true,
         sample: true,
       },
     });
-    if (!request) return NextResponse.json({ error: 'Lab request not found' }, { status: 404 });
-    return NextResponse.json(request);
+    if (!labRequest) return NextResponse.json({ error: 'Lab request not found' }, { status: 404 });
+    return NextResponse.json(labRequest);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch lab request' }, { status: 500 });
   }
@@ -24,11 +24,11 @@ export async function PUT(request, { params }) {
   try {
     const data = await request.json();
     const requestData = {
-      sampleId: data.sampleId ? parseInt(data.sampleId) : null,
+      sampleId: data.sampleId || null, // Treat as string, remove parseInt
       requestedAt: new Date(data.requestedAt),
     };
     const labRequest = await prisma.labRequest.update({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Treat as string, remove parseInt
       data: requestData,
     });
     return NextResponse.json(labRequest);
@@ -40,7 +40,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     await prisma.labRequest.delete({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Treat as string, remove parseInt
     });
     return NextResponse.json({ message: 'Lab request deleted' });
   } catch (error) {
