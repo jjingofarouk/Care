@@ -14,3 +14,4 @@ export async function GET() {
     console.error('Error fetching schedules:', error);
     return NextResponse.json({ error: 'Error fetching schedules' }, { status: 500 });
   }
+  }
