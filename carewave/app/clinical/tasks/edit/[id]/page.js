@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getClinicalTask, updateClinicalTask } from '@/services/clinicalService';
+import { ArrowLeft, Save, X, FileText, CheckCircle } from 'lucide-react';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 export default function ClinicalTaskEdit({ params }) {
   const router = useRouter();
@@ -17,8 +20,8 @@ export default function ClinicalTaskEdit({ params }) {
       try {
         const data = await getClinicalTask(params.id);
         setFormData({
-          description: data.description,
-          status: data.status,
+          description: data.description || '',
+          status: data.status || '',
         });
         setLoading(false);
       } catch (error) {
@@ -39,44 +42,106 @@ export default function ClinicalTaskEdit({ params }) {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-6">
+          <Skeleton width={200} height={32} />
+          <Skeleton width={120} height={40} />
+        </div>
+        <div className="card">
+          <div className="space-y-6">
+            <div>
+              <Skeleton width={100} height={20} />
+              <Skeleton width="100%" height={100} />
+            </div>
+            <div>
+              <Skeleton width={100} height={20} />
+              <Skeleton width="100%" height={40} />
+            </div>
+            <div className="flex space-x-2">
+              <Skeleton width={80} height={40} />
+              <Skeleton width={80} height={40} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Edit Clinical Task</h1>
-      <form onSubmit={handleSubmit} className="bg-hospital-white p-6 rounded-lg shadow">
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-hospital-gray-700">Description</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="mt-1 block w-full rounded-md border-hospital-gray-300 shadow-sm focus:border-hospital-accent focus:ring focus:ring-hospital-accent focus:ring-opacity-50"
-            rows="5"
-          />
+    <div className="container mx-auto px-4 py-8 animate-fade-in">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gradient">Edit Clinical Task</h1>
+        <button
+          onClick={() => router.push('/clinical/tasks')}
+          className="btn btn-outline"
+        >
+          <ArrowLeft size={20} />
+          Back to Tasks
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="card">
+        <div className="card-header">
+          <h2 className="card-title">Update Clinical Task</h2>
+          <p className="card-subtitle">Modify the clinical task details</p>
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-hospital-gray-700">Status</label>
-          <input
-            type="text"
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            className="mt-1 block w-full rounded-md border-hospital-gray-300 shadow-sm focus:border-hospital-accent focus:ring focus:ring-hospital-accent focus:ring-opacity-50"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <button
-            type="submit"
-            className="bg-hospital-accent text-white px-4 py-2 rounded"
-          >
-            Save
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push('/clinical/tasks')}
-            className="bg-hospital-gray-200 text-hospital-gray-800 px-4 py-2 rounded"
-          >
-            Cancel
-          </button>
+
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-hospital-gray-700 mb-1">
+              <div className="flex items-center gap-2">
+                <FileText size={16} className="text-hospital-accent" />
+                Description
+              </div>
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="textarea w-full"
+              rows="5"
+              placeholder="Enter task description"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-hospital-gray-700 mb-1">
+              <div className="flex items-center gap-2">
+                <CheckCircle size={16} className="text-hospital-accent" />
+                Status
+              </div>
+            </label>
+            <input
+              type="text"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="input w-full"
+              placeholder="Enter task status"
+            />
+          </div>
+
+          <div className="flex space-x-2">
+            <button type="submit" className="btn btn-primary">
+              <Save size={20} />
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/clinical/tasks')}
+              className="btn btn-secondary"
+            >
+              <X size={20} />
+              Cancel
+            </button>
+          </div>
         </div>
       </form>
     </div>
