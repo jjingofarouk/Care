@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export async function GET(request, { params }) {
   try {
     const sample = await prisma.sample.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Treat as string, remove parseInt
       include: {
         patient: true,
       },
@@ -22,7 +22,7 @@ export async function PUT(request, { params }) {
   try {
     const data = await request.json();
     const sample = await prisma.sample.update({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Treat as string, remove parseInt
       data: {
         sampleType: data.sampleType,
         collectedAt: new Date(data.collectedAt),
@@ -37,7 +37,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     await prisma.sample.delete({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Treat as string, remove parseInt
     });
     return NextResponse.json({ message: 'Sample deleted' });
   } catch (error) {
