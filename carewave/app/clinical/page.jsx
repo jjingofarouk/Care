@@ -1,67 +1,94 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
-import OutPatientRecords from './OutPatientRecords';
-import InpatientRecords from './InpatientRecords';
-import EmergencyRecords from './EmergencyRecords';
-import { getPatients } from '../patients/patientService';
-import styles from './ClinicalPage.module.css';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { DataTable } from '@/components/DataTable';
+import { getClinicalNotes, createClinicalNote, deleteClinicalNote } from '@/services/clinicalService';
 
-export default function ClinicalPage() {
-  const [patients, setPatients] = useState([]);
-  const [activeTab, setActiveTab] = useState('outpatient');
+export default function ClinicalNotes() {
+  const router = useRouter();
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPatients = async () => {
+    async function fetchData() {
       try {
-        const data = await getPatients();
-        setPatients(data);
-      } catch (err) {
-        console.error('Failed to fetch patients');
+        const notes = await getClinicalNotes();
+        setData(notes);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching clinical notes:', error);
+        setLoading(false);
       }
-    };
-    fetchPatients();
+    }
+    fetchData();
   }, []);
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
+  const columns = [
+    {
+      header: 'Patient',
+      accessorFn: row => `${row.patient.firstName} ${row.patient.lastName}`,
+    },
+    {
+      header: 'Doctor',
+      accessorFn: row => row.doctor.name,
+    },
+    {
+      header: 'Note',
+      accessorKey: 'note',
+    },
+    {
+      header: 'Created At',
+      accessorKey: 'createdAt',
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+    },
+    {
+      header: 'Actions',
+      cell: ({ row }) => (
+        <div className="flex space-x-2">
+          <Link href={`/clinical/notes/${row.original.id}`}>
+            <button className="text-hospital-accent hover:underline">View</button>
+          </Link>
+          <Link href={`/clinical/notes/edit/${row.original.id}`}>
+            <button className="text-hospital-accent hover:underline">Edit</button>
+          </Link>
+          <button
+            onClick={() => handleDelete(row.original.id)}
+            className="text-red-600 hover:underline"
+          >
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteClinicalNote(id);
+      setData(data.filter(note => note.id !== id));
+    } catch (error) {
+      console.error('Error deleting clinical note:', error);
+    }
   };
 
   return (
-    <Container maxWidth="xl" className={styles.container}>
-      <Typography variant="h4" gutterBottom className={styles.title}>
-        Clinical Records
-      </Typography>
-      <Paper elevation={3} className={styles.paper}>
-        <Box className={styles.tabsWrapper}>
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            className={styles.tabs}
-            sx={{
-              '& .MuiTabs-flexContainer': {
-                flexWrap: 'nowrap',
-              },
-              '& .MuiTab-root': {
-                minWidth: { xs: 100, sm: 120 },
-                fontSize: { xs: '0.8rem', sm: '0.875rem' },
-              },
-            }}
-          >
-            <Tab label="Outpatient" value="outpatient" />
-            <Tab label="Inpatient" value="inpatient" />
-            <Tab label="ER" value="emergency" />
-          </Tabs>
-        </Box>
-        <Box className={styles.content}>
-          {activeTab === 'outpatient' && <OutPatientRecords patients={patients} />}
-          {activeTab === 'inpatient' && <InpatientRecords patients={patients} />}
-          {activeTab === 'emergency' && <EmergencyRecords patients={patients} />}
-        </Box>
-      </Paper>
-    </Container>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Clinical Notes</h1>
+        <Link href="/clinical/notes/new">
+          <button className="bg-hospital-accent text-white px-4 py-2 rounded">
+            Add New Note
+          </button>
+        </Link>
+      </div>
+      <DataTable
+        columns={columns}
+        data={data}
+        loading={loading}
+        onRowClick={(row) => router.push(`/clinical/notes/${row.original.id}`)}
+      />
+    </div>
   );
 }
