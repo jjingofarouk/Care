@@ -1,4 +1,4 @@
-// lib/redis.js
+// lib/redis.js (updated)
 import Redis from 'ioredis';
 
 const redis = new Redis(process.env.REDIS_URL);
@@ -6,10 +6,14 @@ const redis = new Redis(process.env.REDIS_URL);
 export async function getCachedData(key, fetchFn, ttl = 300) {
   try {
     const cached = await redis.get(key);
-    if (cached) return JSON.parse(cached);
+    if (cached) {
+      console.log('Cache hit for:', key);
+      return JSON.parse(cached);
+    }
 
+    console.log('Cache miss for:', key);
     const data = await fetchFn();
-    await redis.set(key, JSON.stringify(data), 'EX', ttl); // Cache for 5 minutes
+    await redis.set(key, JSON.stringify(data), 'EX', ttl);
     return data;
   } catch (error) {
     console.error('Redis cache error:', error);
@@ -19,8 +23,21 @@ export async function getCachedData(key, fetchFn, ttl = 300) {
 
 export async function invalidateCache(key) {
   try {
-    await redis.del(key);
+    const deletedCount = await redis.del(key);
+    console.log(`Invalidated cache for ${key}, deleted: ${deletedCount}`);
   } catch (error) {
     console.error('Redis invalidate error:', error);
+  }
+}
+
+export async function invalidateCachePattern(pattern) {
+  try {
+    const keys = await redis.keys(pattern);
+    if (keys.length > 0) {
+      const deletedCount = await redis.del(...keys);
+      console.log(`Invalidated ${deletedCount} cache entries matching pattern: ${pattern}`);
+    }
+  } catch (error) {
+    console.error('Redis invalidate pattern error:', error);
   }
 }
