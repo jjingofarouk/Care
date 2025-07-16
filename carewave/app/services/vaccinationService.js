@@ -1,54 +1,39 @@
 // app/services/vaccinationService.js
+import axios from 'axios';
+
 export const vaccinationService = {
   async getVaccinations() {
-    const response = await fetch('/api/vaccination');
-    if (!response.ok) throw new Error('Failed to fetch vaccinations');
-    return response.json();
+    const response = await axios.get('/api/vaccination');
+    return response.data;
   },
 
   async getVaccination(id) {
-    const response = await fetch(`/api/vaccination/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch vaccination');
-    return response.json();
+    const response = await axios.get(`/api/vaccination/${id}`);
+    return response.data;
   },
 
   async createVaccination(data) {
-    const response = await fetch('/api/vaccination', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to create vaccination');
-    return response.json();
+    const response = await axios.post('/api/vaccination', data);
+    return response.data;
   },
 
   async updateVaccination(id, data) {
-    const response = await fetch(`/api/vaccination/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to update vaccination');
-    return response.json();
+    const response = await axios.put(`/api/vaccination/${id}`, data);
+    return response.data;
   },
 
   async deleteVaccination(id) {
-    const response = await fetch(`/api/vaccination/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Failed to delete vaccination');
-    return response.json();
+    const response = await axios.delete(`/api/vaccination/${id}`);
+    return response.data;
   },
 
   async getVaccines() {
-    const response = await fetch('/api/vaccination/vaccines');
-    if (!response.ok) throw new Error('Failed to fetch vaccines');
-    return response.json();
+    const response = await axios.get('/api/vaccination/vaccines');
+    return response.data;
   },
 
   async getSchedules() {
-    const response = await fetch('/api/vaccination/schedules');
-    if (!response.ok) throw new Error('Failed to fetch schedules');
-    return response.json();
+    const response = await axios.get('/api/vaccination/schedules');
+    return response.data;
   },
 };
