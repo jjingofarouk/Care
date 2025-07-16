@@ -1,35 +1,33 @@
-// middleware.js (updated)
+// middleware.js (final version)
 import { NextResponse } from 'next/server';
-import { getCachedData, invalidateCache } from '@/lib/redis';
+import { invalidateCache, invalidateCachePattern } from '@/lib/redis';
 
 export async function middleware(request) {
   const { pathname, method } = request.nextUrl;
 
-  if (pathname.startsWith('/api/laboratory/')) {
-    const cacheKey = `${method}:${pathname}`;
+  // Only handle cache invalidation for mutating operations on all API routes
+  if (pathname.startsWith('/api/') && ['POST', 'PUT', 'DELETE'].includes(method)) {
     try {
-      // For GET requests, check cache
-      if (method === 'GET') {
-        const cachedResponse = await getCachedData(cacheKey, async () => {
-          const response = await fetch(request);
-          if (!response.ok) throw new Error('Non-200 response');
-          return await response.json();
-        });
-        return NextResponse.json(cachedResponse);
+      // Invalidate specific patterns based on the path
+      const pathParts = pathname.split('/');
+      const basePath = pathParts.slice(0, -1).join('/');
+      
+      // Invalidate specific resource
+      await invalidateCache(`GET:${pathname}`);
+      await invalidateCache(`GET:${pathname}?*`);
+      
+      // Invalidate list endpoint
+      await invalidateCache(`GET:${basePath}`);
+      await invalidateCache(`GET:${basePath}?*`);
+      
+      // For dynamic routes with IDs, also invalidate the collection
+      if (pathname.match(/\/\d+$/)) {
+        await invalidateCachePattern(`GET:${basePath}*`);
       }
-
-      // For POST, PUT, DELETE, invalidate cache and proceed
-      if (['POST', 'PUT', 'DELETE'].includes(method)) {
-        // Invalidate specific cache (e.g., for /api/laboratory/tests/[id])
-        const basePath = pathname.split('/').slice(0, -1).join('/'); // e.g., /api/laboratory/tests
-        await invalidateCache(`GET:${pathname}`); // Invalidate specific resource
-        await invalidateCache(`GET:${basePath}`); // Invalidate list endpoint
-      }
-
-      return NextResponse.next();
+      
+      console.log(`Cache invalidation triggered for ${method} ${pathname}`);
     } catch (error) {
-      console.error('Middleware cache error:', error);
-      return NextResponse.next();
+      console.error('Middleware cache invalidation error:', error);
     }
   }
 
@@ -37,5 +35,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: '/api/laboratory/:path*',
+  matcher: '/api/:path*',
 };
