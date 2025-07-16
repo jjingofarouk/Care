@@ -9,9 +9,6 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -22,10 +19,112 @@ import {
   Filter,
   X,
   Calendar,
-  Search
+  Search,
+  Check
 } from 'lucide-react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+
+// Custom Button Component
+const Button = ({ 
+  children, 
+  variant = 'default', 
+  size = 'md', 
+  disabled = false, 
+  onClick,
+  className = '',
+  ...props 
+}) => {
+  const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
+  
+  const variants = {
+    default: 'bg-white text-[var(--hospital-gray-700)] border border-[var(--hospital-gray-300)] hover:bg-[var(--hospital-gray-50)] focus:ring-[var(--hospital-accent)]',
+    outline: 'bg-transparent text-[var(--hospital-gray-700)] border border-[var(--hospital-gray-300)] hover:bg-[var(--hospital-gray-50)] focus:ring-[var(--hospital-accent)]',
+    ghost: 'bg-transparent text-[var(--hospital-gray-700)] hover:bg-[var(--hospital-gray-100)] focus:ring-[var(--hospital-accent)]',
+    link: 'bg-transparent text-[var(--hospital-accent)] hover:text-[var(--hospital-accent-dark)] underline-offset-4 hover:underline',
+    primary: 'bg-[var(--hospital-accent)] text-white hover:bg-[var(--hospital-accent-dark)] focus:ring-[var(--hospital-accent)]',
+    secondary: 'bg-[var(--hospital-gray-200)] text-[var(--hospital-gray-800)] hover:bg-[var(--hospital-gray-300)] focus:ring-[var(--hospital-gray-400)]'
+  };
+  
+  const sizes = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base'
+  };
+  
+  const disabledStyles = disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+  
+  return (
+    <button
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${disabledStyles} ${className}`}
+      disabled={disabled}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+// Custom Input Component
+const Input = ({ 
+  placeholder, 
+  value, 
+  onChange, 
+  className = '',
+  disabled = false,
+  type = 'text',
+  ...props 
+}) => {
+  const baseStyles = 'flex h-10 w-full rounded-md border border-[var(--hospital-gray-300)] bg-white px-3 py-2 text-sm text-[var(--hospital-gray-900)] placeholder:text-[var(--hospital-gray-400)] focus:outline-none focus:ring-2 focus:ring-[var(--hospital-accent)] focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200';
+  
+  return (
+    <input
+      type={type}
+      className={`${baseStyles} ${className}`}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      {...props}
+    />
+  );
+};
+
+// Custom Checkbox Component
+const Checkbox = ({ 
+  checked, 
+  onCheckedChange, 
+  disabled = false,
+  className = '',
+  ...props 
+}) => {
+  return (
+    <div className="relative">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onCheckedChange(e.target.checked)}
+        disabled={disabled}
+        className="sr-only"
+        {...props}
+      />
+      <div
+        className={`
+          h-4 w-4 rounded border-2 border-[var(--hospital-gray-400)] bg-white cursor-pointer transition-all duration-200
+          ${checked ? 'bg-[var(--hospital-accent)] border-[var(--hospital-accent)]' : 'hover:border-[var(--hospital-gray-500)]'}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+          ${className}
+        `}
+        onClick={() => !disabled && onCheckedChange(!checked)}
+      >
+        {checked && (
+          <Check className="h-3 w-3 text-white absolute top-0.5 left-0.5 transform -translate-x-0.5 -translate-y-0.5" />
+        )}
+      </div>
+    </div>
+  );
+};
 
 export function DataTable({ 
   columns, 
@@ -186,16 +285,16 @@ export function DataTable({
 
   // Loading skeleton
   const LoadingSkeleton = () => (
-    <div className="bg-hospital-white rounded-md shadow-md overflow-hidden">
+    <div className="bg-[var(--hospital-white)] rounded-md shadow-[var(--shadow-md)] overflow-hidden">
       <div className="p-4">
         <Skeleton height={40} className="mb-4 max-w-sm" />
       </div>
       <div className="min-w-full">
-        <div className="bg-hospital-gray-50 px-6 py-3">
+        <div className="bg-[var(--hospital-gray-50)] px-6 py-3">
           <Skeleton height={20} count={1} />
         </div>
         {[...Array(5)].map((_, i) => (
-          <div key={i} className={`px-6 py-4 ${i % 2 === 0 ? 'bg-hospital-white' : 'bg-hospital-gray-50'}`}>
+          <div key={i} className={`px-6 py-4 ${i % 2 === 0 ? 'bg-[var(--hospital-white)]' : 'bg-[var(--hospital-gray-50)]'}`}>
             <Skeleton height={16} count={1} />
           </div>
         ))}
@@ -211,13 +310,13 @@ export function DataTable({
   }
 
   return (
-    <div className="bg-hospital-white rounded-md shadow-md overflow-hidden">
+    <div className="bg-[var(--hospital-white)] rounded-md shadow-[var(--shadow-md)] overflow-hidden">
       {/* Toolbar */}
-      <div className="p-4 border-b border-hospital-gray-200">
+      <div className="p-4 border-b border-[var(--hospital-gray-200)]">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex-1 max-w-sm">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-hospital-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--hospital-gray-400)]" />
               <Input
                 placeholder="Search all columns..."
                 value={globalFilter ?? ''}
@@ -275,15 +374,15 @@ export function DataTable({
 
         {/* Selection Info */}
         {enableRowSelection && Object.keys(rowSelection).length > 0 && (
-          <div className="mt-3 p-2 bg-blue-50 rounded-md">
-            <span className="text-sm text-blue-700">
+          <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
+            <span className="text-sm text-blue-700 font-medium">
               {Object.keys(rowSelection).length} row(s) selected
             </span>
             <Button
               variant="link"
               size="sm"
               onClick={() => setRowSelection({})}
-              className="ml-2 text-blue-700"
+              className="ml-2 text-blue-700 hover:text-blue-800"
             >
               Clear selection
             </Button>
@@ -292,9 +391,9 @@ export function DataTable({
 
         {/* Column Manager */}
         {showColumnManager && enableColumnManagement && (
-          <div className="mt-3 p-3 bg-hospital-gray-50 rounded-md">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-medium text-sm">Manage Columns</h3>
+          <div className="mt-3 p-4 bg-[var(--hospital-gray-50)] rounded-md border border-[var(--hospital-gray-200)]">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold text-sm text-[var(--hospital-gray-700)]">Manage Columns</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -303,16 +402,16 @@ export function DataTable({
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {table.getAllColumns()
                 .filter(column => column.getCanHide())
                 .map(column => (
-                  <label key={column.id} className="flex items-center space-x-2 text-sm">
+                  <label key={column.id} className="flex items-center space-x-2 text-sm cursor-pointer hover:bg-[var(--hospital-gray-100)] p-2 rounded">
                     <Checkbox
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) => column.toggleVisibility(!!value)}
                     />
-                    <span>{column.columnDef.header}</span>
+                    <span className="text-[var(--hospital-gray-700)]">{column.columnDef.header}</span>
                   </label>
                 ))}
             </div>
@@ -321,9 +420,9 @@ export function DataTable({
 
         {/* Advanced Filters */}
         {showAdvancedFilters && enableAdvancedFiltering && (
-          <div className="mt-3 p-3 bg-hospital-gray-50 rounded-md">
+          <div className="mt-3 p-4 bg-[var(--hospital-gray-50)] rounded-md border border-[var(--hospital-gray-200)]">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-medium text-sm">Advanced Filters</h3>
+              <h3 className="font-semibold text-sm text-[var(--hospital-gray-700)]">Advanced Filters</h3>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -347,7 +446,7 @@ export function DataTable({
                 .filter(column => column.getCanFilter() && column.id !== 'select')
                 .map(column => (
                   <div key={column.id} className="space-y-2">
-                    <label className="text-xs font-medium text-hospital-gray-600">
+                    <label className="text-xs font-medium text-[var(--hospital-gray-600)]">
                       {column.columnDef.header}
                     </label>
                     <Input
@@ -365,23 +464,23 @@ export function DataTable({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-hospital-gray-200">
-          <thead className="bg-hospital-gray-50">
+        <table className="min-w-full divide-y divide-[var(--hospital-gray-200)]">
+          <thead className="bg-[var(--hospital-gray-50)]">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-hospital-gray-600 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-[var(--hospital-gray-600)] uppercase tracking-wider"
                   >
                     <div
-                      className="flex items-center gap-2 cursor-pointer select-none"
+                      className="flex items-center gap-2 cursor-pointer select-none hover:text-[var(--hospital-gray-800)] transition-colors duration-200"
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {{
-                        asc: ' ↑',
-                        desc: ' ↓',
+                        asc: <span className="text-[var(--hospital-accent)] font-bold">↑</span>,
+                        desc: <span className="text-[var(--hospital-accent)] font-bold">↓</span>,
                       }[header.column.getIsSorted()] ?? null}
                     </div>
                   </th>
@@ -389,21 +488,21 @@ export function DataTable({
               </tr>
             ))}
           </thead>
-          <tbody className="bg-hospital-white divide-y divide-hospital-gray-200">
+          <tbody className="bg-[var(--hospital-white)] divide-y divide-[var(--hospital-gray-200)]">
             {table.getRowModel().rows.map((row, index) => (
               <tr
                 key={row.id}
                 onClick={() => onRowClick && onRowClick(row)}
                 className={`
-                  hover:bg-hospital-gray-100 cursor-pointer transition-colors duration-200
-                  ${enableRowStriping && index % 2 === 1 ? 'bg-hospital-gray-50' : 'bg-hospital-white'}
-                  ${row.getIsSelected() ? 'bg-blue-50' : ''}
+                  hover:bg-[var(--hospital-gray-100)] cursor-pointer transition-colors duration-200
+                  ${enableRowStriping && index % 2 === 1 ? 'bg-[var(--hospital-gray-50)]' : 'bg-[var(--hospital-white)]'}
+                  ${row.getIsSelected() ? 'bg-blue-50 border-l-4 border-[var(--hospital-accent)]' : ''}
                 `}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-hospital-gray-900"
+                    className="px-6 py-4 whitespace-nowrap text-sm text-[var(--hospital-gray-900)]"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
@@ -415,7 +514,7 @@ export function DataTable({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between p-4 bg-hospital-gray-50">
+      <div className="flex items-center justify-between p-4 bg-[var(--hospital-gray-50)] border-t border-[var(--hospital-gray-200)]">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -433,7 +532,7 @@ export function DataTable({
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-hospital-gray-600">
+          <span className="text-sm text-[var(--hospital-gray-600)] font-medium px-2">
             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
           </span>
           <Button
@@ -455,13 +554,13 @@ export function DataTable({
         </div>
         
         <div className="flex items-center gap-4">
-          <span className="text-sm text-hospital-gray-600">
+          <span className="text-sm text-[var(--hospital-gray-600)] font-medium">
             {table.getFilteredRowModel().rows.length} total rows
           </span>
           <select
             value={table.getState().pagination.pageSize}
             onChange={(e) => table.setPageSize(Number(e.target.value))}
-            className="p-2 border rounded-md text-sm text-hospital-gray-600"
+            className="px-3 py-2 border border-[var(--hospital-gray-300)] rounded-md text-sm text-[var(--hospital-gray-600)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--hospital-accent)] focus:border-transparent transition-all duration-200"
           >
             {[10, 20, 30, 40, 50].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
