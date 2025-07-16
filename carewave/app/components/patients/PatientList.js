@@ -1,4 +1,5 @@
-"use client";
+// File: app/patients/page.js
+'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { DataTable } from '@/components/DataTable';
@@ -8,19 +9,18 @@ import { useRouter } from 'next/navigation';
 export default function PatientList() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     fetchPatients();
-  }, [search]);
+  }, []);
 
   const fetchPatients = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
+      const response = await fetch('/api/patients?include=addresses,nextOfKin,insuranceInfo');
       if (!response.ok) {
         throw new Error(`Failed to fetch patients: ${response.status} ${response.statusText}`);
       }
@@ -247,9 +247,7 @@ export default function PatientList() {
         const hasAccount = !!row.original.userId;
         return (
           <span className={`badge ${hasAccount ? 'badge-success' : 'badge-neutral'}`}>
-            {hasAccount
-
- ? 'Yes' : 'No'}
+            {hasAccount ? 'Yes' : 'No'}
           </span>
         );
       }
