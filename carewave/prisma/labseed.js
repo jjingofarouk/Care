@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
-
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+
+const { v4: uuidv4 } = require('uuid');
 
 // Generate meaningful IDs
 const generateLabTestId = (index) => `LAB-TEST-${String(index).padStart(4, '0')}`;
