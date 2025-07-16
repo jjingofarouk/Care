@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export async function GET(request, { params }) {
   try {
     const result = await prisma.labResult.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Treat as string, remove parseInt
       include: {
         labRequest: {
           include: {
@@ -27,7 +27,7 @@ export async function PUT(request, { params }) {
   try {
     const data = await request.json();
     const result = await prisma.labResult.update({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Treat as string, remove parseInt
       data: {
         result: data.result,
         resultedAt: new Date(data.resultedAt),
@@ -42,7 +42,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     await prisma.labResult.delete({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Treat as string, remove parseInt
     });
     return NextResponse.json({ message: 'Lab result deleted' });
   } catch (error) {
