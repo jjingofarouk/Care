@@ -10,11 +10,14 @@ export async function GET(request, { params }) {
       where: { id: params.id },
       include: { patient: true, vaccine: true, immunizationSchedule: true },
     });
+    
     if (!vaccination) {
-      return NextResponse.json({ error: 'Vaccination not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Vaccination record not found' }, { status: 404 });
     }
+    
     return NextResponse.json(vaccination);
   } catch (error) {
+    console.error('Error fetching vaccination:', error);
     return NextResponse.json({ error: 'Error fetching vaccination' }, { status: 500 });
   }
 }
@@ -27,12 +30,13 @@ export async function PUT(request, { params }) {
       data: {
         patientId: data.patientId,
         vaccineId: data.vaccineId,
-        immunizationScheduleId: data.immunizationScheduleId,
+        immunizationScheduleId: data.immunizationScheduleId || null,
         administeredDate: new Date(data.administeredDate),
       },
     });
     return NextResponse.json(vaccination);
   } catch (error) {
+    console.error('Error updating vaccination:', error);
     return NextResponse.json({ error: 'Error updating vaccination' }, { status: 500 });
   }
 }
@@ -42,8 +46,9 @@ export async function DELETE(request, { params }) {
     await prisma.vaccinationRecord.delete({
       where: { id: params.id },
     });
-    return NextResponse.json({ message: 'Vaccination deleted' });
+    return NextResponse.json({ message: 'Vaccination record deleted successfully' });
   } catch (error) {
+    console.error('Error deleting vaccination:', error);
     return NextResponse.json({ error: 'Error deleting vaccination' }, { status: 500 });
   }
 }
