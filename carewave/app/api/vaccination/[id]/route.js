@@ -1,3 +1,4 @@
+// app/api/vaccination/[id]/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
@@ -5,38 +6,44 @@ const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
-    const vaccinationRecord = await prisma.vaccinationRecord.findUnique({
-      where: { id: parseInt(params.id) },
+    const vaccination = await prisma.vaccinationRecord.findUnique({
+      where: { id: params.id },
+      include: { patient: true, vaccine: true, immunizationSchedule: true },
     });
-    if (!vaccinationRecord) {
-      return NextResponse.json({ error: 'Vaccination record not found' }, { status: 404 });
+    if (!vaccination) {
+      return NextResponse.json({ error: 'Vaccination not found' }, { status: 404 });
     }
-    return NextResponse.json(vaccinationRecord);
+    return NextResponse.json(vaccination);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch vaccination record' }, { status: 500 });
+    return NextResponse.json({ error: 'Error fetching vaccination' }, { status: 500 });
   }
 }
 
 export async function PUT(request, { params }) {
   try {
     const data = await request.json();
-    const vaccinationRecord = await prisma.vaccinationRecord.update({
-      where: { id: parseInt(params.id) },
-      data,
+    const vaccination = await prisma.vaccinationRecord.update({
+      where: { id: params.id },
+      data: {
+        patientId: data.patientId,
+        vaccineId: data.vaccineId,
+        immunizationScheduleId: data.immunizationScheduleId,
+        administeredDate: new Date(data.administeredDate),
+      },
     });
-    return NextResponse.json(vaccinationRecord);
+    return NextResponse.json(vaccination);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update vaccination record' }, { status: 500 });
+    return NextResponse.json({ error: 'Error updating vaccination' }, { status: 500 });
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
     await prisma.vaccinationRecord.delete({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id },
     });
-    return NextResponse.json({ message: 'Vaccination record deleted' });
+    return NextResponse.json({ message: 'Vaccination deleted' });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete vaccination record' }, { status: 500 });
+    return NextResponse.json({ error: 'Error deleting vaccination' }, { status: 500 });
   }
 }
