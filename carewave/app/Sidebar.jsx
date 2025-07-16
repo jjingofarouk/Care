@@ -97,7 +97,7 @@ const roleBasedNavItems = {
     { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
     { name: 'Appointments', path: '/appointments', icon: Calendar, category: 'patient-care' },
     { name: 'Patient Registration', path: '/patient-registration', icon: UserCheck, category: 'patient-care' },
-    { name: 'Queue Management', path: '/queue-mgmt', icon: Users, category: 'patient-care' },
+    { name: 'Queue Management', path: '/queue', icon: Users, category: 'patient-care' },
     { name: 'Helpdesk', path: '/helpdesk', icon: Headphones, category: 'support' },
   ],
   RADIOLOGIST: [
@@ -120,7 +120,7 @@ const roleBasedNavItems = {
     { name: 'Appointments', path: '/appointments', icon: Calendar, category: 'patient-care' },
     { name: 'ADT', path: '/adt', icon: ClipboardList, category: 'patient-care' },
     { name: 'Emergency', path: '/emergency', icon: AlertCircle, category: 'patient-care' },
-    { name: 'Queue Management', path: '/queue-mgmt', icon: Users, category: 'patient-care' },
+    { name: 'Queue Management', path: '/queue', icon: Users, category: 'patient-care' },
     { name: 'Clinical', path: '/clinical', icon: Stethoscope, category: 'clinical' },
     { name: 'Laboratory', path: '/laboratory', icon: Badge, category: 'clinical' },
     { name: 'Radiology', path: '/radiology', icon: ScanLine, category: 'clinical' },
