@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export async function GET(request, { params }) {
   try {
     const test = await prisma.labTest.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Remove parseInt, treat as string
     });
     if (!test) return NextResponse.json({ error: 'Lab test not found' }, { status: 404 });
     return NextResponse.json(test);
@@ -19,7 +19,7 @@ export async function PUT(request, { params }) {
   try {
     const data = await request.json();
     const test = await prisma.labTest.update({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Remove parseInt, treat as string
       data: {
         name: data.name,
         description: data.description,
@@ -34,7 +34,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     await prisma.labTest.delete({
-      where: { id: parseInt(params.id) },
+      where: { id: params.id }, // Remove parseInt, treat as string
     });
     return NextResponse.json({ message: 'Lab test deleted' });
   } catch (error) {
