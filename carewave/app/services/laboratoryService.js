@@ -1,159 +1,181 @@
+import axios from 'axios';
+
 export async function getLabTests() {
-  const response = await fetch('/api/laboratory/tests');
-  if (!response.ok) throw new Error('Failed to fetch lab tests');
-  return response.json();
+  try {
+    const response = await axios.get('/api/laboratory/tests');
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch lab tests');
+  }
 }
 
 export async function getLabTest(id) {
-  const response = await fetch(`/api/laboratory/tests/${id}`);
-  if (!response.ok) throw new Error('Failed to fetch lab test');
-  return response.json();
+  try {
+    const response = await axios.get(`/api/laboratory/tests/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch lab test');
+  }
 }
 
 export async function createLabTest(data) {
-  const response = await fetch('/api/laboratory/tests', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create lab test');
-  return response.json();
+  try {
+    const response = await axios.post('/api/laboratory/tests', data);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to create lab test');
+  }
 }
 
 export async function updateLabTest(id, data) {
-  const response = await fetch(`/api/laboratory/tests/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to update lab test');
-  return response.json();
+  try {
+    const response = await axios.put(`/api/laboratory/tests/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to update lab test');
+  }
 }
 
 export async function deleteLabTest(id) {
-  const response = await fetch(`/api/laboratory/tests/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) throw new Error('Failed to delete lab test');
-  return response.json();
+  try {
+    const response = await axios.delete(`/api/laboratory/tests/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to delete lab test');
+  }
 }
 
 export async function getLabRequests() {
-  const response = await fetch('/api/laboratory/requests');
-  if (!response.ok) throw new Error('Failed to fetch lab requests');
-  return response.json();
+  try {
+    const response = await axios.get('/api/laboratory/requests');
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch lab requests');
+  }
 }
 
 export async function getLabRequest(id) {
-  const response = await fetch(`/api/laboratory/requests/${id}`);
-  if (!response.ok) throw new Error('Failed to fetch lab request');
-  return response.json();
+  try {
+    const response = await axios.get(`/api/laboratory/requests/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch lab request');
+  }
 }
 
 export async function createLabRequest(data) {
-  const response = await fetch('/api/laboratory/requests', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create lab request');
-  return response.json();
+  try {
+    const response = await axios.post('/api/laboratory/requests', data);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to create lab request');
+  }
 }
 
 export async function updateLabRequest(id, data) {
-  const response = await fetch(`/api/laboratory/requests/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to update lab request');
-  return response.json();
+  try {
+    const response = await axios.put(`/api/laboratory/requests/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to update lab request');
+  }
 }
 
 export async function deleteLabRequest(id) {
-  const response = await fetch(`/api/laboratory/requests/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) throw new Error('Failed to delete lab request');
-  return response.json();
+  try {
+    const response = await axios.delete(`/api/laboratory/requests/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to delete lab request');
+  }
 }
 
 export async function getLabResults() {
-  const response = await fetch('/api/laboratory/results');
-  if (!response.ok) throw new Error('Failed to fetch lab results');
-  return response.json();
+  try {
+    const response = await axios.get('/api/laboratory/results');
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch lab results');
+  }
 }
 
 export async function getLabResult(id) {
-  const response = await fetch(`/api/laboratory/results/${id}`);
-  if (!response.ok) throw new Error('Failed to fetch lab result');
-  return response.json();
+  try {
+    const response = await axios.get(`/api/laboratory/results/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch lab result');
+  }
 }
 
 export async function createLabResult(data) {
-  const response = await fetch('/api/laboratory/results', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create lab result');
-  return response.json();
+  try {
+    const response = await axios.post('/api/laboratory/results', data);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to create lab result');
+  }
 }
 
 export async function updateLabResult(id, data) {
-  const response = await fetch(`/api/laboratory/results/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to update lab result');
-  return response.json();
+  try {
+    const response = await axios.put(`/api/laboratory/results/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to update lab result');
+  }
 }
 
 export async function deleteLabResult(id) {
-  const response = await fetch(`/api/laboratory/results/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) throw new Error('Failed to delete lab result');
-  return response.json();
+  try {
+    const response = await axios.delete(`/api/laboratory/results/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to delete lab result');
+  }
 }
 
 export async function getSamples() {
-  const response = await fetch('/api/laboratory/samples');
-  if (!response.ok) throw new Error('Failed to fetch samples');
-  return response.json();
+  try {
+    const response = await axios.get('/api/laboratory/samples');
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch samples');
+  }
 }
 
 export async function getSample(id) {
-  const response = await fetch(`/api/laboratory/samples/${id}`);
-  if (!response.ok) throw new Error('Failed to fetch sample');
-  return response.json();
+  try {
+    const response = await axios.get(`/api/laboratory/samples/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch sample');
+  }
 }
 
 export async function createSample(data) {
-  const response = await fetch('/api/laboratory/samples', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create sample');
-  return response.json();
+  try {
+    const response = await axios.post('/api/laboratory/samples', data);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to create sample');
+  }
 }
 
 export async function updateSample(id, data) {
-  const response = await fetch(`/api/laboratory/samples/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to update sample');
-  return response.json();
+  try {
+    const response = await axios.put(`/api/laboratory/samples/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to update sample');
+  }
 }
 
 export async function deleteSample(id) {
-  const response = await fetch(`/api/laboratory/samples/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) throw new Error('Failed to delete sample');
-  return response.json();
+  try {
+    const response = await axios.delete(`/api/laboratory/samples/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to delete sample');
+  }
 }
