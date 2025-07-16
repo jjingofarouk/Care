@@ -1,27 +1,26 @@
-// components/patients/PatientList.js
-"use client";
+// File: app/patients/page.js
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import { Search, Add, Edit, Delete, Visibility } from '@mui/icons-material';
+import React, { useState, useEffect, useMemo } from 'react';
+import { DataTable } from '@/components/DataTable';
+import { Add, Edit, Delete, Visibility } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
 export default function PatientList() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     fetchPatients();
-  }, [search]);
+  }, []);
 
   const fetchPatients = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/patients?search=${encodeURIComponent(search)}&include=addresses,nextOfKin,insuranceInfo`);
+      const response = await fetch('/api/patients?include=addresses,nextOfKin,insuranceInfo');
       if (!response.ok) {
         throw new Error(`Failed to fetch patients: ${response.status} ${response.statusText}`);
       }
@@ -135,154 +134,133 @@ export default function PatientList() {
     return parts.length > 0 ? parts.join(', ') : '-';
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     { 
-      field: 'id', 
-      headerName: 'ID', 
-      width: 120,
-      sortable: true,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell'
+      accessorKey: 'id', 
+      header: 'ID',
+      enableSorting: true,
+      enableHiding: true,
+      enableColumnFilter: true
     },
     { 
-      field: 'firstName', 
-      headerName: 'First Name', 
-      width: 130,
-      sortable: true,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell'
+      accessorKey: 'firstName', 
+      header: 'First Name',
+      enableSorting: true,
+      enableHiding: true,
+      enableColumnFilter: true
     },
     { 
-      field: 'lastName', 
-      headerName: 'Last Name', 
-      width: 130,
-      sortable: true,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell'
+      accessorKey: 'lastName', 
+      header: 'Last Name',
+      enableSorting: true,
+      enableHiding: true,
+      enableColumnFilter: true
     },
     { 
-      field: 'email', 
-      headerName: 'Email', 
-      width: 180,
-      sortable: true,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell'
+      accessorKey: 'email', 
+      header: 'Email',
+      enableSorting: true,
+      enableHiding: true,
+      enableColumnFilter: true
     },
     {
-      field: 'age',
-      headerName: 'Age',
-      width: 80,
-      sortable: true,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell',
-      valueGetter: (params) => calculateAge(params?.row?.dateOfBirth),
+      accessorKey: 'age',
+      header: 'Age',
+      enableSorting: true,
+      enableHiding: true,
+      enableColumnFilter: true,
+      cell: ({ row }) => calculateAge(row.original.dateOfBirth)
     },
     { 
-      field: 'gender', 
-      headerName: 'Gender', 
-      width: 100,
-      sortable: true,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell'
+      accessorKey: 'gender', 
+      header: 'Gender',
+      enableSorting: true,
+      enableHiding: true,
+      enableColumnFilter: true
     },
     { 
-      field: 'phone', 
-      headerName: 'Phone', 
-      width: 130,
-      sortable: true,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell'
+      accessorKey: 'phone', 
+      header: 'Phone',
+      enableSorting: true,
+      enableHiding: true,
+      enableColumnFilter: true
     },
     {
-      field: 'address',
-      headerName: 'Address',
-      width: 200,
-      sortable: false,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell',
-      renderCell: (params) => (
-        <span className="text-[var(--hospital-gray-700)] text-sm">{formatAddress(params?.row?.address)}</span>
-      ),
+      accessorKey: 'address',
+      header: 'Address',
+      enableSorting: false,
+      enableHiding: true,
+      enableColumnFilter: false,
+      cell: ({ row }) => (
+        <span className="text-hospital-gray-700 text-sm">{formatAddress(row.original.address)}</span>
+      )
     },
     {
-      field: 'nextOfKin',
-      headerName: 'Next of Kin',
-      width: 150,
-      sortable: false,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell',
-      renderCell: (params) => {
-        const nextOfKin = params?.row?.nextOfKin;
-        
+      accessorKey: 'nextOfKin',
+      header: 'Next of Kin',
+      enableSorting: false,
+      enableHiding: true,
+      enableColumnFilter: false,
+      cell: ({ row }) => {
+        const nextOfKin = row.original.nextOfKin;
         if (!nextOfKin || !nextOfKin.name) {
-          return <span className="text-[var(--hospital-gray-500)] text-sm">-</span>;
+          return <span className="text-hospital-gray-500 text-sm">-</span>;
         }
-        
         return (
           <div className="flex flex-col">
-            <span className="font-medium text-[var(--hospital-gray-900)] text-sm">{nextOfKin.name}</span>
-            <span className="text-[var(--hospital-gray-600)] text-xs">{nextOfKin.relationship}</span>
+            <span className="font-medium text-hospital-gray-900 text-sm">{nextOfKin.name}</span>
+            <span className="text-hospital-gray-600 text-xs">{nextOfKin.relationship}</span>
           </div>
         );
-      },
+      }
     },
     {
-      field: 'insurance',
-      headerName: 'Insurance',
-      width: 150,
-      sortable: false,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell',
-      renderCell: (params) => {
-        const insurance = params?.row?.insurance;
-        
+      accessorKey: 'insurance',
+      header: 'Insurance',
+      enableSorting: false,
+      enableHiding: true,
+      enableColumnFilter: false,
+      cell: ({ row }) => {
+        const insurance = row.original.insurance;
         if (!insurance || !insurance.provider) {
-          return <span className="text-[var(--hospital-gray-500)] text-sm">-</span>;
+          return <span className="text-hospital-gray-500 text-sm">-</span>;
         }
-        
         const isExpired = insurance.expiryDate && new Date(insurance.expiryDate) < new Date();
-        
         return (
           <div className="flex flex-col">
-            <span className="font-medium text-[var(--hospital-gray-900)] text-sm">{insurance.provider}</span>
-            <span className="text-[var(--hospital-gray-600)] text-xs">{insurance.policyNumber}</span>
+            <span className="font-medium text-hospital-gray-900 text-sm">{insurance.provider}</span>
+            <span className="text-hospital-gray-600 text-xs">{insurance.policyNumber}</span>
             {isExpired && (
               <span className="badge badge-error mt-1">Expired</span>
             )}
           </div>
         );
-      },
+      }
     },
     {
-      field: 'hasUserAccount',
-      headerName: 'User Account',
-      width: 120,
-      sortable: true,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell',
-      renderCell: (params) => {
-        const hasAccount = !!params?.row?.userId;
-        
+      accessorKey: 'hasUserAccount',
+      header: 'User Account',
+      enableSorting: true,
+      enableHiding: true,
+      enableColumnFilter: true,
+      cell: ({ row }) => {
+        const hasAccount = !!row.original.userId;
         return (
           <span className={`badge ${hasAccount ? 'badge-success' : 'badge-neutral'}`}>
             {hasAccount ? 'Yes' : 'No'}
           </span>
         );
-      },
+      }
     },
     {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 150,
-      sortable: false,
-      filterable: false,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell',
-      renderCell: (params) => {
-        const patientId = params?.row?.id;
-        
+      accessorKey: 'actions',
+      header: 'Actions',
+      enableSorting: false,
+      enableHiding: false,
+      enableColumnFilter: false,
+      cell: ({ row }) => {
+        const patientId = row.original.id;
         if (!patientId) return null;
-        
         return (
           <div className="flex gap-1">
             <button
@@ -308,9 +286,13 @@ export default function PatientList() {
             </button>
           </div>
         );
-      },
-    },
-  ];
+      }
+    }
+  ], [router]);
+
+  const handleRowClick = (row) => {
+    router.push(`/patients/${row.original.id}`);
+  };
 
   return (
     <div className="card p-4 max-w-[100vw] overflow-x-auto min-h-screen">
@@ -323,19 +305,6 @@ export default function PatientList() {
           <Add className="w-5 h-5" />
           New Patient
         </button>
-      </div>
-      
-      <div className="mb-4 max-w-md">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--hospital-gray-400)]" />
-          <input
-            type="text"
-            placeholder="Search patients..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input pl-10 w-full"
-          />
-        </div>
       </div>
       
       {error && (
@@ -352,35 +321,17 @@ export default function PatientList() {
         </div>
       )}
       
-      <div className="table w-full">
-        {loading ? (
-          <div className="flex justify-center p-4">
-            <div className="loading-spinner" />
-          </div>
-        ) : (
-          <DataGrid
-            rows={patients}
-            columns={columns}
-            initialState={{
-              pagination: { paginationModel: { pageSize: 10 } },
-            }}
-            pageSizeOptions={[10, 25, 50]}
-            autoHeight
-            disableRowSelectionOnClick
-            getRowId={(row) => row.id}
-            classes={{
-              root: 'table',
-              columnHeaders: 'bg-[var(--hospital-gray-50)]',
-              row: 'hover:bg-[var(--hospital-gray-50)]',
-              cell: 'py-2'
-            }}
-            localeText={{
-              noRowsLabel: 'No patients found',
-              errorOverlayDefaultLabel: 'An error occurred while loading patients',
-            }}
-          />
-        )}
-      </div>
+      <DataTable
+        columns={columns}
+        data={patients}
+        loading={loading}
+        onRowClick={handleRowClick}
+        enableRowSelection={true}
+        enableColumnManagement={true}
+        enableExport={true}
+        enableAdvancedFiltering={true}
+        enableRowStriping={true}
+      />
     </div>
   );
 }
