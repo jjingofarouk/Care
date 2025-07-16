@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { DataTable } from '@/components/DataTable';
-import { Search, Add, Edit, Delete, Visibility } from '@mui/icons-material';
+import { Add, Edit, Delete, Visibility } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
 export default function PatientList() {
