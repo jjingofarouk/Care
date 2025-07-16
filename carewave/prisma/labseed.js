@@ -1,3 +1,4 @@
+// seedLaboratoryData.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -147,7 +148,6 @@ const generateLabResult = (labTestName) => {
     return templates[Math.floor(Math.random() * templates.length)];
   }
   
-  // Default results for tests not specifically defined
   const defaultResults = [
     'Normal',
     'Within normal limits',
@@ -180,15 +180,12 @@ const getRandomPatientId = () => {
 };
 
 async function seedLaboratoryData() {
-  console.log('🧪 Starting laboratory data seeding...');
-
   try {
-    // 1. Create Lab Tests (50 tests)
-    console.log('📝 Creating lab tests...');
+    // 1. Create Lab Tests
     const labTests = [];
     for (let i = 0; i < labTestsData.length; i++) {
       const labTest = {
-        id: generateLabTestId(i + 1),
+        id: uuidv4(),
         name: labTestsData[i].name,
         description: labTestsData[i].description,
         createdAt: randomDate(new Date('2023-01-01'), new Date('2024-12-31')),
@@ -202,15 +199,12 @@ async function seedLaboratoryData() {
       skipDuplicates: true
     });
 
-    console.log(`✅ Created ${labTests.length} lab tests`);
-
-    // 2. Create Samples (1200 samples to cover all lab requests)
-    console.log('🧪 Creating samples...');
+    // 2. Create Samples
     const samples = [];
     for (let i = 1; i <= 1200; i++) {
       const collectedAt = randomDate(new Date('2024-01-01'), new Date('2024-12-31'));
       const sample = {
-        id: generateSampleId(i),
+        id: uuidv4(),
         patientId: getRandomPatientId(),
         sampleType: getRandomElement(sampleTypes),
         collectedAt,
@@ -225,18 +219,15 @@ async function seedLaboratoryData() {
       skipDuplicates: true
     });
 
-    console.log(`✅ Created ${samples.length} samples`);
-
-    // 3. Create Lab Requests (1000 requests)
-    console.log('🔬 Creating lab requests...');
+    // 3. Create Lab Requests
     const labRequests = [];
     for (let i = 1; i <= 1000; i++) {
       const requestedAt = randomDate(new Date('2024-01-01'), new Date('2024-12-31'));
       const labRequest = {
-        id: generateLabRequestId(i),
+        id: uuidv4(),
         patientId: getRandomPatientId(),
         labTestId: getRandomElement(labTests).id,
-        sampleId: Math.random() > 0.1 ? generateSampleId(Math.floor(Math.random() * 1200) + 1) : null, // 90% have samples
+        sampleId: Math.random() > 0.1 ? samples[Math.floor(Math.random() * samples.length)].id : null,
         requestedAt,
         createdAt: requestedAt,
         updatedAt: new Date()
@@ -249,18 +240,15 @@ async function seedLaboratoryData() {
       skipDuplicates: true
     });
 
-    console.log(`✅ Created ${labRequests.length} lab requests`);
-
-    // 4. Create Lab Results (1000 results)
-    console.log('📊 Creating lab results...');
+    // 4. Create Lab Results
     const labResults = [];
     for (let i = 1; i <= 1000; i++) {
       const labRequest = labRequests[i - 1];
       const labTest = labTests.find(test => test.id === labRequest.labTestId);
-      const resultedAt = new Date(labRequest.requestedAt.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000); // 0-7 days after request
+      const resultedAt = new Date(labRequest.requestedAt.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000);
       
       const labResult = {
-        id: generateLabResultId(i),
+        id: uuidv4(),
         labRequestId: labRequest.id,
         result: generateLabResult(labTest.name),
         resultedAt,
@@ -275,32 +263,14 @@ async function seedLaboratoryData() {
       skipDuplicates: true
     });
 
-    console.log(`✅ Created ${labResults.length} lab results`);
-
-    // Summary
-    console.log('\n🎉 Laboratory data seeding completed!');
-    console.log('📈 Summary:');
-    console.log(`   • Lab Tests: ${labTests.length}`);
-    console.log(`   • Samples: ${samples.length}`);
-    console.log(`   • Lab Requests: ${labRequests.length}`);
-    console.log(`   • Lab Results: ${labResults.length}`);
-    console.log('\n💡 ID Formats:');
-    console.log('   • Lab Tests: LAB-TEST-0001 to LAB-TEST-0050');
-    console.log('   • Samples: SAMPLE-000001 to SAMPLE-001200');
-    console.log('   • Lab Requests: LAB-REQ-000001 to LAB-REQ-001000');
-    console.log('   • Lab Results: LAB-RES-000001 to LAB-RES-001000');
-
   } catch (error) {
-    console.error('❌ Error seeding laboratory data:', error);
     throw error;
   } finally {
     await prisma.$disconnect();
   }
 }
 
-// Run the seeder
 seedLaboratoryData()
   .catch((error) => {
-    console.error('❌ Seeding failed:', error);
     process.exit(1);
   });
