@@ -1,12 +1,13 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { DataTable } from '@/components/DataTable';
 import { getLabRequests, deleteLabRequest } from '@/services/laboratoryService';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
 
 export default function LabRequests() {
+  const router = useRouter();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,6 +24,20 @@ export default function LabRequests() {
     }
     fetchData();
   }, []);
+
+  const handleRowClick = (rowData) => {
+    // Navigate to the detail view when a row is clicked
+    router.push(`/laboratory/requests/${rowData.id}`);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteLabRequest(id);
+      setData(data.filter(request => request.id !== id));
+    } catch (error) {
+      console.error('Error deleting lab request:', error);
+    }
+  };
 
   const columns = [
     {
@@ -45,7 +60,7 @@ export default function LabRequests() {
     {
       header: 'Actions',
       cell: ({ row }) => (
-        <div className="flex space-x-2">
+        <div className="flex space-x-2" data-no-row-click>
           <Link href={`/laboratory/requests/${row.original.id}`} className="text-[var(--hospital-accent)] hover:text-[var(--hospital-accent-dark)] transition-colors">
             <Eye className="w-5 h-5" />
           </Link>
@@ -63,15 +78,6 @@ export default function LabRequests() {
     },
   ];
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteLabRequest(id);
-      setData(data.filter(request => request.id !== id));
-    } catch (error) {
-      console.error('Error deleting lab request:', error);
-    }
-  };
-
   return (
     <div className="animate-fade-in">
       <div className="flex justify-between items-center mb-6">
@@ -83,6 +89,7 @@ export default function LabRequests() {
           </button>
         </Link>
       </div>
+      
       {loading ? (
         <div className="card">
           <div className="p-6 space-y-4">
@@ -97,6 +104,7 @@ export default function LabRequests() {
             columns={columns}
             data={data}
             loading={loading}
+            onRowClick={handleRowClick}
             enableRowSelection={false}
             className="table"
           />
