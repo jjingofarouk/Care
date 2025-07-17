@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { TextField, Button, FormControl, Box, Typography, Autocomplete } from '@mui/material';
 import { Save, X, Calendar, User, TestTube, FlaskConical } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { createLabRequest } from '@/services/laboratoryService';
+import { createLabRequest biologyService';
 
 export default function LabRequestNew() {
   const router = useRouter();
@@ -40,10 +40,13 @@ export default function LabRequestNew() {
   useEffect(() => {
     async function fetchPatients() {
       try {
-        const response = await fetch(`/api/laboratory/requests?resource=patients${debouncedPatientSearch ? `&search=${encodeURIComponent(debouncedPatientSearch)}` : ''}`);
-        if (response.ok) {
-          setPatients(await response.json());
-        }
+        const response = await getPatients(debouncedPatientSearch);
+        setPatients(response.map(p => ({
+          id: p.id,
+          name: `${p.firstName} ${p.lastName}`,
+          firstName: p.firstName,
+          lastName: p.lastName
+        })));
       } catch (err) {
         console.error('Error fetching patients:', err);
       }
@@ -54,10 +57,8 @@ export default function LabRequestNew() {
   useEffect(() => {
     async function fetchLabTests() {
       try {
-        const response = await fetch(`/api/laboratory/requests?resource=labTests${debouncedLabTestSearch ? `&search=${encodeURIComponent(debouncedLabTestSearch)}` : ''}`);
-        if (response.ok) {
-          setLabTests(await response.json());
-        }
+        const response = await getLabTests(debouncedLabTestSearch);
+        setLabTests(response);
       } catch (err) {
         console.error('Error fetching lab tests:', err);
       }
@@ -68,10 +69,14 @@ export default function LabRequestNew() {
   useEffect(() => {
     async function fetchSamples() {
       try {
-        const response = await fetch(`/api/laboratory/requests?resource=samples${debouncedSampleSearch ? `&search=${encodeURIComponent(debouncedSampleSearch)}` : ''}`);
-        if (response.ok) {
-          setSamples(await response.json());
-        }
+        const response = await getSamples(debouncedSampleSearch);
+        setSamples(response.map(s => ({
+          id: s.id,
+          sampleType: `${s.sampleType} - ${s.patient.firstName} ${s.patient.lastName}`,
+          originalSampleType: s.sampleType,
+          collectedAt: s.collectedAt,
+          patientName: `${s.patient.firstName} ${s.patient.lastName}`
+        })));
       } catch (err) {
         console.error('Error fetching samples:', err);
       }
@@ -94,7 +99,6 @@ export default function LabRequestNew() {
 
     try {
       await createLabRequest({
-        resource: 'labRequest',
         patientId: formData.patientId,
         labTestId: formData.labTestId,
         sampleId: formData.sampleId || null,
