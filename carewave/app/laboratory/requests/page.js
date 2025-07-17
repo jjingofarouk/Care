@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DataTable } from '@/components/DataTable';
 import { getLabRequests, deleteLabRequest } from '@/services/laboratoryService';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
 
 export default function LabRequests() {
-  const router = useRouter();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -99,7 +97,7 @@ export default function LabRequests() {
             columns={columns}
             data={data}
             loading={loading}
-            onRowClick={(row) => router.push(`/laboratory/requests/${row.original.id}`)}
+            enableRowSelection={false}
             className="table"
           />
         </div>
