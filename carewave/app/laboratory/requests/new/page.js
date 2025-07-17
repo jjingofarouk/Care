@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createLabRequest, getLabTests, getSamples } from '@/services/laboratoryService';
+import { createLabRequest, getLabTests, getSamples, validatePatientId } from '@/services/laboratoryService';
 import { Save, X } from 'lucide-react';
 
 export default function LabRequestNew() {
@@ -21,6 +21,7 @@ export default function LabRequestNew() {
   const [sampleSuggestions, setSampleSuggestions] = useState([]);
   const [showLabTestDropdown, setShowLabTestDropdown] = useState(false);
   const [showSampleDropdown, setShowSampleDropdown] = useState(false);
+  const [errors, setErrors] = useState({});
 
   // Fetch lab tests and samples on mount
   useEffect(() => {
@@ -37,13 +38,22 @@ export default function LabRequestNew() {
     fetchData();
   }, []);
 
+  // Handle patient ID input
+  const handlePatientIdInput = (value) => {
+    setFormData({ ...formData, patientId: value, sampleType: '', sampleId: '' });
+    setSampleSuggestions([]);
+    setShowSampleDropdown(false);
+    setErrors({ ...errors, patientId: '' });
+  };
+
   // Handle lab test name input and suggestions
   const handleLabTestInput = (value) => {
     setFormData({ ...formData, labTestName: value, labTestId: '' });
+    setErrors({ ...errors, labTestName: '' });
     if (value) {
-      const filtered = labTests.filter((test) =>
-        test.name.toLowerCase().includes(value.toLowerCase())
-      );
+      const filtered = labTests
+        .filter((test) => test.name.toLowerCase().includes(value.toLowerCase()))
+        .slice(0, 10); // Limit to 10 suggestions
       setLabTestSuggestions(filtered);
       setShowLabTestDropdown(true);
     } else {
@@ -55,10 +65,15 @@ export default function LabRequestNew() {
   // Handle sample type input and suggestions
   const handleSampleInput = (value) => {
     setFormData({ ...formData, sampleType: value, sampleId: '' });
-    if (value) {
-      const filtered = samples.filter((sample) =>
-        sample.sampleType.toLowerCase().includes(value.toLowerCase())
-      );
+    setErrors({ ...errors, sampleType: '' });
+    if (value && formData.patientId) {
+      const filtered = samples
+        .filter(
+          (sample) =>
+            sample.sampleType.toLowerCase().includes(value.toLowerCase()) &&
+            sample.patientId === formData.patientId
+        )
+        .slice(0, 10); // Limit to 10 suggestions
       setSampleSuggestions(filtered);
       setShowSampleDropdown(true);
     } else {
@@ -71,21 +86,46 @@ export default function LabRequestNew() {
   const selectLabTest = (test) => {
     setFormData({ ...formData, labTestName: test.name, labTestId: test.id });
     setShowLabTestDropdown(false);
+    setErrors({ ...errors, labTestName: '' });
   };
 
   // Handle selecting a sample suggestion
   const selectSample = (sample) => {
     setFormData({ ...formData, sampleType: sample.sampleType, sampleId: sample.id });
     setShowSampleDropdown(false);
+    setErrors({ ...errors, sampleType: '' });
   };
 
-  // Handle form submission
+  // Handle form submission with validation
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const newErrors = {};
+
+    // Validate patientId
+    if (!formData.patientId) {
+      newErrors.patientId = 'Patient ID is required';
+    } else {
+      const isValidPatient = await validatePatientId(formData.patientId);
+      if (!isValidPatient) {
+        newErrors.patientId = 'Invalid Patient ID';
+      }
+    }
+
+    // Validate labTestId
     if (!formData.labTestId) {
-      alert('Please select a valid lab test from the suggestions.');
+      newErrors.labTestName = 'Please select a valid lab test';
+    }
+
+    // Validate requestedAt
+    if (!formData.requestedAt) {
+      newErrors.requestedAt = 'Request date is required';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+
     try {
       const requestData = {
         patientId: formData.patientId,
@@ -97,7 +137,7 @@ export default function LabRequestNew() {
       router.push('/laboratory/requests');
     } catch (error) {
       console.error('Error creating lab request:', error);
-      alert('Failed to create lab request.');
+      setErrors({ ...errors, general: 'Failed to create lab request' });
     }
   };
 
@@ -111,9 +151,11 @@ export default function LabRequestNew() {
             <input
               type="text"
               value={formData.patientId}
-              onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-              className="input w-full"
+              onChange={(e) => handlePatientIdInput(e.target.value)}
+              className={`input w-full ${errors.patientId ? 'border-red-500' : ''}`}
+              placeholder="Enter Patient ID"
             />
+            {errors.patientId && <p className="text-red-500 text-sm mt-1">{errors.patientId}</p>}
           </div>
           <div className="relative">
             <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">Lab Test</label>
@@ -121,7 +163,7 @@ export default function LabRequestNew() {
               type="text"
               value={formData.labTestName}
               onChange={(e) => handleLabTestInput(e.target.value)}
-              className="input w-full"
+              className={`input w-full ${errors.labTestName ? 'border-red-500' : ''}`}
               placeholder="e.g., Complete Blood Count"
             />
             {showLabTestDropdown && labTestSuggestions.length > 0 && (
@@ -137,15 +179,17 @@ export default function LabRequestNew() {
                 ))}
               </ul>
             )}
+            {errors.labTestName && <p className="text-red-500 text-sm mt-1">{errors.labTestName}</p>}
           </div>
           <div className="relative">
-            <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">Sample Type</label>
+            <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">Sample Type (Optional)</label>
             <input
               type="text"
               value={formData.sampleType}
               onChange={(e) => handleSampleInput(e.target.value)}
-              className="input w-full"
+              className={`input w-full ${errors.sampleType ? 'border-red-500' : ''}`}
               placeholder="e.g., Blood"
+              disabled={!formData.patientId}
             />
             {showSampleDropdown && sampleSuggestions.length > 0 && (
               <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-auto">
@@ -160,6 +204,7 @@ export default function LabRequestNew() {
                 ))}
               </ul>
             )}
+            {errors.sampleType && <p className="text-red-500 text-sm mt-1">{errors.sampleType}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--hospital-gray-700)] mb-1">Requested At</label>
@@ -167,9 +212,11 @@ export default function LabRequestNew() {
               type="datetime-local"
               value={formData.requestedAt}
               onChange={(e) => setFormData({ ...formData, requestedAt: e.target.value })}
-              className="input w-full"
+              className={`input w-full ${errors.requestedAt ? 'border-red-500' : ''}`}
             />
+            {errors.requestedAt && <p className="text-red-500 text-sm mt-1">{errors.requestedAt}</p>}
           </div>
+          {errors.general && <p className="text-red-500 text-sm mt-1">{errors.general}</p>}
           <div className="flex space-x-3 pt-2">
             <button type="submit" className="btn btn-primary flex-1 gap-2">
               <Save className="w-5 h-5" />
