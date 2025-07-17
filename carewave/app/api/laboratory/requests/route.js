@@ -21,10 +21,26 @@ export async function GET(request) {
 
   const { searchParams } = new URL(request.url);
   const resource = searchParams.get('resource');
+  const search = searchParams.get('search');
+  const limit = 10; // Limit to 10 records to prevent overload
 
   try {
     if (resource === 'patients') {
+      const whereClause = search ? {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { 
+            AND: [
+              { firstName: { contains: search.split(' ')[0], mode: 'insensitive' } },
+              { lastName: { contains: search.split(' ')[1] || '', mode: 'insensitive' } }
+            ]
+          }
+        ]
+      } : {};
+
       const patients = await prisma.patient.findMany({
+        where: whereClause,
         select: { 
           id: true, 
           firstName: true, 
@@ -33,39 +49,93 @@ export async function GET(request) {
         orderBy: [
           { firstName: 'asc' },
           { lastName: 'asc' }
-        ]
+        ],
+        take: limit
       });
+
       const transformedPatients = patients.map(patient => ({
         id: patient.id,
         name: `${patient.firstName} ${patient.lastName}`,
         firstName: patient.firstName,
         lastName: patient.lastName
       }));
+
       return NextResponse.json(transformedPatients);
     }
 
     if (resource === 'labTests') {
+      const whereClause = search ? {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } }
+        ]
+      } : {};
+
       const labTests = await prisma.labTest.findMany({
-        select: { id: true, name: true },
-        orderBy: { name: 'asc' }
+        where: whereClause,
+        select: { 
+          id: true, 
+          name: true,
+          description: true 
+        },
+        orderBy: { name: 'asc' },
+        take: limit
       });
+
       return NextResponse.json(labTests);
     }
 
     if (resource === 'samples') {
+      const whereClause = search ? {
+        OR: [
+          { sampleType: { contains: search, mode: 'insensitive' } },
+          { patient: { 
+            OR: [
+              { firstName: { contains: search, mode: 'insensitive' } },
+              { lastName: { contains: search, mode: 'insensitive' } }
+            ]
+          }}
+        ]
+      } : {};
+
       const samples = await prisma.sample.findMany({
-        select: { id: true, sampleType: true },
-        orderBy: { sampleType: 'asc' }
+        where: whereClause,
+        select: { 
+          id: true, 
+          sampleType: true,
+          collectedAt: true,
+          patient: {
+            select: {
+              firstName: true,
+              lastName: true
+            }
+          }
+        },
+        orderBy: { sampleType: 'asc' },
+        take: limit
       });
-      return NextResponse.json(samples);
+
+      // Transform samples to include patient info in the display
+      const transformedSamples = samples.map(sample => ({
+        id: sample.id,
+        sampleType: `${sample.sampleType} - ${sample.patient.firstName} ${sample.patient.lastName}`,
+        originalSampleType: sample.sampleType,
+        collectedAt: sample.collectedAt,
+        patientName: `${sample.patient.firstName} ${sample.patient.lastName}`
+      }));
+
+      return NextResponse.json(transformedSamples);
     }
 
+    // Default case: return lab requests
     const requests = await prisma.labRequest.findMany({
       include: {
         patient: { select: { id: true, firstName: true, lastName: true } },
         labTest: { select: { id: true, name: true } },
         sample: { select: { id: true, sampleType: true } },
       },
+      orderBy: { requestedAt: 'desc' },
+      take: 50 // Limit lab requests to 50 to prevent overload
     });
 
     const transformedRequests = requests.map(request => ({
@@ -112,6 +182,7 @@ export async function POST(request) {
           sample: { select: { id: true, sampleType: true } },
         },
       });
+
       const transformedRequest = {
         ...labRequest,
         patient: labRequest.patient ? {
@@ -127,6 +198,7 @@ export async function POST(request) {
           sampleType: labRequest.sample.sampleType
         } : null
       };
+
       return NextResponse.json(transformedRequest);
     }
 
