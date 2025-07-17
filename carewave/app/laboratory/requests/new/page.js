@@ -14,53 +14,110 @@ export default function LabRequestNew({ labRequest }) {
     requestedAt: labRequest?.requestedAt ? 
       new Date(labRequest.requestedAt).toISOString().slice(0, 16) : '',
   });
+  
   const [patients, setPatients] = useState([]);
   const [labTests, setLabTests] = useState([]);
   const [samples, setSamples] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Search states
+  const [patientSearch, setPatientSearch] = useState('');
+  const [labTestSearch, setLabTestSearch] = useState('');
+  const [sampleSearch, setSampleSearch] = useState('');
+
+  // Debounced search function
+  const useDebounce = (value, delay) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+      
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [value, delay]);
+    
+    return debouncedValue;
+  };
+
+  const debouncedPatientSearch = useDebounce(patientSearch, 300);
+  const debouncedLabTestSearch = useDebounce(labTestSearch, 300);
+  const debouncedSampleSearch = useDebounce(sampleSearch, 300);
+
+  // Fetch patients with search
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPatients = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No authentication token found');
+        if (!token) return;
+
+        const url = `/api/laboratory/requests?resource=patients${debouncedPatientSearch ? `&search=${encodeURIComponent(debouncedPatientSearch)}` : ''}`;
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setPatients(data);
         }
-
-        const [patientRes, labTestRes, sampleRes] = await Promise.all([
-          fetch('/api/laboratory/requests?resource=patients', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch('/api/laboratory/requests?resource=labTests', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch('/api/laboratory/requests?resource=samples', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
-        if (!patientRes.ok || !labTestRes.ok || !sampleRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const [patientData, labTestData, sampleData] = await Promise.all([
-          patientRes.json(),
-          labTestRes.json(),
-          sampleRes.json(),
-        ]);
-
-        setPatients(patientData);
-        setLabTests(labTestData);
-        setSamples(sampleData);
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError(err.message);
+        console.error('Error fetching patients:', err);
       }
     };
 
-    fetchData();
-  }, []);
+    fetchPatients();
+  }, [debouncedPatientSearch]);
+
+  // Fetch lab tests with search
+  useEffect(() => {
+    const fetchLabTests = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const url = `/api/laboratory/requests?resource=labTests${debouncedLabTestSearch ? `&search=${encodeURIComponent(debouncedLabTestSearch)}` : ''}`;
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setLabTests(data);
+        }
+      } catch (err) {
+        console.error('Error fetching lab tests:', err);
+      }
+    };
+
+    fetchLabTests();
+  }, [debouncedLabTestSearch]);
+
+  // Fetch samples with search
+  useEffect(() => {
+    const fetchSamples = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const url = `/api/laboratory/requests?resource=samples${debouncedSampleSearch ? `&search=${encodeURIComponent(debouncedSampleSearch)}` : ''}`;
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSamples(data);
+        }
+      } catch (err) {
+        console.error('Error fetching samples:', err);
+      }
+    };
+
+    fetchSamples();
+  }, [debouncedSampleSearch]);
 
   const handleAutocompleteChange = (name, value) => {
     setFormData({ ...formData, [name]: value ? value.id : '' });
@@ -159,12 +216,17 @@ export default function LabRequestNew({ labRequest }) {
             getOptionLabel={(option) => option.name || ''}
             onChange={(e, value) => handleAutocompleteChange('patientId', value)}
             value={patients.find(p => p.id === formData.patientId) || null}
+            onInputChange={(event, newInputValue) => {
+              setPatientSearch(newInputValue);
+            }}
+            filterOptions={(x) => x} // Disable client-side filtering
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Patient"
                 required
                 className="input"
+                placeholder="Type to search patients..."
                 InputProps={{
                   ...params.InputProps,
                   startAdornment: (
@@ -185,12 +247,17 @@ export default function LabRequestNew({ labRequest }) {
             getOptionLabel={(option) => option.name || ''}
             onChange={(e, value) => handleAutocompleteChange('labTestId', value)}
             value={labTests.find(t => t.id === formData.labTestId) || null}
+            onInputChange={(event, newInputValue) => {
+              setLabTestSearch(newInputValue);
+            }}
+            filterOptions={(x) => x} // Disable client-side filtering
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Lab Test"
                 required
                 className="input"
+                placeholder="Type to search lab tests..."
                 InputProps={{
                   ...params.InputProps,
                   startAdornment: (
@@ -211,11 +278,16 @@ export default function LabRequestNew({ labRequest }) {
             getOptionLabel={(option) => option.sampleType || ''}
             onChange={(e, value) => handleAutocompleteChange('sampleId', value)}
             value={samples.find(s => s.id === formData.sampleId) || null}
+            onInputChange={(event, newInputValue) => {
+              setSampleSearch(newInputValue);
+            }}
+            filterOptions={(x) => x} // Disable client-side filtering
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Sample"
                 className="input"
+                placeholder="Type to search samples..."
                 InputProps={{
                   ...params.InputProps,
                   startAdornment: (
