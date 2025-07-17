@@ -1,9 +1,8 @@
-
 import axios from 'axios';
 
-export async function getLabTests(search = '') {
+export async function getLabTests() {
   try {
-    const response = await axios.get(`/api/laboratory/tests${search ? `?search=${encodeURIComponent(search)}` : ''}`);
+    const response = await axios.get('/api/laboratory/tests');
     return response.data;
   } catch (error) {
     throw new Error('Failed to fetch lab tests');
@@ -91,9 +90,9 @@ export async function deleteLabRequest(id) {
   }
 }
 
-export async function getLabResults(search = '') {
+export async function getLabResults() {
   try {
-    const response = await axios.get(`/api/laboratory/results${search ? `?search=${encodeURIComponent(search)}` : ''}`);
+    const response = await axios.get('/api/laboratory/results');
     return response.data;
   } catch (error) {
     throw new Error('Failed to fetch lab results');
@@ -136,9 +135,9 @@ export async function deleteLabResult(id) {
   }
 }
 
-export async function getSamples(search = '') {
+export async function getSamples() {
   try {
-    const response = await axios.get(`/api/laboratory/samples${search ? `?search=${encodeURIComponent(search)}` : ''}`);
+    const response = await axios.get('/api/laboratory/samples');
     return response.data;
   } catch (error) {
     throw new Error('Failed to fetch samples');
@@ -178,50 +177,5 @@ export async function deleteSample(id) {
     return response.data;
   } catch (error) {
     throw new Error('Failed to delete sample');
-  }
-}
-
-export async function getPatients(search = '') {
-  try {
-    const response = await axios.get(`/api/laboratory/patients${search ? `?search=${encodeURIComponent(search)}` : ''}`);
-    return response.data;
-  } catch (error) {
-    throw new Error('Failed to fetch patients');
-  }
-}
-
-export async function getPatient(id) {
-  try {
-    const response = await axios.get(`/api/laboratory/patients/${id}`);
-    return response.data;
-  } catch (error) {
-    throw new Error('Failed to fetch patient');
-  }
-}
-
-export async function createPatient(data) {
-  try {
-    const response = await axios.post('/api/laboratory/patients', data);
-    return response.data;
-  } catch (error) {
-    throw new Error('Failed to create patient');
-  }
-}
-
-export async function updatePatient(id, data) {
-  try {
-    const response = await axios.put(`/api/laboratory/patients/${id}`, data);
-    return response.data;
-  } catch (error) {
-    throw new Error('Failed to update patient');
-  }
-}
-
-export async function deletePatient(id) {
-  try {
-    const response = await axios.delete(`/api/laboratory/patients/${id}`);
-    return response.data;
-  } catch (error) {
-    throw new Error('Failed to delete patient');
   }
 }
