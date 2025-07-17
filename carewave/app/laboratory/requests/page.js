@@ -29,7 +29,7 @@ export default function LabRequests() {
   const columns = [
     {
       header: 'Patient',
-      accessorFn: row => row.patient.name,
+      accessorFn: row => `${row.patient.firstName} ${row.patient.lastName}`,
     },
     {
       header: 'Lab Test',
@@ -42,11 +42,7 @@ export default function LabRequests() {
     {
       header: 'Requested At',
       accessorKey: 'requestedAt',
-      cell: ({ row }) => new Date(row.original.requestedAt).toLocaleString(),
-    },
-    {
-      header: 'Results',
-      accessorFn: row => row.labResults.length > 0 ? row.labResults[0].result : 'Pending',
+      cell: ({ row }) => new Date(row.original.requestedAt).toLocaleDateString(),
     },
     {
       header: 'Actions',
@@ -70,14 +66,11 @@ export default function LabRequests() {
   ];
 
   const handleDelete = async (id) => {
-    if (confirm('Are you sure you want to delete this lab request?')) {
-      try {
-        await deleteLabRequest(id);
-        setData(data.filter(request => request.id !== id));
-      } catch (error) {
-        console.error('Error deleting lab request:', error);
-        alert('Failed to delete lab request');
-      }
+    try {
+      await deleteLabRequest(id);
+      setData(data.filter(request => request.id !== id));
+    } catch (error) {
+      console.error('Error deleting lab request:', error);
     }
   };
 
@@ -106,7 +99,7 @@ export default function LabRequests() {
             columns={columns}
             data={data}
             loading={loading}
-            onRowClick={(row) => router.push(`/laboratory/requests/edit/${row.original.id}`)}
+            onRowClick={(row) => router.push(`/laboratory/requests/${row.original.id}`)}
             className="table"
           />
         </div>
