@@ -1,4 +1,3 @@
-// File: app/components/DataTable.js
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -129,7 +128,6 @@ const Checkbox = ({
 export function DataTable({ 
   columns, 
   data, 
-  onRowClick, 
   loading = false,
   onSelectionChange,
   enableRowSelection = true,
@@ -463,9 +461,8 @@ export function DataTable({
             {table.getRowModel().rows.map((row, index) => (
               <tr
                 key={row.id}
-                onClick={() => onRowClick && onRowClick(row)}
                 className={`
-                  hover:bg-[var(--hospital-gray-100)] cursor-pointer transition-colors duration-200
+                  hover:bg-[var(--hospital-gray-100)] transition-colors duration-200
                   ${enableRowStriping && index % 2 === 1 ? 'bg-[var(--hospital-gray-50)]' : 'bg-[var(--hospital-white)]'}
                   ${row.getIsSelected() ? 'bg-blue-50 border-l-4 border-[var(--hospital-accent)]' : ''}
                 `}
