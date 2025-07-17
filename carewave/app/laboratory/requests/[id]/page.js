@@ -1,293 +1,88 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, FormControl, Box, Typography, Autocomplete } from '@mui/material';
-import { Save, X, Calendar, User, TestTube, FlaskConical } from 'lucide-react';
-import { useRouter, useParams } from 'next/navigation';
-import { getLabRequest, updateLabRequest } from '@/services/laboratoryService';
+import { useRouter } from 'next/navigation';
+import { getLabRequest } from '@/services/laboratoryService';
+import { ArrowLeft } from 'lucide-react';
 
-export default function LabRequestEdit() {
+export default function LabRequestView({ params }) {
   const router = useRouter();
-  const { id } = useParams();
-  const [formData, setFormData] = useState({
-    patientId: '',
-    labTestId: '',
-    sampleId: '',
-    requestedAt: '',
-  });
-  const [patients, setPatients] = useState([]);
-  const [labTests, setLabTests] = useState([]);
-  const [samples, setSamples] = useState([]);
+  const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [patientSearch, setPatientSearch] = useState('');
-  const [labTestSearch, setLabTestSearch] = useState('');
-  const [sampleSearch, setSampleSearch] = useState('');
-
-  const useDebounce = (value, delay) => {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-    useEffect(() => {
-      const handler = setTimeout(() => setDebouncedValue(value), delay);
-      return () => clearTimeout(handler);
-    }, [value, delay]);
-    return debouncedValue;
-  };
-
-  const debouncedPatientSearch = useDebounce(patientSearch, 300);
-  const debouncedLabTestSearch = useDebounce(labTestSearch, 300);
-  const debouncedSampleSearch = useDebounce(sampleSearch, 300);
 
   useEffect(() => {
-    async function fetchInitialData() {
+    async function fetchRequest() {
       try {
-        const request = await getLabRequest(id);
-        setFormData({
-          patientId: request.patient.id,
-          labTestId: request.labTest.id,
-          sampleId: request.sample?.id || '',
-          requestedAt: new Date(request.requestedAt).toISOString().slice(0, 16),
-        });
+        const data = await getLabRequest(params.id);
+        setRequest(data);
         setLoading(false);
-      } catch (err) {
-        setError('Failed to load lab request');
+      } catch (error) {
+        console.error('Error fetching lab request:', error);
         setLoading(false);
       }
     }
-    fetchInitialData();
-  }, [id]);
+    fetchRequest();
+  }, [params.id]);
 
-  useEffect(() => {
-    async function fetchPatients() {
-      try {
-        const response = await fetch(`/api/laboratory/requests?resource=patients${debouncedPatientSearch ? `&search=${encodeURIComponent(debouncedPatientSearch)}` : ''}`);
-        if (response.ok) {
-          setPatients(await response.json());
-        }
-      } catch (err) {
-        console.error('Error fetching patients:', err);
-      }
-    }
-    fetchPatients();
-  }, [debouncedPatientSearch]);
-
-  useEffect(() => {
-    async function fetchLabTests() {
-      try {
-        const response = await fetch(`/api/laboratory/requests?resource=labTests${debouncedLabTestSearch ? `&search=${encodeURIComponent(debouncedLabTestSearch)}` : ''}`);
-        if (response.ok) {
-          setLabTests(await response.json());
-        }
-      } catch (err) {
-        console.error('Error fetching lab tests:', err);
-      }
-    }
-    fetchLabTests();
-  }, [debouncedLabTestSearch]);
-
-  useEffect(() => {
-    async function fetchSamples() {
-      try {
-        const response = await fetch(`/api/laboratory/requests?resource=samples${debouncedSampleSearch ? `&search=${encodeURIComponent(debouncedSampleSearch)}` : ''}`);
-        if (response.ok) {
-          setSamples(await response.json());
-        }
-      } catch (err) {
-        console.error('Error fetching samples:', err);
-      }
-    }
-    fetchSamples();
-  }, [debouncedSampleSearch]);
-
-  const handleAutocompleteChange = (name, value) => {
-    setFormData({ ...formData, [name]: value ? value.id : '' });
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      await updateLabRequest(id, {
-        patientId: formData.patientId,
-        labTestId: formData.labTestId,
-        sampleId: formData.sampleId || null,
-        requestedAt: formData.requestedAt,
-      });
-      router.push('/laboratory/requests');
-    } catch (err) {
-      setError('Failed to update lab request');
-      console.error('Error updating lab request:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="card max-w-full mx-auto p-4">
+  if (loading) return (
+    <div className="card p-6">
+      <div className="skeleton-text w-1/3 mb-4" />
+      <div className="space-y-4">
+        <div className="skeleton-text" />
+        <div className="skeleton-text" />
         <div className="skeleton-text" />
       </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="card max-w-full mx-auto p-4">
-        <div className="alert alert-error mb-2">
-          <span>{error}</span>
-        </div>
-        <Button 
-          variant="outlined" 
-          onClick={() => window.location.reload()}
-          className="btn-secondary"
-        >
-          Retry
-        </Button>
-      </div>
-    );
-  }
+    </div>
+  );
+  if (!request) return (
+    <div className="alert alert-error">
+      Request not found
+    </div>
+  );
 
   return (
-    <div className="card max-w-full mx-auto p-4">
-      <Typography variant="h5" className="card-title mb-4 font-bold">
-        Edit Lab Request
-      </Typography>
-      
-      {error && (
-        <div className="alert alert-error mb-4">
-          <span>{error}</span>
+    <div className="animate-slide-up">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-[var(--hospital-gray-900)]">Lab Request Details</h1>
+        <button
+          onClick={() => router.push('/laboratory/requests')}
+          className="btn btn-secondary gap-2"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Requests
+        </button>
+      </div>
+      <div className="card">
+        <div className="card-header">
+          <h2 className="card-title">Request for {request.patient.firstName} {request.patient.lastName}</h2>
         </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <FormControl fullWidth>
-          <Autocomplete
-            options={patients}
-            getOptionLabel={(option) => option.name || ''}
-            onChange={(e, value) => handleAutocompleteChange('patientId', value)}
-            value={patients.find(p => p.id === formData.patientId) || null}
-            onInputChange={(event, newInputValue) => setPatientSearch(newInputValue)}
-            filterOptions={(x) => x}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Patient"
-                required
-                className="input"
-                placeholder="Type to search patients..."
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <User className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                }}
-              />
-            )}
-          />
-        </FormControl>
-
-        <FormControl fullWidth>
-          <Autocomplete
-            options={labTests}
-            getOptionLabel={(option) => option.name || ''}
-            onChange={(e, value) => handleAutocompleteChange('labTestId', value)}
-            value={labTests.find(t => t.id === formData.labTestId) || null}
-            onInputChange={(event, newInputValue) => setLabTestSearch(newInputValue)}
-            filterOptions={(x) => x}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Lab Test"
-                required
-                className="input"
-                placeholder="Type to search lab tests..."
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <TestTube className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                }}
-              />
-            )}
-          />
-        </FormControl>
-
-        <FormControl fullWidth>
-          <Autocomplete
-            options={samples}
-            getOptionLabel={(option) => option.sampleType || ''}
-            onChange={(e, value) => handleAutocompleteChange('sampleId', value)}
-            value={samples.find(s => s.id === formData.sampleId) || null}
-            onInputChange={(event, newInputValue) => setSampleSearch(newInputValue)}
-            filterOptions={(x) => x}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Sample"
-                className="input"
-                placeholder="Type to search samples..."
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <FlaskConical className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                }}
-              />
-            )}
-          />
-        </FormControl>
-
-        <TextField
-          name="requestedAt"
-          label="Requested At"
-          type="datetime-local"
-          value={formData.requestedAt}
-          onChange={handleChange}
-          className="input"
-          fullWidth
-          required
-          InputLabelProps={{ shrink: true }}
-          InputProps={{
-            startAdornment: <Calendar className="h-4 w-4 mr-2 text-[var(--hospital-accent)]" />,
-          }}
-        />
-
-        <Box className="flex justify-end gap-2 mt-6">
-          <Button
-            variant="outlined"
-            className="btn-secondary"
-            onClick={() => router.push('/laboratory/requests')}
-            disabled={loading}
-          >
-            <X className="h-4 w-4 mr-2" />
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            className="btn-primary"
-            type="submit"
-            disabled={loading}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Updating...' : 'Update'}
-          </Button>
-        </Box>
-      </form>
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-medium text-[var(--hospital-gray-700)]">Patient</h3>
+            <p className="text-[var(--hospital-gray-900)]">{request.patient.firstName} {request.patient.lastName}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-[var(--hospital-gray-700)]">Lab Test</h3>
+            <p className="text-[var(--hospital-gray-900)]">{request.labTest.name}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-[var(--hospital-gray-700)]">Sample</h3>
+            <p className="text-[var(--hospital-gray-900)]">{request.sample?.sampleType || 'N/A'}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-[var(--hospital-gray-700)]">Requested At</h3>
+            <p className="text-[var(--hospital-gray-900)]">{new Date(request.requestedAt).toLocaleString()}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-[var(--hospital-gray-700)]">Created At</h3>
+            <p className="text-[var(--hospital-gray-900)]">{new Date(request.createdAt).toLocaleString()}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-[var(--hospital-gray-700)]">Updated At</h3>
+            <p className="text-[var(--hospital-gray-900)]">{new Date(request.updatedAt).toLocaleString()}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
