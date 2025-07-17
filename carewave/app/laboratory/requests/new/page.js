@@ -267,7 +267,7 @@ export default function LabRequestNew() {
             <div className="text-center mb-6">
               <User className="w-12 h-12 text-blue-500 mx-auto mb-2" />
               <h2 className="text-xl font-semibold text-gray-900">Patient Information</h2>
-              <p className="text-gray-600">Enter the patient's ID to get started</p>
+              <p className="text-gray-600">Enter the patient&apos; ID to get started</p>
             </div>
             
             <div className="relative">
