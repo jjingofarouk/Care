@@ -144,6 +144,16 @@ export async function getSamples() {
   }
 }
 
+// Fixed: Add function to get samples by patient ID
+export async function getSamplesByPatient(patientId) {
+  try {
+    const response = await axios.get(`/api/laboratory/samples/patient/${patientId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch patient samples');
+  }
+}
+
 export async function getSample(id) {
   try {
     const response = await axios.get(`/api/laboratory/samples/${id}`);
@@ -180,11 +190,23 @@ export async function deleteSample(id) {
   }
 }
 
+// Fixed: Proper patient validation function
 export async function validatePatientId(patientId) {
   try {
-    const response = await axios.get(`/api/patients/${patientId}`);
-    return response.data ? true : false;
+    const response = await axios.get(`/api/patients/${patientId}/validate`);
+    return response.data.exists;
   } catch (error) {
+    console.error('Patient validation error:', error);
     return false;
+  }
+}
+
+// Additional helper function to get patient info
+export async function getPatientInfo(patientId) {
+  try {
+    const response = await axios.get(`/api/patients/${patientId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch patient information');
   }
 }
