@@ -23,7 +23,6 @@ export default function LabRequestEdit({ params }) {
     requestedAt: ''
   });
   
-  const [originalData, setOriginalData] = useState(null);
   const [labTests, setLabTests] = useState([]);
   const [patientSamples, setPatientSamples] = useState([]);
   const [labTestSuggestions, setLabTestSuggestions] = useState([]);
@@ -44,7 +43,6 @@ export default function LabRequestEdit({ params }) {
           getLabTests()
         ]);
         
-        setOriginalData(request);
         setLabTests(tests);
         
         // Set form data
