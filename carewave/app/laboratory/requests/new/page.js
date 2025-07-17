@@ -1,3 +1,4 @@
+// pages/laboratory/requests/new.js
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -53,7 +54,6 @@ export default function LabRequestNew() {
     { id: 4, title: 'Review', icon: CheckCircle }
   ];
 
-  // Fetch lab tests on mount
   useEffect(() => {
     const fetchLabTests = async () => {
       try {
@@ -61,12 +61,12 @@ export default function LabRequestNew() {
         setLabTests(tests);
       } catch (error) {
         console.error('Error fetching lab tests:', error);
+        setErrors({ ...errors, general: 'Failed to load lab tests' });
       }
     };
     fetchLabTests();
   }, []);
 
-  // Handle patient ID input and validation
   const handlePatientIdInput = async (value) => {
     setFormData({ ...formData, patientId: value, sampleType: '', sampleId: '' });
     setPatientSamples([]);
@@ -97,7 +97,6 @@ export default function LabRequestNew() {
     }
   };
 
-  // Handle lab test name input and suggestions
   const handleLabTestInput = (value) => {
     setFormData({ ...formData, labTestName: value, labTestId: '' });
     setErrors({ ...errors, labTestName: '' });
@@ -114,7 +113,6 @@ export default function LabRequestNew() {
     }
   };
 
-  // Handle sample type input and suggestions
   const handleSampleInput = (value) => {
     setFormData({ ...formData, sampleType: value, sampleId: '' });
     setErrors({ ...errors, sampleType: '' });
@@ -133,21 +131,18 @@ export default function LabRequestNew() {
     }
   };
 
-  // Handle selecting a lab test suggestion
   const selectLabTest = (test) => {
     setFormData({ ...formData, labTestName: test.name, labTestId: test.id });
     setShowLabTestDropdown(false);
     setErrors({ ...errors, labTestName: '' });
   };
 
-  // Handle selecting a sample suggestion
   const selectSample = (sample) => {
     setFormData({ ...formData, sampleType: sample.sampleType, sampleId: sample.id });
     setShowSampleDropdown(false);
     setErrors({ ...errors, sampleType: '' });
   };
 
-  // Step navigation functions
   const nextStep = () => {
     if (validateCurrentStep()) {
       setCurrentStep(currentStep + 1);
@@ -185,16 +180,25 @@ export default function LabRequestNew() {
           newErrors.requestedAt = 'Request date cannot be in the future';
         }
       }
+      // Validate sample if provided
+      if (formData.sampleId) {
+        const sample = patientSamples.find(s => s.id === formData.sampleId);
+        if (!sample) {
+          newErrors.sampleType = 'Selected sample is invalid';
+        }
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateCurrentStep()) return;
+    if (!validateCurrentStep()) {
+      setIsSubmitting(false);
+      return;
+    }
     
     setIsSubmitting(true);
 
@@ -203,14 +207,14 @@ export default function LabRequestNew() {
         patientId: formData.patientId.trim(),
         labTestId: formData.labTestId,
         sampleId: formData.sampleId || null,
-        requestedAt: formData.requestedAt,
+        requestedAt: new Date(formData.requestedAt).toISOString(),
       };
       
       await createLabRequest(requestData);
       router.push('/laboratory/requests');
     } catch (error) {
       console.error('Error creating lab request:', error);
-      setErrors({ ...errors, general: 'Failed to create lab request. Please try again.' });
+      setErrors({ ...errors, general: error.message || 'Failed to create lab request. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -263,7 +267,7 @@ export default function LabRequestNew() {
             <div className="text-center mb-6">
               <User className="w-12 h-12 text-blue-500 mx-auto mb-2" />
               <h2 className="text-xl font-semibold text-gray-900">Patient Information</h2>
-              <p className="text-gray-600">Enter the patient&apos;s ID to get started</p>
+              <p className="text-gray-600">Enter the patient's ID to get started</p>
             </div>
             
             <div className="relative">
@@ -481,8 +485,8 @@ export default function LabRequestNew() {
                   <div className="text-sm text-gray-600 space-y-1">
                     <p><strong>ID:</strong> {formData.patientId}</p>
                     <p><strong>Name:</strong> {patientInfo?.firstName} {patientInfo?.lastName}</p>
-                    <p><strong>DOB:</strong> {new Date(patientInfo?.dateOfBirth).toLocaleDateString()}</p>
-                    <p><strong>Gender:</strong> {patientInfo?.gender}</p>
+                    <p><strong>DOB:</strong> {patientInfo?.dateOfBirth ? new Date(patientInfo.dateOfBirth).toLocaleDateString() : 'N/A'}</p>
+                    <p><strong>Gender:</strong> {patientInfo?.gender || 'N/A'}</p>
                   </div>
                 </div>
                 
@@ -548,7 +552,7 @@ export default function LabRequestNew() {
             <button
               type="button"
               onClick={nextStep}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (currentStep === 1 && !patientInfo) || (currentStep === 2 && !formData.labTestId)}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
               Next
@@ -557,6 +561,7 @@ export default function LabRequestNew() {
             <button
               type="submit"
               disabled={isSubmitting}
+              onClick={handleSubmit}
               className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
             >
               {isSubmitting ? (
