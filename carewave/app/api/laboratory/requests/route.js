@@ -1,28 +1,15 @@
+
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
-const authenticate = (request) => {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader) return null;
-  const token = authHeader.replace('Bearer ', '');
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return null;
-  }
-};
-
 export async function GET(request) {
-  const user = authenticate(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
   const { searchParams } = new URL(request.url);
   const resource = searchParams.get('resource');
   const search = searchParams.get('search');
-  const limit = 10; // Limit to 10 records to prevent overload
+  const id = searchParams.get('id');
+  const limit = 10;
 
   try {
     if (resource === 'patients') {
@@ -41,26 +28,17 @@ export async function GET(request) {
 
       const patients = await prisma.patient.findMany({
         where: whereClause,
-        select: { 
-          id: true, 
-          firstName: true, 
-          lastName: true 
-        },
-        orderBy: [
-          { firstName: 'asc' },
-          { lastName: 'asc' }
-        ],
+        select: { id: true, firstName: true, lastName: true },
+        orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
         take: limit
       });
 
-      const transformedPatients = patients.map(patient => ({
-        id: patient.id,
-        name: `${patient.firstName} ${patient.lastName}`,
-        firstName: patient.firstName,
-        lastName: patient.lastName
-      }));
-
-      return NextResponse.json(transformedPatients);
+      return NextResponse.json(patients.map(p => ({
+        id: p.id,
+        name: `${p.firstName} ${p.lastName}`,
+        firstName: p.firstName,
+        lastName: p.lastName
+      })));
     }
 
     if (resource === 'labTests') {
@@ -73,11 +51,7 @@ export async function GET(request) {
 
       const labTests = await prisma.labTest.findMany({
         where: whereClause,
-        select: { 
-          id: true, 
-          name: true,
-          description: true 
-        },
+        select: { id: true, name: true, description: true },
         orderBy: { name: 'asc' },
         take: limit
       });
@@ -104,60 +78,64 @@ export async function GET(request) {
           id: true, 
           sampleType: true,
           collectedAt: true,
-          patient: {
-            select: {
-              firstName: true,
-              lastName: true
-            }
-          }
+          patient: { select: { firstName: true, lastName: true } }
         },
         orderBy: { sampleType: 'asc' },
         take: limit
       });
 
-      // Transform samples to include patient info in the display
-      const transformedSamples = samples.map(sample => ({
-        id: sample.id,
-        sampleType: `${sample.sampleType} - ${sample.patient.firstName} ${sample.patient.lastName}`,
-        originalSampleType: sample.sampleType,
-        collectedAt: sample.collectedAt,
-        patientName: `${sample.patient.firstName} ${sample.patient.lastName}`
-      }));
-
-      return NextResponse.json(transformedSamples);
+      return NextResponse.json(samples.map(s => ({
+        id: s.id,
+        sampleType: `${s.sampleType} - ${s.patient.firstName} ${s.patient.lastName}`,
+        originalSampleType: s.sampleType,
+        collectedAt: s.collectedAt,
+        patientName: `${s.patient.firstName} ${s.patient.lastName}`
+      })));
     }
 
-    // Default case: return lab requests (when no resource is specified)
-    if (!resource || resource === 'labRequests') {
-      const requests = await prisma.labRequest.findMany({
+    if (resource === 'labRequest' && id) {
+      const request = await prisma.labRequest.findUnique({
+        where: { id },
         include: {
           patient: { select: { id: true, firstName: true, lastName: true } },
           labTest: { select: { id: true, name: true } },
           sample: { select: { id: true, sampleType: true } },
-        },
-        orderBy: { requestedAt: 'desc' }
+          labResults: { select: { id: true, result: true, resultedAt: true } }
+        }
       });
 
-      const transformedRequests = requests.map(request => ({
-        ...request,
-        patient: request.patient ? {
-          ...request.patient,
-          name: `${request.patient.firstName} ${request.patient.lastName}`
-        } : null,
-        labTest: request.labTest ? {
-          ...request.labTest,
-          name: request.labTest.name
-        } : null,
-        sample: request.sample ? {
-          ...request.sample,
-          sampleType: request.sample.sampleType
-        } : null
-      }));
+      if (!request) {
+        return NextResponse.json({ error: 'Lab request not found' }, { status: 404 });
+      }
 
-      return NextResponse.json(transformedRequests);
+      return NextResponse.json({
+        id: request.id,
+        patient: { id: request.patient.id, name: `${request.patient.firstName} ${request.patient.lastName}` },
+        labTest: { id: request.labTest.id, name: request.labTest.name },
+        sample: request.sample ? { id: request.sample.id, sampleType: request.sample.sampleType } : null,
+        requestedAt: request.requestedAt,
+        labResults: request.labResults
+      });
     }
 
-    return NextResponse.json({ error: 'Invalid resource' }, { status: 400 });
+    const requests = await prisma.labRequest.findMany({
+      include: {
+        patient: { select: { id: true, firstName: true, lastName: true } },
+        labTest: { select: { id: true, name: true } },
+        sample: { select: { id: true, sampleType: true } },
+        labResults: { select: { id: true, result: true, resultedAt: true } }
+      },
+      orderBy: { requestedAt: 'desc' }
+    });
+
+    return NextResponse.json(requests.map(r => ({
+      id: r.id,
+      patient: { id: r.patient.id, name: `${r.patient.firstName} ${r.patient.lastName}` },
+      labTest: { id: r.labTest.id, name: r.labTest.name },
+      sample: r.sample ? { id: r.sample.id, sampleType: r.sample.sampleType } : null,
+      requestedAt: r.requestedAt,
+      labResults: r.labResults
+    })));
   } catch (error) {
     console.error('Error fetching lab requests:', error);
     return NextResponse.json({ error: 'Failed to fetch lab requests' }, { status: 500 });
@@ -165,49 +143,93 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const user = authenticate(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
   try {
     const data = await request.json();
     
-    if (data.resource === 'labRequest') {
-      const labRequest = await prisma.labRequest.create({
-        data: {
-          patientId: data.patientId,
-          labTestId: data.labTestId,
-          sampleId: data.sampleId || null,
-          requestedAt: new Date(data.requestedAt),
-        },
-        include: {
-          patient: { select: { id: true, firstName: true, lastName: true } },
-          labTest: { select: { id: true, name: true } },
-          sample: { select: { id: true, sampleType: true } },
-        },
-      });
-
-      const transformedRequest = {
-        ...labRequest,
-        patient: labRequest.patient ? {
-          ...labRequest.patient,
-          name: `${labRequest.patient.firstName} ${labRequest.patient.lastName}`
-        } : null,
-        labTest: labRequest.labTest ? {
-          ...labRequest.labTest,
-          name: labRequest.labTest.name
-        } : null,
-        sample: labRequest.sample ? {
-          ...labRequest.sample,
-          sampleType: labRequest.sample.sampleType
-        } : null
-      };
-
-      return NextResponse.json(transformedRequest);
+    if (data.resource !== 'labRequest') {
+      return NextResponse.json({ error: 'Invalid resource' }, { status: 400 });
     }
 
-    return NextResponse.json({ error: 'Invalid resource' }, { status: 400 });
+    const labRequest = await prisma.labRequest.create({
+      data: {
+        patientId: data.patientId,
+        labTestId: data.labTestId,
+        sampleId: data.sampleId || null,
+        requestedAt: new Date(data.requestedAt),
+      },
+      include: {
+        patient: { select: { id: true, firstName: true, lastName: true } },
+        labTest: { select: { id: true, name: true } },
+        sample: { select: { id: true, sampleType: true } }
+      }
+    });
+
+    return NextResponse.json({
+      id: labRequest.id,
+      patient: { id: labRequest.patient.id, name: `${labRequest.patient.firstName} ${labRequest.patient.lastName}` },
+      labTest: { id: labRequest.labTest.id, name: labRequest.labTest.name },
+      sample: labRequest.sample ? { id: labRequest.sample.id, sampleType: labRequest.sample.sampleType } : null,
+      requestedAt: labRequest.requestedAt
+    });
   } catch (error) {
     console.error('Error creating lab request:', error);
     return NextResponse.json({ error: 'Failed to create lab request' }, { status: 500 });
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'Missing request ID' }, { status: 400 });
+    }
+
+    const data = await request.json();
+    
+    const labRequest = await prisma.labRequest.update({
+      where: { id },
+      data: {
+        patientId: data.patientId,
+        labTestId: data.labTestId,
+        sampleId: data.sampleId || null,
+        requestedAt: new Date(data.requestedAt),
+      },
+      include: {
+        patient: { select: { id: true, firstName: true, lastName: true } },
+        labTest: { select: { id: true, name: true } },
+        sample: { select: { id: true, sampleType: true } }
+      }
+    });
+
+    return NextResponse.json({
+      id: labRequest.id,
+      patient: { id: labRequest.patient.id, name: `${labRequest.patient.firstName} ${labRequest.patient.lastName}` },
+      labTest: { id: labRequest.labTest.id, name: labRequest.labTest.name },
+      sample: labRequest.sample ? { id: labRequest.sample.id, sampleType: labRequest.sample.sampleType } : null,
+      requestedAt: labRequest.requestedAt
+    });
+  } catch (error) {
+    console.error('Error updating lab request:', error);
+    return NextResponse.json({ error: 'Failed to update lab request' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'Missing request ID' }, { status: 400 });
+    }
+
+    await prisma.labRequest.delete({
+      where: { id }
+    });
+
+    return NextResponse.json({ message: 'Lab request deleted' });
+  } catch (error) {
+    console.error('Error deleting lab request:', error);
+    return NextResponse.json({ error: 'Failed to delete lab request' }, { status: 500 });
   }
 }
