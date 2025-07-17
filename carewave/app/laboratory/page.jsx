@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DataTable } from '@/components/DataTable';
-import { getLabRequests, deleteLabRequest } from '@/services/laboratoryService';
+import { getLabTests, deleteLabTest } from '@/services/laboratoryService';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
 
-export default function LabRequests() {
+export default function LabTests() {
   const router = useRouter();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,11 +15,11 @@ export default function LabRequests() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const requests = await getLabRequests();
-        setData(requests);
+        const tests = await getLabTests();
+        setData(tests);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching lab requests:', error);
+        console.error('Error fetching lab tests:', error);
         setLoading(false);
       }
     }
@@ -28,30 +28,26 @@ export default function LabRequests() {
 
   const columns = [
     {
-      header: 'Patient',
-      accessorFn: row => `${row.patient.firstName} ${row.patient.lastName}`,
+      header: 'Name',
+      accessorKey: 'name',
     },
     {
-      header: 'Lab Test',
-      accessorFn: row => row.labTest.name,
+      header: 'Description',
+      accessorKey: 'description',
     },
     {
-      header: 'Sample',
-      accessorFn: row => row.sample?.sampleType || 'N/A',
-    },
-    {
-      header: 'Requested At',
-      accessorKey: 'requestedAt',
-      cell: ({ row }) => new Date(row.original.requestedAt).toLocaleDateString(),
+      header: 'Created At',
+      accessorKey: 'createdAt',
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
     },
     {
       header: 'Actions',
       cell: ({ row }) => (
         <div className="flex space-x-2">
-          <Link href={`/laboratory/requests/${row.original.id}`} className="text-[var(--hospital-accent)] hover:text-[var(--hospital-accent-dark)] transition-colors">
+          <Link href={`/laboratory/tests/${row.original.id}`} className="text-[var(--hospital-accent)] hover:text-[var(--hospital-accent-dark)] transition-colors">
             <Eye className="w-5 h-5" />
           </Link>
-          <Link href={`/laboratory/requests/edit/${row.original.id}`} className="text-[var(--hospital-accent)] hover:text-[var(--hospital-accent-dark)] transition-colors">
+          <Link href={`/laboratory/tests/edit/${row.original.id}`} className="text-[var(--hospital-accent)] hover:text-[var(--hospital-accent-dark)] transition-colors">
             <Edit className="w-5 h-5" />
           </Link>
           <button
@@ -67,21 +63,21 @@ export default function LabRequests() {
 
   const handleDelete = async (id) => {
     try {
-      await deleteLabRequest(id);
-      setData(data.filter(request => request.id !== id));
+      await deleteLabTest(id);
+      setData(data.filter(test => test.id !== id));
     } catch (error) {
-      console.error('Error deleting lab request:', error);
+      console.error('Error deleting lab test:', error);
     }
   };
 
   return (
     <div className="animate-fade-in">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[var(--hospital-gray-900)]">Lab Requests</h1>
-        <Link href="/laboratory/requests/new">
+        <h1 className="text-2xl font-bold text-[var(--hospital-gray-900)]">Lab Tests</h1>
+        <Link href="/laboratory/tests/new">
           <button className="btn btn-primary gap-2">
             <Plus className="w-5 h-5" />
-            Add New Request
+            Add New Test
           </button>
         </Link>
       </div>
@@ -99,7 +95,7 @@ export default function LabRequests() {
             columns={columns}
             data={data}
             loading={loading}
-            onRowClick={(row) => router.push(`/laboratory/requests/${row.original.id}`)}
+            onRowClick={(row) => router.push(`/laboratory/tests/${row.original.id}`)}
             className="table"
           />
         </div>
