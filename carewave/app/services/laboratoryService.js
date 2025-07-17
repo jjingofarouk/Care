@@ -179,3 +179,12 @@ export async function deleteSample(id) {
     throw new Error('Failed to delete sample');
   }
 }
+
+export async function validatePatientId(patientId) {
+  try {
+    const response = await axios.get(`/api/patients/${patientId}`);
+    return response.data ? true : false;
+  } catch (error) {
+    return false;
+  }
+}
