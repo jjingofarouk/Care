@@ -130,6 +130,7 @@ export function DataTable({
   data, 
   loading = false,
   onSelectionChange,
+  onRowClick,
   enableRowSelection = true,
   enableColumnManagement = true,
   enableExport = true,
@@ -242,6 +243,23 @@ export function DataTable({
     setGlobalFilter('');
     setColumnFilters([]);
     table.resetColumnFilters();
+  };
+
+  // Handle row click
+  const handleRowClick = (row, event) => {
+    // Don't trigger row click if clicking on action buttons, checkboxes, or other interactive elements
+    if (
+      event.target.closest('button') ||
+      event.target.closest('a') ||
+      event.target.closest('input') ||
+      event.target.closest('[data-no-row-click]')
+    ) {
+      return;
+    }
+
+    if (onRowClick) {
+      onRowClick(row.original, row);
+    }
   };
 
   // Selection change callback
@@ -461,10 +479,12 @@ export function DataTable({
             {table.getRowModel().rows.map((row, index) => (
               <tr
                 key={row.id}
+                onClick={(event) => handleRowClick(row, event)}
                 className={`
                   hover:bg-[var(--hospital-gray-100)] transition-colors duration-200
                   ${enableRowStriping && index % 2 === 1 ? 'bg-[var(--hospital-gray-50)]' : 'bg-[var(--hospital-white)]'}
                   ${row.getIsSelected() ? 'bg-blue-50 border-l-4 border-[var(--hospital-accent)]' : ''}
+                  ${onRowClick ? 'cursor-pointer' : ''}
                 `}
               >
                 {row.getVisibleCells().map((cell) => (
