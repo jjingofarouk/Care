@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { getRadiologyTests, getImagingOrders, getRadiologyResults, getScanImages } from '@/services/radiologyService';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Activity, TestTube, FileText, Image } from 'lucide-react';
+import { TestTube, FileText, Image } from 'lucide-react';
 
 export default function RadiologyDashboard() {
   const [stats, setStats] = useState({
