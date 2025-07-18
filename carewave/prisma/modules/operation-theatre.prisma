@@ -26,6 +26,7 @@ model Surgery {
   preOpAssessment PreOpAssessment? @relation("SurgeryPreOp", fields: [preOpAssessmentId], references: [id], onDelete: SetNull)
   anesthesiaRecord AnesthesiaRecord?
   postOpRecovery PostOpRecovery?
+  auditLogs SurgeryAuditLog[]
   type String?
   estimatedDurationMinutes Int?
   actualDurationMinutes Int?
