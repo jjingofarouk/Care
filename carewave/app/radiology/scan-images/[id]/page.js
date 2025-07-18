@@ -5,8 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { getScanImage } from '@/services/radiologyService';
 import { ArrowLeft, Edit } from 'lucide-react';
-import { Button } from '@mui/material';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Button, Paper, Typography } from '@mui/material';
 
 export default function ScanImageDetailPage() {
   const router = useRouter();
@@ -55,18 +54,27 @@ export default function ScanImageDetailPage() {
           Edit Scan Image
         </Button>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Scan Image</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Paper elevation={1} className="rounded-lg border border-[var(--hospital-gray-200)] bg-white">
+        <div className="px-6 py-4 border-b border-[var(--hospital-gray-200)]">
+          <Typography variant="h5" className="text-[var(--hospital-gray-900)]">
+            Scan Image
+          </Typography>
+        </div>
+        <div className="p-6">
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold">Patient</h3>
-              <p>{scanImage.radiologyResult.imagingOrder.patient.firstName} {scanImage.radiologyResult.imagingOrder.patient.lastName}</p>
+              <Typography variant="h6" className="font-semibold">
+                Patient
+              </Typography>
+              <Typography>
+                {scanImage.radiologyResult.imagingOrder.patient.firstName}{' '}
+                {scanImage.radiologyResult.imagingOrder.patient.lastName}
+              </Typography>
             </div>
             <div>
-              <h3 className="font-semibold">Image</h3>
+              <Typography variant="h6" className="font-semibold">
+                Image
+              </Typography>
               <img
                 src={scanImage.imageUrl}
                 alt="Scan image"
@@ -74,8 +82,8 @@ export default function ScanImageDetailPage() {
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Paper>
     </div>
   );
 }
