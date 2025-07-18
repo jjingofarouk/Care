@@ -561,3 +561,5 @@ export function DataTable({
     </div>
   );
 }
+
+export default DataTable;
