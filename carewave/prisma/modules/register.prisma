@@ -1,13 +1,15 @@
 model UserRegistration {
-  id           String         @id @default(uuid())
-  email        String         @unique
-  firstName    String
-  lastName     String
-  role         UserRole       @default(PATIENT)
+  id String @id @default(uuid())
+  email String @unique
+  firstName String
+  lastName String
+  role UserRole @default(PATIENT)
   passwordHash String
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  patient      Patient?
+  patient Patient?
+  surgicalTeamMemberships SurgicalTeamMember[]
+  surgeryAuditLogs SurgeryAuditLog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum UserRole {
