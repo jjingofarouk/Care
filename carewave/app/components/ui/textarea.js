@@ -1,36 +1,15 @@
-// components/ui/Card.js
+// components/ui/Textarea.js
 'use client';
 
 import React from 'react';
 
-export function Card({ children, className = '' }) {
+export function Textarea({ value, onChange, disabled = false, className = '' }) {
   return (
-    <div className={`rounded-lg border border-[var(--hospital-gray-200)] bg-white shadow-sm ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-export function CardHeader({ children }) {
-  return (
-    <div className="px-6 py-4 border-b border-[var(--hospital-gray-200)]">
-      {children}
-    </div>
-  );
-}
-
-export function CardTitle({ children }) {
-  return (
-    <h2 className="text-xl font-semibold text-[var(--hospital-gray-900)]">
-      {children}
-    </h2>
-  );
-}
-
-export function CardContent({ children }) {
-  return (
-    <div className="p-6">
-      {children}
-    </div>
+    <textarea
+      className={`flex min-h-[80px] w-full rounded-md border border-[var(--hospital-gray-300)] bg-white px-3 py-2 text-sm text-[var(--hospital-gray-900)] placeholder:text-[var(--hospital-gray-400)] focus:outline-none focus:ring-2 focus:ring-[var(--hospital-accent)] focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 ${className}`}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+    />
   );
 }
