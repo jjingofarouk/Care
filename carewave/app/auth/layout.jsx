@@ -10,7 +10,7 @@ export default function AuthLayout({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (isAuthenticated(token)) {
-      router.push('/appointment');
+      router.push('/appointments');
     }
   }, [router]);
 

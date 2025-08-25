@@ -64,7 +64,7 @@ export default function AuthPage() {
     setError(null);
     try {
       await login(loginData);
-      router.push('/appointment');
+      router.push('/appointments');
     } catch (err) {
       setError(err.message || 'Invalid credentials');
     } finally {
@@ -78,7 +78,7 @@ export default function AuthPage() {
     setError(null);
     try {
       await register(registerData);
-      router.push('/auth/login');
+      router.push('/auth');
     } catch (err) {
       setError(err.message || 'Failed to register');
     } finally {
