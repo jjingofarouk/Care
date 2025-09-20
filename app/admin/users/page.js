@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserPlus, Trash2, Edit } from 'lucide-react';
 import { useAuth } from '@/auth/AuthContext';
 
