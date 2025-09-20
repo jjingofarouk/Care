@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, Heart, CheckCircle } from 'lucide-react';
-import authService from '@/app/auth/authService';
-import { useAuth } from '@/app/auth/AuthContext';
+import authService from '@/auth/authService';
+import { useAuth } from '@/auth/AuthContext';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({ email: '', password: '', firstName: '', lastName: '', role: 'PATIENT' });
