@@ -1,0 +1,44 @@
+// Represents a journal entry in the accounting system
+model JournalEntry {
+  id            String     @id @default(uuid())
+  accountId     String
+  account       Account    @relation("AccountJournalEntries", fields: [accountId], references: [id], onDelete: Restrict)
+  amount        Float
+  entryDate     DateTime
+  description   String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  ledgerId      String
+  ledger        Ledger     @relation("LedgerJournalEntries", fields: [ledgerId], references: [id], onDelete: Cascade)
+}
+
+// Represents a ledger for accounting
+model Ledger {
+  id              String         @id @default(uuid())
+  name            String         @unique
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  journalEntries  JournalEntry[] @relation("LedgerJournalEntries")
+  trialBalances   TrialBalance[] @relation("LedgerTrialBalances")
+}
+
+// Represents an account in the accounting system
+model Account {
+  id              String         @id @default(uuid())
+  name            String         @unique
+  accountType     String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  journalEntries  JournalEntry[] @relation("AccountJournalEntries")
+}
+
+// Represents a trial balance for accounting
+model TrialBalance {
+  id            String     @id @default(uuid())
+  ledgerId      String
+  ledger        Ledger     @relation("LedgerTrialBalances", fields: [ledgerId], references: [id], onDelete: Cascade)
+  period        String
+  balance       Float
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

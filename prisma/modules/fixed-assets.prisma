@@ -1,0 +1,33 @@
+// Represents a fixed asset in the hospital
+model FixedAsset {
+  id                    String                 @id
+  name                  String                 // Removed @unique constraint
+  purchaseDate          DateTime
+  cost                  Float
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  depreciationSchedules DepreciationSchedule[] @relation("AssetDepreciationSchedules")
+  assetAudits           AssetAudit[]           @relation("AssetAudits")
+}
+
+// Represents a depreciation schedule for a fixed asset
+model DepreciationSchedule {
+  id               String     @id
+  fixedAssetId     String
+  fixedAsset       FixedAsset @relation("AssetDepreciationSchedules", fields: [fixedAssetId], references: [id], onDelete: Cascade)
+  depreciationDate DateTime
+  amount           Float
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+// Represents an audit of a fixed asset
+model AssetAudit {
+  id           String     @id
+  fixedAssetId String
+  fixedAsset   FixedAsset @relation("AssetAudits", fields: [fixedAssetId], references: [id], onDelete: Cascade)
+  auditDate    DateTime
+  findings     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}

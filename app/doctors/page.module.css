@@ -1,0 +1,48 @@
+/* Styles for the main doctor dashboard page */
+
+.container {
+  width: 100vw; /* Full viewport width */
+  max-width: 100%; /* Override any max-width constraints */
+  margin: 0; /* Remove margins */
+  padding: 0; /* No padding as requested */
+  box-sizing: border-box; /* Ensure no extra width from borders */
+}
+
+.title {
+  font-weight: bold;
+  font-size: 2rem; /* Match Typography h4 */
+  margin: 0 0 20px 0; /* Match PharmacyPage margin-bottom, no side margins */
+  padding: 16px; /* Minimal padding for readability */
+  color: #333; /* Match PharmacyPage color */
+  width: 100%; /* Full width */
+  box-sizing: border-box;
+  background-color: #f5f5f5; /* Light background for contrast */
+}
+
+.paper {
+  width: 100%; /* Full width */
+  margin: 0; /* No margins */
+  padding: 0; /* No padding as requested */
+  border-radius: 8px; /* Match PharmacyPage */
+  box-shadow: 0px 3px 3px -2px rgba(0,0,0,0.2), 0px 3px 4px 0px rgba(0,0,0,0.14), 0px 1px 8px 0px rgba(0,0,0,0.12); /* Match Paper elevation=3 */
+  box-sizing: border-box;
+}
+
+.tabsWrapper {
+  width: 100%; /* Full width */
+  margin: 0; /* No margins */
+  padding: 0; /* No padding */
+  border-bottom: 1px solid #e0e0e0; /* Match PharmacyPage */
+}
+
+.tabs {
+  width: 100%; /* Full width */
+  margin: 0; /* No margins */
+  padding: 0; /* No padding */
+}
+
+.tabContent {
+  width: 100%; /* Full width */
+  margin: 0; /* No margins */
+  padding: 0; /* No padding as requested */
+}

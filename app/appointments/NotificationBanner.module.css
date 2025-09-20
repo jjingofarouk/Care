@@ -1,0 +1,15 @@
+
+
+
+/* NotificationBanner.module.css */
+.banner {
+  background-color: #ffeb3b;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.error {
+  color: red;
+}

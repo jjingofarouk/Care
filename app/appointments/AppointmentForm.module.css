@@ -1,0 +1,223 @@
+/* AppointmentForm.module.css */
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e0e7ff 100%); /* Light theme gradient */
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.formBox {
+  width: 100%;
+  max-width: 700px; /* Slightly wider for better form layout */
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  margin: 2rem 1rem;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.formBox:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  color: #1e40af !important;
+  font-weight: 700 !important;
+  font-size: 1.75rem !important;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.5rem !important;
+  position: relative;
+  text-align: center;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  border-radius: 2px;
+}
+
+.formControl {
+  margin-bottom: 1.5rem !important;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e0e7ff;
+  transition: border-color 0.2s ease;
+}
+
+.formControl:hover {
+  border-color: #2563eb !important;
+}
+
+.inputLabel {
+  color: #1e40af !important;
+  font-weight: 500 !important;
+}
+
+.select {
+  background: white;
+  border-radius: 5px;
+}
+
+.textField {
+  background: white;
+  border-radius: 5px;
+}
+
+.submitButton {
+  background: linear-gradient(45deg, #2563eb 0%, #1e40af 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.submitButton:hover {
+  background: linear-gradient(45deg, #1e40af,0%, #2563eb 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+}
+
+.clearButton {
+  background: linear-gradient(45deg, #ef4444,0%, #dc2626 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.clearButton:hover {
+  background: linear-gradient(45deg, #dc2626,0%, #b91c1c 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+.errorText {
+  color: #d32f2f !important;
+  font-size: 0.875rem !important;
+  margin-top: 0.5rem !important;
+  text-align: center;
+}
+
+.dialog {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.dialogTitle {
+  color: #1e40af !important;
+  font-weight: 600 !important;
+  background: #f5f7fa;
+  border-bottom: 1px solid #e0e7ff;
+  text-align: center;
+}
+
+.dialogContent {
+  padding: 1.5rem !important;
+  background: white;
+}
+
+.dialogActions {
+  padding: 1rem !important;
+  background: #f9fafb;
+  border-top: 1px solid #e0e7ff;
+  justify-content: center !important;
+}
+
+.dialogButton {
+  background: linear-gradient(45deg, #2563eb,0%, #1e40af 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.dialogButton:hover {
+  background: linear-gradient(45deg, #1e40af,0%, #2563eb 100%) !important;
+  transform: translateY(-1px);
+}
+
+.dialogCancelButton {
+  background: linear-gradient(45deg, #ef4444,0%, #dc2626 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.dialogCancelButton:hover {
+  background: linear-gradient(45deg, #dc2626,0%, #b91c1c 100%) !important;
+  transform: translateY(-1px);
+}
+
+.fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .formBox {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  .title {
+    font-size: 1.5rem !important;
+  }
+  .title::after {
+    width: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .formBox {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  .title {
+    font-size: 1.25rem !important;
+  }
+  .title::after {
+    width: 50px;
+  }
+  .submitButton, .clearButton, .dialogButton, .dialogCancelButton {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}

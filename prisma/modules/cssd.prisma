@@ -1,0 +1,33 @@
+// Represents an item in the Central Sterile Services Department (CSSD)
+model CSSDItem {
+  id                  String              @id @default(uuid())
+  name                String              @unique
+  description         String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  sterilizationCycles  SterilizationCycle[] @relation("CSSDItemCycles")
+  instrumentRequests  InstrumentRequest[] @relation("CSSDItemRequests")
+}
+
+// Represents a sterilization cycle in the CSSD
+model SterilizationCycle {
+  id            String     @id @default(uuid())
+  cssdItemId    String
+  cssdItem      CSSDItem   @relation("CSSDItemCycles", fields: [cssdItemId], references: [id], onDelete: Restrict)
+  cycleDate     DateTime
+  status        String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a request for an instrument from the CSSD
+model InstrumentRequest {
+  id            String     @id @default(uuid())
+  cssdItemId    String
+  cssdItem      CSSDItem   @relation("CSSDItemRequests", fields: [cssdItemId], references: [id], onDelete: Restrict)
+  departmentId  String
+  department    Department @relation("InstrumentRequestDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  requestedAt   DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

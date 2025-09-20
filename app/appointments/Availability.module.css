@@ -1,0 +1,88 @@
+.container {
+  width: 100vw;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  background: linear-gradient(45deg, #00b0ff, #80d8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.filterContainer {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.textField {
+  min-width: 200px;
+}
+
+.alert {
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 75, 75, 0.1);
+  backdrop-filter: blur(10px);
+  color: #ff6b6b;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.gridContainer {
+  width: 100%;
+  max-width: 1200px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.grid {
+  background: transparent !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.grid :global(.MuiDataGrid-root) {
+  border: none !important;
+}
+
+.grid :global(.MuiDataGrid-columnHeaders) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border-radius: 12px 12px 0 0;
+}
+
+.grid :global(.MuiDataGrid-cell) {
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.grid :global(.MuiDataGrid-row:hover) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  transition: background 0.3s ease;
+}
+
+.grid :global(.MuiDataGrid-footerContainer) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border-radius: 0 0 12px 12px;
+}

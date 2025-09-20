@@ -1,0 +1,27 @@
+// Tracks electricity usage logs
+model ElectricityLog {
+  id            String     @id @default(uuid())
+  recordedAt    DateTime
+  usageKwh      Float
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Tracks water usage logs
+model WaterLog {
+  id            String     @id @default(uuid())
+  recordedAt    DateTime
+  usageLiters   Float
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Tracks the status of backup generators
+model BackupGeneratorStatus {
+  id            String     @id @default(uuid())
+  generatorId   String     @unique
+  status        String
+  lastCheckedAt DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

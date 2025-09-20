@@ -1,0 +1,19 @@
+/* pharmacy/PharmacyPrescriptions.module.css */
+/* Styles for the prescription management component */
+
+.container {
+  padding: 20px;
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}

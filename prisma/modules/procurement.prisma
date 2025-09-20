@@ -1,0 +1,32 @@
+// Represents a purchase order for procurement
+model PurchaseOrder {
+  id                String           @id @default(uuid())
+  supplierId        String
+  supplier          Supplier         @relation("SupplierPurchaseOrders", fields: [supplierId], references: [id], onDelete: Restrict)
+  orderDate         DateTime
+  totalAmount       Float
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  goodsReceivedNotes GoodsReceivedNote[] @relation("PurchaseOrderGRNs")
+}
+
+// Represents a supplier for procurement
+model Supplier {
+  id              String          @id @default(uuid())
+  name            String          @unique
+  contactInfo     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  purchaseOrders  PurchaseOrder[] @relation("SupplierPurchaseOrders")
+}
+
+// Represents a goods received note
+model GoodsReceivedNote {
+  id              String        @id @default(uuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation("PurchaseOrderGRNs", fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  receivedAt      DateTime
+  details         String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}

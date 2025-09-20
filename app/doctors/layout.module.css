@@ -1,0 +1,13 @@
+/* Styles for the doctor layout */
+
+.container {
+  width: 100vw; /* Full viewport width */
+  max-width: 100%; /* Override any max-width constraints */
+  min-height: 100vh; /* Full viewport height */
+  margin: 0; /* Remove margins */
+  padding: 0; /* Remove padding */
+  box-sizing: border-box; /* Ensure no extra width from borders */
+  background-color: #f5f5f5; /* Match grey.100 from previous version */
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,81 @@
+// patients.prisma
+// Represents a patient in the hospital system
+model Patient {
+  id              String           @id @default(uuid())
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime
+  gender          String
+  phone           String?
+  email           String?          @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  userId          String?          @unique
+  userAccount     UserRegistration? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  medicalRecords      MedicalRecord[]      @relation("PatientMedicalRecords")
+  appointments        Appointment[]        @relation("PatientAppointments")
+  admissions          Admission[]          @relation("PatientAdmissions")
+  addresses           PatientAddress[]     @relation("PatientAddresses")
+  nextOfKin           NextOfKin?           @relation("PatientNextOfKin")
+  insuranceInfo       InsuranceInfo?       @relation("PatientInsurance")
+  supportCases        PatientSupportCase[] @relation("PatientSupportCases")
+  queueEntries        QueueEntry[]         @relation("PatientQueueEntries")
+  clinicalNotes       ClinicalNote[]       @relation("PatientClinicalNotes")
+  progressNotes       ProgressNote[]       @relation("PatientProgressNotes")
+  soapNotes           SOAPNote[]           @relation("PatientSOAPNotes")
+  clinicalTasks       ClinicalTask[]       @relation("PatientClinicalTasks")
+  emergencyCases      EmergencyCase[]      @relation("PatientEmergencyCases")
+  triage              Triage[]             @relation("PatientTriage")
+  maternityCases      MaternityCase[]      @relation("PatientMaternityCases")
+  vaccinationRecords  VaccinationRecord[]  @relation("PatientVaccinationRecords")
+  surgeries           Surgery[]            @relation("PatientSurgeries")
+  preOpAssessments    PreOpAssessment[]    @relation("PatientPreOpAssessments")
+  labRequests         LabRequest[]         @relation("PatientLabRequests")
+  samples             Sample[]             @relation("PatientSamples")
+  imagingOrders       ImagingOrder[]       @relation("PatientImagingOrders")
+  prescriptions       Prescription[]       @relation("PatientPrescriptions")
+  dispenseRecords     DispenseRecord[]     @relation("PatientDispenseRecords")
+  invoices            Invoice[]            @relation("PatientInvoices")
+  claims              Claim[]              @relation("PatientClaims")
+  nhifClaims          NHIFClaim[]          @relation("PatientNHIFClaims")
+  referrals           Referral[]           @relation("PatientReferrals")
+}
+
+// Represents a patient's address
+model PatientAddress {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   Patient  @relation("PatientAddresses", fields: [patientId], references: [id], onDelete: Cascade)
+  street    String
+  city      String
+  country   String
+  postalCode String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Represents a patient's next of kin
+model NextOfKin {
+  id        String   @id @default(uuid())
+  patientId String   @unique
+  patient   Patient  @relation("PatientNextOfKin", fields: [patientId], references: [id], onDelete: Cascade)
+  firstName String
+  lastName  String
+  relationship String
+  phone     String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Represents a patient's insurance information
+model InsuranceInfo {
+  id            String   @id @default(uuid())
+  patientId     String   @unique
+  patient       Patient  @relation("PatientInsurance", fields: [patientId], references: [id], onDelete: Cascade)
+  provider      String
+  policyNumber  String   @unique
+  expiryDate    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

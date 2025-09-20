@@ -1,0 +1,47 @@
+// Represents a laboratory test
+model LabTest {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  description   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  labRequests   LabRequest[] @relation("LabTestRequests")
+}
+
+// Represents a laboratory test result
+model LabResult {
+  id            String     @id @default(uuid())
+  labRequestId  String
+  labRequest    LabRequest @relation("LabRequestResults", fields: [labRequestId], references: [id], onDelete: Cascade)
+  result        String
+  resultedAt    DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a request for a laboratory test
+model LabRequest {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientLabRequests", fields: [patientId], references: [id], onDelete: Cascade)
+  labTestId     String
+  labTest       LabTest    @relation("LabTestRequests", fields: [labTestId], references: [id], onDelete: Restrict)
+  sampleId      String?
+  sample        Sample?    @relation("LabRequestSample", fields: [sampleId], references: [id], onDelete: SetNull)
+  requestedAt   DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  labResults    LabResult[] @relation("LabRequestResults")
+}
+
+// Represents a sample collected for a lab test
+model Sample {
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       Patient      @relation("PatientSamples", fields: [patientId], references: [id], onDelete: Cascade)
+  sampleType    String
+  collectedAt   DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  labRequests   LabRequest[] @relation("LabRequestSample")
+}

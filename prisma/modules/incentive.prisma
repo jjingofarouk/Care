@@ -1,0 +1,24 @@
+// Represents an incentive program for hospital staff
+model IncentiveProgram {
+  id                String            @id @default(uuid())
+  name              String            @unique
+  description       String?
+  startDate         DateTime
+  endDate           DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  incentiveRecords  IncentiveRecord[] @relation("ProgramIncentives")
+}
+
+// Tracks individual incentive records for staff
+model IncentiveRecord {
+  id                String           @id @default(uuid())
+  programId         String
+  program           IncentiveProgram @relation("ProgramIncentives", fields: [programId], references: [id], onDelete: Cascade)
+  staffId           String
+  staffType         String
+  amount            Float
+  awardedAt         DateTime
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}

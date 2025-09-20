@@ -1,0 +1,113 @@
+enum SurgeryStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum SurgicalRole {
+  SURGEON
+  ASSISTANT
+  ANESTHESIOLOGIST
+  SCRUB_NURSE
+  CIRCULATING_NURSE
+  TECHNICIAN
+}
+
+model Surgery {
+  id String @id @default(uuid())
+  patientId String
+  patient Patient @relation("PatientSurgeries", fields: [patientId], references: [id], onDelete: Cascade)
+  theatreId String
+  theatre Theatre @relation("TheatreSurgeries", fields: [theatreId], references: [id], onDelete: Restrict)
+  surgicalTeamId String
+  surgicalTeam SurgicalTeam @relation("SurgeryTeam", fields: [surgicalTeamId], references: [id], onDelete: Restrict)
+  preOpAssessmentId String?
+  preOpAssessment PreOpAssessment? @relation("SurgeryPreOp", fields: [preOpAssessmentId], references: [id], onDelete: SetNull)
+  anesthesiaRecord AnesthesiaRecord?
+  postOpRecovery PostOpRecovery?
+  auditLogs SurgeryAuditLog[]
+  type String?
+  estimatedDurationMinutes Int?
+  actualDurationMinutes Int?
+  status SurgeryStatus @default(PLANNED)
+  notes String?
+  complications String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Theatre {
+  id String @id @default(uuid())
+  name String @unique
+  departmentId String
+  department Department @relation("TheatreDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  surgeries Surgery[] @relation("TheatreSurgeries")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SurgicalTeam {
+  id String @id @default(uuid())
+  name String @unique
+  members SurgicalTeamMember[]
+  surgeries Surgery[] @relation("SurgeryTeam")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SurgicalTeamMember {
+  id String @id @default(uuid())
+  surgicalTeamId String
+  userId String
+  role SurgicalRole
+  surgicalTeam SurgicalTeam @relation(fields: [surgicalTeamId], references: [id], onDelete: Cascade)
+  user UserRegistration @relation(fields: [userId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PreOpAssessment {
+  id String @id @default(uuid())
+  patientId String
+  patient Patient @relation("PatientPreOpAssessments", fields: [patientId], references: [id], onDelete: Cascade)
+  assessment String
+  assessedAt DateTime
+  surgeries Surgery[] @relation("SurgeryPreOp")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AnesthesiaRecord {
+  id String @id @default(uuid())
+  surgeryId String @unique
+  surgery Surgery @relation(fields: [surgeryId], references: [id], onDelete: Cascade)
+  type String
+  notes String?
+  administeredAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PostOpRecovery {
+  id String @id @default(uuid())
+  surgeryId String @unique
+  surgery Surgery @relation(fields: [surgeryId], references: [id], onDelete: Cascade)
+  recoveryNotes String?
+  dischargeDate DateTime?
+  complications String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SurgeryAuditLog {
+  id String @id @default(uuid())
+  surgeryId String
+  changedById String
+  fieldChanged String
+  oldValue String?
+  newValue String?
+  changedAt DateTime @default(now())
+  surgery Surgery @relation(fields: [surgeryId], references: [id], onDelete: Cascade)
+  changedBy UserRegistration @relation(fields: [changedById], references: [id])
+}

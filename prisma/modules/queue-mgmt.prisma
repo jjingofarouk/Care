@@ -1,0 +1,33 @@
+// Represents an entry in the hospital queue
+model QueueEntry {
+  id              String        @id @default(uuid())
+  patientId       String
+  patient         Patient       @relation("PatientQueueEntries", fields: [patientId], references: [id], onDelete: Cascade)
+  serviceCounterId String
+  serviceCounter  ServiceCounter @relation("ServiceCounterQueueEntries", fields: [serviceCounterId], references: [id], onDelete: Restrict)
+  queueStatusId   String
+  queueStatus     QueueStatus   @relation("QueueEntryStatus", fields: [queueStatusId], references: [id], onDelete: Restrict)
+  queueNumber     Int           @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// Represents a service counter for queue management
+model ServiceCounter {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  departmentId  String
+  department    Department   @relation("ServiceCounterDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  queueEntries  QueueEntry[] @relation("ServiceCounterQueueEntries")
+}
+
+// Represents the status of a queue entry
+model QueueStatus {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  queueEntries  QueueEntry[] @relation("QueueEntryStatus")
+}

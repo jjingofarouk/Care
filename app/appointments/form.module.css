@@ -1,0 +1,36 @@
+.container {
+  width: 100vw;
+  max-width: 100%;
+  padding: 8px;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.tabsContainer {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.tab {
+  text-transform: none;
+  font-size: 14px;
+  padding: 4px 8px;
+  min-height: 36px;
+}
+
+.contentContainer {
+  width: 100%;
+  padding: 0;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 4px;
+  }
+
+  .tab {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+}

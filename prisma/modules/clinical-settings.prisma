@@ -1,0 +1,163 @@
+enum ClinicalSettingType {
+  GENERAL
+  SPECIALTY
+  EMERGENCY
+  OUTPATIENT
+  INPATIENT
+  ICU
+  PEDIATRIC
+  MATERNITY
+}
+
+enum ConfigurationStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+  RESERVED
+  UNDER_CLEANING
+}
+
+model ClinicalSetting {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  name                  String
+  code                  String?               @unique
+  type                  ClinicalSettingType
+  status                ConfigurationStatus   @default(DRAFT)
+  departmentId          Int?
+  department            Department?           @relation("DepartmentClinicalSettings", fields: [departmentId], references: [id])
+  protocols             String?
+  defaultRoomId         Int?                  @unique
+  defaultRoom           Room?                 @relation("ClinicalSettingDefaultRoom")
+  equipmentList         String?
+  staffRoles            String?
+  appointmentDuration   Int?
+  maxPatientsPerSlot    Int?
+  operatingHours        String?
+  billingRules          String?
+  laboratoryId          Int?                  @unique
+  laboratory            Laboratory?           @relation("ClinicalSettingLaboratory")
+  radiologyId           Int?                  @unique
+  radiology             Radiology?            @relation("ClinicalSettingRadiology")
+  pharmacyId            Int?                  @unique
+  pharmacy              Pharmacy?             @relation("ClinicalSettingPharmacy")
+  operationTheatreId    Int?                  @unique
+  operationTheatre      OperationTheatre?     @relation("ClinicalSettingOperationTheatre")
+  nursingId             Int?                  @unique
+  nursing               Nursing?              @relation("ClinicalSettingNursing")
+  cssdId                Int?                  @unique
+  cssd                  Cssd?                 @relation("ClinicalSettingCssd")
+  wardId                Int?                  @unique
+  ward                  Ward?                 @relation("ClinicalSettingWard")
+  triageProtocols       String?
+  emergencyProtocols    String?
+  patientFlowRules      String?
+  documentationTemplates String?
+  createdById           Int?                  @unique
+  createdBy             User?                 @relation("ClinicalSettingCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                  @unique
+  updatedBy             User?                 @relation("ClinicalSettingUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("ClinicalSettingAuditLogs")
+  clinicalSettingDocuments ClinicalSettingDocument[] @relation("ClinicalSettingDocuments")
+  clinicalSettingNotifications ClinicalSettingNotification[] @relation("ClinicalSettingNotifications")
+  services              Service[]             @relation("ServiceClinicalSetting")
+  patients              Patient[]             @relation("PatientClinicalSettings")
+  clinicalRecords       ClinicalRecord[]      @relation("ClinicalRecordClinicalSettings")
+  homeCares             HomeCare[]            @relation("HomeCareClinicalSettings")
+  socialServices        SocialService[]       @relation("SocialServiceClinicalSettings")
+  socialServiceCases    SocialServiceCase[]   @relation("SocialServiceCaseClinicalSettings")
+  radiologyTests        RadiologyTest[]       @relation("RadiologyTestClinicalSettings")
+  laboratoryTests       Laboratory[]          @relation("LaboratoryClinicalSettings")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  emergencies           Emergency[]           @relation("EmergencyClinicalSettings")
+  doctors               Doctor[]              @relation("DoctorClinicalSettings")
+  cssdInstruments       CSSDInstrument[]      @relation("ClinicalSettingCSSDInstruments")
+  cssdRecords           CSSDRecord[]          @relation("ClinicalSettingCSSDRecords")
+  cssdRequisitions      CSSDRequisition[]     @relation("ClinicalSettingCSSDRequisitions")
+  nursingCares          NursingCare[]         @relation("NursingCareClinicalSettings")
+  queues                Queue[]               @relation("QueueClinicalSettings")
+}
+
+model Room {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  roomNumber            String                @unique
+  name                  String?
+  departmentId          Int?
+  department            Department?           @relation("DepartmentRooms", fields: [departmentId], references: [id])
+  clinicalSettingId     Int?                  @unique
+  clinicalSetting       ClinicalSetting?      @relation("ClinicalSettingDefaultRoom", fields: [clinicalSettingId], references: [id])
+  status                RoomStatus            @default(AVAILABLE)
+  capacity              Int?
+  roomType              String?
+  equipment             String?
+  location              String?
+  lastCleaned           DateTime?
+  maintenanceNotes      String?
+  createdById           Int?                  @unique
+  createdBy             User?                 @relation("RoomCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                  @unique
+  updatedBy             User?                 @relation("RoomUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("RoomAuditLogs")
+  roomSchedules         RoomSchedule[]        @relation("RoomSchedules")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model RoomSchedule {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  roomId                Int
+  room                  Room                  @relation("RoomSchedules", fields: [roomId], references: [id])
+  startTime             DateTime
+  endTime               DateTime
+  appointmentId         Int?                  @unique
+  appointment           Appointment?          @relation("RoomScheduleAppointment", fields: [appointmentId], references: [id])
+  status                String                @default("AVAILABLE")
+  notes                 String?
+  createdById           Int?                  @unique
+  createdBy             User?                 @relation("RoomScheduleCreatedBy", fields: [createdById], references: [id])
+  updatedById           Int?                  @unique
+  updatedBy             User?                 @relation("RoomScheduleUpdatedBy", fields: [updatedById], references: [id])
+  auditLogs             AuditLog[]            @relation("RoomScheduleAuditLogs")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model ClinicalSettingDocument {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  clinicalSettingId     Int
+  clinicalSetting       ClinicalSetting       @relation("ClinicalSettingDocuments", fields: [clinicalSettingId], references: [id])
+  documentType          String
+  filePath              String
+  description           String?
+  uploadedById          Int?                  @unique
+  uploadedBy            User?                 @relation("ClinicalSettingDocumentUploadedBy", fields: [uploadedById], references: [id])
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  auditLogs             AuditLog[]            @relation("ClinicalSettingDocumentAuditLogs")
+}
+
+model ClinicalSettingNotification {
+  id                    Int                   @id @default(autoincrement())
+  uuid                  String                @unique @default(uuid())
+  clinicalSettingId     Int
+  clinicalSetting       ClinicalSetting       @relation("ClinicalSettingNotifications", fields: [clinicalSettingId], references: [id])
+  notificationType      String
+  status                NotificationStatus    @default(PENDING)
+  sentAt                DateTime?
+  recipientId           Int?                  @unique
+  recipient             User?                 @relation("ClinicalSettingNotificationRecipient", fields: [recipientId], references: [id])
+  message               String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}

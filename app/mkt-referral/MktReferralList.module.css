@@ -1,0 +1,6 @@
+/* mkt-referral/MktReferralList.module.css */
+.list {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}

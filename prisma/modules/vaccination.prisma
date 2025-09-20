@@ -1,0 +1,34 @@
+// vaccination.prisma
+// Represents a vaccination record for a patient
+model VaccinationRecord {
+  id                  String              @id @default(uuid())
+  patientId           String
+  patient             Patient             @relation("PatientVaccinationRecords", fields: [patientId], references: [id], onDelete: Cascade)
+  vaccineId           String
+  vaccine             Vaccine             @relation("VaccineRecords", fields: [vaccineId], references: [id], onDelete: Restrict)
+  immunizationScheduleId String?
+  immunizationSchedule ImmunizationSchedule? @relation("VaccinationSchedule", fields: [immunizationScheduleId], references: [id], onDelete: SetNull)
+  administeredDate    DateTime
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+}
+
+// Represents a vaccine in the hospital
+model Vaccine {
+  id                  String              @id @default(uuid())
+  name                String              @unique
+  description         String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  vaccinationRecords  VaccinationRecord[] @relation("VaccineRecords")
+}
+
+// Represents an immunization schedule
+model ImmunizationSchedule {
+  id                  String              @id @default(uuid())
+  name                String              @unique
+  description         String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  vaccinationRecords  VaccinationRecord[] @relation("VaccinationSchedule")
+}

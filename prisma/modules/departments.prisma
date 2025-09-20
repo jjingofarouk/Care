@@ -1,0 +1,31 @@
+enum DepartmentTypeEnum {
+  CLINICAL
+  ADMINISTRATIVE
+  SUPPORT
+}
+
+// Represents a department in the hospital
+model Department {
+  id                String            @id @default(uuid())
+  name              String            @unique
+  departmentType    DepartmentTypeEnum
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  units             Unit[]            @relation("DepartmentUnits")
+  doctors           Doctor[]          @relation("DoctorDepartment")
+  nurses            Nurse[]           @relation("NurseDepartment")
+  wards             Ward[]            @relation("WardDepartment")
+  serviceCounters   ServiceCounter[]  @relation("ServiceCounterDepartment")
+  theatres          Theatre[]         @relation("TheatreDepartment")
+  instrumentRequests InstrumentRequest[] @relation("InstrumentRequestDepartment")
+}
+
+// Represents a unit within a department
+model Unit {
+  id            String     @id @default(uuid())
+  departmentId  String
+  department    Department @relation("DepartmentUnits", fields: [departmentId], references: [id], onDelete: Cascade)
+  name          String     @unique
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

@@ -1,0 +1,66 @@
+// medical-records.prisma
+
+model MedicalRecord {
+  id                 String              @id @default(uuid())
+  patientId          String
+  patient            Patient             @relation("PatientMedicalRecords", fields: [patientId], references: [id], onDelete: Cascade)
+
+  admissionId        String?             // NEW: Optional link to admission
+  admission          Admission?          @relation("AdmissionMedicalRecords", fields: [admissionId], references: [id], onDelete: SetNull)
+
+  recordDate         DateTime
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  // Clinical data
+  allergies          Allergy[]           @relation("MedicalRecordAllergies")
+  diagnoses          Diagnosis[]         @relation("MedicalRecordDiagnoses")
+  vitalSigns         VitalSign[]         @relation("MedicalRecordVitalSigns")
+
+  // History taking
+  chiefComplaint     ChiefComplaint?
+  presentIllness     PresentIllness?
+  pastConditions     PastMedicalCondition[]
+  surgicalHistory    SurgicalHistory[]
+  familyHistory      FamilyHistory[]
+  medicationHistory  MedicationHistory[]
+  socialHistory      SocialHistory?
+  reviewOfSystems    ReviewOfSystems[]
+  immunizations      Immunization[]
+  travelHistory      TravelHistory[]
+}
+
+model Allergy {
+  id              String        @id @default(uuid())
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation("MedicalRecordAllergies", fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  name            String
+  severity        String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Diagnosis {
+  id              String        @id @default(uuid())
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation("MedicalRecordDiagnoses", fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  code            String
+  description     String
+  diagnosedAt     DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model VitalSign {
+  id              String        @id @default(uuid())
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation("MedicalRecordVitalSigns", fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  bloodPressure   String?
+  heartRate       Int?
+  temperature     Float?
+  respiratoryRate Int?
+  oxygenSaturation Float?
+  recordedAt      DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}

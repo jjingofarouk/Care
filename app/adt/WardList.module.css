@@ -1,0 +1,95 @@
+/* app/adt/WardList.module.css */
+.container {
+  max-width: 100%;
+  width:100vw;
+  padding: 0 16px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1a3c34;
+}
+
+.alert {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+.tableWrapper {
+  height: 400px;
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background: #fff;
+}
+
+.dataGrid {
+  border: none;
+}
+
+.dataGrid :global(.MuiDataGrid-root) {
+  border: none;
+}
+
+.dataGrid :global(.MuiDataGrid-columnHeaders) {
+  background-color: #f5f7fa;
+  font-weight: 600;
+  color: #1a3c34;
+}
+
+.dataGrid :global(.MuiDataGrid-cell) {
+  padding: 8px;
+  font-size: 0.875rem;
+}
+
+.dataGrid :global(.MuiDataGrid-row) {
+  transition: background-color 0.2s;
+}
+
+.dataGrid :global(.MuiDataGrid-row:hover) {
+  background-color: #f9fafb;
+}
+
+.available {
+  background-color: #d1fae5;
+  color: #059669;
+  font-weight: 500;
+  border-radius: 12px;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.full {
+  background-color: #fee2e2;
+  color: #dc2626;
+  font-weight: 500;
+  border-radius: 12px;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 8px;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  .tableWrapper {
+    height: 350px;
+  }
+
+  .dataGrid :global(.MuiDataGrid-cell) {
+    font-size: 0.75rem;
+    padding: 6px;
+  }
+
+  .dataGrid :global(.MuiDataGrid-columnHeaderTitle) {
+    font-size: 0.75rem;
+  }
+}

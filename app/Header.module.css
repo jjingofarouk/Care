@@ -1,0 +1,350 @@
+/* Hospital Management System Header Styles */
+
+/* Header Styles */
+.hospital-header {
+  background-color: var(--hospital-teal);
+  border-bottom: 1px solid var(--hospital-teal-light);
+  box-shadow: var(--shadow-md);
+  color: var(--hospital-white);
+}
+
+.hospital-header .MuiToolbar-root {
+  min-height: 64px;
+  padding: 0 20px;
+}
+
+/* Logo Section */
+.hospital-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.hospital-logo-container:hover {
+  background-color: var(--hospital-teal-light);
+}
+
+.hospital-logo-image {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background-color: var(--hospital-white);
+  padding: 2px;
+}
+
+.hospital-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--hospital-white);
+  letter-spacing: -0.025em;
+}
+
+.hospital-title-mobile {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .hospital-title-mobile {
+    display: block;
+  }
+}
+
+/* Menu Toggle Button */
+.hospital-menu-toggle {
+  color: var(--hospital-white);
+  padding: 4px;
+  margin-right: 8px;
+}
+
+.hospital-menu-toggle:hover {
+  background-color: var(--hospital-teal-light);
+}
+
+/* Navigation Buttons (for non-authenticated users) */
+.hospital-nav-button {
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-weight: 500;
+  text-transform: none;
+  transition: all 0.2s ease;
+  color: var(--hospital-white);
+  border: 1px solid transparent;
+}
+
+.hospital-nav-button:hover {
+  background-color: var(--hospital-teal-light);
+  border-color: var(--hospital-teal-lighter);
+}
+
+.hospital-nav-button.active {
+  background-color: var(--hospital-teal-lighter);
+  border-color: var(--hospital-accent);
+}
+
+/* User Info Section */
+.hospital-user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hospital-user-name {
+  font-weight: 600;
+  color: var(--hospital-white);
+  font-size: 0.875rem;
+}
+
+.hospital-user-name-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hospital-user-name-mobile {
+    display: block;
+  }
+}
+
+/* Role Chips */
+.hospital-role-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  height: 20px;
+  border-radius: 10px;
+}
+
+.hospital-role-patient {
+  background-color: rgba(5, 150, 105, 0.2);
+  color: #10b981;
+}
+
+.hospital-role-doctor {
+  background-color: rgba(124, 58, 237, 0.2);
+  color: #a855f7;
+}
+
+.hospital-role-nurse {
+  background-color: rgba(220, 38, 38, 0.2);
+  color: #ef4444;
+}
+
+.hospital-role-lab {
+  background-color: rgba(234, 88, 12, 0.2);
+  color: #f97316;
+}
+
+.hospital-role-staff {
+  background-color: rgba(8, 145, 178, 0.2);
+  color: #0891b2;
+}
+
+.hospital-role-admin {
+  background-color: rgba(100, 116, 139, 0.2);
+  color: #64748b;
+}
+
+.hospital-role-guest {
+  background-color: rgba(55, 65, 81, 0.2);
+  color: #6b7280;
+}
+
+/* Avatar Styles */
+.hospital-avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 2px solid var(--hospital-white);
+}
+
+.hospital-avatar:hover {
+  transform: scale(1.05);
+}
+
+.hospital-avatar-patient {
+  background-color: var(--hospital-success);
+}
+
+.hospital-avatar-doctor {
+  background-color: #7c3aed;
+}
+
+.hospital-avatar-nurse {
+  background-color: var(--hospital-error);
+}
+
+.hospital-avatar-lab {
+  background-color: var(--hospital-warning);
+}
+
+.hospital-avatar-staff {
+  background-color: var(--hospital-accent);
+}
+
+.hospital-avatar-admin {
+  background-color: var(--hospital-gray-500);
+}
+
+.hospital-avatar-guest {
+  background-color: var(--hospital-gray-600);
+}
+
+/* Notification Button */
+.hospital-notification-btn {
+  color: var(--hospital-white);
+  transition: color 0.2s ease;
+}
+
+.hospital-notification-btn:hover {
+  background-color: var(--hospital-teal-light);
+}
+
+/* Menu Styles */
+.hospital-menu {
+  margin-top: 8px;
+}
+
+.hospital-menu .MuiPaper-root {
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--hospital-gray-200);
+  min-width: 280px;
+}
+
+.hospital-menu-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--hospital-gray-200);
+  background-color: var(--hospital-gray-50);
+}
+
+.hospital-menu-header .hospital-user-title {
+  font-weight: 600;
+  color: var(--hospital-gray-800);
+  font-size: 0.875rem;
+  margin-bottom: 2px;
+}
+
+.hospital-menu-header .hospital-user-subtitle {
+  color: var(--hospital-gray-500);
+  font-size: 0.75rem;
+}
+
+.hospital-menu-item {
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin: 4px 8px;
+  transition: all 0.2s ease;
+}
+
+.hospital-menu-item:hover {
+  background-color: var(--hospital-gray-50);
+}
+
+.hospital-menu-item.danger:hover {
+  background-color: rgba(239, 68, 68, 0.05);
+  color: var(--hospital-error);
+}
+
+.hospital-menu-item-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.hospital-menu-item-text .hospital-menu-item-title {
+  font-weight: 500;
+  color: var(--hospital-gray-800);
+  font-size: 0.875rem;
+}
+
+.hospital-menu-item-text .hospital-menu-item-desc {
+  color: var(--hospital-gray-500);
+  font-size: 0.75rem;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Notification Menu */
+.hospital-notification-item {
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin: 4px 8px;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.hospital-notification-item.unread {
+  background-color: rgba(8, 145, 178, 0.02);
+  border-left-color: var(--hospital-accent);
+}
+
+.hospital-notification-item:hover {
+  background-color: var(--hospital-gray-50);
+}
+
+.hospital-notification-title {
+  font-size: 0.875rem;
+  color: var(--hospital-gray-800);
+  margin-bottom: 2px;
+}
+
+.hospital-notification-title.unread {
+  font-weight: 600;
+}
+
+.hospital-notification-time {
+  color: var(--hospital-gray-500);
+  font-size: 0.75rem;
+}
+
+.hospital-notification-footer {
+  padding: 12px 20px;
+  margin: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.hospital-notification-footer:hover {
+  background-color: var(--hospital-gray-50);
+}
+
+.hospital-notification-footer-text {
+  color: var(--hospital-accent);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hospital-header .MuiToolbar-root {
+    padding: 0 16px;
+  }
+
+  .hospital-user-info {
+    gap: 12px;
+  }
+
+  .hospital-menu .MuiPaper-root {
+    min-width: 260px;
+  }
+}
+
+/* Focus States for Accessibility */
+.hospital-menu-toggle:focus,
+.hospital-nav-button:focus,
+.hospital-avatar:focus,
+.hospital-notification-btn:focus {
+  outline: 2px solid var(--hospital-accent);
+  outline-offset: 2px;
+}
+
+/* Divider */
+.hospital-divider {
+  margin: 8px 0;
+  background-color: var(--hospital-gray-200);
+}

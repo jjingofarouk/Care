@@ -1,0 +1,35 @@
+// nhif.prisma
+// Represents an NHIF claim
+model NHIFClaim {
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       Patient      @relation("PatientNHIFClaims", fields: [patientId], references: [id], onDelete: Cascade)
+  nhifBenefitId String
+  nhifBenefit   NHIFBenefit  @relation("NHIFClaimBenefit", fields: [nhifBenefitId], references: [id], onDelete: Restrict)
+  amount        Float
+  submittedAt   DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  nhifSubmissions NHIFSubmission[] @relation("NHIFClaimSubmissions")
+}
+
+// Represents an NHIF benefit
+model NHIFBenefit {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  description   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  nhifClaims    NHIFClaim[]  @relation("NHIFClaimBenefit")
+}
+
+// Represents an NHIF claim submission
+model NHIFSubmission {
+  id            String     @id @default(uuid())
+  nhifClaimId   String
+  nhifClaim     NHIFClaim  @relation("NHIFClaimSubmissions", fields: [nhifClaimId], references: [id], onDelete: Cascade)
+  submittedAt   DateTime
+  details       String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

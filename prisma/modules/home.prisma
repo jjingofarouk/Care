@@ -1,0 +1,42 @@
+// Represents configuration for the hospital homepage
+model HomepageConfig {
+  id            String    @id @default(uuid())
+  title         String
+  subtitle      String?
+  theme         String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  heroSections  HeroSection[] @relation("HomepageHeroSections")
+}
+
+// Represents the hero section on the homepage
+model HeroSection {
+  id              String         @id @default(uuid())
+  homepageConfigId String
+  homepageConfig  HomepageConfig @relation("HomepageHeroSections", fields: [homepageConfigId], references: [id], onDelete: Cascade)
+  imageUrl        String?
+  headline        String
+  subheadline     String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+// Represents news articles displayed on the homepage
+model News {
+  id            String    @id @default(uuid())
+  title         String
+  content       String
+  publishedAt   DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Represents highlighted content on the homepage
+model Highlight {
+  id            String    @id @default(uuid())
+  title         String
+  description   String?
+  imageUrl      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}

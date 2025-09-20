@@ -1,0 +1,29 @@
+.searchContainer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 20px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.searchInput {
+  flex-grow: 1;
+}
+
+.searchButton {
+  min-width: 100px;
+}
+
+@media (max-width: 600px) {
+  .searchContainer {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  .searchButton {
+    width: 100%;
+    min-width: unset;
+  }
+}

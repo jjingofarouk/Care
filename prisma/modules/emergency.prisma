@@ -1,0 +1,47 @@
+// emergency.prisma
+// Represents an emergency case
+model EmergencyCase {
+  id            String      @id @default(uuid())
+  patientId     String
+  patient       Patient     @relation("PatientEmergencyCases", fields: [patientId], references: [id], onDelete: Cascade)
+  triageId      String
+  triage        Triage      @relation("EmergencyCaseTriage", fields: [triageId], references: [id], onDelete: Cascade)
+  admissionId   String?
+  admission     Admission?  @relation("EmergencyCaseAdmission", fields: [admissionId], references: [id], onDelete: SetNull)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  logs          EmergencyLog[] @relation("EmergencyCaseLogs")
+}
+
+// Represents a triage assessment for an emergency case
+model Triage {
+  id              String         @id @default(uuid())
+  patientId       String
+  patient         Patient        @relation("PatientTriage", fields: [patientId], references: [id], onDelete: Cascade)
+  triageLevel     String
+  symptoms        String
+  assessedAt      DateTime
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  emergencyCases  EmergencyCase[] @relation("EmergencyCaseTriage")
+}
+
+// Represents an ambulance used in emergencies
+model Ambulance {
+  id            String     @id @default(uuid())
+  vehicleNumber String     @unique
+  status        String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Tracks emergency-related activities
+model EmergencyLog {
+  id              String        @id @default(uuid())
+  emergencyCaseId String
+  emergencyCase   EmergencyCase @relation("EmergencyCaseLogs", fields: [emergencyCaseId], references: [id], onDelete: Cascade)
+  description     String
+  loggedAt        DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}

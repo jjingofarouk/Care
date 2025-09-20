@@ -1,0 +1,40 @@
+// substore.prisma
+// Represents a substore in the hospital
+model Substore {
+  id                String             @id @default(uuid())
+  name              String             @unique
+  location          String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  substoreTransfersFrom SubstoreTransfer[] @relation("SubstoreTransfersFrom")
+  substoreTransfersTo   SubstoreTransfer[] @relation("SubstoreTransfersTo")
+  requisitions      Requisition[]      @relation("SubstoreRequisitions")
+}
+
+// Represents a transfer between substores
+model SubstoreTransfer {
+  id              String     @id @default(uuid())
+  fromSubstoreId  String
+  fromSubstore    Substore   @relation("SubstoreTransfersFrom", fields: [fromSubstoreId], references: [id], onDelete: Restrict)
+  toSubstoreId    String
+  toSubstore      Substore   @relation("SubstoreTransfersTo", fields: [toSubstoreId], references: [id], onDelete: Restrict)
+  itemId          String
+  item            Item       @relation("SubstoreTransferItem", fields: [itemId], references: [id], onDelete: Restrict)
+  quantity        Int
+  transferredAt   DateTime
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+// Represents a requisition for items from a substore
+model Requisition {
+  id            String     @id @default(uuid())
+  substoreId    String
+  substore      Substore   @relation("SubstoreRequisitions", fields: [substoreId], references: [id], onDelete: Restrict)
+  itemId        String
+  item          Item       @relation("RequisitionItem", fields: [itemId], references: [id], onDelete: Restrict)
+  quantity      Int
+  requestedAt   DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

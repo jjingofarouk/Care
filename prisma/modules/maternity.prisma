@@ -1,0 +1,45 @@
+// maternity.prisma
+// Represents a maternity case
+model MaternityCase {
+  id            String      @id @default(uuid())
+  patientId     String
+  patient       Patient     @relation("PatientMaternityCases", fields: [patientId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deliveryRecords DeliveryRecord[] @relation("MaternityCaseDeliveries")
+  ancVisits     ANCVisit[]  @relation("MaternityCaseANCVisits")
+  pncVisits     PNCVisit[]  @relation("MaternityCasePNCVisits")
+}
+
+// Represents a delivery record for a maternity case
+model DeliveryRecord {
+  id              String        @id @default(uuid())
+  maternityCaseId String
+  maternityCase   MaternityCase @relation("MaternityCaseDeliveries", fields: [maternityCaseId], references: [id], onDelete: Cascade)
+  deliveryDate    DateTime
+  deliveryType    String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// Represents an Antenatal Care (ANC) visit
+model ANCVisit {
+  id              String        @id @default(uuid())
+  maternityCaseId String
+  maternityCase   MaternityCase @relation("MaternityCaseANCVisits", fields: [maternityCaseId], references: [id], onDelete: Cascade)
+  visitDate       DateTime
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// Represents a Postnatal Care (PNC) visit
+model PNCVisit {
+  id              String        @id @default(uuid())
+  maternityCaseId String
+  maternityCase   MaternityCase @relation("MaternityCasePNCVisits", fields: [maternityCaseId], references: [id], onDelete: Cascade)
+  visitDate       DateTime
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}

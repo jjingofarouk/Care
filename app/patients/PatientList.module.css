@@ -1,0 +1,97 @@
+/* app/doctor/PatientList.module.css */
+.container {
+  width: 100vw;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: left;
+  margin: 0;
+  padding: 16px;
+  background-color: #f5f5f5;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.alert {
+  width: 100%;
+  margin: 0;
+  padding: 8px 16px;
+  box-sizing: border-box;
+}
+
+.tableWrapper {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.dataGridWrapper {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.dataGridWrapper .dataGrid {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.dataGridWrapper .MuiDataGrid-root {
+  width: 100% !important;
+  border: none !important;
+}
+
+.dataGridWrapper .MuiDataGrid-cell {
+  padding: 0 8px;
+}
+
+.dataGridWrapper .MuiDataGrid-columnHeaders {
+  width: 100% !important;
+  margin: 0;
+  padding: 0;
+}
+
+.dataGridWrapper .MuiDataGrid-overlay {
+  padding: 0 !important;
+}
+
+.actionButton {
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  text-transform: none;
+}
+
+.toolbar {
+  width: 100%;
+  padding: 8px 16px;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skeletonWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton {
+  width: 100%;
+  border-radius: 4px;
+}

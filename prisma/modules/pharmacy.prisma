@@ -1,0 +1,53 @@
+// pharmacy.prisma
+// Represents an item in the pharmacy inventory
+model PharmacyItem {
+  id              String          @id @default(uuid())
+  drugId          String
+  drug            Drug            @relation("PharmacyItemDrug", fields: [drugId], references: [id], onDelete: Restrict)
+  batchNumber     String
+  expiryDate      DateTime
+  quantity        Int
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  dispenseRecords DispenseRecord[] @relation("PharmacyItemDispenses")
+}
+
+// Represents a prescription for a patient
+model Prescription {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientPrescriptions", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor     @relation("DoctorPrescriptions", fields: [doctorId], references: [id], onDelete: Restrict)
+  drugId        String
+  drug          Drug       @relation("PrescriptionDrug", fields: [drugId], references: [id], onDelete: Restrict)
+  dosage        String
+  prescribedAt  DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a drug in the pharmacy
+model Drug {
+  id              String          @id @default(uuid())
+  name            String          @unique
+  description     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  pharmacyItems   PharmacyItem[]  @relation("PharmacyItemDrug")
+  prescriptions   Prescription[]  @relation("PrescriptionDrug")
+  dispensaryStocks DispensaryStock[] @relation("DispensaryStockDrug")
+}
+
+// Represents a record of dispensed medication
+model DispenseRecord {
+  id              String        @id @default(uuid())
+  pharmacyItemId  String
+  pharmacyItem    PharmacyItem  @relation("PharmacyItemDispenses", fields: [pharmacyItemId], references: [id], onDelete: Restrict)
+  patientId       String
+  patient         Patient       @relation("PatientDispenseRecords", fields: [patientId], references: [id], onDelete: Cascade)
+  dispensedAt     DateTime
+  quantity        Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}

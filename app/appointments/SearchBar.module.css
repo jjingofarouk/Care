@@ -1,0 +1,13 @@
+
+/* SearchBar.module.css */
+.container {
+  max-width: 800px;
+  margin: 0 auto 20px;
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

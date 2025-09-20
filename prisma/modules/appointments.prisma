@@ -1,0 +1,43 @@
+enum AppointmentStatusEnum {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+// Represents an appointment in the hospital
+model Appointment {
+  id              String              @id @default(uuid())
+  patientId       String
+  patient         Patient             @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId        String
+  doctor          Doctor              @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Restrict)
+  visitTypeId     String
+  visitType       VisitType           @relation("AppointmentVisitType", fields: [visitTypeId], references: [id], onDelete: Restrict)
+  appointmentStatus AppointmentStatusEnum @default(PENDING)
+  appointmentDate DateTime
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  appointmentStatusRecords AppointmentStatus[] @relation("AppointmentStatusRecord")
+}
+
+// Represents the status history of an appointment
+model AppointmentStatus {
+  id            String       @id @default(uuid())
+  appointmentId String       @unique
+  appointment   Appointment  @relation("AppointmentStatusRecord", fields: [appointmentId], references: [id], onDelete: Cascade)
+  status        AppointmentStatusEnum
+  changedAt     DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+// Represents the type of visit for an appointment
+model VisitType {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  description   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  appointments  Appointment[] @relation("AppointmentVisitType")
+}

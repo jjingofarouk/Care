@@ -1,0 +1,24 @@
+// Represents a social worker in the hospital
+model SocialWorker {
+  id                String              @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String              @unique
+  phone             String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  supportCases      PatientSupportCase[] @relation("SocialWorkerCases")
+}
+
+// Represents support cases handled by social workers
+model PatientSupportCase {
+  id              String        @id @default(uuid())
+  patientId       String
+  patient         Patient       @relation("PatientSupportCases", fields: [patientId], references: [id], onDelete: Cascade)
+  socialWorkerId  String
+  socialWorker    SocialWorker  @relation("SocialWorkerCases", fields: [socialWorkerId], references: [id], onDelete: Restrict)
+  caseDetails     String
+  status          String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}

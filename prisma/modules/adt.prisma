@@ -1,0 +1,84 @@
+// adt.prisma
+// Represents a patient admission
+model Admission {
+  id              String          @id @default(uuid())
+  patientId       String
+  patient         Patient         @relation("PatientAdmissions", fields: [patientId], references: [id], onDelete: Cascade)
+  wardId          String
+  ward            Ward            @relation("WardAdmissions", fields: [wardId], references: [id], onDelete: Restrict)
+  bedId           String?
+  bed             Bed?            @relation("AdmissionBed", fields: [bedId], references: [id], onDelete: SetNull)
+  admissionDate   DateTime
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  discharges      Discharge[]     @relation("AdmissionDischarges")
+  transfers       Transfer[]      @relation("AdmissionTransfers")
+  emergencyCases  EmergencyCase[] @relation("EmergencyCaseAdmission")
+
+  // NEW RELATION: All medical records created during this admission
+  medicalRecords  MedicalRecord[] @relation("AdmissionMedicalRecords")
+}
+
+// Represents a patient discharge
+model Discharge {
+  id            String     @id @default(uuid())
+  admissionId   String
+  admission     Admission  @relation("AdmissionDischarges", fields: [admissionId], references: [id], onDelete: Cascade)
+  dischargeDate DateTime
+  notes         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a patient transfer between wards or beds
+model Transfer {
+  id            String     @id @default(uuid())
+  admissionId   String
+  admission     Admission  @relation("AdmissionTransfers", fields: [admissionId], references: [id], onDelete: Cascade)
+  fromWardId    String
+  fromWard      Ward       @relation("TransferFromWard", fields: [fromWardId], references: [id], onDelete: Restrict)
+  toWardId      String
+  toWard        Ward       @relation("TransferToWard", fields: [toWardId], references: [id], onDelete: Restrict)
+  transferDate  DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+// Represents a hospital bed
+model Bed {
+  id            String       @id @default(uuid())
+  wardId        String
+  ward          Ward         @relation("WardBeds", fields: [wardId], references: [id], onDelete: Cascade)
+  bedNumber     String       @unique
+  isOccupied    Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  admissions    Admission[]  @relation("AdmissionBed")
+}
+
+// departments.prisma
+// Represents a hospital ward
+model Ward {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  departmentId  String
+  department    Department   @relation("WardDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  beds          Bed[]        @relation("WardBeds")
+  admissions    Admission[]  @relation("WardAdmissions")
+  shifts        Shift[]      @relation("ShiftWard")
+  transfersFrom Transfer[]   @relation("TransferFromWard")
+  transfersTo   Transfer[]   @relation("TransferToWard")
+  rooms         Room[]       @relation("WardRooms")
+}
+
+// Represents a room within a ward
+model Room {
+  id            String     @id @default(uuid())
+  wardId        String
+  ward          Ward       @relation("WardRooms", fields: [wardId], references: [id], onDelete: Cascade)
+  roomNumber    String     @unique
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

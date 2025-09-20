@@ -1,0 +1,140 @@
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 8px; /* Added small padding for better spacing */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Removed height: 100vh and overflow: hidden to allow scrolling */
+}
+
+.searchBar {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 8px; /* Added small padding for separation */
+}
+
+.grid {
+  width: 100%;
+  flex: 1;
+  overflow: auto;
+  min-width: 0;
+  margin-top: 8px; /* Added small margin for spacing */
+}
+
+.container .MuiTypography-h6 {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+}
+
+.container .MuiAlert-root {
+  padding: 4px 8px;
+  margin-bottom: 8px;
+}
+
+.container .MuiTextField-root {
+  margin: 0;
+}
+
+.container .MuiIconButton-root {
+  padding: 4px;
+}
+
+.container .MuiDataGrid-root {
+  width: 100%;
+  border: none;
+  /* Ensure the DataGrid has a defined height for scrolling */
+  height: 600px; /* Matches the fixed height in the React component */
+  & .MuiDataGrid-main {
+    width: 100%;
+  }
+  & .MuiDataGrid-columnHeaders {
+    width: 100%;
+    min-width: 100%;
+  }
+  & .MuiDataGrid-virtualScroller {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 4px; /* Reduced padding for smaller screens */
+  }
+
+  .searchBar {
+    gap: 4px;
+    padding-bottom: 4px; /* Reduced padding for smaller screens */
+  }
+
+  .grid {
+    margin-top: 4px; /* Reduced margin for smaller screens */
+    & .MuiDataGrid-root {
+      font-size: 14px;
+      height: 500px; /* Slightly smaller height for smaller screens */
+    }
+
+    & .MuiDataGrid-columnHeaderTitle {
+      font-size: 12px;
+    }
+
+    & .MuiDataGrid-cell {
+      padding: 4px;
+    }
+  }
+
+  .container .MuiTypography-h6 {
+    font-size: 1.1rem;
+  }
+
+  .container .MuiTextField-root {
+    font-size: 14px;
+  }
+
+  .container .MuiIconButton-root {
+    padding: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 2px; /* Further reduced padding for very small screens */
+  }
+
+  .container .MuiTypography-h6 {
+    font-size: 1rem;
+  }
+
+  .container .MuiTextField-root {
+    font-size: 13px;
+  }
+
+  .container .MuiIconButton-root {
+    padding: 2px;
+  }
+
+  .searchBar {
+    padding-bottom: 2px; /* Further reduced padding */
+  }
+
+  .grid {
+    margin-top: 2px; /* Further reduced margin */
+    & .MuiDataGrid-root {
+      font-size: 12px;
+      height: 400px; /* Further reduced height for very small screens */
+    }
+
+    & .MuiDataGrid-columnHeaderTitle {
+      font-size: 10px;
+    }
+
+    & .MuiDataGrid-cell {
+      font-size: 12px;
+      padding: 2px;
+    }
+  }
+}

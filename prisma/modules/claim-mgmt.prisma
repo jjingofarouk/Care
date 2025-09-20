@@ -1,0 +1,54 @@
+// claim-mgmt.prisma
+enum ClaimStatusEnum {
+  PENDING
+  APPROVED
+  REJECTED
+  SUBMITTED
+}
+
+// Represents an insurance claim
+model Claim {
+  id              String           @id @default(uuid())
+  patientId       String
+  patient         Patient          @relation("PatientClaims", fields: [patientId], references: [id], onDelete: Cascade)
+  claimBatchId    String?
+  claimBatch      ClaimBatch?      @relation("ClaimBatchClaims", fields: [claimBatchId], references: [id], onDelete: SetNull)
+  claimStatusId   String           @unique
+  claimStatus     ClaimStatus      @relation("ClaimStatusRecord", fields: [claimStatusId], references: [id], onDelete: Cascade)
+  amount          Float
+  submittedAt     DateTime
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  claimSubmissions ClaimSubmission[] @relation("ClaimSubmissions")
+}
+
+// Represents a batch of claims
+model ClaimBatch {
+  id            String     @id @default(uuid())
+  batchNumber   String     @unique
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  claims        Claim[]    @relation("ClaimBatchClaims")
+}
+
+// Represents the status history of a claim
+model ClaimStatus {
+  id            String         @id @default(uuid())
+  claimId       String         @unique
+  claim         Claim?         @relation("ClaimStatusRecord")
+  status        ClaimStatusEnum
+  changedAt     DateTime
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+// Represents a submission of a claim
+model ClaimSubmission {
+  id            String     @id @default(uuid())
+  claimId       String
+  claim         Claim      @relation("ClaimSubmissions", fields: [claimId], references: [id], onDelete: Cascade)
+  submittedAt   DateTime
+  details       String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

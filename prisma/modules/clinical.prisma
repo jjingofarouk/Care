@@ -1,0 +1,51 @@
+// Represents a clinical note for a patient
+model ClinicalNote {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientClinicalNotes", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor     @relation("DoctorClinicalNotes", fields: [doctorId], references: [id], onDelete: Restrict)
+  note          String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a progress note for a patient
+model ProgressNote {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientProgressNotes", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor     @relation("DoctorProgressNotes", fields: [doctorId], references: [id], onDelete: Restrict)
+  note          String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a SOAP note for a patient
+model SOAPNote {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientSOAPNotes", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor     @relation("DoctorSOAPNotes", fields: [doctorId], references: [id], onDelete: Restrict)
+  subjective    String?
+  objective     String?
+  assessment    String?
+  plan          String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a clinical task assigned to staff
+model ClinicalTask {
+  id            String     @id @default(uuid())
+  patientId     String
+  patient       Patient    @relation("PatientClinicalTasks", fields: [patientId], references: [id], onDelete: Cascade)
+  assignedToId  String
+  assignedToType String
+  description   String
+  status        String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

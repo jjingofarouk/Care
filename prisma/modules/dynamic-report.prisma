@@ -1,0 +1,32 @@
+// Represents a custom report defined by users
+model CustomReport {
+  id            String        @id @default(uuid())
+  name          String        @unique
+  description   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  reportFields  ReportField[] @relation("CustomReportFields")
+  reportFilters ReportFilter[] @relation("CustomReportFilters")
+}
+
+// Represents a field in a custom report
+model ReportField {
+  id            String       @id @default(uuid())
+  customReportId String
+  customReport  CustomReport @relation("CustomReportFields", fields: [customReportId], references: [id], onDelete: Cascade)
+  fieldName     String
+  fieldType     String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+// Represents a filter for a custom report
+model ReportFilter {
+  id            String       @id @default(uuid())
+  customReportId String
+  customReport  CustomReport @relation("CustomReportFilters", fields: [customReportId], references: [id], onDelete: Cascade)
+  filterName    String
+  filterValue   String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}

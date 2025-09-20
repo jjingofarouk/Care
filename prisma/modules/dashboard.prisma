@@ -1,0 +1,43 @@
+// Represents key statistics for the hospital dashboard
+model DashboardStats {
+  id            String    @id @default(uuid())
+  name          String
+  value         Float
+  period        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  widgets       Widget[]  @relation("DashboardWidgetStats")
+}
+
+// Represents key performance indicators for hospital operations
+model KPI {
+  id            String    @id @default(uuid())
+  name          String
+  target        Float
+  currentValue  Float
+  period        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Represents notifications displayed on the dashboard
+model Notification {
+  id            String    @id @default(uuid())
+  message       String
+  type          String
+  priority      String
+  isRead        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Represents customizable widgets on the dashboard
+model Widget {
+  id              String         @id @default(uuid())
+  title           String
+  type            String
+  statsId         String?
+  stats           DashboardStats? @relation("DashboardWidgetStats", fields: [statsId], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}

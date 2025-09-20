@@ -1,0 +1,45 @@
+.container {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  background: #f7fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: linear-gradient(90deg, #4c51bf, #667eea) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.headerTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.main {
+  width: 100%;
+  padding: 2rem;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 1.5rem;
+  }
+
+  .headerTitle {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: 1rem;
+  }
+
+  .headerTitle {
+    font-size: 1.125rem;
+  }
+}

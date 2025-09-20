@@ -1,0 +1,44 @@
+// Represents a system administrator
+model SystemAdmin {
+  id            String       @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String       @unique
+  roleId        String
+  role          Role         @relation("AdminRole", fields: [roleId], references: [id], onDelete: Restrict)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  logs          AdminLog[]   @relation("AdminLogs")
+}
+
+// Represents permissions assigned to roles
+model Permission {
+  id            String     @id @default(uuid())
+  name          String     @unique
+  description   String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  roles         Role[]     @relation("RolePermissions")
+}
+
+// Represents roles assigned to system admins
+model Role {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  description   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  admins        SystemAdmin[] @relation("AdminRole")
+  permissions   Permission[] @relation("RolePermissions")
+}
+
+// Tracks administrative actions
+model AdminLog {
+  id            String      @id @default(uuid())
+  adminId       String
+  admin         SystemAdmin @relation("AdminLogs", fields: [adminId], references: [id], onDelete: Cascade)
+  action        String
+  details       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}

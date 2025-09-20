@@ -1,0 +1,66 @@
+// doctor.prisma
+// Represents a doctor in the hospital
+model Doctor {
+  id               String              @id
+  firstName        String
+  lastName         String
+  email            String              @unique
+  phone            String?
+  departmentId     String
+  department       Department          @relation("DoctorDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  schedules        DoctorSchedule[]    @relation("DoctorSchedules")
+  leaves           DoctorLeave[]       @relation("DoctorLeaves")
+  appointments     Appointment[]       @relation("DoctorAppointments")
+  specializations  DoctorSpecialization[] @relation("DoctorSpecializations")
+  clinicalNotes    ClinicalNote[]      @relation("DoctorClinicalNotes")
+  progressNotes    ProgressNote[]      @relation("DoctorProgressNotes")
+  soapNotes        SOAPNote[]          @relation("DoctorSOAPNotes")
+  prescriptions    Prescription[]      @relation("DoctorPrescriptions")
+}
+
+// Represents a doctor's specialization
+model Specialization {
+  id               String              @id @default(uuid())
+  name             String              @unique
+  description      String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  doctors          DoctorSpecialization[] @relation("SpecializationDoctors")
+}
+
+// Join table for many-to-many relation between Doctor and Specialization
+model DoctorSpecialization {
+  id              String         @id @default(uuid())
+  doctorId        String
+  specializationId String
+  doctor          Doctor         @relation("DoctorSpecializations", fields: [doctorId], references: [id], onDelete: Cascade)
+  specialization  Specialization @relation("SpecializationDoctors", fields: [specializationId], references: [id], onDelete: Cascade)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+// Represents a doctor's schedule
+model DoctorSchedule {
+  id            String     @id @default(uuid())
+  doctorId      String
+  doctor        Doctor     @relation("DoctorSchedules", fields: [doctorId], references: [id], onDelete: Cascade)
+  startTime     DateTime
+  endTime       DateTime
+  dayOfWeek     String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a doctor's leave of absence
+model DoctorLeave {
+  id            String     @id @default(uuid())
+  doctorId      String
+  doctor        Doctor     @relation("DoctorLeaves", fields: [doctorId], references: [id], onDelete: Cascade)
+  startDate     DateTime
+  endDate       DateTime
+  reason        String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

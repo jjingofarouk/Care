@@ -1,0 +1,45 @@
+// radiology.prisma
+// Represents a radiology test
+model RadiologyTest {
+  id              String          @id @default(uuid())
+  name            String          @unique
+  description     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  imagingOrders   ImagingOrder[]  @relation("RadiologyTestOrders")
+}
+
+// Represents a radiology test result
+model RadiologyResult {
+  id            String       @id @default(uuid())
+  imagingOrderId String
+  imagingOrder  ImagingOrder @relation("ImagingOrderResults", fields: [imagingOrderId], references: [id], onDelete: Cascade)
+  result        String
+  resultedAt    DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  scanImages    ScanImage[]  @relation("ResultScanImages")
+}
+
+// Represents an order for a radiology test
+model ImagingOrder {
+  id              String          @id @default(uuid())
+  patientId       String
+  patient         Patient         @relation("PatientImagingOrders", fields: [patientId], references: [id], onDelete: Cascade)
+  radiologyTestId String
+  radiologyTest   RadiologyTest   @relation("RadiologyTestOrders", fields: [radiologyTestId], references: [id], onDelete: Restrict)
+  orderedAt       DateTime
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  radiologyResults RadiologyResult[] @relation("ImagingOrderResults")
+}
+
+// Represents a scan image from a radiology test
+model ScanImage {
+  id              String          @id @default(uuid())
+  radiologyResultId String
+  radiologyResult RadiologyResult @relation("ResultScanImages", fields: [radiologyResultId], references: [id], onDelete: Cascade)
+  imageUrl        String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}

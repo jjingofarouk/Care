@@ -1,0 +1,227 @@
+/* Hospital Sidebar Main Container */
+.hospital-sidebar {
+  width: 280px;
+  background: #0a3d3e !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Sidebar Header */
+.hospital-sidebar-header {
+  padding: 20px 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.hospital-sidebar-header:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.hospital-sidebar-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hospital-sidebar-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.hospital-sidebar-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  letter-spacing: -0.025em;
+}
+
+/* Sidebar Content */
+.hospital-sidebar-content {
+  padding: 16px 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Section Divider */
+.hospital-section-divider {
+  margin: 12px 16px !important;
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Category Header */
+.hospital-category-header {
+  padding: 8px 16px 4px;
+  margin-top: 8px;
+}
+
+.hospital-category-chip {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  height: 24px !important;
+  border-radius: 12px !important;
+}
+
+/* Category specific styles */
+.hospital-category-main {
+  background-color: rgba(37, 99, 235, 0.15) !important;
+}
+
+.hospital-category-patient-care {
+  background-color: rgba(5, 150, 105, 0.15) !important;
+}
+
+.hospital-category-clinical {
+  background-color: rgba(124, 58, 237, 0.15) !important;
+}
+
+.hospital-category-nursing {
+  background-color: rgba(220, 38, 38, 0.15) !important;
+}
+
+.hospital-category-lab {
+  background-color: rgba(234, 88, 12, 0.15) !important;
+}
+
+.hospital-category-pharmacy {
+  background-color: rgba(8, 145, 178, 0.15) !important;
+}
+
+.hospital-category-finance {
+  background-color: rgba(22, 163, 74, 0.15) !important;
+}
+
+.hospital-category-operations {
+  background-color: rgba(147, 51, 234, 0.15) !important;
+}
+
+.hospital-category-reports {
+  background-color: rgba(13, 148, 136, 0.15) !important;
+}
+
+.hospital-category-support {
+  background-color: rgba(67, 56, 202, 0.15) !important;
+}
+
+.hospital-category-admin {
+  background-color: rgba(100, 116, 139, 0.15) !important;
+}
+
+.hospital-category-auth {
+  background-color: rgba(55, 65, 81, 0.15) !important;
+}
+
+.hospital-category-health {
+  background-color: rgba(5, 150, 105, 0.15) !important;
+}
+
+/* Navigation List */
+.hospital-nav-list {
+  padding: 0 !important;
+}
+
+.hospital-nav-item {
+  margin: 0 8px;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  transition: all 0.3s ease !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  text-decoration: none !important;
+}
+
+.hospital-nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 1) !important;
+  transform: translateX(4px);
+}
+
+.hospital-nav-item.active {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  color: #ffffff !important;
+  border-left: 3px solid #22c55e;
+}
+
+.hospital-nav-item.active .MuiListItemIcon-root {
+  color: #22c55e !important;
+}
+
+.hospital-nav-text {
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  color: inherit !important;
+}
+
+/* Sidebar Footer */
+.hospital-sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  margin-top: auto;
+}
+
+.hospital-footer-caption {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.75rem !important;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.hospital-footer-user {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  text-transform: capitalize;
+}
+
+/* Scrollbar Styling */
+.hospital-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.hospital-sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hospital-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.hospital-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Material-UI Overrides */
+.hospital-sidebar .MuiListItemIcon-root {
+  color: rgba(255, 255, 255, 0.7) !important;
+  min-width: 36px !important;
+}
+
+.hospital-sidebar .MuiListItemText-primary {
+  color: inherit !important;
+}
+
+.hospital-sidebar .MuiDivider-root {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hospital-sidebar {
+    width: 100vw;
+  }
+  
+  .hospital-sidebar-header {
+    padding: 16px;
+  }
+  
+  .hospital-nav-item {
+    padding: 12px 16px !important;
+  }
+}

@@ -1,0 +1,32 @@
+enum HelpCategoryEnum {
+  TECHNICAL
+  BILLING
+  CLINICAL
+  OTHER
+}
+
+// Represents a help desk ticket
+model HelpTicket {
+  id              String           @id @default(uuid())
+  userId          String
+  userType        String
+  category        HelpCategoryEnum
+  description     String
+  status          String
+  supportAgentId  String?
+  supportAgent    SupportAgent?   @relation("TicketSupportAgent", fields: [supportAgentId], references: [id], onDelete: SetNull)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+// Represents a support agent for the help desk
+model SupportAgent {
+  id            String       @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String       @unique
+  phone         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  helpTickets   HelpTicket[] @relation("TicketSupportAgent")
+}

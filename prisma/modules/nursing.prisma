@@ -1,0 +1,39 @@
+// Represents a nurse in the hospital
+model Nurse {
+  id            String         @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String         @unique
+  phone         String?
+  departmentId  String
+  department    Department     @relation("NurseDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  schedules     NurseSchedule[] @relation("NurseSchedules")
+  shifts        Shift[]        @relation("NurseShifts")
+}
+
+// Represents a nurse's schedule
+model NurseSchedule {
+  id            String     @id @default(uuid())
+  nurseId       String
+  nurse         Nurse      @relation("NurseSchedules", fields: [nurseId], references: [id], onDelete: Cascade)
+  startTime     DateTime
+  endTime       DateTime
+  dayOfWeek     String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+// Represents a shift assigned to a nurse
+model Shift {
+  id            String     @id @default(uuid())
+  nurseId       String
+  nurse         Nurse      @relation("NurseShifts", fields: [nurseId], references: [id], onDelete: Cascade)
+  wardId        String
+  ward          Ward       @relation("ShiftWard", fields: [wardId], references: [id], onDelete: Restrict)
+  startTime     DateTime
+  endTime       DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}

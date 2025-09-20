@@ -1,0 +1,36 @@
+// mkt-referral.prisma
+// Represents a patient referral
+model Referral {
+  id                String          @id @default(uuid())
+  patientId         String
+  patient           Patient         @relation("PatientReferrals", fields: [patientId], references: [id], onDelete: Cascade)
+  referringDoctorId String?
+  referringDoctor   ReferringDoctor? @relation("ReferringDoctorReferrals", fields: [referringDoctorId], references: [id], onDelete: SetNull)
+  referralSourceId  String
+  referralSource    ReferralSource  @relation("ReferralSourceReferrals", fields: [referralSourceId], references: [id], onDelete: Restrict)
+  referralDate      DateTime
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+// Represents a doctor who refers patients
+model ReferringDoctor {
+  id            String       @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String?      @unique
+  phone         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  referrals     Referral[]   @relation("ReferringDoctorReferrals")
+}
+
+// Represents a source of referrals
+model ReferralSource {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  description   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  referrals     Referral[]   @relation("ReferralSourceReferrals")
+}
