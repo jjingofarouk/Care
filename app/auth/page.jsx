@@ -7,7 +7,6 @@ import {
   Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, Heart, Stethoscope, Users, Settings, LogIn 
 } from 'lucide-react';
 import authService from './authService';
-import { useAuth } from '@/auth/AuthContext';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,14 +18,13 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const { login: contextLogin, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (authService.isAuthenticated()) {
       router.push('/appointments');
     }
-  }, [user, authLoading, router]);
+  }, [router]);
 
   const handleLoginChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -44,7 +42,8 @@ export default function AuthPage() {
     setIsLoading(true);
     setError(null);
     try {
-      await contextLogin(loginData);
+      await authService.login(loginData);
+      router.push('/appointments');
     } catch (err) {
       setError(err.message || 'Invalid credentials');
     } finally {
@@ -84,8 +83,6 @@ export default function AuthPage() {
         return false;
     }
   };
-
-  if (authLoading) return null;
 
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">

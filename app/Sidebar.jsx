@@ -204,7 +204,6 @@ const roleBasedNavItems = {
   GUEST: [
     { name: 'Home', path: '/', icon: Home, category: 'main' },
     { name: 'Login', path: '/auth', icon: Key, category: 'auth' },
-    { name: 'Register', path: '/auth', icon: User, category: 'auth' },
     { name: 'Contact', path: '/contact', icon: Phone, category: 'auth' },
     { name: 'About', path: '/about', icon: HelpCircle, category: 'auth' },
   ],
