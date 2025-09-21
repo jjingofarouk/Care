@@ -1,0 +1,76 @@
+
+> hospital-management-system@1.0.3 db:seed
+> npm run schema:build && npx prisma db seed -- --seed-file prisma/seed.js
+
+
+> hospital-management-system@1.0.3 schema:build
+> node prisma/scripts/build-schema.js
+
+🔨 Building Prisma schema from modules...
+📄 Processing: dashboard.prisma
+📄 Processing: home.prisma
+📄 Processing: login.prisma
+📄 Processing: register.prisma
+📄 Processing: doctor.prisma
+📄 Processing: nursing.prisma
+📄 Processing: system-admin.prisma
+📄 Processing: social-service.prisma
+📄 Processing: incentive.prisma
+📄 Processing: patients.prisma
+📄 Processing: medical-records.prisma
+📄 Processing: adt.prisma
+📄 Processing: queue-mgmt.prisma
+📄 Processing: clinical.prisma
+📄 Processing: appointments.prisma
+📄 Processing: emergency.prisma
+📄 Processing: maternity.prisma
+📄 Processing: vaccination.prisma
+📄 Processing: operation-theatre.prisma
+📄 Processing: laboratory.prisma
+📄 Processing: radiology.prisma
+📄 Processing: pharmacy.prisma
+📄 Processing: dispensary.prisma
+📄 Processing: cssd.prisma
+📄 Processing: helpdesk.prisma
+📄 Processing: utilities.prisma
+📄 Processing: settings.prisma
+📄 Processing: verification.prisma
+📄 Processing: billing.prisma
+📄 Processing: accounting.prisma
+📄 Processing: claim-mgmt.prisma
+📄 Processing: nhif.prisma
+📄 Processing: inventory.prisma
+📄 Processing: procurement.prisma
+📄 Processing: substore.prisma
+📄 Processing: fixed-assets.prisma
+📄 Processing: departments.prisma
+📄 Processing: reports.prisma
+📄 Processing: dynamic-report.prisma
+📄 Processing: mkt-referral.prisma
+✅ Schema built successfully!
+📊 Processed 40 modules
+📏 Total lines: 1852
+💾 Output: /project/workspace/carewave/prisma/schema.prisma
+Environment variables loaded from .env
+Running seed command `node prisma/seed.js --seed-file prisma/seed.js` ...
+PrismaClientKnownRequestError: 
+Invalid `prisma.department.create()` invocation in
+/project/workspace/carewave/prisma/seed.js:214:48
+
+  211 
+  212 async function main() {
+  213   // Create departments
+→ 214   const clinicalDept = await prisma.department.create(
+Unique constraint failed on the fields: (`name`)
+    at $n.handleRequestError (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:121:7315)
+    at $n.handleAndLogRequestError (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/project/workspace/carewave/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async main (/project/workspace/carewave/prisma/seed.js:214:24) {
+  code: 'P2002',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'Department', target: [ 'name' ] }
+}
+
+An error occurred while running the seed command:
+Error: Command failed with exit code 1: node prisma/seed.js --seed-file prisma/seed.js
